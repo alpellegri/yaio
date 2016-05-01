@@ -70,6 +70,7 @@ angular.module('app.controllers', [])
   $scope.WSStatus = 'Disconnected';
   $scope.settings = {};
   $scope.ComButton = 'Connect to Node';
+  $scope.Text = 'rx data goes here';
 
   WebSocketService.subscribe(function(message) {
     // $scope.messages.push(message);

@@ -100,13 +100,19 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         return;
       }
       const char* ssid = root["ssid"];
-      strcpy(sta_ssid, ssid);
+      if (ssid != NULL) {
+        strcpy(sta_ssid, ssid);
+      }
       Serial.printf("sta_ssid %s\n", sta_ssid);
       const char* password = root["password"];
-      strcpy(sta_password, password);
+      if (password != NULL) {
+        strcpy(sta_password, password);
+      }
       Serial.printf("sta_password %s\n", sta_password);
       const char* firebase = root["firebase"];
-      strcpy(firebase_url, firebase);
+      if (firebase != NULL) {
+        strcpy(firebase_url, firebase);
+      }
       Serial.printf("firebase_url %s\n", firebase_url);
       const char* data = root["data"];
       Serial.printf("data %s\n", data);

@@ -20,6 +20,13 @@
         <button id="setup-send" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="SetupComSend(settings)">
 		Send to Node
         </button>
+        <form class="list">
+            <label class="item item-input">
+                <span class="input-label">
+                {{Text}}
+                </span><textarea placeholder=""> </textarea>
+            </label>
+        </form>
         <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>
     </ion-content>
 </ion-view>
