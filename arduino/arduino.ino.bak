@@ -18,8 +18,6 @@
 
 #include <ArduinoJson.h>
 
-#include <Ticker.h>
-
 #include <stdio.h>
 #include <string.h>
 
@@ -46,32 +44,7 @@ Firebase fbase = Firebase(""); // "ikka.firebaseIO.com"
 // create sebsocket server
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-Ticker flipper;
-
 int mode = 1;
-int flip_mode = 1;
-
-int count = 0;
-
-void setflip_mode(int mode) {
-  flip_mode = mode;
-}
-
-void flip(void) {
-  int trig;
-
-  if (flip_mode != 2) {
-    trig = (flip_mode == 0)?(1):(5);
-    if (count >= trig) {
-      int state = digitalRead(LED);
-      digitalWrite(LED, !state); // set pin to the opposite state
-      count = 0;
-    }
-    ++count;
-  } else {
-    digitalWrite(LED, 1);
-  }
-}
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
 
@@ -81,7 +54,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       setup_sta_mode();
       break;
     case WStype_CONNECTED: {
-      setflip_mode(2);
       IPAddress ip = webSocket.remoteIP(num);
       Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
 
@@ -120,7 +92,6 @@ void setup_ap_mode() {
   IPAddress ip(192,168,2,1);
 
   mode = 0;
-  setflip_mode(0);
   Serial.printf("connecting mode %d\n", mode);
 
   WiFi.mode(WIFI_STA);
@@ -142,7 +113,6 @@ void setup_ap_mode() {
 void setup_sta_mode() {
   int cnt;
   mode = 1;
-  setflip_mode(1);
   Serial.printf("connecting mode %d\n", mode);
 
   WiFi.mode(WIFI_STA);
@@ -179,7 +149,20 @@ void setup() {
   pinMode(BUTTON, INPUT);   // 
   Serial.begin(115200);
 
-  flipper.attach(0.1, flip);
+#if 0
+  char json[] =
+      "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(json);
+  // Test if parsing succeeds.
+  if (!root.success()) {
+    Serial.println("parseObject() failed");
+    return;
+  }
+  const char* sensor = root["sensor"];
+  Serial.println("Sensor");
+  Serial.println(sensor);
+#endif
 
   Serial.println();
   Serial.println("Starting");
@@ -206,6 +189,17 @@ void loop() {
         return;
     }
     delay(500);
+
+#if 0
+    // Use dynamic for large JSON objects
+    //  DynamicJsonBuffer jsonBuffer;
+    StaticJsonBuffer<JSON_OBJECT_SIZE(JSON_BUFFER_SIZE)> jsonBuffer;
+  
+    // create an empty object
+    String ref = get.json();
+    Serial.println(ref);
+    JsonObject& pixelJSON = jsonBuffer.parseObject((char*)ref.c_str());
+#endif
 
     // Serial.println(get.json()["settings"]);
     // get object data
