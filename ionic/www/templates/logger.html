@@ -1,0 +1,10 @@
+<ion-view title="Logger" id="page3">
+    <ion-content padding="true" scroll="true" class="has-header">
+        <div id="logger" ng-controller="loggerCtrl" style="color:#000000;">
+				<ion-item ng-repeat="value in logs track by $index" ng-style="{'line-height': '1px'}" style="font-size:12px;">
+					{{value}}
+				</ion-item> 
+			<ion-infinite-scroll on-infinite="doList()"></ion-infinite-scroll> 
+        </div>
+    </ion-content>
+</ion-view>

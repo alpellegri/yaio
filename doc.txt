@@ -1,0 +1,30 @@
+* modo setup
+
+canale websocket diretto
+
+eeprom <- ws <- firebase url, pass
+eeprom <- ws <- router ip, pass
+eeprom <- ws <- node ip, pass (opzionale)
+
+
+* modo normale
+
+canale firebase indiretto
+
+input:
+alarm ins/disins <- firebase/control/alarm
+sensor periode <- firebase/control/heart-periode
+
+output:
+stato allarme -> firebase/status/alarm (disattivato, sorveglianza, alarming)
+stato sensore temp -> firebase/status/temp (heart)
+stato sensore um -> firebase/status/umidity (heart)
+stato sensore antincandio -> firebase/status/fire
+stato sensore allagamento -> firebase/status/flood
+
+logs:
+firebase/logs/alarm (event)
+firebase/logs/temp (periodic)
+firebase/logs/umidity (periodic)
+firebase/logs/fire (event)
+firebase/logs/flood (event)

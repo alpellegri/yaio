@@ -1,0 +1,24 @@
+<ion-view title="Setup" id="page2">
+    <ion-content padding="true" scroll="false" class="has-header">
+        <button id="setup-connect" style="text-align:left;" class="button button-positive  button-block icon-right ion-log-in" on-touch="ws_connect()">
+		WS Connect</button>
+        <form class="list">
+            <label class="item item-input">
+                <input type="text" placeholder="access point ssid" name="ssid" ng-model="settings.ssid">
+            </label>
+            <label class="item item-input">
+                <input type="text" placeholder="access point password" name="password" ng-model="settings.password">
+            </label>
+            <label class="item item-input">
+                <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase">
+            </label>
+            <label class="item item-input">
+                <input type="text" placeholder="payload4" name="data" ng-model="settings.data">
+            </label>
+        </form>
+        <button id="setup-send" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="ws_send(settings)">
+		WS Send</button>
+        <button id="setup-disconnect" style="text-align:left;" class="button button-positive  button-block icon-right ion-log-out" on-touch="ws_disconnect()">
+		WS Disconnect</button>
+    </ion-content>
+</ion-view>
