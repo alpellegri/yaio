@@ -69,7 +69,7 @@ void flip(void) {
     }
     ++count;
   } else {
-    digitalWrite(LED, 1);
+    digitalWrite(LED, 0);
   }
 }
 
