@@ -13,12 +13,12 @@ canale firebase indiretto
 
 input:
 alarm ins/disins <- firebase/control/alarm
-sensor periode <- firebase/control/heart-periode
+siren period <- firebase/control/heart-periode
 
 output:
-stato allarme -> firebase/status/alarm (disattivato, sorveglianza, alarming)
-stato sensore temp -> firebase/status/temp (heart)
-stato sensore um -> firebase/status/umidity (heart)
+stato allarme -> firebase/status/alarm (disabled, enabled, alarming)
+stato sensore temp -> firebase/status/temp
+stato sensore um -> firebase/status/umidity
 stato sensore antincandio -> firebase/status/fire
 stato sensore allagamento -> firebase/status/flood
 
