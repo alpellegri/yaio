@@ -73,6 +73,7 @@ void flip(void) {
   }
 }
 
+uint8_t port_id;
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
 
   switch(type) {
@@ -84,6 +85,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       setflip_mode(2);
       IPAddress ip = webSocket.remoteIP(num);
       Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+      port_id = num;
 
       // send message to client
       webSocket.sendTXT(num, "Connected");
@@ -126,6 +128,7 @@ void setup_ap_mode() {
   IPAddress ip(192,168,2,1);
 
   mode = 0;
+  port_id = 0xFF;
   setflip_mode(0);
   Serial.printf("connecting mode %d\n", mode);
 
@@ -196,11 +199,18 @@ void setup() {
   }
 }
 
+int cnt = 0;
 void loop() {
   int in;
   String str;
+  char c_str[25] = "";
 
   if (mode == 0) {
+    if (port_id != 0xFF) {
+      sprintf(c_str, "cnt %x\n", cnt++);
+      // Serial.printf("%s\n", c_str);
+      webSocket.sendTXT(port_id, c_str);
+    }
     webSocket.loop();
   } else if (mode == 1) {
     FirebaseGet get = fbase.get("");

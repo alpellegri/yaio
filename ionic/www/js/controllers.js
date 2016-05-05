@@ -80,6 +80,8 @@ angular.module('app.controllers', [])
       $scope.WSStatus = message;
     } else if (message == 'Close') {
       $scope.WSStatus = 'Disconnected';
+    } else {
+      $scope.Text = message;
     }
   });
 
