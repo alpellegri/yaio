@@ -60,7 +60,7 @@ void setflip_mode(int mode) {
 void flip(void) {
   int trig;
 
-  if (flip_mode == 0) {
+  if (flip_mode != 2) {
     trig = (flip_mode == 0)?(1):(5);
     if (count >= trig) {
       int state = digitalRead(LED);
@@ -68,9 +68,8 @@ void flip(void) {
       count = 0;
     }
     ++count;
-  } else if (flip_mode == 2) {
-    digitalWrite(LED, 0);
   } else {
+    digitalWrite(LED, 0);
   }
 }
 
@@ -89,7 +88,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       port_id = num;
 
       // send message to client
-      // webSocket.sendTXT(num, "Connected");
+      webSocket.sendTXT(num, "Connected");
       }
       break;
     case WStype_TEXT:
@@ -208,7 +207,7 @@ void loop() {
 
   if (mode == 0) {
     if (port_id != 0xFF) {
-      sprintf(c_str, "cnt %x", cnt++);
+      sprintf(c_str, "cnt %x\n", cnt++);
       // Serial.printf("%s\n", c_str);
       webSocket.sendTXT(port_id, c_str);
     }

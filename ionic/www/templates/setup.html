@@ -1,5 +1,14 @@
 <ion-view title="Setup" id="page2">
     <ion-content padding="true" scroll="true" class="has-header">
+        <h4 id="setup-heading6" style="color:#000000;text-align:left;">Connection Status</h4>
+        <form class="list">
+            <label class="item item-input">
+                <span class="input-label">
+                    {{StsTxt}} {{WSStatus}}
+                </span><textarea placeholder=""> </textarea>
+            </label>
+        </form>
+        <h4 id="setup-heading5" style="color:#000000;text-align:left;">Control</h4>
         <button id="setup-connect" style="text-align:left;" class="button button-positive  button-block icon-right ion-log-in" on-touch="SetupComCmd()">
 		{{ComButton}}
         </button>
@@ -21,6 +30,7 @@
 		Send to Node
         </button>
         <form class="list">
+            <h4 id="setup-heading3" style="color:#000000;font-weight:600;text-align:left;">Data</h4>
             <label class="item item-input">
                 <span class="input-label">
                 {{Text}}
