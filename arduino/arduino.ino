@@ -67,11 +67,11 @@ void flip(void) {
       digitalWrite(LED, !state); // set pin to the opposite state
       count = 0;
     }
-    ++count;
   } else if (flip_mode == 2) {
     digitalWrite(LED, 0);
   } else {
   }
+  count++;
 }
 
 uint8_t port_id;
@@ -127,6 +127,7 @@ void setup_ap_mode() {
 
   // static ip for AP mode
   IPAddress ip(192,168,2,1);
+  digitalWrite(LED, 1);
 
   mode = 0;
   port_id = 0xFF;
@@ -150,11 +151,13 @@ void setup_ap_mode() {
 }
 
 void setup_sta_mode() {
+
   int cnt;
   mode = 1;
   setflip_mode(1);
   Serial.printf("connecting mode %d\n", mode);
 
+  digitalWrite(LED, 1);
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
@@ -162,9 +165,10 @@ void setup_sta_mode() {
 
   Serial.printf("sta_ssid: %s\n", sta_ssid);
   Serial.printf("sta_password: %s\n", sta_password);
+  Serial.printf("trying to connect\n", sta_password);
   WiFi.begin(sta_ssid, sta_password);
   cnt = 0;
-  while ((WiFi.status() != WL_CONNECTED) && (cnt++<10)){
+  while ((WiFi.status() != WL_CONNECTED) && (cnt++<30)){
     Serial.print(".");
     delay(500);
   }
