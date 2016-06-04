@@ -10,6 +10,8 @@
 #include <WiFiServer.h>
 #include <WiFiUdp.h>
 
+#include <EEPROM.h>
+
 #include <WebSockets.h>
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
@@ -53,35 +55,85 @@ int flip_mode = 1;
 
 int count = 0;
 
-void setflip_mode(int mode) {
+uint8_t *eeprom_ptr;
+
+void setflip_mode(int mode)
+{
   flip_mode = mode;
 }
 
-void flip(void) {
+void flip(void)
+{
   int trig;
 
-  if (flip_mode == 0) {
+  if (flip_mode == 0)
+  {
     trig = (flip_mode == 0)?(1):(5);
-    if (count >= trig) {
+    if (count >= trig)
+    {
       int state = digitalRead(LED);
       digitalWrite(LED, !state); // set pin to the opposite state
       count = 0;
     }
-  } else if (flip_mode == 2) {
+  }
+  else if (flip_mode == 2)
+  {
     digitalWrite(LED, 0);
-  } else {
+  }
+  else
+  {
   }
   count++;
 }
 
+StaticJsonBuffer<200> jsonBuffer;
+uint8_t LoadWiFiData(uint8_t *data)
+{
+  uint8_t ret = 0;
+
+  JsonObject& root = jsonBuffer.parseObject((char*)data);
+
+  // Test if parsing succeeds.
+  if (root.success())
+  {
+    const char* ssid = root["ssid"];
+    const char* password = root["password"];
+    const char* firebase = root["firebase"];
+    const char* data = root["data"];
+    if ((ssid != NULL) &&
+        (password != NULL) &&
+        (firebase != NULL))
+    {
+      strcpy(sta_ssid, ssid);
+      strcpy(sta_password, password);
+      strcpy(firebase_url, firebase);
+      Serial.printf("sta_ssid %s\n", sta_ssid);
+      Serial.printf("sta_password %s\n", sta_password);
+      Serial.printf("firebase_url %s\n", firebase_url);
+      Serial.printf("data %s\n", data);
+      ret = 1;
+    }
+  }
+  else
+  {
+    Serial.println("parseObject() failed");
+  }
+
+  return ret;
+}
+
 uint8_t port_id;
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght)
+{
+  uint16_t len;
+  uint8_t sts;
 
   switch(type) {
     case WStype_DISCONNECTED:
       Serial.printf("[%u] Disconnected!\n", num);
       setup_sta_mode();
       break;
+
     case WStype_CONNECTED: {
       setflip_mode(2);
       IPAddress ip = webSocket.remoteIP(num);
@@ -92,39 +144,30 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       // webSocket.sendTXT(num, "Connected");
       }
       break;
+
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
-  
-      StaticJsonBuffer<200> jsonBuffer;
-      JsonObject& root = jsonBuffer.parseObject((char*)payload);
-      // Test if parsing succeeds.
-      if (!root.success()) {
-        Serial.println("parseObject() failed");
-        return;
+
+      len = strlen((char*)payload);
+      if (len != 0)
+      {
+        // save to epprom
+        memcpy(eeprom_ptr, payload, len);
+        EEPROM.commit();
       }
-      const char* ssid = root["ssid"];
-      if (ssid != NULL) {
-        strcpy(sta_ssid, ssid);
-      }
-      Serial.printf("sta_ssid %s\n", sta_ssid);
-      const char* password = root["password"];
-      if (password != NULL) {
-        strcpy(sta_password, password);
-      }
-      Serial.printf("sta_password %s\n", sta_password);
-      const char* firebase = root["firebase"];
-      if (firebase != NULL) {
-        strcpy(firebase_url, firebase);
-      }
-      Serial.printf("firebase_url %s\n", firebase_url);
-      const char* data = root["data"];
-      Serial.printf("data %s\n", data);
+      break;
+
+    case WStype_ERROR:
+      Serial.printf("[%u] Error!\n", num);
+      break;
+
+    default:
       break;
     }
 }
 
-void setup_ap_mode() {
-
+void setup_ap_mode()
+{
   // static ip for AP mode
   IPAddress ip(192,168,2,1);
   digitalWrite(LED, 1);
@@ -150,48 +193,67 @@ void setup_ap_mode() {
   webSocket.onEvent(webSocketEvent);
 }
 
-void setup_sta_mode() {
-
+void setup_sta_mode()
+{
+  uint8_t sts;
   int cnt;
   mode = 1;
   setflip_mode(1);
   Serial.printf("connecting mode %d\n", mode);
 
-  digitalWrite(LED, 1);
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(100);
-  WiFi.mode(WIFI_AP_STA);
+  Serial.printf("Configuration parameters:\n%s\n", eeprom_ptr);
+  sts = LoadWiFiData(eeprom_ptr);
+  if (sts == 1)
+  {
+    digitalWrite(LED, 1);
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    WiFi.mode(WIFI_AP_STA);
 
-  Serial.printf("sta_ssid: %s\n", sta_ssid);
-  Serial.printf("sta_password: %s\n", sta_password);
-  Serial.printf("trying to connect\n", sta_password);
-  WiFi.begin(sta_ssid, sta_password);
-  cnt = 0;
-  while ((WiFi.status() != WL_CONNECTED) && (cnt++<30)){
-    Serial.print(".");
-    delay(500);
+    Serial.printf("sta_ssid: %s\n", sta_ssid);
+    Serial.printf("sta_password: %s\n", sta_password);
+    Serial.printf("trying to connect\n", sta_password);
+    WiFi.begin(sta_ssid, sta_password);
+    cnt = 0;
+    while ((WiFi.status() != WL_CONNECTED) && (cnt++<30))
+    {
+      Serial.print(".");
+      delay(500);
+    }
+
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      Serial.println();
+      Serial.print("connected: ");
+      Serial.println(WiFi.localIP());
+      fbase = Firebase(firebase_url);
+    }
+    else
+    {
+      sts = 0;  
+    }
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
-    Serial.print("connected: ");
-    Serial.println(WiFi.localIP());
-    fbase = Firebase(firebase_url);
-  } else {
+  if (sts != 1)
+  {
     Serial.println();
     Serial.println("not connected to router");
     setup_ap_mode();
   }
 }
 
-void setup() {
+void setup()
+{
 
   mode = 1;
 
   pinMode(LED, OUTPUT);   // LED pin as output.
   pinMode(BUTTON, INPUT);   // 
   Serial.begin(115200);
+
+  EEPROM.begin(512);
+  eeprom_ptr = EEPROM.getDataPtr();
 
   flipper.attach(0.1, flip);
 

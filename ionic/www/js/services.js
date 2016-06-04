@@ -33,19 +33,20 @@ angular.module('app.services', [])
     var ws = new WebSocket(wsUri);
 
     ws.onopen = function() {
-      service.callback('Open');
+      service.open_cb();
     };
 
     ws.onclose = function() {
-      service.callback('Close');
+      service.close_cb();
     };
 
     ws.onerror = function() {
-      service.callback('Error');
+      service.error_cb();
     }
 
     ws.onmessage = function(message) {
-      service.callback(message.data);
+      console.log('>>>>' + message.data);
+      service.message_cb(message.data);
     };
 
     service.ws = ws;
@@ -59,8 +60,11 @@ angular.module('app.services', [])
     service.ws.send(message);
   }
  
-  service.subscribe = function(callback) {
-    service.callback = callback;
+  service.subscribe = function(open_cb, close_cb, error_cb, message_cb) {
+    service.open_cb = open_cb;
+    service.close_cb = close_cb;
+    service.error_cb = error_cb;
+    service.message_cb = message_cb;
   }
  
   return service;

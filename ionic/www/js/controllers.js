@@ -73,20 +73,41 @@ angular.module('app.controllers', [])
   $scope.Text = 'rx data goes here';
   $scope.StsTxt = 'Disconnected';
 
-  WebSocketService.subscribe(function(message) {
-    // $scope.messages.push(message);
-    $scope.$apply();
-    $scope.message = message;
-    if (message == 'Open') {
-      $scope.WSStatus = message;
-      serviceLog.putlog('ws message: ' + message);
-    } else if (message == 'Close') {
+  WebSocketService.subscribe(
+    // open
+    function() {
+      $scope.$apply();
+      $scope.message = 'Open';
+      $scope.WSStatus = 'Open';
+      $scope.StsTxt = 'Connected';
+      serviceLog.putlog('ws status: ' + $scope.WSStatus);
+      $scope.Text = $scope.message;
+    },
+    // close
+    function() {
+      $scope.$apply();
+      $scope.message = 'Close';
       $scope.WSStatus = 'Close';
-      serviceLog.putlog('ws message: ' + message);
-    } else {
+      $scope.StsTxt = 'Disconnected';
+      serviceLog.putlog('ws status: ' + $scope.WSStatus);
+      $scope.Text = $scope.message;
+    },
+    // error
+    function() {
+      $scope.$apply();
+      $scope.message = 'Error';
+      $scope.WSStatus = 'Error';
+      $scope.StsTxt = 'Error';
+      serviceLog.putlog('ws status: ' + $scope.WSStatus);
+      $scope.Text = $scope.message;
+    },
+    // message
+    function(message) {
+      $scope.$apply();
+      $scope.message = message;
       $scope.Text = message;
     }
-  });
+  );
 
   $scope.SetupComCmd = function() {
     if ($scope.WSStatus == 'Close') {
@@ -95,6 +116,7 @@ angular.module('app.controllers', [])
       WebSocketService.connect();
     } else if ($scope.WSStatus = 'Open') {
       serviceLog.putlog('ws disconnect');
+      $scope.StsTxt = 'Disconnecting...';
 	  WebSocketService.disconnect();
     } else {
       serviceLog.putlog('ws cmd not applicable');
@@ -116,11 +138,11 @@ angular.module('app.controllers', [])
   $scope.doRefresh = function() {
     console.log($scope.WSStatus);
     if ($scope.WSStatus == 'Close') {
-      $scope.StsTxt = 'Disconnected';
       $scope.ComButton = 'Connect to Node';
     } else if ($scope.WSStatus == 'Open') {
-      $scope.StsTxt = 'Connected';
       $scope.ComButton = 'Disconnect to Node';
+    } else if ($scope.WSStatus == 'Error') {
+      $scope.ComButton = '...';
     }
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
