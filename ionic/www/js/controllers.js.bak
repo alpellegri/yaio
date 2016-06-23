@@ -6,9 +6,9 @@ angular.module('app.controllers', [])
   $scope.pushCtrl0Change = function() {
     serviceLog.putlog('LED ' + $scope.pushCtrl0.checked);
 	if ($scope.pushCtrl0.checked) {
-		messagesRef.update({data: true});
+		messagesRef.update({data: 1});
 	} else {
-		messagesRef.update({data: false});
+		messagesRef.update({data: 0});
 	}
   };
 

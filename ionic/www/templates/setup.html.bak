@@ -23,7 +23,7 @@
                 <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase">
             </label>
             <label class="item item-input">
-                <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret">
+                <input type="text" placeholder="payload4" name="data" ng-model="settings.data">
             </label>
         </form>
         <button id="setup-send" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="SetupComSend(settings)">

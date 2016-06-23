@@ -45,6 +45,7 @@ angular.module('app.services', [])
     }
 
     ws.onmessage = function(message) {
+      console.log('>>>>' + message.data);
       service.message_cb(message.data);
     };
 

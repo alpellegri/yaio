@@ -16,7 +16,7 @@
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
 
-#include <FirebaseArduino.h>
+#include <Firebase.h>
 
 #include <ArduinoJson.h>
 
@@ -35,13 +35,15 @@ const char* ap_ssid     = "esp8266";
 const char* ap_password = "123456789";
 
 // STA mode: router access
-char sta_ssid[25] = "D-Link DSL-3580L";
-char sta_password[25] = "pippolo1234";
-char firebase_url[50] = "ikka.firebaseIO.com";
-char firebase_secret[50] = "WqHzeyJu1NlWArvHRmqhq457U73dn9PFS41BThby";
+char sta_ssid[25] = ""; // "D-Link DSL-3580L";
+char sta_password[25] = ""; // "pippolo1234";
+char firebase_url[50] = "";
 
 void setup_ap_mode(void);
 void setup_sta_mode(void);
+
+// create firebase client
+Firebase fbase = Firebase(""); // "ikka.firebaseIO.com"
 
 // create sebsocket server
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -97,20 +99,18 @@ uint8_t LoadWiFiData(uint8_t *data)
     const char* ssid = root["ssid"];
     const char* password = root["password"];
     const char* firebase = root["firebase"];
-    const char* secret = root["secret"];
+    const char* data = root["data"];
     if ((ssid != NULL) &&
         (password != NULL) &&
-        (firebase != NULL) &&
-        (secret != NULL))
+        (firebase != NULL))
     {
       strcpy(sta_ssid, ssid);
       strcpy(sta_password, password);
       strcpy(firebase_url, firebase);
-      strcpy(firebase_secret, secret);
       Serial.printf("sta_ssid %s\n", sta_ssid);
       Serial.printf("sta_password %s\n", sta_password);
       Serial.printf("firebase_url %s\n", firebase_url);
-      Serial.printf("firebase_secret %s\n", firebase_secret);
+      Serial.printf("data %s\n", data);
       ret = 1;
     }
   }
@@ -139,6 +139,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       IPAddress ip = webSocket.remoteIP(num);
       Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
       port_id = num;
+
+      // send message to client
+      // webSocket.sendTXT(num, "Connected");
       }
       break;
 
@@ -192,15 +195,14 @@ void setup_ap_mode()
 
 void setup_sta_mode()
 {
-  uint8_t *ee_ptr = eeprom_ptr;
   uint8_t sts;
   int cnt;
   mode = 1;
   setflip_mode(1);
   Serial.printf("connecting mode %d\n", mode);
 
-  Serial.printf("Configuration parameters:\n%s\n", ee_ptr);
-  sts = LoadWiFiData(ee_ptr);
+  Serial.printf("Configuration parameters:\n%s\n", eeprom_ptr);
+  sts = LoadWiFiData(eeprom_ptr);
   if (sts == 1)
   {
     digitalWrite(LED, 1);
@@ -225,7 +227,7 @@ void setup_sta_mode()
       Serial.println();
       Serial.print("connected: ");
       Serial.println(WiFi.localIP());
-      Firebase.begin(firebase_url);
+      fbase = Firebase(firebase_url);
     }
     else
     {
@@ -243,6 +245,7 @@ void setup_sta_mode()
 
 void setup()
 {
+
   mode = 1;
 
   pinMode(LED, OUTPUT);   // LED pin as output.
@@ -264,102 +267,57 @@ void setup()
 }
 
 int cnt = 0;
-int button = 0x55;
-
-bool status_alarm = false;
-int status_scheduler = 10;
-
 void loop() {
   int in;
   String str;
   char c_str[25] = "";
 
-  Serial.printf("loop %x\n", cnt);
-  Serial.print("heap: ");
-  Serial.println(ESP.getFreeHeap());
-
-  cnt++;
-  if (mode == 0)
-  {
-    if (port_id != 0xFF)
-    {
-      sprintf(c_str, "cnt %x", cnt);
+  if (mode == 0) {
+    if (port_id != 0xFF) {
+      sprintf(c_str, "cnt %x", cnt++);
       // Serial.printf("%s\n", c_str);
       webSocket.sendTXT(port_id, c_str);
     }
     webSocket.loop();
-  }
-  else if (mode == 1)
-  {
-    // get object data
-    bool data = Firebase.getBool("data");
-    if (Firebase.failed())
-    {
-      Serial.print("get failed:");
-      Serial.println(Firebase.error());  
-    }
-    else
-    {
-      digitalWrite(LED, !(data == true));
-    }
+  } else if (mode == 1) {
+    FirebaseGet get = fbase.get("");
 
-    // get object data
-    bool control_alarm = Firebase.getBool("control/alarm");
-    if (Firebase.failed())
-    {
-      Serial.print("get failed:");
-      Serial.println(Firebase.error());  
+    // get json from the root of the firebase
+    if (get.error()) {
+        Serial.println("Firebase get failed");
+        Serial.println(get.error().message());
+        return;
     }
-    else
-    {
-      Serial.printf("%control_alarm: %d\n", (control_alarm == true));
-      if (status_alarm != control_alarm)
-      {
-        status_alarm = control_alarm;
-        Firebase.setBool("status/alarm", status_alarm);
-        if (Firebase.failed())
-        {
-          Serial.print("set failed:");
-          Serial.println(Firebase.error());
-        }
-      }
-    }
+    delay(500);
 
-#if 1
-    Serial.printf("%x\n", (data == true));
+    // Serial.println(get.json()["settings"]);
+    // get object data
+    String data = get.json()["data"];
+    String settings = ""; //get.json()["settings"];
+    delay(500);
+
+    digitalWrite(LED, (data[0]=='0'));
+    Serial.printf("%x %x\n", data[0], settings[0]);
+    // Serial.print(setting[0]);
     in = digitalRead(BUTTON);
-    if (in != button) {
-      button = in;
-      Firebase.setInt("ctrl/button", button);
-      if (Firebase.failed())
-      {
-        Serial.print("set failed:");
-        Serial.println(Firebase.error());
-      }
-      delay(1000);
-    }
-#endif
 
 #if 0
-  if (Firebase.available()) {
-     // FirebaseObject event = Firebase.readEvent();
-     // String eventType = event.getString("type");
-     // eventType.toLowerCase();
-     
-     Serial.print("event: ");
-     // Serial.println(eventType);
-     // if (eventType == "put") {
-       // Serial.print("data: ");
-       // Serial.println(event.getString("data"));
-       // String path = event.getString("path");
-       // String data = event.getString("data");
+    str = "{\"button\": \"" + String(in) + "\"}";
+    FirebaseSet set = fbase.set("ctrl/", str);
+    if (set.error()) {
+      Serial.println("Firebase set failed");
+      Serial.println(set.error().message());  
+      return;
+    }
+    delay(500);
 
-       // Serial.println(path.c_str());
-       // Serial.println(data);
-     // }
+  FirebasePush push = fbase.push("/logs", "{\".sv\": \"timestamp\"}");
+  if (push.error()) {
+      Serial.println("Firebase push failed");
+      Serial.println(push.error().message());  
+      return;
   }
 #endif
-
   }
 }
 
