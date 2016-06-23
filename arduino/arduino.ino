@@ -38,7 +38,7 @@ const char* ap_password = "123456789";
 char sta_ssid[25] = "D-Link DSL-3580L";
 char sta_password[25] = "pippolo1234";
 char firebase_url[50] = "ikka.firebaseIO.com";
-char firebase_secret[50] = "WqHzeyJu1NlWArvHRmqhq457U73dn9PFS41BThby";
+char firebase_secret[50] = "";
 
 void setup_ap_mode(void);
 void setup_sta_mode(void);
