@@ -3,7 +3,13 @@ angular.module('app.controllers', [])
 .controller('homeCtrl', function($scope, serviceLog) {
   console.log('homeCtrl');
 
+  $scope.pushCtrl0 = { checked: false };
+  $scope.pushCtrl1 = { checked: false };
+  $scope.pushCtrl2 = { checked: true };
+  $scope.RadioNum = 0;
+  $scope.RadioCode = [];
   $scope.status = {};
+
   $scope.pushCtrl0Change = function() {
     var ref = new Firebase("https://ikka.firebaseIO.com/control");
     serviceLog.putlog('LED ' + $scope.pushCtrl0.checked);
@@ -32,6 +38,26 @@ angular.module('app.controllers', [])
 	}
   };
 
+  $scope.HomeButton1 = function() {
+    $scope.RadioCode.push($scope.RadioNum);
+    $scope.RadioNum++;
+    console.log('button\n' + $scope.RadioCode);
+  };
+  $scope.HomeButton2 = function() {
+    var len = $scope.RadioCode.length;
+    var ref = new Firebase("https://ikka.firebaseIO.com/");
+    console.log('list\n');
+    for (i=0;i<len;i++) {
+      var sensor_ref = ref.child('sensor/' + i.toString());
+      sensor_ref.set({
+        name: "pir",
+        action: "00",
+        code: $scope.RadioCode[i]
+      });
+      console.log('[' + i + ']: ' + $scope.RadioCode[i]);
+    }
+  };
+
   $scope.doRefresh = function() {
     serviceLog.putlog('refresh home');
 	var ref = new Firebase("https://ikka.firebaseIO.com/");
@@ -58,10 +84,6 @@ angular.module('app.controllers', [])
 		serviceLog.putlog("firebase failed: " + errorObject.code);
 	});
   };
-
-  $scope.pushCtrl0 = { checked: false };
-  $scope.pushCtrl1 = { checked: false };
-  $scope.pushCtrl2 = { checked: true };
 })
 
 .controller('setupCtrl', function($scope, WebSocketService, serviceLog, $ionicPopup, $timeout) {
@@ -74,6 +96,8 @@ angular.module('app.controllers', [])
   $scope.Text = 'rx data goes here';
   $scope.StsTxt = 'Disconnected';
   $scope.SensorNum = 0;
+  $scope.RadioNum = 0;
+  $scope.RadioCode = [];
 
   WebSocketService.subscribe(
     // open
@@ -151,6 +175,21 @@ angular.module('app.controllers', [])
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
 
+  $scope.SetupUpdateFirebase = function() {
+    var len = $scope.RadioCode.length;
+    var ref = new Firebase("https://ikka.firebaseIO.com/");
+    console.log('list\n');
+    for (i=0;i<len;i++) {
+      var sensor_ref = ref.child('sensor/' + i.toString());
+      sensor_ref.set({
+        name: "pir",
+        action: "00",
+        code: $scope.RadioCode[i]
+      });
+      console.log('[' + i + ']: ' + $scope.RadioCode[i]);
+    }
+  };
+
   // Triggered on a button click, or some other target
   $scope.showPopup = function() {
   $scope.data = {};
@@ -196,24 +235,14 @@ angular.module('app.controllers', [])
 
   confirmPopup.then(function(res) {
     if(res) {
-      console.log('You are sure');
       var obj = JSON.parse(message);
-      console.log('radio code' + obj.sensor);
+      console.log('RadioCode ' + obj.sensor);
       if (obj.sensor != null) {
-        var number = $scope.SensorNum.toString();
-        var json_str = "{ number: { action: 0, name: 0, code: 0 } }";
-        var ref = new Firebase("https://ikka.firebaseIO.com/");
-        sensor_ref = ref.child("sensor/"+$scope.SensorNum.toString());
-        sensor_ref.set({
-            name: "pir",
-            action: "00",
-            code: obj.sensor
-        });
-        $scope.SensorNum++;
+        console.log('RadioCode OK');
+        $scope.RadioCode.push(obj.sensor);
       }
     } else {
-      console.log('You are not sure');
-     }
+    }
    });
  };
 
