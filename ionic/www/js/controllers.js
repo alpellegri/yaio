@@ -68,13 +68,13 @@ angular.module('app.controllers', [])
 .controller('setupCtrl', function($scope, WebSocketService, serviceLog, $ionicPopup, $timeout) {
   console.log('setupCtrl');
 
-  // $scope.messages = [];
   $scope.message = {};
   $scope.WSStatus = 'Close';
   $scope.settings = {};
   $scope.ComButton = 'Connect to Node';
   $scope.Text = 'rx data goes here';
   $scope.StsTxt = 'Disconnected';
+  $scope.SensorNum = 0;
 
   WebSocketService.subscribe(
     // open
@@ -201,15 +201,16 @@ angular.module('app.controllers', [])
       var obj = JSON.parse(message);
       console.log('radio code' + obj.sensor);
       if (obj.sensor != null) {
+        var number = $scope.SensorNum.toString();
+        var json_str = "{ number: { action: 0, name: 0, code: 0 } }";
         var ref = new Firebase("https://ikka.firebaseIO.com/");
-        sensor_ref = ref.child("sensor");
+        sensor_ref = ref.child("sensor/"+$scope.SensorNum.toString());
         sensor_ref.set({
-          "00": {
-            action: "00",
             name: "pir",
+            action: "00",
             code: obj.sensor
-          }
         });
+        $scope.SensorNum++;
       }
     } else {
       console.log('You are not sure');

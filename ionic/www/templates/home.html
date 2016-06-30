@@ -8,12 +8,12 @@
         <ion-toggle toggle-class="toggle-assertive"
 		            ng-model="pushCtrl0.checked"
                     ng-change="pushCtrl0Change()">
-          LED
+          Corntrol Alarm
         </ion-toggle>
         <ion-toggle toggle-class="toggle-assertive"
 		            ng-model="pushCtrl1.checked"
                     ng-change="pushCtrl1Change()">
-          CTRL1
+          Corntrol Heap
         </ion-toggle>
         <ion-toggle toggle-class="toggle-assertive"
 		            ng-model="pushCtrl2.checked"
@@ -21,5 +21,18 @@
           CTRL2
         </ion-toggle>
         </form>
+        <h4 id="home-heading1" style="color:#000000;text-align:left;">Status</h4>
+        <div id="home-button-bar1" class=" button-bar ">
+            <button id="home-button11" style="text-align:left;" class=" button button-stable  button-block ">status.alarm</button>
+            <button id="home-button12" style="text-align:right;" class=" button button-stable  button-block ">{{status.alarm}}</button>
+        </div>
+        <div id="home-button-bar2" class=" button-bar ">
+            <button id="home-button21" style="text-align:left;" class=" button button-stable  button-block ">status.bootcnt</button>
+            <button id="home-button22" style="text-align:right;" class=" button button-stable  button-block ">{{status.bootcnt}}</button>
+        </div>
+        <div id="home-button-bar3" class=" button-bar ">
+            <button id="home-button31" style="text-align:left;" class=" button button-stable  button-block ">status.upcnt</button>
+            <button id="home-button32" style="text-align:right;" class=" button button-stable  button-block ">{{status.upcnt}}</button>
+        </div>
     </ion-content>
 </ion-view>
