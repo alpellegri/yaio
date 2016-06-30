@@ -39,7 +39,6 @@ angular.module('app.controllers', [])
 	ref.on("value", function(snapshot) {
 		var payload = snapshot.val();
 		var control_alarm = payload.control.alarm;
-		serviceLog.putlog('firebase: ' + "alarm " + alarm + " ctrl " + ctrl);
 		if (control_alarm == 1) {
 			$scope.pushCtrl0.checked = true;
 		} else if (control_alarm == 0) {
