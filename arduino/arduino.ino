@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define LED     D0        // Led in NodeMCU at pin GPIO16 (D0).
-#define BUTTON  D3        // flash button at pin GPIO00 (D3)
+#define LED     D0 // Led in NodeMCU at pin GPIO16 (D0).
+#define BUTTON  D3 // flash button at pin GPIO00 (D3)
 
 #define JSON_BUFFER_SIZE (10*4)
 
@@ -35,13 +35,22 @@ const char* ap_ssid     = "esp8266";
 const char* ap_password = "123456789";
 
 // STA mode: router access
+#if 0
 char sta_ssid[25] = "D-Link DSL-3580L";
 char sta_password[25] = "pippolo1234";
 char firebase_url[50] = "ikka.firebaseIO.com";
+char firebase_secret[50] = "WqHzeyJu1NlWArvHRmqhq457U73dn9PFS41BThby";
+#else
+char sta_ssid[25] = "";
+char sta_password[25] = "";
+char firebase_url[50] = "";
 char firebase_secret[50] = "";
+#endif
 
 void setup_ap_mode(void);
 void setup_sta_mode(void);
+void task(void);
+void task2(void);
 
 // create sebsocket server
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -50,10 +59,21 @@ Ticker flipper;
 
 int mode = 1;
 int flip_mode = 1;
-
 int count = 0;
-
 uint8_t *eeprom_ptr;
+
+bool boot = 0;
+int cnt = 0;
+int button = 0x55;
+bool status_alarm = false;
+int status_scheduler = 10;
+int scheduler_cnt = 0;
+bool scheduler_flag = false;
+int task_cnt = 0;
+int heap_size = 0;
+int status_heap = 0;
+
+StaticJsonBuffer<200> jsonBuffer;
 
 void setflip_mode(int mode)
 {
@@ -82,9 +102,18 @@ void flip(void)
   {
   }
   count++;
+
+  if (scheduler_cnt < status_scheduler)
+  {
+    scheduler_cnt++;
+  }
+  else
+  {
+    scheduler_cnt = 0;
+    scheduler_flag = 1;
+  }
 }
 
-StaticJsonBuffer<200> jsonBuffer;
 uint8_t LoadWiFiData(uint8_t *data)
 {
   uint8_t ret = 0;
@@ -243,10 +272,10 @@ void setup_sta_mode()
 
 void setup()
 {
-  mode = 1;
+  mode = 0;
 
-  pinMode(LED, OUTPUT);   // LED pin as output.
-  pinMode(BUTTON, INPUT);   // 
+  pinMode(LED, OUTPUT);
+  pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 
   EEPROM.begin(512);
@@ -263,103 +292,175 @@ void setup()
   }
 }
 
-int cnt = 0;
-int button = 0x55;
-
-bool status_alarm = false;
-int status_scheduler = 10;
-
 void loop() {
   int in;
   String str;
   char c_str[25] = "";
 
-  Serial.printf("loop %x\n", cnt);
-  Serial.print("heap: ");
-  Serial.println(ESP.getFreeHeap());
+  // Serial.printf("loop %x\n", cnt);
+  // Serial.printf("heap: %d\n\n", ESP.getFreeHeap());
 
   cnt++;
   if (mode == 0)
   {
-    if (port_id != 0xFF)
+    in = digitalRead(BUTTON);
+    if (in != button)
     {
-      sprintf(c_str, "cnt %x", cnt);
-      // Serial.printf("%s\n", c_str);
-      webSocket.sendTXT(port_id, c_str);
+      button = in;
+
+      if (button == true)
+      {
+        if (port_id != 0xFF)
+        {
+          Serial.printf(">");
+          sprintf(c_str, "{\"sensor\":\"%06X\"}", cnt&0xFFFFFF);
+          // "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+          webSocket.sendTXT(port_id, c_str);
+        }
+      }
+      Serial.printf("cnt: %08X, button %d\n", cnt, button);
     }
+
     webSocket.loop();
   }
   else if (mode == 1)
   {
-    // get object data
-    bool data = Firebase.getBool("data");
-    if (Firebase.failed())
+    if (scheduler_flag == true)
     {
-      Serial.print("get failed:");
-      Serial.println(Firebase.error());  
+      scheduler_flag = false;
+      task();
     }
-    else
+  }
+}
+
+void task(void)
+{
+  int in;
+
+  task_cnt++;
+  Serial.printf("task_cnt: %d\n", task_cnt);
+
+    // boot counter
+    if (boot == 0)
     {
-      digitalWrite(LED, !(data == true));
+      int bootcnt = Firebase.getInt("status/bootcnt");
+      if (Firebase.failed())
+      {
+        Serial.print("get failed: status/bootcnt");
+        Serial.println(Firebase.error());  
+      }
+      else
+      {
+        Serial.printf("status/bootcnt: %d\n", bootcnt);
+        Firebase.setInt("status/bootcnt", bootcnt+1);
+        if (Firebase.failed())
+        {
+          Serial.print("set failed: status/bootcnt");
+          Serial.println(Firebase.error());
+        }
+        else
+        {
+          boot = 1;
+        }
+      }
     }
 
+  if (boot == true)
+  {
     // get object data
     bool control_alarm = Firebase.getBool("control/alarm");
     if (Firebase.failed())
     {
-      Serial.print("get failed:");
+      Serial.print("get failed: control/alarm");
       Serial.println(Firebase.error());  
     }
     else
     {
-      Serial.printf("%control_alarm: %d\n", (control_alarm == true));
       if (status_alarm != control_alarm)
       {
         status_alarm = control_alarm;
+        digitalWrite(LED, !(status_alarm == true));
         Firebase.setBool("status/alarm", status_alarm);
         if (Firebase.failed())
         {
-          Serial.print("set failed:");
+          Serial.print("set failed: status/alarm");
           Serial.println(Firebase.error());
         }
       }
     }
 
-#if 1
-    Serial.printf("%x\n", (data == true));
+#if 0
+    // get object data
+    bool control_heap = Firebase.getBool("control/heap");
+    if (Firebase.failed())
+    {
+      Serial.print("get failed: control/heap");
+      Serial.println(Firebase.error());  
+    }
+    else
+    {
+      if (control_heap == true)
+      {
+        status_heap = ESP.getFreeHeap();
+        Firebase.setInt("status/heap", status_heap);
+        if (Firebase.failed())
+        {
+          Serial.print("set failed: status/heap");
+          Serial.println(Firebase.error());
+        }
+      }
+    }
+#endif
+
     in = digitalRead(BUTTON);
-    if (in != button) {
+    if (in != button)
+    {
       button = in;
-      Firebase.setInt("ctrl/button", button);
+      Firebase.setBool("status/button", button);
       if (Firebase.failed())
       {
-        Serial.print("set failed:");
+        Serial.print("set failed: status/button");
         Serial.println(Firebase.error());
       }
-      delay(1000);
+    }
+
+#if 1
+    Firebase.setInt("status/upcnt", task_cnt);
+    if (Firebase.failed())
+    {
+      Serial.print("set failed: status/upcnt");
+      Serial.println(Firebase.error());
     }
 #endif
 
 #if 0
-  if (Firebase.available()) {
-     // FirebaseObject event = Firebase.readEvent();
-     // String eventType = event.getString("type");
-     // eventType.toLowerCase();
-     
-     Serial.print("event: ");
-     // Serial.println(eventType);
-     // if (eventType == "put") {
-       // Serial.print("data: ");
-       // Serial.println(event.getString("data"));
-       // String path = event.getString("path");
-       // String data = event.getString("data");
-
-       // Serial.println(path.c_str());
-       // Serial.println(data);
-     // }
-  }
+    // append a new value to /logs
+    String name = Firebase.pushInt("logs", task_cnt);
+    // handle error
+    if (Firebase.failed()) {
+      Serial.print("pushing /logs failed:");
+      Serial.println(Firebase.error());
+    }
+    else
+    {
+      Serial.print("pushed: /logs/");
+      Serial.println(name);
+    }
 #endif
-
   }
+}
+
+void task2(void)
+{
+  int i;
+  int in;
+
+  FirebaseObject root = Firebase.get("");
+  /*
+  bool control_alarm = root.getBool("control/alarm");
+  Serial.printf("control/alarm: %d\n", control_alarm);
+  int bootcnt = root.getInt("status/bootcnt");
+  Serial.printf("status/bootcnt: %d\n", bootcnt);
+  */
 }
 
