@@ -6,8 +6,6 @@ angular.module('app.controllers', [])
   $scope.pushCtrl0 = { checked: false };
   $scope.pushCtrl1 = { checked: false };
   $scope.pushCtrl2 = { checked: true };
-  $scope.RadioNum = 0;
-  $scope.RadioCode = [];
   $scope.status = {};
 
   $scope.pushCtrl0Change = function() {
@@ -36,26 +34,6 @@ angular.module('app.controllers', [])
 	} else {
 
 	}
-  };
-
-  $scope.HomeButton1 = function() {
-    $scope.RadioCode.push($scope.RadioNum);
-    $scope.RadioNum++;
-    console.log('button\n' + $scope.RadioCode);
-  };
-  $scope.HomeButton2 = function() {
-    var len = $scope.RadioCode.length;
-    var ref = new Firebase("https://ikka.firebaseIO.com/");
-    console.log('list\n');
-    for (i=0;i<len;i++) {
-      var sensor_ref = ref.child('sensor/' + i.toString());
-      sensor_ref.set({
-        name: "pir",
-        action: "00",
-        code: $scope.RadioCode[i]
-      });
-      console.log('[' + i + ']: ' + $scope.RadioCode[i]);
-    }
   };
 
   $scope.doRefresh = function() {
@@ -93,11 +71,20 @@ angular.module('app.controllers', [])
   $scope.WSStatus = 'Close';
   $scope.settings = {};
   $scope.ComButton = 'Connect to Node';
-  $scope.Text = 'rx data goes here';
+  $scope.Text = '';
   $scope.StsTxt = 'Disconnected';
   $scope.SensorNum = 0;
   $scope.RadioNum = 0;
   $scope.RadioCode = [];
+  $scope.RadioListText = '';
+
+  $scope.settings.ComposeText = function() {
+    $scope.settings.text =
+      'Node WiFi SSID: ' + $scope.settings.ssid + '\n' +
+      'Node WiFi PASSWORD: ' + $scope.settings.password + '\n' +
+      'Firebase URL: ' + $scope.settings.password + '\n' +
+      'Firebase Secret: ' + $scope.settings.password + '\n';
+  }
 
   WebSocketService.subscribe(
     // open
@@ -164,7 +151,7 @@ angular.module('app.controllers', [])
   };
 
   $scope.doRefresh = function() {
-    console.log($scope.WSStatus);
+    console.log('doRefresh');
     if ($scope.WSStatus == 'Close') {
       $scope.ComButton = 'Connect to Node';
     } else if ($scope.WSStatus == 'Open') {
@@ -175,10 +162,11 @@ angular.module('app.controllers', [])
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
 
-  $scope.SetupUpdateFirebase = function() {
+  $scope.SetupInitFirebase = function() {
     var len = $scope.RadioCode.length;
     var ref = new Firebase("https://ikka.firebaseIO.com/");
-    console.log('list\n');
+
+    // init Firebase: sensor
     for (i=0;i<len;i++) {
       var sensor_ref = ref.child('sensor/' + i.toString());
       sensor_ref.set({
@@ -188,17 +176,43 @@ angular.module('app.controllers', [])
       });
       console.log('[' + i + ']: ' + $scope.RadioCode[i]);
     }
+    // init Firebase: control
+    var control_ref = ref.child('control');
+    control_ref.set({
+      reboot: false,
+      alarm: false,
+      heap: false,
+      scheduler: 10
+    });
+    // init Firebase: status
+    var starus_ref = ref.child('status');
+    starus_ref.set({
+      alarm: false,
+      bootcnt: 0,
+      upcnt: 0,
+      umidity: 0,
+      temperature: 0,
+      fire: false,
+      flood: false
+    });
   };
 
   // Triggered on a button click, or some other target
   $scope.showPopup = function() {
-  $scope.data = {};
+
+  var PopupTemplate =
+    '<form class="list">' +
+    '<label class="item item-input"> <input type="text" placeholder="access point ssid" name="ssid" ng-model="settings.ssid"></label>' +
+    '<label class="item item-input"> <input type="text" placeholder="access point password" name="password" ng-model="settings.password"> </label>' +
+    '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase"> </label>' +
+    '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
+    '</form>';
 
   // An elaborate, custom popup
   var myPopup = $ionicPopup.show({
-    template: '<input type="password" ng-model="data.wifi">',
+    template: PopupTemplate,
     title: 'Enter Wi-Fi Password',
-    subTitle: 'Please use normal things',
+    subTitle: 'make sure your device is connected to Node WiFi AP',
     scope: $scope,
     buttons: [
       { text: 'Cancel' },
@@ -206,11 +220,12 @@ angular.module('app.controllers', [])
         text: '<b>Save</b>',
         type: 'button-positive',
         onTap: function(e) {
-          if (!$scope.data.wifi) {
+          if (!$scope.settings.ssid || !$scope.settings.password || !$scope.settings.firebase || !$scope.settings.secret) {
             //don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
-            return $scope.data.wifi;
+            $scope.settings.ComposeText();
+            return $scope.settings;
           }
         }
       }
@@ -218,18 +233,18 @@ angular.module('app.controllers', [])
   });
 
   myPopup.then(function(res) {
-    console.log('Tapped!', res);
+    console.log('Tapped!', $scope.settings);
   });
 
   $timeout(function() {
      myPopup.close(); //close the popup after 3 seconds for some reason
-  }, 3000);
+  }, 30000);
  };
 
  // A confirm dialog
  $scope.showConfirm = function(message) {
    var confirmPopup = $ionicPopup.confirm({
-     title: 'Radio code ' + message + ' has found',
+     title: 'Radio message ' + message + ' has found',
      template: 'Are you sure you want to save?'
    });
 
@@ -240,6 +255,7 @@ angular.module('app.controllers', [])
       if (obj.sensor != null) {
         console.log('RadioCode OK');
         $scope.RadioCode.push(obj.sensor);
+        $scope.RadioListText += obj.sensor + '\n';
       }
     } else {
     }
@@ -261,17 +277,12 @@ angular.module('app.controllers', [])
 
 .controller('loggerCtrl', function($scope, serviceLog) {
   console.log('loggerCtrl');
-
-  $scope.doList = function() {
-    console.log('doList');
-    $scope.logs = serviceLog.getlog();
-	$scope.$broadcast("scroll.infiniteScrollComplete");
-  };
+  $scope.logsText = {};
 
   $scope.doRefresh = function() {
-    console.log('Refresh');
-    $scope.logs = serviceLog.getlog();
-	$scope.$broadcast("scroll.refreshComplete");
+    console.log('doRefresh');
+    $scope.logsText = serviceLog.getlog();
+	// $scope.$broadcast("scroll.refreshComplete");
+    $scope.$broadcast("scroll.infiniteScrollComplete");
   };
-  $scope.logs = {};
 })

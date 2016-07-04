@@ -9,16 +9,15 @@ angular.module('app.services', [])
 }])
 
 .factory('serviceLog', function() {
-	var ids = 0;
-	var logs = [];
+	var logsText = '';
 	return {
 		putlog: function(message) {
 			console.log(message);
-			logs[ids++] = message;
+			logsText += message + '\n';
 			return;
 		},
 		getlog: function(){
-			return logs;
+			return logsText;
 		}
 	}
 })

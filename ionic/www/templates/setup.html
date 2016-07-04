@@ -4,7 +4,7 @@
         <form class="list">
             <label class="item item-input">
                 <span class="input-label">
-                    {{StsTxt}} {{WSStatus}}
+                    {{WSStatus}} -> {{StsTxt}}
                 </span><textarea placeholder=""> </textarea>
             </label>
         </form>
@@ -12,36 +12,22 @@
         <button id="setup-connect" style="text-align:left;" class="button button-positive  button-block icon-right ion-log-in" on-touch="SetupComCmd()">
 		{{ComButton}}
         </button>
-        <form class="list">
-            <label class="item item-input">
-                <input type="text" placeholder="access point ssid" name="ssid" ng-model="settings.ssid">
-            </label>
-            <label class="item item-input">
-                <input type="text" placeholder="access point password" name="password" ng-model="settings.password">
-            </label>
-            <label class="item item-input">
-                <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase">
-            </label>
-            <label class="item item-input">
-                <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret">
-            </label>
-        </form>
-        <button id="setup-send" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="SetupComSend(settings)">
-		Send to Node
+        <button id="setup-configure-node" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="showPopup()">
+		Node Configuration
+        </button>
+        <p8 id="setup-heading6" style="white-space: pre; color:#000000;text-align:left;">{{settings.text}}</p8>
+        <button id="setup-update-node" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="SetupComSend(settings)">
+		Send Configuration to Node
+        </button>
+        <button id="setup-update" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="SetupInitFirebase()">
+		Initialize Firebase
         </button>
         <form class="list">
             <h4 id="setup-heading3" style="color:#000000;font-weight:600;text-align:left;">
-            Sensor Radio Code
+            Acquired Radio Codes:
             </h4>
-            <label class="item item-input">
-                <span class="input-label">
-                {{Text}}
-                </span><textarea placeholder=""> </textarea>
-            </label>
+            <p8 id="setup-heading7" style="white-space: pre; color:#000000;text-align:left;">{{RadioListText}}</p8>
         </form>
-        <button id="setup-update" style="text-align:left;" class="button button-positive  button-block icon-right ion-android-arrow-dropright" on-touch="SetupUpdateFirebase()">
-		Update Firebase
-        </button>
         <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>
     </ion-content>
 </ion-view>
