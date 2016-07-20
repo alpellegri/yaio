@@ -1,6 +1,6 @@
 angular.module('app.controllers', [])
 
-.controller('homeCtrl', function($scope, serviceLog) {
+.controller('homeCtrl', function($ionicPlatform, $scope, PushService, serviceLog) {
   console.log('homeCtrl');
 
   $scope.pushCtrl0 = { checked: false };
@@ -8,8 +8,11 @@ angular.module('app.controllers', [])
   $scope.pushCtrl2 = { checked: true };
   $scope.status = {};
 
+  $ionicPlatform.ready(function() {
+    PushService.init();
+  });
+
   $scope.pushCtrl0Change = function() {
-    var ref = new Firebase("https://ikka.firebaseIO.com/control");
     serviceLog.putlog('LED ' + $scope.pushCtrl0.checked);
 	if ($scope.pushCtrl0.checked) {
       ref.update({alarm: true});
