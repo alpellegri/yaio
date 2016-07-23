@@ -67,6 +67,7 @@ bool scheduler_flag = false;
 int task_cnt = 0;
 int heap_size = 0;
 int status_heap = 0;
+bool trig_push = false;
 
 void setflip_mode(int mode)
 {
@@ -339,24 +340,34 @@ void task(void)
     // boot counter
     if (boot == 0)
     {
-      int bootcnt = Firebase.getInt("status/bootcnt");
+      Firebase.setBool("control/reboot", false);
       if (Firebase.failed())
       {
-        Serial.print("get failed: status/bootcnt");
-        Serial.println(Firebase.error());  
+        Serial.print("set failed: control/reboot");
+        Serial.println(Firebase.error());
       }
       else
       {
-        Serial.printf("status/bootcnt: %d\n", bootcnt);
-        Firebase.setInt("status/bootcnt", bootcnt+1);
+        int bootcnt = Firebase.getInt("status/bootcnt");
         if (Firebase.failed())
         {
-          Serial.print("set failed: status/bootcnt");
+          Serial.print("get failed: status/bootcnt");
           Serial.println(Firebase.error());
         }
         else
         {
-          boot = 1;
+          Serial.printf("status/bootcnt: %d\n", bootcnt);
+          Firebase.setInt("status/bootcnt", bootcnt+1);
+          if (Firebase.failed())
+          {
+            Serial.print("set failed: status/bootcnt");
+            Serial.println(Firebase.error());
+          }
+          else
+          {
+            boot = 1;
+            trig_push = true;
+          }
         }
       }
     }
@@ -384,8 +395,21 @@ void task(void)
           }
         }
       }
+      // get object data
+      bool control_reboot = Firebase.getBool("control/reboot");
+      if (Firebase.failed())
+      {
+        Serial.print("get failed: control/reboot");
+        Serial.println(Firebase.error());  
+      }
+      else
+      {
+        if (control_reboot == true)
+        {
+          ESP.restart();
+        }
+      }
 
-#if 0
       // get object data
       bool control_heap = Firebase.getBool("control/heap");
       if (Firebase.failed())
@@ -406,7 +430,6 @@ void task(void)
           }
         }
       }
-#endif
 
       in = digitalRead(BUTTON);
       if (in != button)
@@ -420,7 +443,7 @@ void task(void)
         }
         if ((status_alarm == true) && (in == false))
         {
-          FcmSendPush();
+          trig_push = true;
         }
       }
 
@@ -447,6 +470,12 @@ void task(void)
         Serial.println(name);
       }
 #endif
+    }
+
+    if (trig_push == true)
+    {
+      trig_push = false;
+      FcmSendPush();
     }
     FcmService();
   }

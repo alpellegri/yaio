@@ -5,7 +5,7 @@ angular.module('app.controllers', [])
 
   $scope.pushCtrl0 = { checked: false };
   $scope.pushCtrl1 = { checked: false };
-  $scope.pushCtrl2 = { checked: true };
+  $scope.pushCtrl2 = { checked: false };
   $scope.status = {};
 
   $ionicPlatform.ready(function() {
@@ -13,7 +13,8 @@ angular.module('app.controllers', [])
   });
 
   $scope.pushCtrl0Change = function() {
-    serviceLog.putlog('LED ' + $scope.pushCtrl0.checked);
+    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
 	if ($scope.pushCtrl0.checked) {
       ref.update({alarm: true});
 	} else {
@@ -22,20 +23,22 @@ angular.module('app.controllers', [])
   };
 
   $scope.pushCtrl1Change = function() {
-    serviceLog.putlog('CTRL1 ' + $scope.pushCtrl1.checked);
+    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    serviceLog.putlog('heap control ' + $scope.pushCtrl1.checked);
 	if ($scope.pushCtrl1.checked) {
-
+      ref.update({heap: true});
 	} else {
-
+      ref.update({heap: false});
 	}
   };
 
   $scope.pushCtrl2Change = function() {
-    serviceLog.putlog('CTRL2 ' + $scope.pushCtrl2.checked);
+    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    serviceLog.putlog('reboot control ' + $scope.pushCtrl2.checked);
 	if ($scope.pushCtrl2.checked) {
-
+      ref.update({reboot: true});
 	} else {
-
+      ref.update({reboot: false});
 	}
   };
 
@@ -46,18 +49,24 @@ angular.module('app.controllers', [])
 	ref.on("value", function(snapshot) {
 		var payload = snapshot.val();
 		var control_alarm = payload.control.alarm;
-		if (control_alarm == 1) {
-			$scope.pushCtrl0.checked = true;
-		} else if (control_alarm == 0) {
-			$scope.pushCtrl0.checked = false;
+		if (control_alarm == true) {
+          $scope.pushCtrl0.checked = true;
 		} else {
+          $scope.pushCtrl0.checked = false;
 		}
-//		if (ctrl == 1) {
-//			$scope.pushCtrl1.checked = true;
-//		} else if (ctrl == 0) {
-//			$scope.pushCtrl1.checked = false;
-//		} else {
-//		}
+		var control_heap = payload.control.heap;
+		if (control_heap == true) {
+          $scope.pushCtrl1.checked = true;
+		} else {
+          $scope.pushCtrl1.checked = false;
+		}
+		var control_reboot = payload.control.reboot;
+		if (control_reboot == true) {
+          $scope.pushCtrl2.checked = true;
+		} else {
+          $scope.pushCtrl2.checked = false;
+		}
+
         $scope.status = payload.status;
         
 		$scope.$broadcast('scroll.refreshComplete');
@@ -196,8 +205,9 @@ angular.module('app.controllers', [])
       umidity: 0,
       temperature: 0,
       fire: false,
-      flood: false
-    });
+      flood: false,
+      heap: 0
+   });
   };
 
   // Triggered on a button click, or some other target

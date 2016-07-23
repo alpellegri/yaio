@@ -8,17 +8,17 @@
         <ion-toggle toggle-class="toggle-assertive"
 		            ng-model="pushCtrl0.checked"
                     ng-change="pushCtrl0Change()">
-          Corntrol Alarm
+          Enable Alarm
         </ion-toggle>
         <ion-toggle toggle-class="toggle-assertive"
 		            ng-model="pushCtrl1.checked"
                     ng-change="pushCtrl1Change()">
-          Corntrol Heap
+          Enable Heap Log
         </ion-toggle>
         <ion-toggle toggle-class="toggle-assertive"
 		            ng-model="pushCtrl2.checked"
                     ng-change="pushCtrl2Change()">
-          CTRL2
+          Request Reboot
         </ion-toggle>
         </form>
         <h4 id="home-heading1" style="color:#000000;text-align:left;">Status</h4>
@@ -33,6 +33,10 @@
         <div id="home-button-bar3" class=" button-bar ">
             <button id="home-button31" style="text-align:left;" class=" button button-stable  button-block ">status.upcnt</button>
             <button id="home-button32" style="text-align:right;" class=" button button-stable  button-block ">{{status.upcnt}}</button>
+        </div>
+        <div id="home-button-bar4" class=" button-bar ">
+            <button id="home-button41" style="text-align:left;" class=" button button-stable  button-block ">status.heap</button>
+            <button id="home-button42" style="text-align:right;" class=" button button-stable  button-block ">{{status.heap}}</button>
         </div>
     </ion-content>
 </ion-view>
