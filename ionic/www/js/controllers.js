@@ -21,6 +21,15 @@ angular.module('app.controllers', [])
       ref.update({alarm: false});
 	}
   };
+  $scope.pushCtrl0Change2 = function() {
+    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
+	if ($scope.status.alarm == true) {
+      ref.update({alarm: false});
+	} else {
+      ref.update({alarm: true});
+	}
+  };
 
   $scope.pushCtrl1Change = function() {
     var ref = new Firebase("https://ikka.firebaseIO.com/control");

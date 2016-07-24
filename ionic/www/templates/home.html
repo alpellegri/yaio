@@ -20,23 +20,26 @@
                     ng-change="pushCtrl2Change()">
           Request Reboot
         </ion-toggle>
+
+        <div class="list">
+          <a class="item" on-touch="pushCtrl0Change2()">
+            status.alarm
+            <span class="badge badge-assertive">{{status.alarm}}</span>
+          </a>
+          <a class="item">
+            status.bootcnt
+            <span class="item-note">{{status.bootcnt}}</span>
+          </a>
+          <a class="item">
+            status.upcnt
+            <span class="item-note">{{status.upcnt}}</span>
+          </a>
+          <a class="item">
+            status.heap
+            <span class="item-note">{{status.heap}}</span>
+          </a>
+        </div>
+
         </form>
-        <h4 id="home-heading1" style="color:#000000;text-align:left;">Status</h4>
-        <div id="home-button-bar1" class=" button-bar ">
-            <button id="home-button11" style="text-align:left;" class=" button button-stable  button-block ">status.alarm</button>
-            <button id="home-button12" style="text-align:right;" class=" button button-stable  button-block ">{{status.alarm}}</button>
-        </div>
-        <div id="home-button-bar2" class=" button-bar ">
-            <button id="home-button21" style="text-align:left;" class=" button button-stable  button-block ">status.bootcnt</button>
-            <button id="home-button22" style="text-align:right;" class=" button button-stable  button-block ">{{status.bootcnt}}</button>
-        </div>
-        <div id="home-button-bar3" class=" button-bar ">
-            <button id="home-button31" style="text-align:left;" class=" button button-stable  button-block ">status.upcnt</button>
-            <button id="home-button32" style="text-align:right;" class=" button button-stable  button-block ">{{status.upcnt}}</button>
-        </div>
-        <div id="home-button-bar4" class=" button-bar ">
-            <button id="home-button41" style="text-align:left;" class=" button button-stable  button-block ">status.heap</button>
-            <button id="home-button42" style="text-align:right;" class=" button button-stable  button-block ">{{status.heap}}</button>
-        </div>
     </ion-content>
 </ion-view>

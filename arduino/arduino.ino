@@ -194,6 +194,10 @@ void setup_ap_mode()
   digitalWrite(LED, 1);
 
   mode = 0;
+
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
+
   port_id = 0xFF;
   setflip_mode(0);
   Serial.printf("connecting mode %d\n", mode);
@@ -220,6 +224,10 @@ void setup_sta_mode()
   uint8_t sts;
   int cnt;
   mode = 1;
+
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
+
   setflip_mode(1);
   Serial.printf("connecting mode %d\n", mode);
 

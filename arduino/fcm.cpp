@@ -14,7 +14,6 @@ int RegIDsLen;
 
 void FcmSendPush(void)
 {
-#if 1
     boolean res;
     char str[400];
 
@@ -38,7 +37,7 @@ void FcmSendPush(void)
         }
       }
     }
-#endif
+
   if (RegIDsLen>0)
   {
     http_sts = 0;
@@ -53,8 +52,8 @@ static String FcmPostMsg(void)
   String json = "";
   json += "{";
   json +=    "\"data\":{";
-  json +=      "\"title\":\"ESP8266 Firebase Cloud Messaging\",";
-  json +=      "\"body\":\"This is a Message!\",";
+  json +=      "\"title\":\"ESP8266 Notification\",";
+  json +=      "\"body\":\"Alert!\",";
   json +=      "\"sound\":\"default\"";
   json +=    "},";
   // json +=    "\"registration_ids\":[\"" + REG_ID_0 + "\",\"" + REG_ID_1 + "\"]";
