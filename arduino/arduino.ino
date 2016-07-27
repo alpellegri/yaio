@@ -45,7 +45,6 @@ char firebase_secret[50] = "";
 void setup_ap_mode(void);
 void setup_sta_mode(void);
 void task(void);
-void task2(void);
 
 // create sebsocket server
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -382,102 +381,89 @@ void task(void)
 
     if (boot == true)
     {
-      // get object data
-      bool control_alarm = Firebase.getBool("control/alarm");
-      if (Firebase.failed())
+      bool control_monitor = Firebase.getBool("control/monitor");
+      if ((Firebase.failed() == false) && (control_monitor == true))
       {
-        Serial.print("get failed: control/alarm");
-        Serial.println(Firebase.error());  
-      }
-      else
-      {
-        if (status_alarm != control_alarm)
-        {
-          status_alarm = control_alarm;
-          digitalWrite(LED, !(status_alarm == true));
-          Firebase.setBool("status/alarm", status_alarm);
-          if (Firebase.failed())
-          {
-            Serial.print("set failed: status/alarm");
-            Serial.println(Firebase.error());
-          }
-        }
-      }
-      // get object data
-      bool control_reboot = Firebase.getBool("control/reboot");
-      if (Firebase.failed())
-      {
-        Serial.print("get failed: control/reboot");
-        Serial.println(Firebase.error());  
-      }
-      else
-      {
-        if (control_reboot == true)
-        {
-          ESP.restart();
-        }
-      }
-
-      // get object data
-      bool control_heap = Firebase.getBool("control/heap");
-      if (Firebase.failed())
-      {
-        Serial.print("get failed: control/heap");
-        Serial.println(Firebase.error());  
-      }
-      else
-      {
-        if (control_heap == true)
-        {
-          status_heap = ESP.getFreeHeap();
-          Firebase.setInt("status/heap", status_heap);
-          if (Firebase.failed())
-          {
-            Serial.print("set failed: status/heap");
-            Serial.println(Firebase.error());
-          }
-        }
-      }
-
-      in = digitalRead(BUTTON);
-      if (in != button)
-      {
-        button = in;
-        Firebase.setBool("status/button", button);
+        // get object data
+        bool control_alarm = Firebase.getBool("control/alarm");
         if (Firebase.failed())
         {
-          Serial.print("set failed: status/button");
+          Serial.print("get failed: control/alarm");
+          Serial.println(Firebase.error());  
+        }
+        else
+        {
+          if (status_alarm != control_alarm)
+          {
+            status_alarm = control_alarm;
+            digitalWrite(LED, !(status_alarm == true));
+            Firebase.setBool("status/alarm", status_alarm);
+            if (Firebase.failed())
+            {
+              Serial.print("set failed: status/alarm");
+              Serial.println(Firebase.error());
+            }
+          }
+        }
+        // get object data
+        bool control_reboot = Firebase.getBool("control/reboot");
+        if (Firebase.failed())
+        {
+          Serial.print("get failed: control/reboot");
+          Serial.println(Firebase.error());  
+        }
+        else
+        {
+          if (control_reboot == true)
+          {
+            ESP.restart();
+          }
+        }
+  
+        // get object data
+        bool control_heap = Firebase.getBool("control/heap");
+        if (Firebase.failed())
+        {
+          Serial.print("get failed: control/heap");
+          Serial.println(Firebase.error());  
+        }
+        else
+        {
+          if (control_heap == true)
+          {
+            status_heap = ESP.getFreeHeap();
+            Firebase.setInt("status/heap", status_heap);
+            if (Firebase.failed())
+            {
+              Serial.print("set failed: status/heap");
+              Serial.println(Firebase.error());
+            }
+          }
+        }
+  
+        in = digitalRead(BUTTON);
+        if (in != button)
+        {
+          button = in;
+          Firebase.setBool("status/button", button);
+          if (Firebase.failed())
+          {
+            Serial.print("set failed: status/button");
+            Serial.println(Firebase.error());
+          }
+          if ((status_alarm == true) && (in == false))
+          {
+            trig_push = true;
+          }
+        }
+
+        Firebase.setInt("status/upcnt", task_cnt);
+        if (Firebase.failed())
+        {
+          Serial.print("set failed: status/upcnt");
           Serial.println(Firebase.error());
         }
-        if ((status_alarm == true) && (in == false))
-        {
-          trig_push = true;
-        }
       }
-
-#if 1
-      Firebase.setInt("status/upcnt", task_cnt);
-      if (Firebase.failed())
-      {
-        Serial.print("set failed: status/upcnt");
-        Serial.println(Firebase.error());
-      }
-#endif
-
-#if 0
-      // append a new value to /logs
-      String name = Firebase.pushInt("logs", task_cnt);
-      // handle error
-      if (Firebase.failed()) {
-        Serial.print("pushing /logs failed:");
-        Serial.println(Firebase.error());
-      }
-      else
-      {
-        Serial.print("pushed: /logs/");
-        Serial.println(name);
-      }
-#endif
     }
 
     if (trig_push == true)
@@ -487,55 +473,5 @@ void task(void)
     }
     FcmService();
   }
-}
-
-void task2(void)
-{
-  int in;
-
-  task_cnt++;
-  Serial.printf("task_cnt: %d\n", task_cnt);
-
-#if 0
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    boolean res;
-    char str[400];
-
-    res = Firebase.getRaw("FCM_Registration_IDs", str);
-    if (res == true)
-    {
-      // Serial.printf(">> %s\n",str);
-      StaticJsonBuffer<400> jB;
-      JsonObject& root = jB.parseObject(str);
-      if (!root.success())
-      {
-        Serial.println("parseObject() failed");
-      }
-      else
-      {
-        for (JsonObject::iterator it=root.begin(); it!=root.end(); ++it)
-        {
-          Serial.println(it->key);
-          Serial.println(it->value.asString());
-        }
-      }
-    }
-  }
-#endif
-StaticJsonBuffer<400> jB;
-JsonArray& array = jB.createArray();
-array.add("bazinga!");
-array.add("zeta!");
-array.add("zulu!");
-char buffer[256];
-array.printTo(buffer, sizeof(buffer));
-Serial.println(buffer);
-  delay(1000);
-}
-
-void PushMessage()
-{
-  // FcmSendPushMulti();
 }
 

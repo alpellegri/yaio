@@ -1,45 +1,40 @@
 <ion-view title="Home" id="page1">
-    <ion-content padding="true" scroll="true" class="has-header">
-	<ion-refresher
-    pulling-text="Pull to refresh..."
-    on-refresh="doRefresh()">
+  <ion-content padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()">
     </ion-refresher>
-        <form class="list">
-        <ion-toggle toggle-class="toggle-assertive"
-		            ng-model="pushCtrl0.checked"
-                    ng-change="pushCtrl0Change()">
-          Enable Alarm
-        </ion-toggle>
-        <ion-toggle toggle-class="toggle-assertive"
-		            ng-model="pushCtrl1.checked"
-                    ng-change="pushCtrl1Change()">
-          Enable Heap Log
-        </ion-toggle>
-        <ion-toggle toggle-class="toggle-assertive"
-		            ng-model="pushCtrl2.checked"
-                    ng-change="pushCtrl2Change()">
-          Request Reboot
-        </ion-toggle>
+    <form class="list">
+      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
+        Enable Alarm
+      </ion-toggle>
+      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl3.checked" ng-change="pushCtrl3Change()">
+        Enable Monitoring
+      </ion-toggle>
+      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl1.checked" ng-change="pushCtrl1Change()">
+        Enable Heap Log
+      </ion-toggle>
+      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl2.checked" ng-change="pushCtrl2Change()">
+        Request Reboot
+      </ion-toggle>
 
-        <div class="list">
-          <a class="item" on-touch="pushCtrl0Change2()">
+      <div class="list">
+        <a class="item" on-touch="pushCtrl0Change2()">
             status.alarm
             <span class="badge badge-assertive">{{status.alarm}}</span>
           </a>
-          <a class="item">
+        <a class="item">
             status.bootcnt
             <span class="item-note">{{status.bootcnt}}</span>
           </a>
-          <a class="item">
+        <a class="item">
             status.upcnt
             <span class="item-note">{{status.upcnt}}</span>
           </a>
-          <a class="item">
+        <a class="item">
             status.heap
             <span class="item-note">{{status.heap}}</span>
           </a>
-        </div>
+      </div>
 
-        </form>
-    </ion-content>
+    </form>
+  </ion-content>
 </ion-view>

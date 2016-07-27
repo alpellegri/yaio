@@ -3,9 +3,18 @@ angular.module('app.controllers', [])
 .controller('homeCtrl', function($ionicPlatform, $scope, PushService, serviceLog) {
   console.log('homeCtrl');
 
-  $scope.pushCtrl0 = { checked: false };
-  $scope.pushCtrl1 = { checked: false };
-  $scope.pushCtrl2 = { checked: false };
+  $scope.pushCtrl0 = {
+    checked: false
+  };
+  $scope.pushCtrl1 = {
+    checked: false
+  };
+  $scope.pushCtrl2 = {
+    checked: false
+  };
+  $scope.pushCtrl3 = {
+    checked: false
+  };
   $scope.status = {};
 
   $ionicPlatform.ready(function() {
@@ -15,73 +24,110 @@ angular.module('app.controllers', [])
   $scope.pushCtrl0Change = function() {
     var ref = new Firebase("https://ikka.firebaseIO.com/control");
     serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
-	if ($scope.pushCtrl0.checked) {
-      ref.update({alarm: true});
-	} else {
-      ref.update({alarm: false});
-	}
+    if ($scope.pushCtrl0.checked) {
+      ref.update({
+        alarm: true
+      });
+    } else {
+      ref.update({
+        alarm: false
+      });
+    }
   };
+
   $scope.pushCtrl0Change2 = function() {
     var ref = new Firebase("https://ikka.firebaseIO.com/control");
     serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
-	if ($scope.status.alarm == true) {
-      ref.update({alarm: false});
-	} else {
-      ref.update({alarm: true});
-	}
+    if ($scope.status.alarm == true) {
+      ref.update({
+        alarm: false
+      });
+    } else {
+      ref.update({
+        alarm: true
+      });
+    }
   };
 
   $scope.pushCtrl1Change = function() {
     var ref = new Firebase("https://ikka.firebaseIO.com/control");
     serviceLog.putlog('heap control ' + $scope.pushCtrl1.checked);
-	if ($scope.pushCtrl1.checked) {
-      ref.update({heap: true});
-	} else {
-      ref.update({heap: false});
-	}
+    if ($scope.pushCtrl1.checked) {
+      ref.update({
+        heap: true
+      });
+    } else {
+      ref.update({
+        heap: false
+      });
+    }
   };
 
   $scope.pushCtrl2Change = function() {
     var ref = new Firebase("https://ikka.firebaseIO.com/control");
     serviceLog.putlog('reboot control ' + $scope.pushCtrl2.checked);
-	if ($scope.pushCtrl2.checked) {
-      ref.update({reboot: true});
-	} else {
-      ref.update({reboot: false});
-	}
+    if ($scope.pushCtrl2.checked) {
+      ref.update({
+        reboot: true
+      });
+    } else {
+      ref.update({
+        reboot: false
+      });
+    }
+  };
+
+  $scope.pushCtrl3Change = function() {
+    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    serviceLog.putlog('monitor control ' + $scope.pushCtrl3.checked);
+    if ($scope.pushCtrl3.checked) {
+      ref.update({
+        monitor: true
+      });
+    } else {
+      ref.update({
+        monitor: false
+      });
+    }
   };
 
   $scope.doRefresh = function() {
     serviceLog.putlog('refresh home');
-	var ref = new Firebase("https://ikka.firebaseIO.com/");
-	// Attach an asynchronous callback to read the data at our posts reference
-	ref.on("value", function(snapshot) {
-		var payload = snapshot.val();
-		var control_alarm = payload.control.alarm;
-		if (control_alarm == true) {
-          $scope.pushCtrl0.checked = true;
-		} else {
-          $scope.pushCtrl0.checked = false;
-		}
-		var control_heap = payload.control.heap;
-		if (control_heap == true) {
-          $scope.pushCtrl1.checked = true;
-		} else {
-          $scope.pushCtrl1.checked = false;
-		}
-		var control_reboot = payload.control.reboot;
-		if (control_reboot == true) {
-          $scope.pushCtrl2.checked = true;
-		} else {
-          $scope.pushCtrl2.checked = false;
-		}
+    var ref = new Firebase("https://ikka.firebaseIO.com/");
+    // Attach an asynchronous callback to read the data at our posts reference
+    ref.on("value", function(snapshot) {
+      var payload = snapshot.val();
+      var control_alarm = payload.control.alarm;
+      if (control_alarm == true) {
+        $scope.pushCtrl0.checked = true;
+      } else {
+        $scope.pushCtrl0.checked = false;
+      }
+      var control_monitor = payload.control.monitor;
+      if (control_monitor == true) {
+        $scope.pushCtrl3.checked = true;
+      } else {
+        $scope.pushCtrl3.checked = false;
+      }
+      var control_heap = payload.control.heap;
+      if (control_heap == true) {
+        $scope.pushCtrl1.checked = true;
+      } else {
+        $scope.pushCtrl1.checked = false;
+      }
+      var control_reboot = payload.control.reboot;
+      if (control_reboot == true) {
+        $scope.pushCtrl2.checked = true;
+      } else {
+        $scope.pushCtrl2.checked = false;
+      }
 
-        $scope.status = payload.status;
-        
-		$scope.$broadcast('scroll.refreshComplete');
-	}, function (errorObject) {
-		serviceLog.putlog("firebase failed: " + errorObject.code);
-	});
+      $scope.status = payload.status;
+
+      $scope.$broadcast('scroll.refreshComplete');
+    }, function(errorObject) {
+      serviceLog.putlog("firebase failed: " + errorObject.code);
+    });
   };
 })
 
@@ -153,7 +199,7 @@ angular.module('app.controllers', [])
     } else if ($scope.WSStatus = 'Open') {
       serviceLog.putlog('ws disconnect');
       $scope.StsTxt = 'Disconnecting...';
-	  WebSocketService.disconnect();
+      WebSocketService.disconnect();
     } else {
       serviceLog.putlog('ws cmd not applicable');
     }
@@ -165,7 +211,7 @@ angular.module('app.controllers', [])
       var payload = JSON.stringify(settings);
       // console.log(settings);
       serviceLog.putlog(payload);
-      WebSocketService.send(payload);          
+      WebSocketService.send(payload);
     } else {
       serviceLog.putlog('ws send not applicable');
     }
@@ -188,7 +234,7 @@ angular.module('app.controllers', [])
     var ref = new Firebase("https://ikka.firebaseIO.com/");
 
     // init Firebase: sensor
-    for (i=0;i<len;i++) {
+    for (i = 0; i < len; i++) {
       var sensor_ref = ref.child('sensor/' + i.toString());
       sensor_ref.set({
         name: "pir",
@@ -200,9 +246,10 @@ angular.module('app.controllers', [])
     // init Firebase: control
     var control_ref = ref.child('control');
     control_ref.set({
-      reboot: false,
       alarm: false,
       heap: false,
+      monitor: false,
+      reboot: false,
       scheduler: 10
     });
     // init Firebase: status
@@ -216,29 +263,29 @@ angular.module('app.controllers', [])
       fire: false,
       flood: false,
       heap: 0
-   });
+    });
   };
 
   // Triggered on a button click, or some other target
   $scope.showPopup = function() {
 
-  var PopupTemplate =
-    '<form class="list">' +
-    '<label class="item item-input"> <input type="text" placeholder="access point ssid" name="ssid" ng-model="settings.ssid"></label>' +
-    '<label class="item item-input"> <input type="text" placeholder="access point password" name="password" ng-model="settings.password"> </label>' +
-    '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase"> </label>' +
-    '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
-    '</form>';
+    var PopupTemplate =
+      '<form class="list">' +
+      '<label class="item item-input"> <input type="text" placeholder="access point ssid" name="ssid" ng-model="settings.ssid"></label>' +
+      '<label class="item item-input"> <input type="text" placeholder="access point password" name="password" ng-model="settings.password"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
+      '</form>';
 
-  // An elaborate, custom popup
-  var myPopup = $ionicPopup.show({
-    template: PopupTemplate,
-    title: 'Enter Wi-Fi Password',
-    subTitle: 'make sure your device is connected to Node WiFi AP',
-    scope: $scope,
-    buttons: [
-      { text: 'Cancel' },
-      {
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      template: PopupTemplate,
+      title: 'Enter Wi-Fi Password',
+      subTitle: 'make sure your device is connected to Node WiFi AP',
+      scope: $scope,
+      buttons: [{
+        text: 'Cancel'
+      }, {
         text: '<b>Save</b>',
         type: 'button-positive',
         onTap: function(e) {
@@ -250,51 +297,49 @@ angular.module('app.controllers', [])
             return $scope.settings;
           }
         }
-      }
-    ]
-  });
+      }]
+    });
 
-  myPopup.then(function(res) {
-    console.log('Tapped!', $scope.settings);
-  });
+    myPopup.then(function(res) {
+      console.log('Tapped!', $scope.settings);
+    });
 
-  $timeout(function() {
-     myPopup.close(); //close the popup after 3 seconds for some reason
-  }, 30000);
- };
+    $timeout(function() {
+      myPopup.close(); //close the popup after 3 seconds for some reason
+    }, 30000);
+  };
 
- // A confirm dialog
- $scope.showConfirm = function(message) {
-   var confirmPopup = $ionicPopup.confirm({
-     title: 'Radio message ' + message + ' has found',
-     template: 'Are you sure you want to save?'
-   });
+  // A confirm dialog
+  $scope.showConfirm = function(message) {
+    var confirmPopup = $ionicPopup.confirm({
+      title: 'Radio message ' + message + ' has found',
+      template: 'Are you sure you want to save?'
+    });
 
-  confirmPopup.then(function(res) {
-    if(res) {
-      var obj = JSON.parse(message);
-      console.log('RadioCode ' + obj.sensor);
-      if (obj.sensor != null) {
-        console.log('RadioCode OK');
-        $scope.RadioCode.push(obj.sensor);
-        $scope.RadioListText += obj.sensor + '\n';
-      }
-    } else {
-    }
-   });
- };
+    confirmPopup.then(function(res) {
+      if (res) {
+        var obj = JSON.parse(message);
+        console.log('RadioCode ' + obj.sensor);
+        if (obj.sensor != null) {
+          console.log('RadioCode OK');
+          $scope.RadioCode.push(obj.sensor);
+          $scope.RadioListText += obj.sensor + '\n';
+        }
+      } else {}
+    });
+  };
 
- // An alert dialog
- $scope.showAlert = function() {
-   var alertPopup = $ionicPopup.alert({
-     title: 'Don\'t eat that!',
-     template: 'It might taste good'
-   });
+  // An alert dialog
+  $scope.showAlert = function() {
+    var alertPopup = $ionicPopup.alert({
+      title: 'Don\'t eat that!',
+      template: 'It might taste good'
+    });
 
-   alertPopup.then(function(res) {
-     console.log('Thank you for not eating my delicious ice cream cone');
-   });
- };
+    alertPopup.then(function(res) {
+      console.log('Thank you for not eating my delicious ice cream cone');
+    });
+  };
 })
 
 .controller('loggerCtrl', function($scope, serviceLog) {
@@ -304,7 +349,7 @@ angular.module('app.controllers', [])
   $scope.doRefresh = function() {
     console.log('doRefresh');
     $scope.logsText = serviceLog.getlog();
-	// $scope.$broadcast("scroll.refreshComplete");
+    // $scope.$broadcast("scroll.refreshComplete");
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
 })
