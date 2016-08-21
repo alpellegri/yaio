@@ -238,7 +238,7 @@ void setup_sta_mode()
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     delay(100);
-    WiFi.mode(WIFI_AP_STA);
+    WiFi.mode(WIFI_STA);
 
     Serial.printf("sta_ssid: %s\n", sta_ssid);
     Serial.printf("sta_password: %s\n", sta_password);
@@ -464,6 +464,10 @@ void task(void)
           Serial.println(Firebase.error());
         }
       }
+      else
+      {
+        Serial.print("monitoring suspended\n");
+      }
     }
 
     if (trig_push == true)
@@ -472,6 +476,10 @@ void task(void)
       FcmSendPush();
     }
     FcmService();
+  }
+  else
+  {
+    Serial.print("WiFi.status != WL_CONNECTED\n");
   }
 }
 

@@ -87,21 +87,21 @@ void FcmService(void)
 {
   int in;
 
-    Serial.printf("http_sts: %d\n", http_sts);
+    // Serial.printf("http_sts: %d\n", http_sts);
     if (http_sts == 0)
     {
-          int retVal = client.connect(destServer, 80);
-          if (retVal == -1) {
-            Serial.println("Time out");
-            http_sts = 4;
-          } else if (retVal == -3) {
-            Serial.println("Fail connection");
-            http_sts = 4;
-          } else if (retVal == 1) {
-            Serial.println("Connected with server!");
-            http_sts = 1;
-          }
-          Serial.printf("retVal: %d\n", retVal);
+      int retVal = client.connect(destServer, 80);
+      if (retVal == -1) {
+        Serial.println("Time out");
+        http_sts = 4;
+      } else if (retVal == -3) {
+        Serial.println("Fail connection");
+        http_sts = 4;
+      } else if (retVal == 1) {
+        Serial.println("Connected with server!");
+        http_sts = 1;
+      }
+      Serial.printf("retVal: %d\n", retVal);
     }
     else if (http_sts == 1)
     {
