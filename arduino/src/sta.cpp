@@ -42,7 +42,6 @@ bool STA_Setup(void)
   Serial.printf("connecting mode STA\n");
   Serial.printf("Configuration parameters:\n");
   sts = EE_LoadData();
-  sts = EE_LoadData();
   if (sts == true)
   {
     WiFi.mode(WIFI_STA);

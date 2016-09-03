@@ -14,7 +14,7 @@
 
 Ticker flipper;
 
-int mode = 1;
+int mode;
 int flip_mode = 1;
 int count = 0;
 
