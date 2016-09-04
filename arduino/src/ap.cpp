@@ -21,7 +21,8 @@
 const char* ap_ssid		 = "esp8266";
 const char* ap_password = "123456789";
 
-int cnt = 0;
+int ap_loop_cnt;
+int ap_task_cnt;
 bool enable_WiFi_Scan = false;
 int ap_button = 0x55;
 
@@ -75,6 +76,8 @@ bool AP_Setup(void)
 	bool ret = true;
 	bool sts = false;
 
+  ap_loop_cnt = 0;
+  ap_task_cnt = 0;
 	digitalWrite(LED, false);
 
 	// static ip for AP mode
@@ -111,7 +114,7 @@ bool AP_Loop(void)
 	int in;
 	char c_str[25] = "";
 
-	cnt++;
+	ap_loop_cnt++;
 
 	in = digitalRead(BUTTON);
 	if (in != ap_button)
@@ -123,12 +126,12 @@ bool AP_Loop(void)
 			if (port_id != 0xFF)
 			{
 				Serial.printf(">");
-				sprintf(c_str, "{\"sensor\":\"%06X\"}", cnt&0xFFFFFF);
+				sprintf(c_str, "{\"sensor\":\"%06X\"}", ap_loop_cnt&0xFFFFFF);
 				// "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
 				webSocket.sendTXT(port_id, c_str);
 			}
 		}
-		Serial.printf("cnt: %08X, button %d\n", cnt, ap_button);
+		Serial.printf("cnt: %08X, button %d\n", ap_loop_cnt, ap_button);
 	}
 	/* websocket only in mode 0 */
 	webSocket.loop();
@@ -142,27 +145,31 @@ bool AP_Task(void)
 
 	if (enable_WiFi_Scan == true)
 	{
-		int n = WiFi.scanNetworks();
-		Serial.println("scan done");
-		if (n == 0)
-		{
-			Serial.println("no networks found");
-		}
-		else
-		{
-			char *sta_ssid = EE_GetSSID();
+    if (ap_task_cnt-- == 0)
+    {
+      ap_task_cnt = 10;
+		  int n = WiFi.scanNetworks();
+		  Serial.println("scan done");
+		  if (n == 0)
+		  {
+		  	Serial.println("no networks found");
+		  }
+		  else
+		  {
+		  	char *sta_ssid = EE_GetSSID();
 
-			for (int i = 0; i < n; ++i)
-			{
-				yield();
-				int test = WiFi.SSID(i).compareTo(String(sta_ssid));
-				if (test == 0)
-				{
-					Serial.print("network found: ");
-					Serial.println(WiFi.SSID(i));
-					ret = false;
-				}
-			}
+		  	for (int i = 0; i < n; ++i)
+		  	{
+		  		yield();
+		  		int test = WiFi.SSID(i).compareTo(String(sta_ssid));
+		  		if (test == 0)
+		  		{
+		  			Serial.print("network found: ");
+		  			Serial.println(WiFi.SSID(i));
+		  			ret = false;
+		  		}
+		  	}
+      }
 		}
 	}
 

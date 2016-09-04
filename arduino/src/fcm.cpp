@@ -2,7 +2,7 @@
 #include <FirebaseArduino.h>
 #include <ESP8266HTTPClient.h>
 
-static const String AUTH = "AIzaSyBFPb3Y4ucSQn2lxhcwsQ0Di2jV0GqeTkY";
+static const String AUTH = "AIza***********************************";
 static char FcmServer[50] = "fcm.googleapis.com";
 static char TimeServer[50] = "google.com";
 

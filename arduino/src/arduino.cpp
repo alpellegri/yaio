@@ -121,8 +121,8 @@ void loop() {
       ret = AP_Task();
       if (ret == false)
       {
-        mode = 1;
-        STA_Setup();
+        /* try to setup STA */
+        mode = STA_Setup();
       }
     }
     else if (mode == 1)

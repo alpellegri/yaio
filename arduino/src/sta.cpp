@@ -19,7 +19,7 @@
 bool trig_push = false;
 bool boot = false;
 bool status_alarm = false;
-int task_cnt = 0;
+int sta_task_cnt;
 int heap_size = 0;
 int status_heap = 0;
 int sta_button = 0x55;
@@ -35,6 +35,7 @@ bool STA_Setup(void)
   char *firebase_secret = NULL;
 
   digitalWrite(LED, true);
+  sta_task_cnt = 0;
 
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
@@ -97,8 +98,8 @@ bool STA_Task(void)
   bool ret = true;
   int in;
 
-  task_cnt++;
-  Serial.printf("task_cnt: %d\n", task_cnt);
+  sta_task_cnt++;
+  Serial.printf("task_cnt: %d\n", sta_task_cnt);
 
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -215,7 +216,7 @@ bool STA_Task(void)
           }
         }
 
-        Firebase.setInt("status/upcnt", task_cnt);
+        Firebase.setInt("status/upcnt", sta_task_cnt);
         if (Firebase.failed())
         {
           Serial.print("set failed: status/upcnt");
