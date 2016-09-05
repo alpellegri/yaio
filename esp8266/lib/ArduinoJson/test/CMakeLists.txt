@@ -1,6 +1,6 @@
 # Copyright Benoit Blanchon 2014-2016
 # MIT License
-# 
+#
 # Arduino JSON library
 # https://github.com/bblanchon/ArduinoJson
 # If you like this project, please add a star!
@@ -25,7 +25,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 		-Wformat=2
 		-Winit-self
 		-Wmissing-include-dirs
-		-Wno-parentheses
+		-Wparentheses
 		-Wno-sign-conversion
 		-Wno-unused
 		-Wno-variadic-macros

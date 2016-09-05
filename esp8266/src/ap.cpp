@@ -133,6 +133,7 @@ bool AP_Loop(void)
 		}
 		Serial.printf("cnt: %08X, button %d\n", ap_loop_cnt, ap_button);
 	}
+
 	/* websocket only in mode 0 */
 	webSocket.loop();
 }
