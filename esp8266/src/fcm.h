@@ -1,9 +1,15 @@
 #ifndef FCM_H
 #define FCM_H
 
-void FcmService(void);
-void FcmSendPush(void);
+#include <Arduino.h>
 
-void TimeService(void);
+extern String FCM_AUTH;
+extern char FcmServer[50];
+extern char TimeServer[50];
+
+extern void FcmService(void);
+extern void FcmSendPush(void);
+
+extern void TimeService(void);
 
 #endif

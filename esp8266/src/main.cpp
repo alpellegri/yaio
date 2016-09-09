@@ -6,11 +6,11 @@
 #include <string.h>
 
 #include "ap.h"
-#include "sta.h"
 #include "ee.h"
+#include "sta.h"
 
-#define LED     D0 // Led in NodeMCU at pin GPIO16 (D0).
-#define BUTTON  D3 // flash button at pin GPIO00 (D3)
+#define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
+#define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 Ticker flipper;
 
@@ -22,48 +22,34 @@ int status_scheduler = 10;
 int scheduler_cnt = 0;
 bool scheduler_flag = false;
 
-void setflip_mode(int mode)
-{
-  flip_mode = mode;
-}
+void setflip_mode(int mode) { flip_mode = mode; }
 
-void flip(void)
-{
+void flip(void) {
   int trig;
 
-  if (flip_mode == 0)
-  {
-    trig = (flip_mode == 0)?(1):(5);
-    if (count >= trig)
-    {
+  if (flip_mode == 0) {
+    trig = (flip_mode == 0) ? (1) : (5);
+    if (count >= trig) {
       int state = digitalRead(LED);
       digitalWrite(LED, !state); // set pin to the opposite state
       count = 0;
     }
-  }
-  else if (flip_mode == 2)
-  {
+  } else if (flip_mode == 2) {
     digitalWrite(LED, 0);
-  }
-  else
-  {
+  } else {
   }
   count++;
 
   /* scheduler */
-  if (scheduler_cnt < status_scheduler)
-  {
+  if (scheduler_cnt < status_scheduler) {
     scheduler_cnt++;
-  }
-  else
-  {
+  } else {
     scheduler_cnt = 0;
     scheduler_flag = 1;
   }
 }
 
-void setup()
-{
+void setup() {
   bool ret;
 
   pinMode(LED, OUTPUT);
@@ -78,21 +64,15 @@ void setup()
   Serial.println("Starting");
 
   mode = 0;
-  if (mode == 0)
-  {
+  if (mode == 0) {
     ret = AP_Setup();
-  }
-  else if (mode == 1)
-  {
+  } else if (mode == 1) {
     ret = STA_Setup();
-    if (ret == false)
-    {
+    if (ret == false) {
       mode = 0;
       AP_Setup();
     }
-  }
-  else
-  {
+  } else {
   }
 }
 
@@ -101,41 +81,28 @@ void loop() {
   // Serial.printf("loop %x\n", cnt);
   // Serial.printf("heap: %d\n\n", ESP.getFreeHeap());
 
-  if (mode == 0)
-  {
+  if (mode == 0) {
     AP_Loop();
-  }
-  else if (mode == 1)
-  {
+  } else if (mode == 1) {
     STA_Loop();
-  }
-  else
-  {
+  } else {
   }
 
-  if (scheduler_flag == true)
-  {
+  if (scheduler_flag == true) {
     scheduler_flag = false;
-    if (mode == 0)
-    {
+    if (mode == 0) {
       ret = AP_Task();
-      if (ret == false)
-      {
+      if (ret == false) {
         /* try to setup STA */
         mode = STA_Setup();
       }
-    }
-    else if (mode == 1)
-    {
+    } else if (mode == 1) {
       ret = STA_Task();
-      if (ret == false)
-      {
+      if (ret == false) {
         mode = 0;
         AP_Setup();
       }
-    }
-    else
-    {
+    } else {
     }
   }
 }
