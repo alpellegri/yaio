@@ -22,7 +22,7 @@ angular.module('app.controllers', [])
   });
 
   $scope.pushCtrl0Change = function() {
-    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    var ref = firebase.database().ref("control");
     serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
     if ($scope.pushCtrl0.checked) {
       ref.update({
@@ -36,7 +36,7 @@ angular.module('app.controllers', [])
   };
 
   $scope.pushCtrl0Change2 = function() {
-    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    var ref = firebase.database().ref("control");
     serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
     if ($scope.status.alarm == true) {
       ref.update({
@@ -50,7 +50,7 @@ angular.module('app.controllers', [])
   };
 
   $scope.pushCtrl1Change = function() {
-    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    var ref = firebase.database().ref("control");
     serviceLog.putlog('heap control ' + $scope.pushCtrl1.checked);
     if ($scope.pushCtrl1.checked) {
       ref.update({
@@ -64,7 +64,7 @@ angular.module('app.controllers', [])
   };
 
   $scope.pushCtrl2Change = function() {
-    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    var ref = firebase.database().ref("control");
     serviceLog.putlog('reboot control ' + $scope.pushCtrl2.checked);
     if ($scope.pushCtrl2.checked) {
       ref.update({
@@ -78,7 +78,7 @@ angular.module('app.controllers', [])
   };
 
   $scope.pushCtrl3Change = function() {
-    var ref = new Firebase("https://ikka.firebaseIO.com/control");
+    var ref = firebase.database().ref("control");
     serviceLog.putlog('monitor control ' + $scope.pushCtrl3.checked);
     if ($scope.pushCtrl3.checked) {
       ref.update({
@@ -93,9 +93,9 @@ angular.module('app.controllers', [])
 
   $scope.doRefresh = function() {
     serviceLog.putlog('refresh home');
-    var ref = new Firebase("https://ikka.firebaseIO.com/");
+    var ref = firebase.database().ref("/");
     // Attach an asynchronous callback to read the data at our posts reference
-    ref.on("value", function(snapshot) {
+    ref.on('value', function(snapshot) {
       var payload = snapshot.val();
       var control_alarm = payload.control.alarm;
       if (control_alarm == true) {
@@ -231,7 +231,7 @@ angular.module('app.controllers', [])
 
   $scope.SetupInitFirebase = function() {
     var len = $scope.RadioCode.length;
-    var ref = new Firebase("https://ikka.firebaseIO.com/");
+    var ref = FBdb.database();
 
     // init Firebase: sensor
     for (i = 0; i < len; i++) {

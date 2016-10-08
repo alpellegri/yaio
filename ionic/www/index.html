@@ -16,11 +16,21 @@
     <link href="css/ionic.app.css" rel="stylesheet">
     -->
 
-  <!-- Firebase -->
-  <script src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
-
-  <!-- AngularFire -->
-  <script src="https://cdn.firebase.com/libs/angularfire/2.0.1/angularfire.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBqJWOLi2b0SQJ51Ug0U6hKF5lDBVkRCIQ",
+        authDomain: "ikka.firebaseapp.com",
+        databaseURL: "https://ikka.firebaseio.com",
+        storageBucket: "project-7110587599444694745.appspot.com",
+        messagingSenderId: "110645288431"
+      };
+      firebase.initializeApp(config);
+    </script>
+    <!-- AngularFire -->
+    <script src="https://cdn.firebase.com/libs/angularfire/2.0.2/angularfire.min.js"></script>
 
   <style type="text/css">
     .platform-ios .manual-ios-statusbar-padding {
