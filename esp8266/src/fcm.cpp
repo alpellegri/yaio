@@ -1,7 +1,8 @@
+#include "ee.h"
+#include "fcm.h"
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <FirebaseArduino.h>
-#include "fcm.h"
 
 WiFiClient fcm_client;
 WiFiClient time_client;
@@ -39,6 +40,7 @@ void FcmSendPush(void) {
 static String FcmPostMsg(void) {
   int i;
   String fcm_host = String(FcmServer);
+  String fcm_server_key = String(EE_GetFirebaseServerKey());
 
   // json data: the notification message multiple devices
   String json = "";
@@ -48,8 +50,6 @@ static String FcmPostMsg(void) {
   json += "\"body\":\"Alert!\",";
   json += "\"sound\":\"default\"";
   json += "},";
-  // json +=		"\"registration_ids\":[\"" + REG_ID_0 + "\",\"" + REG_ID_1 +
-  // "\"]";
   json += "\"registration_ids\":[";
   for (i = 0; i < RegIDsLen - 1; i++) {
     json += "\"" + RegIDs[i] + "\",";
@@ -65,7 +65,7 @@ static String FcmPostMsg(void) {
   http += "Accept: */";
   http += "*\r\n";
   http += "Content-Type:application/json\r\n";
-  http += "Authorization:key=" + FCM_AUTH + "\r\n";
+  http += "Authorization:key=" + fcm_server_key + "\r\n";
   http += "Content-Length: ";
   http += String(json.length());
   http += "\r\n\r\n";

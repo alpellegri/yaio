@@ -81,12 +81,31 @@ bool STA_Setup(void) {
   return ret;
 }
 
-void STA_Loop() {}
+void STA_Loop() {
+  int in = digitalRead(BUTTON);
+
+  if (in != sta_button) {
+    sta_button = in;
+    // Firebase.setBool("status/button", sta_button);
+    // if (Firebase.failed()) {
+    //   Serial.print("set failed: status/button");
+    //   Serial.println(Firebase.error());
+    // }
+    if ((status_alarm == true) && (in == false)) {
+      trig_push = true;
+    }
+    // if (in == false) {
+    //   char payload[11] = "reset";
+    //   int len = strlen(payload);
+    //   Serial.println("reset eeprom");
+    //   EE_StoreData((uint8_t *)payload, len);
+    // }
+  }
+}
 
 /* main function task */
 bool STA_Task(void) {
   bool ret = true;
-  int in;
 
   sta_task_cnt++;
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
@@ -160,19 +179,6 @@ bool STA_Task(void) {
               Serial.print("set failed: status/heap");
               Serial.println(Firebase.error());
             }
-          }
-        }
-
-        in = digitalRead(BUTTON);
-        if (in != sta_button) {
-          sta_button = in;
-          Firebase.setBool("status/button", sta_button);
-          if (Firebase.failed()) {
-            Serial.print("set failed: status/button");
-            Serial.println(Firebase.error());
-          }
-          if ((status_alarm == true) && (in == false)) {
-            trig_push = true;
           }
         }
 
