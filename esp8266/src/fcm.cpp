@@ -1,8 +1,8 @@
+#include "ee.h"
+#include "fcm.h"
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <FirebaseArduino.h>
-#include "fcm.h"
-#include "ee.h"
 
 WiFiClient fcm_client;
 WiFiClient time_client;
@@ -50,8 +50,6 @@ static String FcmPostMsg(void) {
   json += "\"body\":\"Alert!\",";
   json += "\"sound\":\"default\"";
   json += "},";
-  // json +=		"\"registration_ids\":[\"" + REG_ID_0 + "\",\"" + REG_ID_1 +
-  // "\"]";
   json += "\"registration_ids\":[";
   for (i = 0; i < RegIDsLen - 1; i++) {
     json += "\"" + RegIDs[i] + "\",";
