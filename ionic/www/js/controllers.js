@@ -149,8 +149,9 @@ angular.module('app.controllers', [])
     $scope.settings.text =
       'Node WiFi SSID: ' + $scope.settings.ssid + '\n' +
       'Node WiFi PASSWORD: ' + $scope.settings.password + '\n' +
-      'Firebase URL: ' + $scope.settings.password + '\n' +
-      'Firebase Secret: ' + $scope.settings.password + '\n';
+      'Firebase URL: ' + $scope.settings.firebase_url + '\n' +
+      'Firebase Secret: ' + $scope.settings.secret + '\n' +
+      'Firebase Server Key: ' + $scope.settings.server_key + '\n';
   }
 
   WebSocketService.subscribe(
@@ -231,7 +232,7 @@ angular.module('app.controllers', [])
 
   $scope.SetupInitFirebase = function() {
     var len = $scope.RadioCode.length;
-    var ref = FBdb.database();
+    var ref = firebase.database().ref("/");
 
     // init Firebase: sensor
     for (i = 0; i < len; i++) {
@@ -273,8 +274,9 @@ angular.module('app.controllers', [])
       '<form class="list">' +
       '<label class="item item-input"> <input type="text" placeholder="access point ssid" name="ssid" ng-model="settings.ssid"></label>' +
       '<label class="item item-input"> <input type="text" placeholder="access point password" name="password" ng-model="settings.password"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase" ng-model="settings.firebase"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase_url" ng-model="settings.firebase_url"> </label>' +
       '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase server key" name="server_key" ng-model="settings.server_key"> </label>' +
       '</form>';
 
     // An elaborate, custom popup
@@ -289,7 +291,8 @@ angular.module('app.controllers', [])
         text: '<b>Save</b>',
         type: 'button-positive',
         onTap: function(e) {
-          if (!$scope.settings.ssid || !$scope.settings.password || !$scope.settings.firebase || !$scope.settings.secret) {
+          if (!$scope.settings.ssid || !$scope.settings.password || !$scope.settings.firebase_url ||
+            !$scope.settings.secret || !$scope.settings.server_key) {
             //don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
