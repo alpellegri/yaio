@@ -71,8 +71,8 @@ angular.module('app.services', [])
 .factory('PushService', function($ionicPlatform, $rootScope, $http, $cordovaPushV5) {
   var service = {};
 
+  console.log('services');
   $ionicPlatform.ready(function() {
-
     service.init = function() {
 
       var options = {
@@ -106,7 +106,7 @@ angular.module('app.services', [])
               localStorage.setItem('registrationId', token);
               console.log('store registrationId to firebase DB');
               // Post registrationId to your app server as the value has changed
-              var ref = new Firebase("https://ikka.firebaseIO.com");
+              var ref = firebase.database().ref("/");
               var FCM_Registration_IDs_ref = ref.child('FCM_Registration_IDs');
               FCM_Registration_IDs_ref.push(token);
             }
