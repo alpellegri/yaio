@@ -1,0 +1,34 @@
+{
+    "version": "1.1.0", 
+    "repository": {
+        "url": "https://github.com/adafruit/Adafruit_SSD1306.git", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelavr"
+    ], 
+    "description": "SSD1306 oled driver library for 'monochrome' 128x64 and 128x32 OLEDs", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "dependencies": {
+        "frameworks": "arduino", 
+        "name": "Adafruit GFX Library"
+    }, 
+    "authors": [
+        {
+            "maintainer": false, 
+            "name": "Adafruit Industries", 
+            "url": "https://github.com/adafruit", 
+            "email": null
+        }
+    ], 
+    "keywords": [
+        "oled", 
+        "led", 
+        "display", 
+        "graphics"
+    ], 
+    "id": 135, 
+    "name": "Adafruit SSD1306"
+}
