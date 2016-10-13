@@ -1,6 +1,10 @@
 #include <Arduino.h>
-
 #include <Ticker.h>
+
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -11,6 +15,9 @@
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
+
+#define OLED_RESET LED_BUILTIN  //4
+Adafruit_SSD1306 display(OLED_RESET);
 
 Ticker flipper;
 
@@ -62,6 +69,20 @@ void setup() {
 
   Serial.println();
   Serial.println("Starting");
+
+  // init oled display
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  // Clear the buffer.
+  display.clearDisplay();
+  display.display();
+
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println("WIFI mode");
+  display.setTextSize(2);
+  display.println("AP");
+  display.display();
 
   mode = 0;
   if (mode == 0) {
