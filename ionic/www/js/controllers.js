@@ -308,8 +308,8 @@ angular.module('app.controllers', [])
     });
 
     $timeout(function() {
-      myPopup.close(); //close the popup after 3 seconds for some reason
-    }, 30000);
+      myPopup.close(); //close the popup after 9 seconds for some reason
+    }, 90000);
   };
 
   // A confirm dialog

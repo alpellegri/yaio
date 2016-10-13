@@ -16,7 +16,7 @@
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define DHTPIN 2
+#define DHTPIN D6
 #define DHTTYPE DHT22
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -112,8 +112,9 @@ void STA_Loop() {
 bool STA_Task(void) {
   bool ret = true;
 
-  int humidity_data = (int)dht.readHumidity();
-  int temperature_data = (int)dht.readTemperature();
+  int humidity_data = dht.readHumidity();
+  int temperature_data = dht.readTemperature();
+  // Serial.printf("t: %d, h: %d\n", temperature_data, humidity_data);
 
   sta_task_cnt++;
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
@@ -193,6 +194,18 @@ bool STA_Task(void) {
         Firebase.setInt("status/upcnt", sta_task_cnt);
         if (Firebase.failed()) {
           Serial.print("set failed: status/upcnt");
+          Serial.println(Firebase.error());
+        }
+
+        Firebase.setInt("status/temperature", temperature_data);
+        if (Firebase.failed()) {
+          Serial.print("set failed: status/temperature");
+          Serial.println(Firebase.error());
+        }
+
+        Firebase.setInt("status/humidity", humidity_data);
+        if (Firebase.failed()) {
+          Serial.print("set failed: status/humidity");
           Serial.println(Firebase.error());
         }
       } else {
