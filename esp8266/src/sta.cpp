@@ -3,8 +3,8 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#include <ArduinoJson.h>
 #include <FirebaseArduino.h>
+#include <DHT.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -15,6 +15,11 @@
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
+
+#define DHTPIN 2
+#define DHTTYPE DHT22
+
+DHT dht(DHTPIN, DHTTYPE);
 
 bool trig_push = false;
 bool boot = false;
@@ -106,6 +111,9 @@ void STA_Loop() {
 /* main function task */
 bool STA_Task(void) {
   bool ret = true;
+
+  int humidity_data = (int)dht.readHumidity();
+  int temperature_data = (int)dht.readTemperature();
 
   sta_task_cnt++;
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
