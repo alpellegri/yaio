@@ -1,6 +1,6 @@
 // Ionic Starter App
 
-angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.services', 'app.directives', 'ngCordova'])
+angular.module('app', ['ionic', 'zingchart-angularjs', 'app.controllers', 'app.routes', 'app.services', 'app.directives', 'ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

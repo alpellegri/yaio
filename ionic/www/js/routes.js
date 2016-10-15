@@ -28,8 +28,18 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('menu.logger', {
+  .state('menu.chart', {
     url: '/page3',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/chart.html',
+        controller: 'chartCtrl'
+      }
+    }
+  })
+
+  .state('menu.logger', {
+    url: '/page4',
     views: {
       'side-menu21': {
         templateUrl: 'templates/logger.html',

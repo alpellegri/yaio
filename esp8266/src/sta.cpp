@@ -208,6 +208,18 @@ bool STA_Task(void) {
           Serial.print("set failed: status/humidity");
           Serial.println(Firebase.error());
         }
+
+        Firebase.pushInt("logs/temperature", temperature_data);
+        if (Firebase.failed()) {
+          Serial.print("push failed: logs/temperature");
+          Serial.println(Firebase.error());
+        }
+
+        Firebase.pushInt("logs/humidity", humidity_data);
+        if (Firebase.failed()) {
+          Serial.print("push failed: logs/humidity");
+          Serial.println(Firebase.error());
+        }
       } else {
         Serial.print("monitoring suspended\n");
       }
