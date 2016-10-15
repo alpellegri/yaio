@@ -17,6 +17,7 @@ angular.module('app.controllers', [])
   };
   $scope.status = {};
 
+  // wait for device ready (cordova) before initialize push service
   $ionicPlatform.ready(function() {
     PushService.init();
   });
@@ -308,8 +309,8 @@ angular.module('app.controllers', [])
     });
 
     $timeout(function() {
-      myPopup.close(); //close the popup after 3 seconds for some reason
-    }, 30000);
+      myPopup.close(); //close the popup after 9 seconds for some reason
+    }, 90000);
   };
 
   // A confirm dialog
@@ -343,6 +344,36 @@ angular.module('app.controllers', [])
       console.log('Thank you for not eating my delicious ice cream cone');
     });
   };
+})
+
+.controller("chartCtrl", function($scope) {
+  console.log('chartCtrl');
+
+  $scope.myJson = {
+    type : 'line' ,
+    "plot":{
+      "aspect":"spline"
+    },
+    series : [
+      { values : [ ] },
+      { values : [ ] }
+    ]
+  };
+
+  var Ref = firebase.database().ref('logs/temperature').limitToLast(100);
+  Ref.once('value', function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+      $scope.myJson.series[0].values.push(childSnapshot.val());
+    });
+  });
+  var Ref = firebase.database().ref('logs/humidity').limitToLast(100);
+  Ref.once('value', function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+      $scope.myJson.series[1].values.push(childSnapshot.val());
+    });
+  });
+
+// console.log(temperatureRef);
 })
 
 .controller('loggerCtrl', function($scope, serviceLog) {

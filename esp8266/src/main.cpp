@@ -3,7 +3,7 @@
 
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
+// #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 #define OLED_RESET LED_BUILTIN  //4
+
 Adafruit_SSD1306 display(OLED_RESET);
 
 Ticker flipper;
@@ -25,7 +26,7 @@ int mode;
 int flip_mode = 1;
 int count = 0;
 
-int status_scheduler = 10;
+int status_scheduler = 50;
 int scheduler_cnt = 0;
 bool scheduler_flag = false;
 
