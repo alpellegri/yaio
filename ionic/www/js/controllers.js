@@ -124,11 +124,10 @@ angular.module('app.controllers', [])
       }
 
       $scope.status = payload.status;
-
-      $scope.$broadcast('scroll.refreshComplete');
     }, function(errorObject) {
       serviceLog.putlog("firebase failed: " + errorObject.code);
     });
+    $scope.$broadcast('scroll.refreshComplete');
   };
 })
 
@@ -350,30 +349,36 @@ angular.module('app.controllers', [])
   console.log('chartCtrl');
 
   $scope.myJson = {
-    type : 'line' ,
-    "plot":{
-      "aspect":"spline"
-    },
-    series : [
-      { values : [ ] },
-      { values : [ ] }
-    ]
+    type: 'line',
+    series: [{
+      values: []
+    }, {
+      values: []
+    }]
   };
 
-  var Ref = firebase.database().ref('logs/temperature').limitToLast(100);
-  Ref.once('value', function(snapshot) {
-    snapshot.forEach(function(childSnapshot) {
-      $scope.myJson.series[0].values.push(childSnapshot.val());
-    });
-  });
-  var Ref = firebase.database().ref('logs/humidity').limitToLast(100);
-  Ref.once('value', function(snapshot) {
-    snapshot.forEach(function(childSnapshot) {
-      $scope.myJson.series[1].values.push(childSnapshot.val());
-    });
-  });
+  $scope.doRefresh = function() {
+    console.log('doRefresh');
 
-// console.log(temperatureRef);
+    $scope.myJson.series[0].values = [];
+    $scope.myJson.series[1].values = [];
+    var Ref = firebase.database().ref('logs/temperature').limitToLast(3600);
+    Ref.once('value', function(snapshot) {
+      snapshot.forEach(function(childSnapshot) {
+        $scope.myJson.series[0].values.push(childSnapshot.val());
+      });
+    });
+
+    var Ref = firebase.database().ref('logs/humidity').limitToLast(3600);
+    Ref.once('value', function(snapshot) {
+      snapshot.forEach(function(childSnapshot) {
+        $scope.myJson.series[1].values.push(childSnapshot.val());
+      });
+    });
+
+    // $scope.$broadcast("scroll.infiniteScrollComplete");
+    $scope.$broadcast('scroll.refreshComplete');
+  };
 })
 
 .controller('loggerCtrl', function($scope, serviceLog) {

@@ -1,7 +1,6 @@
 <ion-view title="Home" id="page1">
   <ion-content padding="true" scroll="true" class="has-header">
-    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()">
-    </ion-refresher>
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
     <form class="list">
       <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
         Enable Alarm

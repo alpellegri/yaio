@@ -3,8 +3,8 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#include <FirebaseArduino.h>
 #include <DHT.h>
+#include <FirebaseArduino.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -108,6 +108,7 @@ void STA_Loop() {
   }
 }
 
+int logcnt = 0;
 /* main function task */
 bool STA_Task(void) {
   bool ret = true;
@@ -197,28 +198,31 @@ bool STA_Task(void) {
           Serial.println(Firebase.error());
         }
 
-        Firebase.setInt("status/temperature", temperature_data);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/temperature");
-          Serial.println(Firebase.error());
-        }
+        if (++logcnt == 30) {
+          logcnt = 0;
+          Firebase.setInt("status/temperature", temperature_data);
+          if (Firebase.failed()) {
+            Serial.print("set failed: status/temperature");
+            Serial.println(Firebase.error());
+          }
 
-        Firebase.setInt("status/humidity", humidity_data);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/humidity");
-          Serial.println(Firebase.error());
-        }
+          Firebase.setInt("status/humidity", humidity_data);
+          if (Firebase.failed()) {
+            Serial.print("set failed: status/humidity");
+            Serial.println(Firebase.error());
+          }
 
-        Firebase.pushInt("logs/temperature", temperature_data);
-        if (Firebase.failed()) {
-          Serial.print("push failed: logs/temperature");
-          Serial.println(Firebase.error());
-        }
+          Firebase.pushInt("logs/temperature", temperature_data);
+          if (Firebase.failed()) {
+            Serial.print("push failed: logs/temperature");
+            Serial.println(Firebase.error());
+          }
 
-        Firebase.pushInt("logs/humidity", humidity_data);
-        if (Firebase.failed()) {
-          Serial.print("push failed: logs/humidity");
-          Serial.println(Firebase.error());
+          Firebase.pushInt("logs/humidity", humidity_data);
+          if (Firebase.failed()) {
+            Serial.print("push failed: logs/humidity");
+            Serial.println(Firebase.error());
+          }
         }
       } else {
         Serial.print("monitoring suspended\n");
