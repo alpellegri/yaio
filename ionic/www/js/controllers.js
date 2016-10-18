@@ -348,31 +348,57 @@ angular.module('app.controllers', [])
 .controller("chartCtrl", function($scope) {
   console.log('chartCtrl');
 
+  $scope.myRender = {
+    id: 'myChart',
+    data: myChart,
+    height: 300,
+    width: 500
+  };
+
   $scope.myJson = {
-    type: 'line',
-    series: [{
-      values: []
+    "graphset": [{
+      "type": 'area',
+      "height":"50%",
+      "width":"100%",
+      "scale-y": {
+        "min-value": 10,
+        "max-value": 30
+      },
+      "series": [{
+        "values": [],
+        // "line-color": "red"
+      }]
     }, {
-      values: []
+      "type": 'area',
+      "height":"50%",
+      "width":"100%",
+      "scale-y": {
+        "min-value": 50,
+        "max-value": 80
+      },
+      "series": [{
+        "values": [],
+        // "line-color": "blue"
+      }]
     }]
   };
 
   $scope.doRefresh = function() {
     console.log('doRefresh');
 
-    $scope.myJson.series[0].values = [];
-    $scope.myJson.series[1].values = [];
-    var Ref = firebase.database().ref('logs/temperature').limitToLast(3600);
+    $scope.myJson.graphset[0].series[0].values = [];
+    $scope.myJson.graphset[1].series[0].values = [];
+    var Ref = firebase.database().ref('logs/temperature').limitToLast(288);
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        $scope.myJson.series[0].values.push(childSnapshot.val());
+        $scope.myJson.graphset[0].series[0].values.push(childSnapshot.val());
       });
     });
 
-    var Ref = firebase.database().ref('logs/humidity').limitToLast(3600);
+    var Ref = firebase.database().ref('logs/humidity').limitToLast(288);
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        $scope.myJson.series[1].values.push(childSnapshot.val());
+        $scope.myJson.graphset[1].series[0].values.push(childSnapshot.val());
       });
     });
 

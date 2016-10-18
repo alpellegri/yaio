@@ -198,7 +198,6 @@ bool STA_Task(void) {
           Serial.println(Firebase.error());
         }
 
-        if (++logcnt == 30) {
           logcnt = 0;
           Firebase.setInt("status/temperature", temperature_data);
           if (Firebase.failed()) {
