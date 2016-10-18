@@ -1,6 +1,6 @@
 <ion-view title="Chart" id="page3">
   <ion-content padding="true" scroll="true" class="has-header">
     <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
-    <zingchart id="myChart" zc-json="myJson" zc-height=550 zc-width=350></zingchart>
+    <canvas id="myChart" class="chart chart-line" chart-data="myJson.data" chart-labels="myJson.labels" chart-series="myJson.series" chart-options="myJson.options" chart-dataset-override="myJson.datasetOverride" chart-click="onClick" </canvas>
   </ion-content>
 </ion-view>
