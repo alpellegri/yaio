@@ -3,33 +3,20 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#include <DHT.h>
-#include <FirebaseArduino.h>
-
 #include <stdio.h>
 #include <string.h>
 
 #include "ap.h"
 #include "ee.h"
+#include "fbm.h"
 #include "fcm.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define DHTPIN D6
-#define DHTTYPE DHT22
-
-DHT dht(DHTPIN, DHTTYPE);
-
 bool trig_push = false;
-bool boot = false;
-bool status_alarm = false;
 int sta_task_cnt;
-int heap_size = 0;
-int status_heap = 0;
 int sta_button = 0x55;
-int sta_logcnt = 0;
-int sta_monitorcnt = 0;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -37,8 +24,6 @@ bool STA_Setup(void) {
   int cnt;
   char *sta_ssid = NULL;
   char *sta_password = NULL;
-  char *firebase_url = NULL;
-  char *firebase_secret = NULL;
 
   digitalWrite(LED, true);
   sta_task_cnt = 0;
@@ -57,8 +42,6 @@ bool STA_Setup(void) {
 
     sta_ssid = EE_GetSSID();
     sta_password = EE_GetPassword();
-    firebase_url = EE_GetFirebaseUrl();
-    firebase_secret = EE_GetFirebaseSecret();
     Serial.printf("sta_ssid: %s\n", sta_ssid);
     Serial.printf("sta_password: %s\n", sta_password);
     Serial.printf("\ntrying to connect...\n");
@@ -70,10 +53,10 @@ bool STA_Setup(void) {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
+      FBM_Setup();
       Serial.println();
       Serial.print("connected: ");
       Serial.println(WiFi.localIP());
-      Firebase.begin(firebase_url);
     } else {
       sts = false;
     }
@@ -93,12 +76,7 @@ void STA_Loop() {
 
   if (in != sta_button) {
     sta_button = in;
-    // Firebase.setBool("status/button", sta_button);
-    // if (Firebase.failed()) {
-    //   Serial.print("set failed: status/button");
-    //   Serial.println(Firebase.error());
-    // }
-    if ((status_alarm == true) && (in == false)) {
+    if (in == false) {
       trig_push = true;
     }
     // if (in == false) {
@@ -114,125 +92,13 @@ void STA_Loop() {
 bool STA_Task(void) {
   bool ret = true;
 
-  int humidity_data = dht.readHumidity();
-  int temperature_data = dht.readTemperature();
   // Serial.printf("t: %d, h: %d\n", temperature_data, humidity_data);
 
   sta_task_cnt++;
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
 
   if (WiFi.status() == WL_CONNECTED) {
-    // boot counter
-    if (boot == false) {
-      Firebase.setBool("control/reboot", false);
-      if (Firebase.failed()) {
-        Serial.print("set failed: control/reboot");
-        Serial.println(Firebase.error());
-      } else {
-        int bootcnt = Firebase.getInt("status/bootcnt");
-        if (Firebase.failed()) {
-          Serial.print("get failed: status/bootcnt");
-          Serial.println(Firebase.error());
-        } else {
-          Serial.printf("status/bootcnt: %d\n", bootcnt);
-          Firebase.setInt("status/bootcnt", bootcnt + 1);
-          if (Firebase.failed()) {
-            Serial.print("set failed: status/bootcnt");
-            Serial.println(Firebase.error());
-          } else {
-            boot = 1;
-            trig_push = true;
-          }
-        }
-      }
-    }
-
-    if (boot == true) {
-      if (++sta_monitorcnt == (2 / 1)) {
-        sta_monitorcnt = 0;
-
-        bool control_monitor = Firebase.getBool("control/monitor");
-        if ((Firebase.failed() == false) && (control_monitor == true)) {
-          // get object data
-          bool control_alarm = Firebase.getBool("control/alarm");
-          if (Firebase.failed()) {
-            Serial.print("get failed: control/alarm");
-            Serial.println(Firebase.error());
-          } else {
-            if (status_alarm != control_alarm) {
-              status_alarm = control_alarm;
-              digitalWrite(LED, !(status_alarm == true));
-              Firebase.setBool("status/alarm", status_alarm);
-              if (Firebase.failed()) {
-                Serial.print("set failed: status/alarm");
-                Serial.println(Firebase.error());
-              }
-            }
-          }
-          // get object data
-          bool control_reboot = Firebase.getBool("control/reboot");
-          if (Firebase.failed()) {
-            Serial.print("get failed: control/reboot");
-            Serial.println(Firebase.error());
-          } else {
-            if (control_reboot == true) {
-              ESP.restart();
-            }
-          }
-
-          // get object data
-          bool control_heap = Firebase.getBool("control/heap");
-          if (Firebase.failed()) {
-            Serial.print("get failed: control/heap");
-            Serial.println(Firebase.error());
-          } else {
-            if (control_heap == true) {
-              status_heap = ESP.getFreeHeap();
-              Firebase.setInt("status/heap", status_heap);
-              if (Firebase.failed()) {
-                Serial.print("set failed: status/heap");
-                Serial.println(Firebase.error());
-              }
-            }
-          }
-
-          Firebase.setInt("status/upcnt", sta_task_cnt);
-          if (Firebase.failed()) {
-            Serial.print("set failed: status/upcnt");
-            Serial.println(Firebase.error());
-          }
-
-          Firebase.setInt("status/temperature", temperature_data);
-          if (Firebase.failed()) {
-            Serial.print("set failed: status/temperature");
-            Serial.println(Firebase.error());
-          }
-
-          Firebase.setInt("status/humidity", humidity_data);
-          if (Firebase.failed()) {
-            Serial.print("set failed: status/humidity");
-            Serial.println(Firebase.error());
-          }
-        }
-
-        if (++sta_logcnt == (60 * 30 / 1)) {
-          sta_logcnt = 0;
-          Firebase.pushInt("logs/temperature", temperature_data);
-          if (Firebase.failed()) {
-            Serial.print("push failed: logs/temperature");
-            Serial.println(Firebase.error());
-          }
-
-          Firebase.pushInt("logs/humidity", humidity_data);
-          if (Firebase.failed()) {
-            Serial.print("push failed: logs/humidity");
-            Serial.println(Firebase.error());
-          }
-        }
-      } else {
-        Serial.print("monitoring suspended\n");
-      }
-    }
+    trig_push |= FBM_Task();
 
     if (trig_push == true) {
       trig_push = false;

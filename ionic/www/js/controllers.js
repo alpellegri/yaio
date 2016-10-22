@@ -384,14 +384,14 @@ angular.module('app.controllers', [])
 
     $scope.myJson.data[0] = [];
     $scope.myJson.labels = [];
-    var Ref = firebase.database().ref('logs/temperature').limitToLast(48);
+    var Ref = firebase.database().ref('logs/temperature').limitToLast(96);
     var i = 0;
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
         $scope.myJson.data[0].push(childSnapshot.val());
-        if (i%2 == 0) {
-          var i2 = i/2;
-          $scope.myJson.labels.push(i2.toString());
+        if (i % 4 == 0) {
+          var ii = i / 4;
+          $scope.myJson.labels.push(ii.toString());
         } else {
           $scope.myJson.labels.push("");
         }
@@ -400,7 +400,7 @@ angular.module('app.controllers', [])
     });
 
     $scope.myJson.data[1] = [];
-    var Ref = firebase.database().ref('logs/humidity').limitToLast(48);
+    var Ref = firebase.database().ref('logs/humidity').limitToLast(96);
     var i = 0;
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
