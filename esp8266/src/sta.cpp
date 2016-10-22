@@ -28,6 +28,8 @@ int sta_task_cnt;
 int heap_size = 0;
 int status_heap = 0;
 int sta_button = 0x55;
+int sta_logcnt = 0;
+int sta_monitorcnt = 0;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -108,7 +110,6 @@ void STA_Loop() {
   }
 }
 
-int logcnt = 0;
 /* main function task */
 bool STA_Task(void) {
   bool ret = true;
@@ -147,59 +148,60 @@ bool STA_Task(void) {
     }
 
     if (boot == true) {
-      bool control_monitor = Firebase.getBool("control/monitor");
-      if ((Firebase.failed() == false) && (control_monitor == true)) {
-        // get object data
-        bool control_alarm = Firebase.getBool("control/alarm");
-        if (Firebase.failed()) {
-          Serial.print("get failed: control/alarm");
-          Serial.println(Firebase.error());
-        } else {
-          if (status_alarm != control_alarm) {
-            status_alarm = control_alarm;
-            digitalWrite(LED, !(status_alarm == true));
-            Firebase.setBool("status/alarm", status_alarm);
-            if (Firebase.failed()) {
-              Serial.print("set failed: status/alarm");
-              Serial.println(Firebase.error());
+      if (++sta_monitorcnt == (2 / 1)) {
+        sta_monitorcnt = 0;
+
+        bool control_monitor = Firebase.getBool("control/monitor");
+        if ((Firebase.failed() == false) && (control_monitor == true)) {
+          // get object data
+          bool control_alarm = Firebase.getBool("control/alarm");
+          if (Firebase.failed()) {
+            Serial.print("get failed: control/alarm");
+            Serial.println(Firebase.error());
+          } else {
+            if (status_alarm != control_alarm) {
+              status_alarm = control_alarm;
+              digitalWrite(LED, !(status_alarm == true));
+              Firebase.setBool("status/alarm", status_alarm);
+              if (Firebase.failed()) {
+                Serial.print("set failed: status/alarm");
+                Serial.println(Firebase.error());
+              }
             }
           }
-        }
-        // get object data
-        bool control_reboot = Firebase.getBool("control/reboot");
-        if (Firebase.failed()) {
-          Serial.print("get failed: control/reboot");
-          Serial.println(Firebase.error());
-        } else {
-          if (control_reboot == true) {
-            ESP.restart();
-          }
-        }
-
-        // get object data
-        bool control_heap = Firebase.getBool("control/heap");
-        if (Firebase.failed()) {
-          Serial.print("get failed: control/heap");
-          Serial.println(Firebase.error());
-        } else {
-          if (control_heap == true) {
-            status_heap = ESP.getFreeHeap();
-            Firebase.setInt("status/heap", status_heap);
-            if (Firebase.failed()) {
-              Serial.print("set failed: status/heap");
-              Serial.println(Firebase.error());
+          // get object data
+          bool control_reboot = Firebase.getBool("control/reboot");
+          if (Firebase.failed()) {
+            Serial.print("get failed: control/reboot");
+            Serial.println(Firebase.error());
+          } else {
+            if (control_reboot == true) {
+              ESP.restart();
             }
           }
-        }
 
-        Firebase.setInt("status/upcnt", sta_task_cnt);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/upcnt");
-          Serial.println(Firebase.error());
-        }
+          // get object data
+          bool control_heap = Firebase.getBool("control/heap");
+          if (Firebase.failed()) {
+            Serial.print("get failed: control/heap");
+            Serial.println(Firebase.error());
+          } else {
+            if (control_heap == true) {
+              status_heap = ESP.getFreeHeap();
+              Firebase.setInt("status/heap", status_heap);
+              if (Firebase.failed()) {
+                Serial.print("set failed: status/heap");
+                Serial.println(Firebase.error());
+              }
+            }
+          }
 
-        if (++logcnt == (60*30/5)) {
-          logcnt = 0;
+          Firebase.setInt("status/upcnt", sta_task_cnt);
+          if (Firebase.failed()) {
+            Serial.print("set failed: status/upcnt");
+            Serial.println(Firebase.error());
+          }
+
           Firebase.setInt("status/temperature", temperature_data);
           if (Firebase.failed()) {
             Serial.print("set failed: status/temperature");
@@ -211,7 +213,10 @@ bool STA_Task(void) {
             Serial.print("set failed: status/humidity");
             Serial.println(Firebase.error());
           }
+        }
 
+        if (++sta_logcnt == (60 * 30 / 1)) {
+          sta_logcnt = 0;
           Firebase.pushInt("logs/temperature", temperature_data);
           if (Firebase.failed()) {
             Serial.print("push failed: logs/temperature");

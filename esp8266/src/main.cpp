@@ -26,7 +26,8 @@ int mode;
 int flip_mode = 1;
 int count = 0;
 
-int status_scheduler = 50;
+/* schedule every 5s */
+int status_scheduler = 10;
 int scheduler_cnt = 0;
 bool scheduler_flag = false;
 
