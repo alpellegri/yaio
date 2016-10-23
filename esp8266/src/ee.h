@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-extern void EE_setup();
+extern void EE_Setup();
 extern char *EE_GetSSID();
 extern char *EE_GetPassword();
 extern char *EE_GetFirebaseUrl();

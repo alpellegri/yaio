@@ -79,12 +79,12 @@ void STA_Loop() {
     if (in == false) {
       trig_push = true;
     }
-    // if (in == false) {
-    //   char payload[11] = "reset";
-    //   int len = strlen(payload);
-    //   Serial.println("reset eeprom");
-    //   EE_StoreData((uint8_t *)payload, len);
-    // }
+    if (in == false) {
+      char payload[11] = "reset";
+      int len = strlen(payload);
+      Serial.println("reset eeprom");
+      EE_StoreData((uint8_t *)payload, len);
+    }
   }
 }
 

@@ -3,6 +3,18 @@
 angular.module('app', ['ionic', 'chart.js', 'app.controllers', 'app.routes', 'app.services', 'app.directives', 'ngCordova'])
 
 .run(function($ionicPlatform) {
+
+  var config = {
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    storageBucket: "",
+    messagingSenderId: ""
+  };
+  var fb_url = localStorage.getItem('firebase_url');
+  config.databaseURL = "https://" + fb_url;
+  firebase.initializeApp(config);
+
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)

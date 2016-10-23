@@ -12,11 +12,12 @@
 #include "ap.h"
 #include "ee.h"
 #include "sta.h"
+#include "rf.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define OLED_RESET LED_BUILTIN  //4
+#define OLED_RESET LED_BUILTIN // 4
 
 Adafruit_SSD1306 display(OLED_RESET);
 
@@ -65,13 +66,14 @@ void setup() {
   pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 
-  EE_setup();
+  EE_Setup();
 
   flipper.attach(0.1, flip);
 
   Serial.println();
   Serial.println("Starting");
 
+#if 1
   // init oled display
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   // Clear the buffer.
@@ -85,7 +87,9 @@ void setup() {
   display.setTextSize(2);
   display.println("AP");
   display.display();
+#endif
 
+#if 1
   mode = 0;
   if (mode == 0) {
     ret = AP_Setup();
@@ -97,6 +101,8 @@ void setup() {
     }
   } else {
   }
+#endif
+  // RF_Setup();
 }
 
 void loop() {
@@ -104,6 +110,8 @@ void loop() {
   // Serial.printf("loop %x\n", cnt);
   // Serial.printf("heap: %d\n\n", ESP.getFreeHeap());
 
+  RF_Loop();
+#if 1
   if (mode == 0) {
     AP_Loop();
   } else if (mode == 1) {
@@ -118,14 +126,16 @@ void loop() {
       if (ret == false) {
         /* try to setup STA */
         mode = STA_Setup();
+        // RF_Setup();
       }
     } else if (mode == 1) {
       ret = STA_Task();
       if (ret == false) {
         mode = 0;
-        AP_Setup();
+        // AP_Setup();
       }
     } else {
     }
   }
+#endif
 }

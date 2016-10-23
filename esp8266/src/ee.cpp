@@ -16,7 +16,7 @@ char firebase_url[50] = "";
 char firebase_secret[50] = "";
 char firebase_server_key[50] = "";
 
-void EE_setup() { EEPROM.begin(EE_SIZE); }
+void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
 char *EE_GetSSID() { return sta_ssid; }
 
