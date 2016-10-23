@@ -144,6 +144,7 @@ angular.module('app.controllers', [])
     $scope.settings = {};
     $scope.ComButton = 'Connect to Node';
     $scope.Text = '';
+    $scope.NodeSettingMsg = '';
     $scope.StsTxt = 'Disconnected';
     $scope.SensorNum = 0;
     $scope.RadioNum = 0;
@@ -154,7 +155,7 @@ angular.module('app.controllers', [])
       $scope.settings.firebase_url = localStorage.getItem('firebase_url');
       $scope.settings.secret = localStorage.getItem('firebase_secret');
       $scope.settings.server_key = localStorage.getItem('firebase_server_key');
-      $scope.settings.text =
+      $scope.NodeSettings =
         'Node WiFi SSID: ' + $scope.settings.ssid + '\n' +
         'Node WiFi PASSWORD: ' + $scope.settings.password + '\n' +
         'Firebase URL: ' + $scope.settings.firebase_url + '\n' +
@@ -238,7 +239,7 @@ angular.module('app.controllers', [])
       $scope.$broadcast("scroll.infiniteScrollComplete");
     };
 
-    $scope.SetupInitFirebase = function() {
+    $scope.SetupRadio = function() {
       var len = $scope.RadioCode.length;
       var ref = firebase.database().ref("/");
 
@@ -252,27 +253,6 @@ angular.module('app.controllers', [])
         });
         console.log('[' + i + ']: ' + $scope.RadioCode[i]);
       }
-      // init Firebase: control
-      var control_ref = ref.child('control');
-      control_ref.set({
-        alarm: false,
-        heap: false,
-        monitor: false,
-        reboot: false,
-        scheduler: 10
-      });
-      // init Firebase: status
-      var starus_ref = ref.child('status');
-      starus_ref.set({
-        alarm: false,
-        bootcnt: 0,
-        upcnt: 0,
-        umidity: 0,
-        temperature: 0,
-        fire: false,
-        flood: false,
-        heap: 0
-      });
     };
 
     // Triggered on a button click, or some other target
@@ -287,7 +267,7 @@ angular.module('app.controllers', [])
       // An elaborate, custom popup
       var myPopup = $ionicPopup.show({
         template: PopupTemplate,
-        title: 'Enter Access Point configuration',
+        title: 'Enter Access Point SSID and password',
         subTitle: 'make sure your device is connected to Node WiFi AP',
         scope: $scope,
         buttons: [{
@@ -484,7 +464,7 @@ angular.module('app.controllers', [])
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: PopupTemplate,
-      title: 'FireBase',
+      title: 'Firebase setup',
       subTitle: '',
       scope: $scope,
       buttons: [{

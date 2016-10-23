@@ -67,7 +67,7 @@ bool FBM_Task(void) {
   }
 
   if (boot == true) {
-    Serial.printf("fbm_logcnt: %d\n", fbm_monitorcnt);
+    // Serial.printf("fbm_logcnt: %d\n", fbm_monitorcnt);
     // every 5 second
     if (++fbm_monitorcnt == (5 / 1)) {
       fbm_monitorcnt = 0;

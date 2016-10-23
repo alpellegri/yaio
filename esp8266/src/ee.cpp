@@ -28,6 +28,16 @@ char *EE_GetFirebaseSecret() { return firebase_secret; }
 
 char *EE_GetFirebaseServerKey() { return firebase_server_key; }
 
+void EE_EraseData() {
+  int i;
+
+  for (i = 0; i < EE_SIZE; i++) {
+    yield();
+    EEPROM.write(i, 0);
+  }
+  EEPROM.commit();
+}
+
 void EE_StoreData(uint8_t *data, uint16_t len) {
   int i;
 

@@ -80,10 +80,8 @@ void STA_Loop() {
       trig_push = true;
     }
     if (in == false) {
-      char payload[11] = "reset";
-      int len = strlen(payload);
-      Serial.println("reset eeprom");
-      EE_StoreData((uint8_t *)payload, len);
+      EE_EraseData();
+      Serial.printf("EEPROM erased\n");
     }
   }
 }
