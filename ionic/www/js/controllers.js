@@ -8,9 +8,6 @@ angular.module('app.controllers', [])
     $scope.pushCtrl0 = {
       checked: false
     };
-    $scope.pushCtrl1 = {
-      checked: false
-    };
     $scope.pushCtrl2 = {
       checked: false
     };
@@ -48,20 +45,6 @@ angular.module('app.controllers', [])
       } else {
         ref.update({
           alarm: true
-        });
-      }
-    };
-
-    $scope.pushCtrl1Change = function() {
-      var ref = firebase.database().ref("control");
-      serviceLog.putlog('heap control ' + $scope.pushCtrl1.checked);
-      if ($scope.pushCtrl1.checked) {
-        ref.update({
-          heap: true
-        });
-      } else {
-        ref.update({
-          heap: false
         });
       }
     };
@@ -110,12 +93,6 @@ angular.module('app.controllers', [])
           $scope.pushCtrl3.checked = true;
         } else {
           $scope.pushCtrl3.checked = false;
-        }
-        var control_heap = payload.control.heap;
-        if (control_heap == true) {
-          $scope.pushCtrl1.checked = true;
-        } else {
-          $scope.pushCtrl1.checked = false;
         }
         var control_reboot = payload.control.reboot;
         if (control_reboot == true) {

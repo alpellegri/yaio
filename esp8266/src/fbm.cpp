@@ -37,6 +37,8 @@ bool FBM_Setup(void) {
 
 void FBM_Loop() {}
 
+int bootcnt;
+
 /* main function task */
 bool FBM_Task(void) {
   bool ret = false;
@@ -48,7 +50,7 @@ bool FBM_Task(void) {
       Serial.print("set failed: control/reboot");
       Serial.println(Firebase.error());
     } else {
-      int bootcnt = Firebase.getInt("status/bootcnt");
+      bootcnt = Firebase.getInt("status/bootcnt");
       if (Firebase.failed()) {
         Serial.print("get failed: status/bootcnt");
         Serial.println(Firebase.error());
@@ -72,95 +74,61 @@ bool FBM_Task(void) {
     if (++fbm_monitorcnt == (5 / 1)) {
       fbm_monitorcnt = 0;
 
-      int humidity_data = dht.readHumidity();
-      int temperature_data = dht.readTemperature();
-      // Serial.printf("t: %d, h: %d\n", temperature_data, humidity_data);
-
-      bool control_monitor = Firebase.getBool("control/monitor");
-      if ((Firebase.failed() == false) && (control_monitor == true)) {
-        // get object data
-        bool control_alarm = Firebase.getBool("control/alarm");
-        if (Firebase.failed()) {
-          Serial.print("get failed: control/alarm");
-          Serial.println(Firebase.error());
-        } else {
-          if (status_alarm != control_alarm) {
-            status_alarm = control_alarm;
-            digitalWrite(LED, !(status_alarm == true));
-            Firebase.setBool("status/alarm", status_alarm);
-            if (Firebase.failed()) {
-              Serial.print("set failed: status/alarm");
-              Serial.println(Firebase.error());
-            }
-          }
-        }
-        // get object data
-        bool control_reboot = Firebase.getBool("control/reboot");
-        if (Firebase.failed()) {
-          Serial.print("get failed: control/reboot");
-          Serial.println(Firebase.error());
-        } else {
-          if (control_reboot == true) {
-            ESP.restart();
-          }
-        }
-
-        // get object data
-        bool control_heap = Firebase.getBool("control/heap");
-        if (Firebase.failed()) {
-          Serial.print("get failed: control/heap");
-          Serial.println(Firebase.error());
-        } else {
-          if (control_heap == true) {
-            status_heap = ESP.getFreeHeap();
-            Firebase.setInt("status/heap", status_heap);
-            if (Firebase.failed()) {
-              Serial.print("set failed: status/heap");
-              Serial.println(Firebase.error());
-            }
-          }
-        }
-
-        Firebase.setInt("status/upcnt", fbm_task_cnt++);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/upcnt");
-          Serial.println(Firebase.error());
-        }
-
-        Firebase.setInt("status/temperature", temperature_data);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/temperature");
-          Serial.println(Firebase.error());
-        }
-
-        Firebase.setInt("status/humidity", humidity_data);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/humidity");
-          Serial.println(Firebase.error());
-        }
+      FirebaseObject fbcontrol = Firebase.get("control");
+      if (Firebase.failed() == true) {
+        Serial.print("get failed: control");
+        Serial.println(Firebase.error());
       } else {
-        Serial.print("monitoring suspended\n");
-      }
-
-      Serial.printf("fbm_logcnt: %d\n", fbm_logcnt);
-      // log every 15 minutes
-      if (++fbm_logcnt == (60 * 15 / 5)) {
-        fbm_logcnt = 0;
-        Firebase.pushInt("logs/temperature", temperature_data);
-        if (Firebase.failed()) {
-          Serial.print("push failed: logs/temperature");
-          Serial.println(Firebase.error());
+        JsonVariant variant = fbcontrol.getJsonVariant();
+        JsonObject &object = variant.as<JsonObject>();
+        bool control_alarm = object["alarm"];
+        bool control_reboot = object["reboot"];
+        if (control_reboot == true) {
+          ESP.restart();
         }
+        bool control_monitor = object["monitor"];
+        if (control_monitor == true) {
+          int humidity_data = dht.readHumidity();
+          int temperature_data = dht.readTemperature();
 
-        Firebase.pushInt("logs/humidity", humidity_data);
-        if (Firebase.failed()) {
-          Serial.print("push failed: logs/humidity");
-          Serial.println(Firebase.error());
+          StaticJsonBuffer<256> jsonBuffer;
+          JsonObject &status = jsonBuffer.createObject();
+          status["alarm"] = control_alarm;
+          digitalWrite(LED, !(control_alarm == true));
+          status["bootcnt"] = bootcnt;
+          status["fire"] = false;
+          status["flood"] = false;
+          status["heap"] = ESP.getFreeHeap();
+          status["humidity"] = humidity_data;
+          status["temperature"] = temperature_data;
+          status["upcnt"] = fbm_task_cnt++;
+          Firebase.set("status", JsonVariant(status));
+          if (Firebase.failed()) {
+            Serial.print("set failed: status");
+            Serial.println(Firebase.error());
+          }
+          Serial.printf("fbm_logcnt: %d\n", fbm_logcnt);
+          // log every 15 minutes
+          if (++fbm_logcnt == (60 * 15 / 5)) {
+            fbm_logcnt = 0;
+            Firebase.pushInt("logs/temperature", temperature_data);
+            if (Firebase.failed()) {
+              Serial.print("push failed: logs/temperature");
+              Serial.println(Firebase.error());
+            }
+            Firebase.pushInt("logs/humidity", humidity_data);
+            if (Firebase.failed()) {
+              Serial.print("push failed: logs/humidity");
+              Serial.println(Firebase.error());
+            }
+          }
+        } else {
+          Serial.print("monitor suspended\n");
         }
       }
-    } else {
-      Serial.print("fbm yield\n");
     }
+  } else {
+    Serial.print("fbm yield\n");
   }
 
   return ret;
