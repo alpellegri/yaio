@@ -7,8 +7,9 @@
 #include <string.h>
 
 #include "ee.h"
+#include "fcm.h"
 
-#define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
+#define LED D0
 #define DHTPIN D6
 #define DHTTYPE DHT22
 
@@ -21,30 +22,22 @@ int heap_size = 0;
 int status_heap = 0;
 int fbm_logcnt = 0;
 int fbm_monitorcnt = 0;
-
-bool FBM_Setup(void) {
-  bool ret = true;
-  char *firebase_url = NULL;
-  char *firebase_secret = NULL;
-
-  firebase_url = EE_GetFirebaseUrl();
-  firebase_secret = EE_GetFirebaseSecret();
-
-  Firebase.begin(firebase_url);
-
-  return ret;
-}
-
-void FBM_Loop() {}
-
-int bootcnt;
+int bootcnt = 0;
 
 /* main function task */
-bool FBM_Task(void) {
+bool FbmService(void) {
   bool ret = false;
 
   // boot counter
   if (boot == false) {
+    bool ret = true;
+    char *firebase_url = NULL;
+    char *firebase_secret = NULL;
+
+    firebase_url = EE_GetFirebaseUrl();
+    firebase_secret = EE_GetFirebaseSecret();
+    Firebase.begin(firebase_url);
+
     Firebase.setBool("control/reboot", false);
     if (Firebase.failed()) {
       Serial.print("set failed: control/reboot");
@@ -62,7 +55,7 @@ bool FBM_Task(void) {
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          ret = true;
+          FcmSendPush("boot-up complete");
         }
       }
     }

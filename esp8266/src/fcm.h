@@ -8,7 +8,7 @@ extern char FcmServer[50];
 extern char TimeServer[50];
 
 extern void FcmService(void);
-extern void FcmSendPush(void);
+extern void FcmSendPush(char *message);
 
 extern void TimeService(void);
 

@@ -14,7 +14,6 @@
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-bool trig_push = false;
 int sta_task_cnt;
 int sta_button = 0x55;
 
@@ -53,7 +52,6 @@ bool STA_Setup(void) {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-      FBM_Setup();
       Serial.println();
       Serial.print("connected: ");
       Serial.println(WiFi.localIP());
@@ -77,7 +75,7 @@ void STA_Loop() {
   if (in != sta_button) {
     sta_button = in;
     if (in == false) {
-      trig_push = true;
+      FcmSendPush("manual button press");
     }
     if (in == false) {
       EE_EraseData();
@@ -90,18 +88,11 @@ void STA_Loop() {
 bool STA_Task(void) {
   bool ret = true;
 
-  // Serial.printf("t: %d, h: %d\n", temperature_data, humidity_data);
-
   sta_task_cnt++;
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
 
   if (WiFi.status() == WL_CONNECTED) {
-    trig_push |= FBM_Task();
-
-    if (trig_push == true) {
-      trig_push = false;
-      FcmSendPush();
-    }
+    FbmService();
     FcmService();
   } else {
     Serial.print("WiFi.status != WL_CONNECTED\n");

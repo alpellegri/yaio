@@ -1,8 +1,9 @@
-#include "ee.h"
-#include "fcm.h"
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <FirebaseArduino.h>
+#include <string.h>
+#include "ee.h"
+#include "fcm.h"
 
 WiFiClient fcm_client;
 WiFiClient time_client;
@@ -11,8 +12,9 @@ int time_sts = 0;
 
 String RegIDs[5];
 int RegIDsLen;
+char FcmMessage[50];
 
-void FcmSendPush(void) {
+void FcmSendPush(char *message) {
   boolean res;
   char str[400];
 
@@ -32,7 +34,8 @@ void FcmSendPush(void) {
     }
   }
 
-  if (RegIDsLen > 0) {
+  if ((RegIDsLen > 0) && (fcm_sts == 5)) {
+	strcpy(FcmMessage, message);
     fcm_sts = 0;
   }
 }
@@ -46,7 +49,9 @@ static String FcmPostMsg(void) {
   String json = "";
   json += "{";
   json += "\"data\":{";
-  json += "\"title\":\"ESP8266 Notification\",";
+  json += "\"title\":\"";
+  json += String(FcmMessage);
+  json += "\",";
   json += "\"body\":\"Alert!\",";
   json += "\"sound\":\"default\"";
   json += "},";

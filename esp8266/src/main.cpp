@@ -107,8 +107,6 @@ void setup() {
 
 void loop() {
   bool ret;
-  // Serial.printf("loop %x\n", cnt);
-  // Serial.printf("heap: %d\n\n", ESP.getFreeHeap());
 
   RF_Loop();
 #if 1
@@ -132,7 +130,7 @@ void loop() {
       ret = STA_Task();
       if (ret == false) {
         mode = 0;
-        // AP_Setup();
+        AP_Setup();
       }
     } else {
     }
