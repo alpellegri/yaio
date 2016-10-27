@@ -1,9 +1,9 @@
+#include "ee.h"
+#include "fcm.h"
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <FirebaseArduino.h>
 #include <string.h>
-#include "ee.h"
-#include "fcm.h"
 
 WiFiClient fcm_client;
 WiFiClient time_client;
@@ -15,27 +15,24 @@ int RegIDsLen;
 char FcmMessage[50];
 
 void FcmSendPush(char *message) {
-  boolean res;
-  char str[400];
-
   RegIDsLen = 0;
-  res = Firebase.getRaw("FCM_Registration_IDs", str);
-  if (res == true) {
-    StaticJsonBuffer<400> jB;
-    JsonObject &root = jB.parseObject(str);
-    if (!root.success()) {
-      Serial.println("parseObject() failed");
-    } else {
-      for (JsonObject::iterator it = root.begin(); it != root.end(); ++it) {
-        Serial.println(it->key);
-        Serial.println(it->value.asString());
-        RegIDs[RegIDsLen++] = it->value.asString();
-      }
+
+  FirebaseObject fbRegistration_IDs = Firebase.get("FCM_Registration_IDs");
+  if (Firebase.failed() == true) {
+    Serial.print("get failed: FCM_Registration_IDs");
+    Serial.println(Firebase.error());
+  } else {
+    JsonVariant variant = fbRegistration_IDs.getJsonVariant();
+    JsonObject &object = variant.as<JsonObject>();
+    for (JsonObject::iterator it = object.begin(); it != object.end(); ++it) {
+      Serial.println(it->key);
+      Serial.println(it->value.asString());
+      RegIDs[RegIDsLen++] = it->value.asString();
     }
   }
 
   if ((RegIDsLen > 0) && (fcm_sts == 5)) {
-	strcpy(FcmMessage, message);
+    strcpy(FcmMessage, message);
     fcm_sts = 0;
   }
 }
@@ -131,6 +128,7 @@ void FcmService(void) {
 
   case 5:
   default: {
+    fcm_sts = 5;
     Serial.println("fcm: idle");
     break;
   }

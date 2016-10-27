@@ -174,7 +174,6 @@ class FirebaseArduino {
    * \return a FirebaseObject value located at that path. Will only be populated if success() is true.
    */
   FirebaseObject get(const String& path);
-  boolean getRaw(const String& path, char* str);
 
   /**
    * Remove the node, and possibly entire tree, located at path.

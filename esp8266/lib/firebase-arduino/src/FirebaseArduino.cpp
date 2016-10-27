@@ -84,16 +84,6 @@ FirebaseObject FirebaseArduino::get(const String& path) {
 	return FirebaseObject(get.response().c_str());
 }
 
-boolean FirebaseArduino::getRaw(const String& path, char *str) {
-	auto get = FirebaseGet(host_, auth_, path.c_str(), http_.get());
-	error_ = get.error();
-	if (failed()) {
-		false;
-	}
-	strcpy(str, get.response().c_str());
-	return true;
-}
-
 int FirebaseArduino::getInt(const String& path) {
   auto get = FirebaseGet(host_, auth_, path.c_str(), http_.get());
   error_ = get.error();

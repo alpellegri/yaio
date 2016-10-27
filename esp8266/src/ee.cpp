@@ -58,7 +58,7 @@ bool EE_LoadData(void) {
     data[i] = EEPROM.read(i);
   }
 
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<400> jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
 
   // Test if parsing succeeds.

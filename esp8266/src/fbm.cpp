@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "ee.h"
+#include "fbm.h"
 #include "fcm.h"
 
 #define LED D0
@@ -55,7 +56,7 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          FcmSendPush("boot-up complete");
+          FcmSendPush((char *)"boot-up complete");
         }
       }
     }
@@ -81,8 +82,8 @@ bool FbmService(void) {
         }
         bool control_monitor = object["monitor"];
         if (control_monitor == true) {
-          int humidity_data = dht.readHumidity();
-          int temperature_data = dht.readTemperature();
+          int humidity_data = 10*dht.readHumidity();
+          int temperature_data = 10*dht.readTemperature();
 
           StaticJsonBuffer<256> jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();

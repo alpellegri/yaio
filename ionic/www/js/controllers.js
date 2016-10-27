@@ -350,7 +350,7 @@ angular.module('app.controllers', [])
     var i = 0;
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        $scope.myJson.data[0].push(childSnapshot.val());
+        $scope.myJson.data[0].push(childSnapshot.val()/10);
         if (i % 4 == 0) {
           var ii = i / 4;
           $scope.myJson.labels.push(ii.toString());
@@ -366,7 +366,7 @@ angular.module('app.controllers', [])
     var i = 0;
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        $scope.myJson.data[1].push(childSnapshot.val());
+        $scope.myJson.data[1].push(childSnapshot.val()/10);
       });
     });
 

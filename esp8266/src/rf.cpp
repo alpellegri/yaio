@@ -19,7 +19,7 @@ bool RF_Setup(void) {
 
   RadioCode = 0;
   Serial.printf("RF_Setup\n");
-  mySwitch.enableTransmit(10); // gpio 10  sd3
+  // mySwitch.enableTransmit(10); // gpio 10  sd3
   mySwitch.enableReceive(D7);  // gpio13 D7
   // mySwitch.setProtocol(1);
   // mySwitch.setPulseLength(420);   // orig338
