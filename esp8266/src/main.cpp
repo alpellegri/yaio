@@ -11,8 +11,8 @@
 
 #include "ap.h"
 #include "ee.h"
-#include "sta.h"
 #include "rf.h"
+#include "sta.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -73,7 +73,7 @@ void setup() {
   Serial.println();
   Serial.println("Starting");
 
-#if 1
+#if 0
   // init oled display
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   // Clear the buffer.
@@ -102,14 +102,14 @@ void setup() {
   } else {
   }
 #endif
-  // RF_Setup();
+  RF_Setup();
 }
 
 void loop() {
   bool ret;
 
   RF_Loop();
-#if 1
+
   if (mode == 0) {
     AP_Loop();
   } else if (mode == 1) {
@@ -124,7 +124,6 @@ void loop() {
       if (ret == false) {
         /* try to setup STA */
         mode = STA_Setup();
-        // RF_Setup();
       }
     } else if (mode == 1) {
       ret = STA_Task();
@@ -133,7 +132,7 @@ void loop() {
         AP_Setup();
       }
     } else {
+      /* unmapped mode */
     }
   }
-#endif
 }

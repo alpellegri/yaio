@@ -9,6 +9,7 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fcm.h"
+#include "rf.h"
 
 #define LED D0
 #define DHTPIN D6
@@ -76,14 +77,21 @@ bool FbmService(void) {
         JsonVariant variant = fbcontrol.getJsonVariant();
         JsonObject &object = variant.as<JsonObject>();
         bool control_alarm = object["alarm"];
+        if (control_alarm == true) {
+          uint32_t in;
+          in = RF_GetRadioCode();
+          if (in != 0) {
+            FcmSendPush((char *)"intrusion");
+          }
+        }
         bool control_reboot = object["reboot"];
         if (control_reboot == true) {
           ESP.restart();
         }
         bool control_monitor = object["monitor"];
         if (control_monitor == true) {
-          int humidity_data = 10*dht.readHumidity();
-          int temperature_data = 10*dht.readTemperature();
+          int humidity_data = 10 * dht.readHumidity();
+          int temperature_data = 10 * dht.readTemperature();
 
           StaticJsonBuffer<256> jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
