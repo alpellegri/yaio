@@ -23,13 +23,13 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 Ticker flipper;
 
-int mode;
-int flip_mode = 1;
-int count = 0;
+uint8_t mode;
+uint8_t flip_mode = 1;
+uint16_t count = 0;
 
 /* schedule every 5s */
-int status_scheduler = 10;
-int scheduler_cnt = 0;
+uint16_t status_scheduler = 10;
+uint16_t scheduler_cnt = 0;
 bool scheduler_flag = false;
 
 void setflip_mode(int mode) { flip_mode = mode; }

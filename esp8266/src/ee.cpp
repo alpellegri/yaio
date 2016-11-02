@@ -39,7 +39,7 @@ void EE_EraseData() {
 }
 
 void EE_StoreData(uint8_t *data, uint16_t len) {
-  int i;
+  uint16_t i;
 
   for (i = 0; i < len; i++) {
     yield();
@@ -51,7 +51,7 @@ void EE_StoreData(uint8_t *data, uint16_t len) {
 bool EE_LoadData(void) {
   bool ret = false;
   char data[EE_SIZE];
-  int i;
+  uint16_t i;
 
   for (i = 0; i < EE_SIZE; i++) {
     yield();

@@ -14,8 +14,8 @@
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-int sta_task_cnt;
-int sta_button = 0x55;
+uint16_t sta_task_cnt;
+uint8_t sta_button = 0x55;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -70,7 +70,7 @@ bool STA_Setup(void) {
 }
 
 void STA_Loop() {
-  int in = digitalRead(BUTTON);
+  uint8_t in = digitalRead(BUTTON);
 
   if (in != sta_button) {
     sta_button = in;

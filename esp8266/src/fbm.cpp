@@ -19,12 +19,11 @@ DHT dht(DHTPIN, DHTTYPE);
 
 bool boot = false;
 bool status_alarm = false;
-int fbm_task_cnt;
-int heap_size = 0;
-int status_heap = 0;
-int fbm_logcnt = 0;
-int fbm_monitorcnt = 0;
-int bootcnt = 0;
+uint16_t fbm_task_cnt;
+uint32_t heap_size = 0;
+uint16_t fbm_logcnt = 0;
+uint16_t fbm_monitorcnt = 0;
+uint16_t bootcnt = 0;
 
 /* main function task */
 bool FbmService(void) {
@@ -92,7 +91,7 @@ bool FbmService(void) {
           uint32_t code;
           code = RF_GetRadioCode();
           if (code != 0) {
-            FcmSendPush((char *)"Alarm intrusion!!!");
+            FcmSendPush((char *)"Intrusion!!!");
           }
         }
 

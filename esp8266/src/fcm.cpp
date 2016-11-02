@@ -5,13 +5,17 @@
 #include <FirebaseArduino.h>
 #include <string.h>
 
+const char FcmServer[50] = "fcm.googleapis.com";
+const char TimeServer[50] = "google.com";
+
 WiFiClient fcm_client;
 WiFiClient time_client;
-int fcm_sts = 5;
-int time_sts = 0;
+uint16_t fcm_sts = 5;
+uint16_t time_sts = 0;
 
+// up-to 5 devices
 String RegIDs[5];
-int RegIDsLen;
+uint16_t RegIDsLen;
 char FcmMessage[50];
 
 void FcmSendPush(char *message) {
@@ -47,9 +51,11 @@ static String FcmPostMsg(void) {
   json += "{";
   json += "\"data\":{";
   json += "\"title\":\"";
+  json += "ESP8266 Alert";
+  json += "\",";
+  json += "\"body\":\"";
   json += String(FcmMessage);
   json += "\",";
-  json += "\"body\":\"Alert!\",";
   json += "\"sound\":\"default\"";
   json += "},";
   json += "\"registration_ids\":[";

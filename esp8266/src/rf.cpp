@@ -52,7 +52,7 @@ void RF_Loop() {
       // Serial.print("Protocol: ");
       // Serial.println(mySwitch.getReceivedProtocol());
       if (RadioCode == 0) {
-        Serial.printf(">>%x\n", value);
+        Serial.printf("radio code: %x\n", value);
         RadioCode = value;
       } else {
         Serial.printf(".\n", value);

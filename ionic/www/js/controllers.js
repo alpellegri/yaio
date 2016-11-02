@@ -358,7 +358,8 @@ angular.module('app.controllers', [])
     $scope.myJson.data[0] = [];
     $scope.myJson.data[1] = [];
     $scope.myJson.labels = [];
-    var Ref = firebase.database().ref('logs/TH').limitToLast(96);
+    // 2 days: 2 * (24 * 4)
+    var Ref = firebase.database().ref('logs/TH').limitToLast(2*24*4);
     var i = 0;
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
@@ -366,7 +367,7 @@ angular.module('app.controllers', [])
         $scope.myJson.data[0].push(childSnapshot.val().t / 10);
         $scope.myJson.data[1].push(childSnapshot.val().h / 10);
         if (i % 4 == 0) {
-          var ii = i / 4;
+          var ii = (i / 4) % 24; // wrap hour: every one days
           $scope.myJson.labels.push(ii.toString());
         } else {
           $scope.myJson.labels.push("");
