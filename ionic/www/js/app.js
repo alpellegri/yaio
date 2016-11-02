@@ -11,9 +11,19 @@ angular.module('app', ['ionic', 'chart.js', 'app.controllers', 'app.routes', 'ap
     storageBucket: "",
     messagingSenderId: ""
   };
+
   var fb_url = localStorage.getItem('firebase_url');
   config.databaseURL = "https://" + fb_url;
   firebase.initializeApp(config);
+
+  // var fb_secret = localStorage.getItem('firebase_secret');
+  // console.log(fb_secret);
+  // firebase.auth().signInWithCustomToken(fb_secret).catch(function(error) {
+  //   // Handle Errors here.
+  //   var errorCode = error.code;
+  //   var errorMessage = error.message;
+  //   // ...
+  // });
 
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

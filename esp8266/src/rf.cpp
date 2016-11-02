@@ -16,12 +16,22 @@ uint32_t RF_GetRadioCode(void) {
   return Code;
 }
 
-bool RF_Setup(void) {
+bool RF_Enable(void) {
   bool ret = true;
 
   RadioCode = 0;
-  Serial.printf("RF_Setup\n");
+  Serial.printf("RF Enable\n");
   mySwitch.enableReceive(D7); // gpio13 D7
+
+  return ret;
+}
+
+bool RF_Disable(void) {
+  bool ret = true;
+
+  RadioCode = 0;
+  Serial.printf("RF disable\n");
+  mySwitch.disableReceive(); // gpio13 D7
 
   return ret;
 }
@@ -41,9 +51,11 @@ void RF_Loop() {
       // Serial.print("bit ");
       // Serial.print("Protocol: ");
       // Serial.println(mySwitch.getReceivedProtocol());
-      Serial.printf(">>%x\n", value);
       if (RadioCode == 0) {
+        Serial.printf(">>%x\n", value);
         RadioCode = value;
+      } else {
+        Serial.printf(".\n", value);
       }
     }
   }

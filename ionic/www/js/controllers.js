@@ -8,6 +8,9 @@ angular.module('app.controllers', [])
     $scope.pushCtrl0 = {
       checked: false
     };
+    $scope.pushCtrl1 = {
+      checked: false
+    };
     $scope.pushCtrl2 = {
       checked: false
     };
@@ -35,16 +38,16 @@ angular.module('app.controllers', [])
       }
     };
 
-    $scope.pushCtrl0Change2 = function() {
+    $scope.pushCtrl1Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
-      if ($scope.status.alarm == true) {
+      serviceLog.putlog('led control ' + $scope.pushCtrl1.checked);
+      if ($scope.pushCtrl1.checked) {
         ref.update({
-          alarm: false
+          led: true
         });
       } else {
         ref.update({
-          alarm: true
+          led: false
         });
       }
     };
@@ -76,26 +79,34 @@ angular.module('app.controllers', [])
         });
       }
     };
+
     $scope.doRefresh = function() {
       serviceLog.putlog('refresh home');
+
       var ref = firebase.database().ref("/");
       // Attach an asynchronous callback to read the data at our posts reference
       ref.on('value', function(snapshot) {
         var payload = snapshot.val();
-        var control_alarm = payload.control.alarm;
-        if (control_alarm == true) {
+
+        if (payload.control.alarm == true) {
           $scope.pushCtrl0.checked = true;
         } else {
           $scope.pushCtrl0.checked = false;
         }
-        var control_monitor = payload.control.monitor;
-        if (control_monitor == true) {
+
+        if (payload.control.led == true) {
+          $scope.pushCtrl1.checked = true;
+        } else {
+          $scope.pushCtrl1.checked = false;
+        }
+
+        if (payload.control.monitor == true) {
           $scope.pushCtrl3.checked = true;
         } else {
           $scope.pushCtrl3.checked = false;
         }
-        var control_reboot = payload.control.reboot;
-        if (control_reboot == true) {
+
+        if (payload.control.reboot == true) {
           $scope.pushCtrl2.checked = true;
         } else {
           $scope.pushCtrl2.checked = false;
@@ -345,12 +356,15 @@ angular.module('app.controllers', [])
     console.log('doRefresh');
 
     $scope.myJson.data[0] = [];
+    $scope.myJson.data[1] = [];
     $scope.myJson.labels = [];
-    var Ref = firebase.database().ref('logs/temperature').limitToLast(96);
+    var Ref = firebase.database().ref('logs/TH').limitToLast(96);
     var i = 0;
     Ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        $scope.myJson.data[0].push(childSnapshot.val()/10);
+        // console.log(childSnapshot.val());
+        $scope.myJson.data[0].push(childSnapshot.val().t / 10);
+        $scope.myJson.data[1].push(childSnapshot.val().h / 10);
         if (i % 4 == 0) {
           var ii = i / 4;
           $scope.myJson.labels.push(ii.toString());
@@ -358,15 +372,6 @@ angular.module('app.controllers', [])
           $scope.myJson.labels.push("");
         }
         i++;
-      });
-    });
-
-    $scope.myJson.data[1] = [];
-    var Ref = firebase.database().ref('logs/humidity').limitToLast(96);
-    var i = 0;
-    Ref.once('value', function(snapshot) {
-      snapshot.forEach(function(childSnapshot) {
-        $scope.myJson.data[1].push(childSnapshot.val()/10);
       });
     });
 
