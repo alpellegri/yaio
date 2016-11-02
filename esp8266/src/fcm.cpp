@@ -3,36 +3,40 @@
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <FirebaseArduino.h>
+#include <string.h>
+
+const char FcmServer[50] = "fcm.googleapis.com";
+const char TimeServer[50] = "google.com";
 
 WiFiClient fcm_client;
 WiFiClient time_client;
-int fcm_sts = 5;
-int time_sts = 0;
+uint16_t fcm_sts = 5;
+uint16_t time_sts = 0;
 
+// up-to 5 devices
 String RegIDs[5];
-int RegIDsLen;
+uint16_t RegIDsLen;
+char FcmMessage[50];
 
-void FcmSendPush(void) {
-  boolean res;
-  char str[400];
-
+void FcmSendPush(char *message) {
   RegIDsLen = 0;
-  res = Firebase.getRaw("FCM_Registration_IDs", str);
-  if (res == true) {
-    StaticJsonBuffer<400> jB;
-    JsonObject &root = jB.parseObject(str);
-    if (!root.success()) {
-      Serial.println("parseObject() failed");
-    } else {
-      for (JsonObject::iterator it = root.begin(); it != root.end(); ++it) {
-        Serial.println(it->key);
-        Serial.println(it->value.asString());
-        RegIDs[RegIDsLen++] = it->value.asString();
-      }
+
+  FirebaseObject fbRegistration_IDs = Firebase.get("FCM_Registration_IDs");
+  if (Firebase.failed() == true) {
+    Serial.print("get failed: FCM_Registration_IDs");
+    Serial.println(Firebase.error());
+  } else {
+    JsonVariant variant = fbRegistration_IDs.getJsonVariant();
+    JsonObject &object = variant.as<JsonObject>();
+    for (JsonObject::iterator it = object.begin(); it != object.end(); ++it) {
+      Serial.println(it->key);
+      Serial.println(it->value.asString());
+      RegIDs[RegIDsLen++] = it->value.asString();
     }
   }
 
-  if (RegIDsLen > 0) {
+  if ((RegIDsLen > 0) && (fcm_sts == 5)) {
+    strcpy(FcmMessage, message);
     fcm_sts = 0;
   }
 }
@@ -46,8 +50,12 @@ static String FcmPostMsg(void) {
   String json = "";
   json += "{";
   json += "\"data\":{";
-  json += "\"title\":\"ESP8266 Notification\",";
-  json += "\"body\":\"Alert!\",";
+  json += "\"title\":\"";
+  json += "ESP8266 Alert";
+  json += "\",";
+  json += "\"body\":\"";
+  json += String(FcmMessage);
+  json += "\",";
   json += "\"sound\":\"default\"";
   json += "},";
   json += "\"registration_ids\":[";
@@ -126,6 +134,7 @@ void FcmService(void) {
 
   case 5:
   default: {
+    fcm_sts = 5;
     Serial.println("fcm: idle");
     break;
   }

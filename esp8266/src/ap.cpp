@@ -13,6 +13,7 @@
 
 #include "ee.h"
 #include "sta.h"
+#include "rf.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -21,10 +22,10 @@
 const char *ap_ssid = "esp8266";
 const char *ap_password = "123456789";
 
-int ap_loop_cnt;
-int ap_task_cnt;
+uint16_t ap_loop_cnt;
+uint16_t ap_task_cnt;
 bool enable_WiFi_Scan = false;
-int ap_button = 0x55;
+uint16_t ap_button = 0x55;
 
 // create sebsocket server
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -108,24 +109,20 @@ bool AP_Setup(void) {
 }
 
 bool AP_Loop(void) {
-  int in;
+  uint32_t code;
   char c_str[25] = "";
 
   ap_loop_cnt++;
 
-  in = digitalRead(BUTTON);
-  if (in != ap_button) {
-    ap_button = in;
-
-    if (ap_button == true) {
-      if (port_id != 0xFF) {
-        Serial.printf(">");
-        sprintf(c_str, "{\"sensor\":\"%06X\"}", ap_loop_cnt & 0xFFFFFF);
-        // "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
-        webSocket.sendTXT(port_id, c_str);
-      }
+  code = RF_GetRadioCode();
+  if (code != 0) {
+    if (port_id != 0xFF) {
+      Serial.printf(">");
+      sprintf(c_str, "{\"sensor\":\"%06X\"}", code & 0xFFFFFF);
+      // "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+      webSocket.sendTXT(port_id, c_str);
     }
-    Serial.printf("cnt: %08X, button %d\n", ap_loop_cnt, ap_button);
+    Serial.printf("code: %08X\n", code);
   }
 
   /* websocket only in mode 0 */

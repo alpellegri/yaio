@@ -9,26 +9,27 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ap.h"
 #include "ee.h"
+#include "ap.h"
 #include "sta.h"
+#include "rf.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define OLED_RESET LED_BUILTIN  //4
+#define OLED_RESET LED_BUILTIN // 4
 
 Adafruit_SSD1306 display(OLED_RESET);
 
 Ticker flipper;
 
-int mode;
-int flip_mode = 1;
-int count = 0;
+uint8_t mode;
+uint8_t flip_mode = 1;
+uint16_t count = 0;
 
 /* schedule every 5s */
-int status_scheduler = 10;
-int scheduler_cnt = 0;
+uint16_t status_scheduler = 10;
+uint16_t scheduler_cnt = 0;
 bool scheduler_flag = false;
 
 void setflip_mode(int mode) { flip_mode = mode; }
@@ -65,13 +66,14 @@ void setup() {
   pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 
-  EE_setup();
+  EE_Setup();
 
   flipper.attach(0.1, flip);
 
   Serial.println();
   Serial.println("Starting");
 
+#if 0
   // init oled display
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   // Clear the buffer.
@@ -85,6 +87,7 @@ void setup() {
   display.setTextSize(2);
   display.println("AP");
   display.display();
+#endif
 
   mode = 0;
   if (mode == 0) {
@@ -101,8 +104,8 @@ void setup() {
 
 void loop() {
   bool ret;
-  // Serial.printf("loop %x\n", cnt);
-  // Serial.printf("heap: %d\n\n", ESP.getFreeHeap());
+
+  RF_Loop();
 
   if (mode == 0) {
     AP_Loop();
@@ -126,6 +129,7 @@ void loop() {
         AP_Setup();
       }
     } else {
+      /* unmapped mode */
     }
   }
 }

@@ -16,7 +16,7 @@ char firebase_url[50] = "";
 char firebase_secret[50] = "";
 char firebase_server_key[50] = "";
 
-void EE_setup() { EEPROM.begin(EE_SIZE); }
+void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
 char *EE_GetSSID() { return sta_ssid; }
 
@@ -28,8 +28,18 @@ char *EE_GetFirebaseSecret() { return firebase_secret; }
 
 char *EE_GetFirebaseServerKey() { return firebase_server_key; }
 
-void EE_StoreData(uint8_t *data, uint16_t len) {
+void EE_EraseData() {
   int i;
+
+  for (i = 0; i < EE_SIZE; i++) {
+    yield();
+    EEPROM.write(i, 0);
+  }
+  EEPROM.commit();
+}
+
+void EE_StoreData(uint8_t *data, uint16_t len) {
+  uint16_t i;
 
   for (i = 0; i < len; i++) {
     yield();
@@ -41,14 +51,14 @@ void EE_StoreData(uint8_t *data, uint16_t len) {
 bool EE_LoadData(void) {
   bool ret = false;
   char data[EE_SIZE];
-  int i;
+  uint16_t i;
 
   for (i = 0; i < EE_SIZE; i++) {
     yield();
     data[i] = EEPROM.read(i);
   }
 
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<400> jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
 
   // Test if parsing succeeds.

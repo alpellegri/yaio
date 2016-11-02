@@ -18,11 +18,21 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('menu.setup', {
+  .state('menu.firebase', {
+    url: '/page5',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/firebase.html',
+        controller: 'firebaseCtrl'
+      }
+    }
+  })
+
+  .state('menu.node', {
     url: '/page2',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/setup.html',
+        templateUrl: 'templates/node.html',
         controller: 'setupCtrl'
       }
     }

@@ -5,11 +5,11 @@
       <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
         Enable Alarm
       </ion-toggle>
+      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl1.checked" ng-change="pushCtrl1Change()">
+        LED Output
+      </ion-toggle>
       <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl3.checked" ng-change="pushCtrl3Change()">
         Enable Monitoring
-      </ion-toggle>
-      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl1.checked" ng-change="pushCtrl1Change()">
-        Enable Heap Log
       </ion-toggle>
       <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl2.checked" ng-change="pushCtrl2Change()">
         Request Reboot
@@ -34,11 +34,11 @@
         </a>
         <a class="item">
             status.temperature
-            <span class="item-note">{{status.temperature}}</span>
+            <span class="item-note">{{status.temperature/10}}</span>
         </a>
         <a class="item">
             status.humidity
-            <span class="item-note">{{status.humidity}}</span>
+            <span class="item-note">{{status.humidity/10}}</span>
         </a>
       </div>
     </form>
