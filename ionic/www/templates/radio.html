@@ -1,0 +1,47 @@
+<ion-view title="Radio Setup" id="page6">
+  <ion-content padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+    <form class="list">
+      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
+        Enable Radio Codes Learning
+      </ion-toggle>
+    </form>
+    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="SetupRadio()">
+      Update Radio Codes Configuration
+    </button>
+    <div class="list card">
+      <div class="item item-divider">
+        Inactive Radio Codes
+      </div>
+      <ion-list can-swipe="true">
+        <ion-item ng-repeat="RadioCode in InactiveRadioCodes">
+          <i class="icon ion-wifi"></i>
+          <ion-option-button class="button-positive" ng-click="ActivateRadioCode($index)">
+            Activate
+          </ion-option-button>
+          <ion-option-button class="button-info" ng-click="RemoveInactiveRadioCode($index)">
+            Remove
+          </ion-option-button>
+          {{RadioCode.val()}}
+        </ion-item>
+      </ion-list>
+    </div>
+    <div class="list card">
+      <div class="item item-divider">
+        Active Radio Codes
+      </div>
+      <ion-list <ion-list can-swipe="true">
+        <ion-item ng-repeat="RadioCode in ActiveRadioCodes">
+          <i class="icon ion-wifi"></i>
+          <ion-option-button class="button-positive" ng-click="DeactivateRadioCode($index)">
+            Deactivate
+          </ion-option-button>
+          <ion-option-button class="button-info" ng-click="RemoveActiveRadioCode($index)">
+            Remove
+          </ion-option-button>
+          {{RadioCode.val()}}
+        </ion-item>
+      </ion-list>
+    </div>
+  </ion-content>
+</ion-view>

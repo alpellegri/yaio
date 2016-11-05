@@ -1,4 +1,4 @@
-<ion-view title="Setup" id="page2">
+<ion-view title="Node Setup" id="page2">
   <ion-content padding="true" scroll="true" class="has-header">
     <h4 id="setup-heading6" style="color:#000000;text-align:left;">Connection Status</h4>
     <form class="list">
@@ -20,15 +20,6 @@
     <button id="setup-update-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="SetupComSend(settings)">
       Store to Node
     </button>
-    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="SetupRadio()">
-      Save Radio Codes
-    </button>
-    <form class="list">
-      <h4 id="setup-heading3" style="color:#000000;font-weight:600;text-align:left;">
-        Acquired Radio Codes:
-      </h4>
-      <p8 id="setup-heading7" style="white-space: pre; color:#000000;text-align:left;">{{RadioListText}}</p8>
-    </form>
     <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>
   </ion-content>
 </ion-view>

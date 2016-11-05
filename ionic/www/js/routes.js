@@ -33,7 +33,17 @@ angular.module('app.routes', [])
     views: {
       'side-menu21': {
         templateUrl: 'templates/node.html',
-        controller: 'setupCtrl'
+        controller: 'NodeCtrl'
+      }
+    }
+  })
+
+  .state('menu.radio', {
+    url: '/page6',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/radio.html',
+        controller: 'RadioCtrl'
       }
     }
   })

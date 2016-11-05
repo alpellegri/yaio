@@ -19,11 +19,15 @@ DHT dht(DHTPIN, DHTTYPE);
 
 bool boot = false;
 bool status_alarm = false;
+bool control_alarm = false;
+bool control_radio_learn = false;
+
 uint16_t fbm_task_cnt;
 uint32_t heap_size = 0;
 uint16_t fbm_logcnt = 0;
 uint16_t fbm_monitorcnt = 0;
 uint16_t bootcnt = 0;
+uint32_t fbm_code_last = 0;
 
 /* main function task */
 bool FbmService(void) {
@@ -63,6 +67,7 @@ bool FbmService(void) {
   }
 
   if (boot == true) {
+
     // Serial.printf("fbm_logcnt: %d\n", fbm_monitorcnt);
     // every 5 second
     if (++fbm_monitorcnt == (5 / 1)) {
@@ -76,24 +81,9 @@ bool FbmService(void) {
         JsonVariant variant = fbcontrol.getJsonVariant();
         JsonObject &object = variant.as<JsonObject>();
 
-        bool control_alarm = object["alarm"];
+        control_alarm = object["alarm"];
 
-        if (status_alarm != control_alarm) {
-          status_alarm = control_alarm;
-          if (status_alarm == true) {
-            RF_Enable();
-          } else {
-            RF_Disable();
-          }
-        }
-
-        if (status_alarm == true) {
-          uint32_t code;
-          code = RF_GetRadioCode();
-          if (code != 0) {
-            FcmSendPush((char *)"Intrusion!!!");
-          }
-        }
+        control_radio_learn = object["radio_learn"];
 
         bool control_led = object["led"];
         digitalWrite(LED, !(control_led == true));
@@ -132,7 +122,7 @@ bool FbmService(void) {
           // log every 15 minutes
           if (++fbm_logcnt == (60 * 15 / 5)) {
             fbm_logcnt = 0;
-            StaticJsonBuffer<32> jsonBuffer;
+            StaticJsonBuffer<128> jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
             th["t"] = temperature_data;
             th["h"] = humidity_data;
@@ -147,6 +137,54 @@ bool FbmService(void) {
         }
       }
     }
+
+    // monitor for alarm activation
+    if (status_alarm != control_alarm) {
+      status_alarm = control_alarm;
+      if (status_alarm == true) {
+        // acquire Active Radio Codes
+        FirebaseObject fbradio = Firebase.get("RadioCodes/Active");
+        if (Firebase.failed() == true) {
+          Serial.print("get failed: control");
+          Serial.println(Firebase.error());
+        } else {
+          fbm_code_last = 0;
+          RF_ResetRadioCodeDB();
+          JsonVariant variant = fbradio.getJsonVariant();
+          JsonObject &object = variant.as<JsonObject>();
+          for (JsonObject::iterator it = object.begin(); it != object.end();
+               ++it) {
+            Serial.println(it->key);
+            String string = it->value.asString();
+            Serial.println(string);
+            RF_AddRadioCodeDB(string);
+          }
+        }
+        RF_Enable();
+      } else {
+        RF_Disable();
+      }
+    }
+
+    // monitor for RF radio codes
+    uint32_t code = RF_GetRadioCode();
+    // Serial.printf("control_radio_learn: %d\n", control_radio_learn);
+    if (status_alarm == true) {
+      if (code != 0) {
+        if (RF_CheckRadioCodeDB(code) == true) {
+          FcmSendPush((char *)"Intrusion!!!");
+        } else {
+          if (control_radio_learn == true) {
+            if (code != fbm_code_last) {
+              fbm_code_last = code;
+              Serial.printf("RadioCodes/Inactive: %d\n", code);
+              Firebase.pushInt("RadioCodes/Inactive", code);
+            }
+          }
+        }
+      }
+    }
+
   } else {
     Serial.print("fbm yield\n");
   }
