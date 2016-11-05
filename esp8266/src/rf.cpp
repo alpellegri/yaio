@@ -7,6 +7,32 @@
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 
+uint32_t RadioCodes[10];
+uint16_t RadioCodesLen = 0;
+
+void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
+
+void RF_AddRadioCodeDB(String string) {
+  RadioCodes[RadioCodesLen++] = atoi(string.c_str());
+}
+
+bool RF_CheckRadioCodeDB(uint32_t code) {
+  bool res = false;
+
+  uint8_t i = 0;
+  while ((i < RadioCodesLen) && (res == false)) {
+    Serial.printf("> %x, %x\n", code, RadioCodes[i]);
+    if (code == RadioCodes[i]) {
+      res = true;
+    }
+    i++;
+  }
+
+  Serial.printf(">> %d\n", res);
+
+  return res;
+}
+
 uint32_t RF_GetRadioCode(void) {
   uint32_t Code;
 

@@ -5,11 +5,11 @@ angular.module('app', ['ionic', 'chart.js', 'app.controllers', 'app.routes', 'ap
 .run(function($ionicPlatform) {
 
   var config = {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    storageBucket: "",
-    messagingSenderId: ""
+    apiKey: "AIzaSyBqJWOLi2b0SQJ51Ug0U6hKF5lDBVkRCIQ",
+    authDomain: "ikka.firebaseapp.com",
+    databaseURL: "https://ikka.firebaseio.com",
+    storageBucket: "project-7110587599444694745.appspot.com",
+    messagingSenderId: "110645288431"
   };
 
   var fb_url = localStorage.getItem('firebase_url');

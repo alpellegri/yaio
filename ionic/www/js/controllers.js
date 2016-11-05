@@ -121,8 +121,8 @@ angular.module('app.controllers', [])
   }
 })
 
-.controller('setupCtrl', function($scope, WebSocketService, serviceLog, $ionicPopup, $timeout) {
-  console.log('setupCtrl');
+.controller('NodeCtrl', function($scope, WebSocketService, serviceLog, $ionicPopup, $timeout) {
+  console.log('NodeCtrl');
 
   var fb_url = localStorage.getItem('firebase_url');
   if (fb_url != null) {
@@ -134,10 +134,6 @@ angular.module('app.controllers', [])
     $scope.Text = '';
     $scope.NodeSettingMsg = '';
     $scope.StsTxt = 'Disconnected';
-    $scope.SensorNum = 0;
-    $scope.RadioNum = 0;
-    $scope.RadioCode = [];
-    $scope.RadioListText = '';
 
     $scope.settings.ComposeText = function() {
       $scope.settings.firebase_url = localStorage.getItem('firebase_url');
@@ -227,22 +223,6 @@ angular.module('app.controllers', [])
       $scope.$broadcast("scroll.infiniteScrollComplete");
     };
 
-    $scope.SetupRadio = function() {
-      var len = $scope.RadioCode.length;
-      var ref = firebase.database().ref("/");
-
-      // init Firebase: sensor
-      for (i = 0; i < len; i++) {
-        var sensor_ref = ref.child('sensor/' + i.toString());
-        sensor_ref.set({
-          name: "pir",
-          action: "00",
-          code: $scope.RadioCode[i]
-        });
-        console.log('[' + i + ']: ' + $scope.RadioCode[i]);
-      }
-    };
-
     // Triggered on a button click, or some other target
     $scope.showPopup = function() {
 
@@ -284,26 +264,6 @@ angular.module('app.controllers', [])
       }, 90000);
     };
 
-    // A confirm dialog
-    $scope.showConfirm = function(message) {
-      var confirmPopup = $ionicPopup.confirm({
-        title: 'Radio message ' + message + ' has found',
-        template: 'Are you sure you want to save?'
-      });
-
-      confirmPopup.then(function(res) {
-        if (res) {
-          var obj = JSON.parse(message);
-          console.log('RadioCode ' + obj.sensor);
-          if (obj.sensor != null) {
-            console.log('RadioCode OK');
-            $scope.RadioCode.push(obj.sensor);
-            $scope.RadioListText += obj.sensor + '\n';
-          }
-        } else {}
-      });
-    };
-
     // An alert dialog
     $scope.showAlert = function() {
       var alertPopup = $ionicPopup.alert({
@@ -314,6 +274,116 @@ angular.module('app.controllers', [])
       alertPopup.then(function(res) {
         console.log('Thank you for not eating my delicious ice cream cone');
       });
+    };
+  }
+})
+
+.controller('RadioCtrl', function($scope, serviceLog, $ionicPopup, $timeout) {
+  console.log('RadioCtrl');
+
+  var fb_url = localStorage.getItem('firebase_url');
+  if (fb_url != null) {
+
+    $scope.pushCtrl0 = {
+      checked: false
+    };
+
+    $scope.InactiveRadioCodes = [];
+    $scope.ActiveRadioCodes = [];
+
+    // remove radio code
+    $scope.RemoveInactiveRadioCode = function(i) {
+      $scope.InactiveRadioCodes.splice(i, 1);
+    };
+
+    // move radio code to active
+    $scope.ActivateRadioCode = function(i) {
+      $scope.ActiveRadioCodes.push($scope.InactiveRadioCodes[i]);
+      $scope.InactiveRadioCodes.splice(i, 1);
+    };
+
+    // remove radio code
+    $scope.RemoveActiveRadioCode = function(i) {
+      $scope.ActiveRadioCodes.splice(i, 1);
+    };
+
+    // move radio code to inactive
+    $scope.DeactivateRadioCode = function(i) {
+      $scope.InactiveRadioCodes.push($scope.ActiveRadioCodes[i]);
+      $scope.ActiveRadioCodes.splice(i, 1);
+    };
+
+    $scope.SetupRadio = function() {
+      var ref = firebase.database().ref("RadioCodes");
+      ref.child('Active').remove();
+      console.log('active');
+      $scope.ActiveRadioCodes.forEach(function(element) {
+        console.log(element.val());
+        ref.child('Active').push().set(element.val());
+      });
+      ref.child('Inactive').remove();
+      console.log('inactive');
+      $scope.InactiveRadioCodes.forEach(function(element) {
+        console.log(element.val());
+        ref.child('Inactive').push().set(element.val());
+      });
+    }
+
+    $scope.pushCtrl0Change = function() {
+      var ref = firebase.database().ref("control");
+      serviceLog.putlog('radio_learn control ' + $scope.pushCtrl0.checked);
+      if ($scope.pushCtrl0.checked) {
+        ref.update({
+          radio_learn: true
+        });
+      } else {
+        ref.update({
+          radio_learn: false
+        });
+      }
+    };
+
+    $scope.doRefresh = function() {
+      console.log('doRefresh');
+
+      var ref_inactive = firebase.database().ref('RadioCodes/Inactive');
+      var i = 0;
+      $scope.InactiveRadioCodes = [];
+      ref_inactive.once('value', function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+          // console.log(childSnapshot.val());
+          $scope.InactiveRadioCodes.push(childSnapshot);
+          i++;
+        });
+      });
+
+      var ref_active = firebase.database().ref('RadioCodes/Active');
+      var i = 0;
+      $scope.ActiveRadioCodes = [];
+      ref_active.once('value', function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+          // console.log(childSnapshot.val());
+          $scope.ActiveRadioCodes.push(childSnapshot);
+          i++;
+        });
+      });
+
+      var ref = firebase.database().ref("control/radio_learn");
+      // Attach an asynchronous callback to read the data at our posts reference
+      ref.on('value', function(snapshot) {
+        var payload = snapshot.val();
+
+        if (payload == true) {
+          $scope.pushCtrl0.checked = true;
+        } else {
+          $scope.pushCtrl0.checked = false;
+        }
+      }, function(errorObject) {
+        serviceLog.putlog("firebase failed: " + errorObject.code);
+      });
+
+      // $scope.$broadcast("scroll.infiniteScrollComplete");
+      $scope.$broadcast('scroll.refreshComplete');
     };
   }
 })
@@ -359,9 +429,9 @@ angular.module('app.controllers', [])
     $scope.myJson.data[1] = [];
     $scope.myJson.labels = [];
     // 2 days: 2 * (24 * 4)
-    var Ref = firebase.database().ref('logs/TH').limitToLast(2*24*4);
+    var ref = firebase.database().ref('logs/TH').limitToLast(2 * 24 * 4);
     var i = 0;
-    Ref.once('value', function(snapshot) {
+    ref.once('value', function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
         // console.log(childSnapshot.val());
         $scope.myJson.data[0].push(childSnapshot.val().t / 10);
@@ -411,7 +481,9 @@ angular.module('app.controllers', [])
     control_ref.set({
       alarm: false,
       heap: false,
+      led: false,
       monitor: false,
+      radio_learn: false,
       reboot: false,
       scheduler: 10
     });

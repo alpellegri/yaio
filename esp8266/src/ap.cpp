@@ -109,21 +109,21 @@ bool AP_Setup(void) {
 }
 
 bool AP_Loop(void) {
-  uint32_t code;
-  char c_str[25] = "";
+  // uint32_t code;
+  // char c_str[25] = "";
 
   ap_loop_cnt++;
 
-  code = RF_GetRadioCode();
-  if (code != 0) {
-    if (port_id != 0xFF) {
-      Serial.printf(">");
-      sprintf(c_str, "{\"sensor\":\"%06X\"}", code & 0xFFFFFF);
-      // "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
-      webSocket.sendTXT(port_id, c_str);
-    }
-    Serial.printf("code: %08X\n", code);
-  }
+  // code = RF_GetRadioCode();
+  // if (code != 0) {
+  //   if (port_id != 0xFF) {
+  //     Serial.printf(">");
+  //     sprintf(c_str, "{\"sensor\":\"%06X\"}", code & 0xFFFFFF);
+  //     // "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+  //     webSocket.sendTXT(port_id, c_str);
+  //   }
+  //   Serial.printf("code: %08X\n", code);
+  // }
 
   /* websocket only in mode 0 */
   webSocket.loop();
