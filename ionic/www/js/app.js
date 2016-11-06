@@ -1,15 +1,18 @@
 // Ionic Starter App
 
-angular.module('app', ['ionic', 'chart.js', 'app.controllers', 'app.routes', 'app.services', 'app.directives', 'ngCordova'])
+angular.module('app', ['ionic', 'chart.js',
+  'app.services', 'app.controllers', 'app.routes', 'app.directives',
+  'ngCordova'
+])
 
 .run(function($ionicPlatform) {
 
   var config = {
-    apiKey: "AIzaSyBqJWOLi2b0SQJ51Ug0U6hKF5lDBVkRCIQ",
-    authDomain: "ikka.firebaseapp.com",
-    databaseURL: "https://ikka.firebaseio.com",
-    storageBucket: "project-7110587599444694745.appspot.com",
-    messagingSenderId: "110645288431"
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    storageBucket: "",
+    messagingSenderId: ""
   };
 
   var fb_url = localStorage.getItem('firebase_url');
@@ -37,4 +40,7 @@ angular.module('app', ['ionic', 'chart.js', 'app.controllers', 'app.routes', 'ap
       StatusBar.styleDefault();
     }
   });
-})
+});
+
+angular.module('app.controllers', []);
+angular.module('app.service', []);
