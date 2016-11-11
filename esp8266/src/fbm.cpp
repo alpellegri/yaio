@@ -10,6 +10,7 @@
 #include "fbm.h"
 #include "fcm.h"
 #include "rf.h"
+#include "timesrv.h"
 
 #define LED D0
 #define DHTPIN D6
@@ -54,13 +55,17 @@ bool FbmService(void) {
         Serial.println(Firebase.error());
       } else {
         Serial.printf("status/bootcnt: %d\n", bootcnt);
-        Firebase.setInt("status/bootcnt", bootcnt + 1);
+        bootcnt++;
+        Firebase.setInt("status/bootcnt", bootcnt);
         if (Firebase.failed()) {
           Serial.print("set failed: status/bootcnt");
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          FcmSendPush((char *)"boot-up complete");
+          String str = String(getUTC()) + String(" boot-up complete");
+          FcmSendPush(str);
+          Firebase.pushString("logs/Reports", str);
+          // Firebase.pushString("logs/Reports/entry", "boot-up complete");
         }
       }
     }
@@ -172,7 +177,10 @@ bool FbmService(void) {
     if (status_alarm == true) {
       if (code != 0) {
         if (RF_CheckRadioCodeDB(code) == true) {
-          FcmSendPush((char *)"Intrusion!!!");
+          String str = String(getUTC()) + String(" Intrusion!!!");
+          Serial.print(str);
+          FcmSendPush(str);
+          Firebase.pushString("logs/Reports", str);
         } else {
           if (control_radio_learn == true) {
             if (code != fbm_code_last) {

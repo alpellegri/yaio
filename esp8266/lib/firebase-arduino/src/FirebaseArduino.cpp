@@ -39,7 +39,7 @@ String FirebaseArduino::pushBool(const String& path, bool value) {
 }
 
 String FirebaseArduino::pushString(const String& path, const String& value) {
-  JsonVariant json(value);
+  JsonVariant json(value.c_str());
   return push(path, json);
 }
 
@@ -76,12 +76,12 @@ void FirebaseArduino::set(const String& path, const JsonVariant& value) {
 }
 
 FirebaseObject FirebaseArduino::get(const String& path) {
-	auto get = FirebaseGet(host_, auth_, path.c_str(), http_.get());
-	error_ = get.error();
-	if (failed()) {
-		return FirebaseObject{ "" };
-	}
-	return FirebaseObject(get.response().c_str());
+  auto get = FirebaseGet(host_, auth_, path.c_str(), http_.get());
+  error_ = get.error();
+  if (failed()) {
+    return FirebaseObject{""};
+  }
+  return FirebaseObject(get.response().c_str());
 }
 
 int FirebaseArduino::getInt(const String& path) {

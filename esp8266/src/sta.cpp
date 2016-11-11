@@ -10,6 +10,7 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fcm.h"
+#include "timesrv.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -75,9 +76,6 @@ void STA_Loop() {
   if (in != sta_button) {
     sta_button = in;
     if (in == false) {
-      FcmSendPush((char *)"manual button press");
-    }
-    if (in == false) {
       // EE_EraseData();
       // Serial.printf("EEPROM erased\n");
     }
@@ -92,8 +90,10 @@ bool STA_Task(void) {
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
 
   if (WiFi.status() == WL_CONNECTED) {
-    FbmService();
-    FcmService();
+    if (TimeService() == true) {
+      FbmService();
+      FcmService();
+    }
   } else {
     Serial.print("WiFi.status != WL_CONNECTED\n");
   }

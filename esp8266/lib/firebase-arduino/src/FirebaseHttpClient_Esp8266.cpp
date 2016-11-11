@@ -28,7 +28,7 @@ class FirebaseHttpClientEsp8266 : public FirebaseHttpClient {
   }
 
   void begin(const std::string& host, const std::string& path) override {
-    http_.begin(host.c_str(), kFirebasePort, path.c_str(), true, kFirebaseFingerprint);
+    http_.begin(host.c_str(), kFirebasePort, path.c_str(), kFirebaseFingerprint);
   }
 
   void end() override {
@@ -60,13 +60,7 @@ class FirebaseHttpClientEsp8266 : public FirebaseHttpClient {
   }
 
   std::string errorToString(int error_code) override {
-#ifdef USE_ESP_ARDUINO_CORE_2_0_0
-    char buff[11];
-    itoa(error_code, buff, 10);
-    return buff;
-#else
-    return HTTPClient::errorToString(error_code).c_str();
-#endif
+   return HTTPClient::errorToString(error_code).c_str();
   }
 
  private:

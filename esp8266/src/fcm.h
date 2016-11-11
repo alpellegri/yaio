@@ -4,8 +4,6 @@
 #include <Arduino.h>
 
 extern void FcmService(void);
-extern void FcmSendPush(char *message);
-
-extern void TimeService(void);
+extern void FcmSendPush(String& message);
 
 #endif
