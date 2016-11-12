@@ -1,15 +1,15 @@
 <ion-view title="Firebase" id="page5">
   <ion-content padding="true" scroll="true" class="has-header">
     <h4 id="setup-heading5" style="color:#000000;text-align:left;">Control</h4>
-    <button id="setup-configure-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="showPopup()">
+    <button id="setup-configure-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-settings" on-touch="showPopup()">
       Firebase Configuration
     </button>
     <p8 id="setup-heading6" style="white-space: pre; color:#000000;text-align:left;">{{settings.text}}</p8>
-    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="InitFirebase()">
+    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-upload" on-touch="InitFirebase()">
       Init Firebase
     </button>
     <p8 id="setup-heading6" style="white-space: pre; color:#000000;text-align:left;">{{settings.text}}</p8>
-    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="ResetFirebase()">
+    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-refresh" on-touch="ResetFirebase()">
       Reset Firebase
     </button>
     <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>

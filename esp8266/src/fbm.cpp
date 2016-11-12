@@ -10,6 +10,7 @@
 #include "fbm.h"
 #include "fcm.h"
 #include "rf.h"
+#include "timesrv.h"
 
 #define LED D0
 #define DHTPIN D6
@@ -19,6 +20,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 bool boot = false;
 bool status_alarm = false;
+bool status_alarm_last = false;
 bool control_alarm = false;
 bool control_radio_learn = false;
 
@@ -54,13 +56,17 @@ bool FbmService(void) {
         Serial.println(Firebase.error());
       } else {
         Serial.printf("status/bootcnt: %d\n", bootcnt);
-        Firebase.setInt("status/bootcnt", bootcnt + 1);
+        bootcnt++;
+        Firebase.setInt("status/bootcnt", bootcnt);
         if (Firebase.failed()) {
           Serial.print("set failed: status/bootcnt");
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          FcmSendPush((char *)"boot-up complete");
+          String str = String(getUTC()) + String(" boot-up complete");
+          FcmSendPush(str);
+          Firebase.pushString("logs/Reports", str);
+          // Firebase.pushString("logs/Reports/entry", "boot-up complete");
         }
       }
     }
@@ -166,13 +172,29 @@ bool FbmService(void) {
       }
     }
 
+    // log alarm status
+    if (status_alarm_last != status_alarm) {
+      status_alarm_last = status_alarm;
+      String str = String(getUTC());
+      if (status_alarm == true) {
+        str += String(" Alarm active");
+      } else {
+        str += String(" Alarm inactive");
+      }
+      Serial.println(str);
+      Firebase.pushString("logs/Reports", str);
+    }
+
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
     // Serial.printf("control_radio_learn: %d\n", control_radio_learn);
     if (status_alarm == true) {
       if (code != 0) {
         if (RF_CheckRadioCodeDB(code) == true) {
-          FcmSendPush((char *)"Intrusion!!!");
+          String str = String(getUTC()) + String(" Intrusion!!!");
+          Serial.print(str);
+          FcmSendPush(str);
+          Firebase.pushString("logs/Reports", str);
         } else {
           if (control_radio_learn == true) {
             if (code != fbm_code_last) {

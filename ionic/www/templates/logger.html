@@ -1,11 +1,11 @@
-<ion-view title="Logger" id="page4">
+<ion-view title="Log History" id="page4">
   <ion-content padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
     <form class="list">
       <h4 id="logger-heading1" style="color:#000000;font-weight:600;text-align:left;">
             Logs:
       </h4>
       <p8 id="logger-heading2" style="white-space: pre; color:#000000;text-align:left;">{{logsText}}</p8>
     </form>
-    <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>
   </ion-content>
 </ion-view>

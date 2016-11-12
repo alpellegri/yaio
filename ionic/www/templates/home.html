@@ -5,10 +5,10 @@
       <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
         Enable Alarm
       </ion-toggle>
-      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl1.checked" ng-change="pushCtrl1Change()">
+      <ion-toggle toggle-class="toggle-positive" ng-model="pushCtrl1.checked" ng-change="pushCtrl1Change()">
         LED Output
       </ion-toggle>
-      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl3.checked" ng-change="pushCtrl3Change()">
+      <ion-toggle toggle-class="toggle-positive" ng-model="pushCtrl3.checked" ng-change="pushCtrl3Change()">
         Enable Monitoring
       </ion-toggle>
       <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl2.checked" ng-change="pushCtrl2Change()">
@@ -16,10 +16,7 @@
       </ion-toggle>
 
       <div class="list">
-        <a class="item">
-            status.alarm
-            <span class="badge badge-assertive">{{status.alarm}}</span>
-        </a>
+        <ion-checkbox ng-model="status.alarm">status.alarm</ion-checkbox>
         <a class="item">
             status.bootcnt
             <span class="item-note">{{status.bootcnt}}</span>
