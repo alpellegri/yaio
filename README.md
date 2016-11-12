@@ -1,5 +1,5 @@
 # uHome
----
+
 a **Cloud Home Automation** based on:
 * Firbase + FCM
 * Ionic
@@ -7,7 +7,6 @@ a **Cloud Home Automation** based on:
 
 Please note that this is in **Alpha status**. This project is **under heavy development, experimental, unversioned and not stable**.
 
----
 ## **Features**
 * Cloud (Firebase)
 * Hybrid Android app (Ionic)
@@ -16,7 +15,7 @@ Please note that this is in **Alpha status**. This project is **under heavy deve
 * SSD1306
 
 ## Install
----
+
 ### get uHome
 ```
 https://github.com/alpellegri/uHome.git
