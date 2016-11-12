@@ -1,1 +1,33 @@
-# esp8266-ionic-firebase
+uHome
+=====
+a **Cloud Home Automation** based on:
+*Firbase + FCM*
+*Ionic*
+*ESP-8266*
+> **Features**
+> Cloud (Firebase)
+> Hybrid Android app (Ionic)
+> DTH22
+> RF
+> SSD1306
+
+
+Alpha
+-----
+Please note that this is in **Alpha status**. This project is **under heavy development, experimental, unversioned and not stable**.
+
+Getting Started
+---------------
+- get uHome
+https://github.com/alpellegri/uHome.git
+- Firebase
+create a Firebase account
+- Ionic
+First, install Node.js 6.x LTS.
+npm install -g cordova ionic
+cd ionic
+ionic platform add android
+ionic run android
+- ESP8266
+Install platformio
+build esp8266 folder
