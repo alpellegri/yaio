@@ -1,19 +1,15 @@
 #include <Arduino.h>
-
-#include <ESP8266WiFi.h>
-#include <WiFiServer.h>
-
 #include <Hash.h>
 #include <WebSockets.h>
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
-
+#include <WiFiServer.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "ee.h"
-#include "sta.h"
 #include "rf.h"
+#include "sta.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -22,7 +18,6 @@
 const char *ap_ssid = "esp8266";
 const char *ap_password = "123456789";
 
-uint16_t ap_loop_cnt;
 uint16_t ap_task_cnt;
 bool enable_WiFi_Scan = false;
 uint16_t ap_button = 0x55;
@@ -75,7 +70,6 @@ bool AP_Setup(void) {
   bool ret = true;
   bool sts = false;
 
-  ap_loop_cnt = 0;
   ap_task_cnt = 0;
   digitalWrite(LED, false);
 
@@ -109,22 +103,6 @@ bool AP_Setup(void) {
 }
 
 bool AP_Loop(void) {
-  // uint32_t code;
-  // char c_str[25] = "";
-
-  ap_loop_cnt++;
-
-  // code = RF_GetRadioCode();
-  // if (code != 0) {
-  //   if (port_id != 0xFF) {
-  //     Serial.printf(">");
-  //     sprintf(c_str, "{\"sensor\":\"%06X\"}", code & 0xFFFFFF);
-  //     // "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
-  //     webSocket.sendTXT(port_id, c_str);
-  //   }
-  //   Serial.printf("code: %08X\n", code);
-  // }
-
   /* websocket only in mode 0 */
   webSocket.loop();
 }

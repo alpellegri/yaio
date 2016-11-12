@@ -22,6 +22,34 @@ angular.module('app.services', [])
   }
 })
 
+.factory('FirebaseService', function() {
+  console.log('FirebaseService: InitFirebase');
+
+  var service = {};
+  service.init = function() {
+    var fb_init = localStorage.getItem('firebase_init');
+    console.log('firebase_init');
+    console.log(fb_init);
+    if (fb_init == 'true') {
+      var config = {
+        apiKey: "",
+        authDomain: "",
+        databaseURL: "",
+        storageBucket: "",
+        messagingSenderId: ""
+      };
+
+      var fb_url = localStorage.getItem('firebase_url');
+      var fb_secret = localStorage.getItem('fb_secret');
+      var firebase_server_key = localStorage.getItem('firebase_server_key');
+      config.databaseURL = "https://" + fb_url;
+      firebase.initializeApp(config);
+    }
+  }
+
+  return service;
+})
+
 .factory('WebSocketService', function() {
   var service = {};
 

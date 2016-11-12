@@ -7,17 +7,19 @@ angular.module('app', ['ionic', 'chart.js',
 
 .run(function($ionicPlatform) {
 
-  var config = {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    storageBucket: "",
-    messagingSenderId: ""
-  };
-
-  var fb_url = localStorage.getItem('firebase_url');
-  config.databaseURL = "https://" + fb_url;
-  firebase.initializeApp(config);
+  // var config = {
+  //   apiKey: "",
+  //   authDomain: "",
+  //   databaseURL: "",
+  //   storageBucket: "",
+  //   messagingSenderId: ""
+  // };
+  //
+  // var fb_url = localStorage.getItem('firebase_url');
+  // var fb_secret = localStorage.getItem('fb_secret');
+  // var firebase_server_key = localStorage.getItem('firebase_server_key');
+  // config.databaseURL = "https://" + fb_url;
+  // firebase.initializeApp(config);
 
   // var fb_secret = localStorage.getItem('firebase_secret');
   // console.log(fb_secret);
