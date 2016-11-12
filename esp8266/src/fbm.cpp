@@ -20,6 +20,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 bool boot = false;
 bool status_alarm = false;
+bool status_alarm_last = false;
 bool control_alarm = false;
 bool control_radio_learn = false;
 
@@ -169,6 +170,19 @@ bool FbmService(void) {
       } else {
         RF_Disable();
       }
+    }
+
+    // log alarm status
+    if (status_alarm_last != status_alarm) {
+      status_alarm_last = status_alarm;
+      String str = String(getUTC());
+      if (status_alarm == true) {
+        str += String(" Alarm active");
+      } else {
+        str += String(" Alarm inactive");
+      }
+      Serial.println(str);
+      Firebase.pushString("logs/Reports", str);
     }
 
     // monitor for RF radio codes
