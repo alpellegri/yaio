@@ -87,6 +87,7 @@ angular.module('app.controllers', [])
   } else {
     console.log('Firebase not initialized');
     alert('Firebase not initialized');
+    $scope.$broadcast('scroll.refreshComplete');
   }
 })
 
@@ -450,6 +451,12 @@ angular.module('app.controllers', [])
   console.log('firebaseCtrl');
 
   $scope.settings = {};
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
+    $scope.settings.firebase_url = localStorage.getItem('firebase_url');
+    $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
+    $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
+  }
 
   $scope.doRefresh = function() {
     console.log('doRefresh-firebaseCtrl');
@@ -495,15 +502,16 @@ angular.module('app.controllers', [])
     localStorage.removeItem('firebase_url');
     localStorage.removeItem('firebase_secret');
     localStorage.removeItem('firebase_server_key');
+    $scope.settings = {};
   }
 
   // Triggered on a button click, or some other target
   $scope.showPopup = function() {
     var PopupTemplate =
       '<form class="list">' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase_url" ng-model="settings.firebase_url"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase server key" name="server_key" ng-model="settings.server_key"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_url" ng-model="settings.firebase_url"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_secret" ng-model="settings.firebase_secret"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_server_key" ng-model="settings.firebase_server_key"> </label>' +
       '</form>';
 
     // An elaborate, custom popup
@@ -518,7 +526,7 @@ angular.module('app.controllers', [])
         text: '<b>Save</b>',
         type: 'button-positive',
         onTap: function(e) {
-          if (!$scope.settings.firebase_url || !$scope.settings.secret || !$scope.settings.server_key) {
+          if (!$scope.settings.firebase_url || !$scope.settings.firebase_secret || !$scope.settings.firebase_server_key) {
             //don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
