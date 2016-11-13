@@ -1,6 +1,6 @@
-angular.module('app.controllers')
+angular.module('app.controllers.chart', [])
 
-.controller("chartCtrl", ['$scope', '$http', function($scope) {
+.controller("chartCtrl", function($scope) {
   console.log('chartCtrl');
 
   $scope.myJson = {};
@@ -61,4 +61,6 @@ angular.module('app.controllers')
     // $scope.$broadcast("scroll.infiniteScrollComplete");
     $scope.$broadcast('scroll.refreshComplete');
   };
-}]);
+
+  $scope.doRefresh();
+})

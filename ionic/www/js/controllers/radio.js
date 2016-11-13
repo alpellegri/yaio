@@ -1,10 +1,10 @@
-angular.module('app.controllers')
+angular.module('app.controllers.radio', [])
 
-.controller('RadioCtrl', ['$scope', '$http', function($scope, serviceLog, $ionicPopup, $timeout) {
+.controller('RadioCtrl', function($scope, $ionicPopup, $timeout) {
   console.log('RadioCtrl');
 
-  var fb_url = localStorage.getItem('firebase_url');
-  if (fb_url != null) {
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
 
     $scope.pushCtrl0 = {
       checked: false
@@ -53,7 +53,7 @@ angular.module('app.controllers')
 
     $scope.pushCtrl0Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('radio_learn control ' + $scope.pushCtrl0.checked);
+      console.log('radio_learn control ' + $scope.pushCtrl0.checked);
       if ($scope.pushCtrl0.checked) {
         ref.update({
           radio_learn: true
@@ -101,11 +101,13 @@ angular.module('app.controllers')
           $scope.pushCtrl0.checked = false;
         }
       }, function(errorObject) {
-        serviceLog.putlog("firebase failed: " + errorObject.code);
+        console.log("firebase failed: " + errorObject.code);
       });
 
       // $scope.$broadcast("scroll.infiniteScrollComplete");
       $scope.$broadcast('scroll.refreshComplete');
     };
+
+    $scope.doRefresh();
   }
-}]);
+})

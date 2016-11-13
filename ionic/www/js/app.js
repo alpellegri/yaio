@@ -1,7 +1,17 @@
 // Ionic Starter App
 
 angular.module('app', ['ionic', 'chart.js',
-  'app.services', 'app.controllers', 'app.routes', 'app.directives',
+  'app.services',
+  'app.services.firebase',
+  'app.services.websocket',
+  'app.services.push',
+  'app.controllers.home',
+  'app.controllers.node',
+  'app.controllers.radio',
+  'app.controllers.chart',
+  'app.controllers.firebase',
+  'app.controllers.logger',
+  'app.routes', 'app.directives',
   'ngCordova'
 ])
 
@@ -19,6 +29,3 @@ angular.module('app', ['ionic', 'chart.js',
     }
   });
 });
-
-angular.module('app.controllers', []);
-angular.module('app.service', []);
