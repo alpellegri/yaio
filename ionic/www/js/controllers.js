@@ -4,8 +4,6 @@ angular.module('app.controllers', [])
   console.log('homeCtrl');
 
   var fb_init = localStorage.getItem('firebase_init');
-  console.log('firebase_init');
-  console.log(fb_init);
   if (fb_init == 'true') {
 
     FirebaseService.init();
@@ -83,6 +81,7 @@ angular.module('app.controllers', [])
     };
 
     $scope.doRefresh = function() {
+      console.log('doRefresh-HomeCtrl');
       var ref = firebase.database().ref("/");
       // Attach an asynchronous callback to read the data at our posts reference
       ref.on('value', function(snapshot) {
@@ -117,9 +116,13 @@ angular.module('app.controllers', [])
         console.log("firebase failed: " + errorObject.code);
       });
       $scope.$broadcast('scroll.refreshComplete');
+      $scope.$broadcast("scroll.infiniteScrollComplete");
     };
 
     $scope.doRefresh();
+  } else {
+    console.log('Firebase not initialized');
+    alert('Firebase not initialized');
   }
 })
 
@@ -214,7 +217,7 @@ angular.module('app.controllers', [])
     };
 
     $scope.doRefresh = function() {
-      console.log('doRefresh');
+      console.log('doRefresh-NodeCtrl');
       if ($scope.WSStatus == 'Close') {
         $scope.ComButton = 'Connect to Node';
       } else if ($scope.WSStatus == 'Open') {
@@ -485,7 +488,8 @@ angular.module('app.controllers', [])
   $scope.settings = {};
 
   $scope.doRefresh = function() {
-    console.log('doRefresh-firebase');
+    console.log('doRefresh-firebaseCtrl');
+    $scope.$broadcast('scroll.refreshComplete');
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
 
@@ -522,6 +526,7 @@ angular.module('app.controllers', [])
   };
 
   $scope.ResetFirebase = function() {
+    console.log('firebaseCtrl: ResetFirebase');
     localStorage.removeItem('firebase_init');
     localStorage.removeItem('firebase_url');
     localStorage.removeItem('firebase_secret');
