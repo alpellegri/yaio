@@ -1,22 +1,14 @@
 angular.module('app.controllers', [])
 
-.controller('homeCtrl', function($ionicPlatform, $scope, PushService, serviceLog) {
+.controller('homeCtrl', function($ionicPlatform, $scope, PushService, FirebaseService) {
   console.log('homeCtrl');
 
-  var fb_url = localStorage.getItem('firebase_url');
-  if (fb_url != null) {
-    $scope.pushCtrl0 = {
-      checked: false
-    };
-    $scope.pushCtrl1 = {
-      checked: false
-    };
-    $scope.pushCtrl2 = {
-      checked: false
-    };
-    $scope.pushCtrl3 = {
-      checked: false
-    };
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
+
+    FirebaseService.init();
+
+    $scope.control = {};
     $scope.status = {};
 
     // wait for device ready (cordova) before initialize push service
@@ -26,8 +18,7 @@ angular.module('app.controllers', [])
 
     $scope.pushCtrl0Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
-      if ($scope.pushCtrl0.checked) {
+      if ($scope.control.alarm) {
         ref.update({
           alarm: true
         });
@@ -40,8 +31,7 @@ angular.module('app.controllers', [])
 
     $scope.pushCtrl1Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('led control ' + $scope.pushCtrl1.checked);
-      if ($scope.pushCtrl1.checked) {
+      if ($scope.control.led) {
         ref.update({
           led: true
         });
@@ -54,8 +44,7 @@ angular.module('app.controllers', [])
 
     $scope.pushCtrl2Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('reboot control ' + $scope.pushCtrl2.checked);
-      if ($scope.pushCtrl2.checked) {
+      if ($scope.control.reboot) {
         ref.update({
           reboot: true
         });
@@ -68,8 +57,7 @@ angular.module('app.controllers', [])
 
     $scope.pushCtrl3Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('monitor control ' + $scope.pushCtrl3.checked);
-      if ($scope.pushCtrl3.checked) {
+      if ($scope.control.monitor) {
         ref.update({
           monitor: true
         });
@@ -81,53 +69,33 @@ angular.module('app.controllers', [])
     };
 
     $scope.doRefresh = function() {
-      serviceLog.putlog('refresh home');
-
+      console.log('doRefresh-HomeCtrl');
       var ref = firebase.database().ref("/");
       // Attach an asynchronous callback to read the data at our posts reference
       ref.on('value', function(snapshot) {
         var payload = snapshot.val();
-
-        if (payload.control.alarm == true) {
-          $scope.pushCtrl0.checked = true;
-        } else {
-          $scope.pushCtrl0.checked = false;
-        }
-
-        if (payload.control.led == true) {
-          $scope.pushCtrl1.checked = true;
-        } else {
-          $scope.pushCtrl1.checked = false;
-        }
-
-        if (payload.control.monitor == true) {
-          $scope.pushCtrl3.checked = true;
-        } else {
-          $scope.pushCtrl3.checked = false;
-        }
-
-        if (payload.control.reboot == true) {
-          $scope.pushCtrl2.checked = true;
-        } else {
-          $scope.pushCtrl2.checked = false;
-        }
-
+        $scope.control = payload.control;
         $scope.status = payload.status;
       }, function(errorObject) {
-        serviceLog.putlog("firebase failed: " + errorObject.code);
+        console.log("firebase failed: " + errorObject.code);
       });
       $scope.$broadcast('scroll.refreshComplete');
+      $scope.$broadcast("scroll.infiniteScrollComplete");
     };
 
     $scope.doRefresh();
+  } else {
+    console.log('Firebase not initialized');
+    alert('Firebase not initialized');
+    $scope.$broadcast('scroll.refreshComplete');
   }
 })
 
-.controller('NodeCtrl', function($scope, WebSocketService, serviceLog, $ionicPopup, $timeout) {
+.controller('NodeCtrl', function($scope, WebSocketService, $ionicPopup, $timeout) {
   console.log('NodeCtrl');
 
-  var fb_url = localStorage.getItem('firebase_url');
-  if (fb_url != null) {
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
 
     $scope.message = {};
     $scope.WSStatus = 'Close';
@@ -156,7 +124,7 @@ angular.module('app.controllers', [])
         $scope.message = 'Open';
         $scope.WSStatus = 'Open';
         $scope.StsTxt = 'Connected';
-        serviceLog.putlog('ws status: ' + $scope.WSStatus);
+        console.log('ws status: ' + $scope.WSStatus);
         $scope.Text = $scope.message;
       },
       // close
@@ -165,7 +133,7 @@ angular.module('app.controllers', [])
         $scope.message = 'Close';
         $scope.WSStatus = 'Close';
         $scope.StsTxt = 'Disconnected';
-        serviceLog.putlog('ws status: ' + $scope.WSStatus);
+        console.log('ws status: ' + $scope.WSStatus);
         $scope.Text = $scope.message;
       },
       // error
@@ -174,7 +142,7 @@ angular.module('app.controllers', [])
         $scope.message = 'Error';
         $scope.WSStatus = 'Error';
         $scope.StsTxt = 'Error';
-        serviceLog.putlog('ws status: ' + $scope.WSStatus);
+        console.log('ws status: ' + $scope.WSStatus);
         $scope.Text = $scope.message;
       },
       // message
@@ -189,32 +157,32 @@ angular.module('app.controllers', [])
 
     $scope.SetupComCmd = function() {
       if ($scope.WSStatus == 'Close') {
-        serviceLog.putlog('ws connect');
+        console.log('ws connect');
         $scope.StsTxt = 'Connecting...';
         WebSocketService.connect();
       } else if ($scope.WSStatus = 'Open') {
-        serviceLog.putlog('ws disconnect');
+        console.log('ws disconnect');
         $scope.StsTxt = 'Disconnecting...';
         WebSocketService.disconnect();
       } else {
-        serviceLog.putlog('ws cmd not applicable');
+        console.log('ws cmd not applicable');
       }
     };
 
     $scope.SetupComSend = function(settings) {
       if ($scope.WSStatus == 'Open') {
-        serviceLog.putlog('ws send');
+        console.log('ws send');
         var payload = JSON.stringify(settings);
         // console.log(settings);
-        serviceLog.putlog(payload);
+        console.log(payload);
         WebSocketService.send(payload);
       } else {
-        serviceLog.putlog('ws send not applicable');
+        console.log('ws send not applicable');
       }
     };
 
     $scope.doRefresh = function() {
-      console.log('doRefresh');
+      console.log('doRefresh-NodeCtrl');
       if ($scope.WSStatus == 'Close') {
         $scope.ComButton = 'Connect to Node';
       } else if ($scope.WSStatus == 'Open') {
@@ -280,11 +248,11 @@ angular.module('app.controllers', [])
   }
 })
 
-.controller('RadioCtrl', function($scope, serviceLog, $ionicPopup, $timeout) {
+.controller('RadioCtrl', function($scope, $ionicPopup, $timeout) {
   console.log('RadioCtrl');
 
-  var fb_url = localStorage.getItem('firebase_url');
-  if (fb_url != null) {
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
 
     $scope.pushCtrl0 = {
       checked: false
@@ -333,7 +301,7 @@ angular.module('app.controllers', [])
 
     $scope.pushCtrl0Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('radio_learn control ' + $scope.pushCtrl0.checked);
+      console.log('radio_learn control ' + $scope.pushCtrl0.checked);
       if ($scope.pushCtrl0.checked) {
         ref.update({
           radio_learn: true
@@ -381,7 +349,7 @@ angular.module('app.controllers', [])
           $scope.pushCtrl0.checked = false;
         }
       }, function(errorObject) {
-        serviceLog.putlog("firebase failed: " + errorObject.code);
+        console.log("firebase failed: " + errorObject.code);
       });
 
       // $scope.$broadcast("scroll.infiniteScrollComplete");
@@ -457,7 +425,7 @@ angular.module('app.controllers', [])
   $scope.doRefresh();
 })
 
-.controller('loggerCtrl', function($scope, serviceLog) {
+.controller('loggerCtrl', function($scope) {
   console.log('loggerCtrl');
   $scope.logsText = "";
 
@@ -472,7 +440,6 @@ angular.module('app.controllers', [])
       });
     });
 
-    // $scope.logsText = serviceLog.getlog();
     // $scope.$broadcast("scroll.infiniteScrollComplete");
     $scope.$broadcast("scroll.refreshComplete");
   };
@@ -480,17 +447,27 @@ angular.module('app.controllers', [])
   $scope.doRefresh();
 })
 
-.controller('firebaseCtrl', function($scope, serviceLog, $ionicPopup, $timeout) {
+.controller('firebaseCtrl', function($scope, FirebaseService, $ionicPopup, $timeout) {
   console.log('firebaseCtrl');
 
   $scope.settings = {};
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
+    $scope.settings.firebase_url = localStorage.getItem('firebase_url');
+    $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
+    $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
+  }
 
   $scope.doRefresh = function() {
-    console.log('doRefresh-firebase');
+    console.log('doRefresh-firebaseCtrl');
+    $scope.$broadcast('scroll.refreshComplete');
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
 
   $scope.InitFirebase = function() {
+    console.log('firebaseCtrl: InitFirebase');
+    FirebaseService.init();
+
     var ref = firebase.database().ref("/");
 
     // init Firebase: control
@@ -504,6 +481,7 @@ angular.module('app.controllers', [])
       reboot: false,
       scheduler: 10
     });
+
     // init Firebase: status
     var starus_ref = ref.child('status');
     starus_ref.set({
@@ -519,18 +497,21 @@ angular.module('app.controllers', [])
   };
 
   $scope.ResetFirebase = function() {
+    console.log('firebaseCtrl: ResetFirebase');
+    localStorage.removeItem('firebase_init');
     localStorage.removeItem('firebase_url');
     localStorage.removeItem('firebase_secret');
     localStorage.removeItem('firebase_server_key');
+    $scope.settings = {};
   }
 
   // Triggered on a button click, or some other target
   $scope.showPopup = function() {
     var PopupTemplate =
       '<form class="list">' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase_url" ng-model="settings.firebase_url"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase server key" name="server_key" ng-model="settings.server_key"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_url" ng-model="settings.firebase_url"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_secret" ng-model="settings.firebase_secret"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_server_key" ng-model="settings.firebase_server_key"> </label>' +
       '</form>';
 
     // An elaborate, custom popup
@@ -545,11 +526,12 @@ angular.module('app.controllers', [])
         text: '<b>Save</b>',
         type: 'button-positive',
         onTap: function(e) {
-          if (!$scope.settings.firebase_url || !$scope.settings.secret || !$scope.settings.server_key) {
+          if (!$scope.settings.firebase_url || !$scope.settings.firebase_secret || !$scope.settings.firebase_server_key) {
             //don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
             // $scope.settings.ComposeText();
+            localStorage.setItem('firebase_init', true);
             localStorage.setItem('firebase_url', $scope.settings.firebase_url);
             localStorage.setItem('firebase_secret', $scope.settings.secret);
             localStorage.setItem('firebase_server_key', $scope.settings.server_key);

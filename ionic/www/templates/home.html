@@ -2,16 +2,16 @@
   <ion-content padding="true" scroll="true" class="has-header">
     <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
     <form class="list">
-      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
+      <ion-toggle toggle-class="toggle-assertive" ng-model="control.alarm" ng-change="pushCtrl0Change()">
         Enable Alarm
       </ion-toggle>
-      <ion-toggle toggle-class="toggle-positive" ng-model="pushCtrl1.checked" ng-change="pushCtrl1Change()">
+      <ion-toggle toggle-class="toggle-positive" ng-model="control.led" ng-change="pushCtrl1Change()">
         LED Output
       </ion-toggle>
-      <ion-toggle toggle-class="toggle-positive" ng-model="pushCtrl3.checked" ng-change="pushCtrl3Change()">
+      <ion-toggle toggle-class="toggle-positive" ng-model="control.monitor" ng-change="pushCtrl3Change()">
         Enable Monitoring
       </ion-toggle>
-      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl2.checked" ng-change="pushCtrl2Change()">
+      <ion-toggle toggle-class="toggle-assertive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
         Request Reboot
       </ion-toggle>
 
