@@ -9,6 +9,9 @@ angular.module('app.controllers.firebase', [])
     $scope.settings.firebase_url = localStorage.getItem('firebase_url');
     $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
     $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
+    console.log($scope.settings.firebase_url);
+    console.log($scope.settings.firebase_secret);
+    console.log($scope.settings.firebase_server_key);
   }
 
   $scope.doRefresh = function() {
@@ -86,8 +89,8 @@ angular.module('app.controllers.firebase', [])
             // $scope.settings.ComposeText();
             localStorage.setItem('firebase_init', true);
             localStorage.setItem('firebase_url', $scope.settings.firebase_url);
-            localStorage.setItem('firebase_secret', $scope.settings.secret);
-            localStorage.setItem('firebase_server_key', $scope.settings.server_key);
+            localStorage.setItem('firebase_secret', $scope.settings.firebase_secret);
+            localStorage.setItem('firebase_server_key', $scope.settings.firebase_server_key);
             return $scope.settings;
           }
         }
