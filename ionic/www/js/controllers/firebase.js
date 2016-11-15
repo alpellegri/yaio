@@ -21,8 +21,9 @@ angular.module('app.controllers.firebase', [])
   };
 
   $scope.InitFirebase = function() {
-    console.log('firebaseCtrl: InitFirebase');
-    FirebaseService.init();
+    console.log('firebaseCtrl: InitFirebase Database');
+
+    // FirebaseService.init();
 
     var ref = firebase.database().ref("/");
 
@@ -68,16 +69,20 @@ angular.module('app.controllers.firebase', [])
   $scope.showPopup = function() {
     var PopupTemplate =
       '<form class="list">' +
+      '<h9 id="setup-heading5" style="text-align:left;">databaseURL</h9>' +
       '<label class="item item-input"> <input type="text" placeholder="firebase_url" ng-model="settings.firebase_url"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">apiKey</h9>' +
       '<label class="item item-input"> <input type="text" placeholder="firebase_api_key" ng-model="settings.firebase_api_key"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">username</h9>' +
       '<label class="item item-input"> <input type="text" placeholder="firebase_username" ng-model="settings.firebase_username"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">password</h9>' +
       '<label class="item item-input"> <input type="text" placeholder="firebase_password" ng-model="settings.firebase_password"> </label>' +
       '</form>';
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: PopupTemplate,
-      title: 'Account Setup',
+      title: 'Firebase Setup',
       subTitle: '',
       scope: $scope,
       buttons: [{
@@ -87,10 +92,9 @@ angular.module('app.controllers.firebase', [])
         type: 'button-positive',
         onTap: function(e) {
           if (!$scope.settings.firebase_url || !$scope.settings.firebase_api_key || !$scope.settings.firebase_username || !$scope.settings.firebase_password) {
-            //don't allow the user to close unless he enters wifi password
+            // don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
-            // $scope.settings.ComposeText();
             localStorage.setItem('firebase_init', true);
             localStorage.setItem('firebase_url', $scope.settings.firebase_url);
             localStorage.setItem('firebase_api_key', $scope.settings.firebase_api_key);
@@ -106,9 +110,9 @@ angular.module('app.controllers.firebase', [])
       console.log('Tapped!', $scope.settings);
     });
 
-    $timeout(function() {
-      myPopup.close(); //close the popup after 9 seconds for some reason
-    }, 90000);
+    // $timeout(function() {
+    //   myPopup.close();
+    // }, 90000);
   };
 
   // Triggered on a button click, or some other target
@@ -132,10 +136,9 @@ angular.module('app.controllers.firebase', [])
         type: 'button-positive',
         onTap: function(e) {
           if (!$scope.settings.firebase_secret || !$scope.settings.firebase_server_key) {
-            //don't allow the user to close unless he enters wifi password
+            // don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
-            // $scope.settings.ComposeText();
             localStorage.setItem('firebase_secret', $scope.settings.firebase_secret);
             localStorage.setItem('firebase_server_key', $scope.settings.firebase_server_key);
             return $scope.settings;
@@ -148,9 +151,9 @@ angular.module('app.controllers.firebase', [])
       console.log('Tapped!', $scope.settings);
     });
 
-    $timeout(function() {
-      myPopup.close(); //close the popup after 9 seconds for some reason
-    }, 90000);
+    // $timeout(function() {
+    //   myPopup.close();
+    // }, 90000);
   };
 
   // An alert dialog
