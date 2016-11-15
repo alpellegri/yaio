@@ -20,20 +20,28 @@ angular.module('app.services.firebase', [])
           messagingSenderId: ""
         };
 
+        var fb_api_key = localStorage.getItem('firebase_api_key');
         var fb_url = localStorage.getItem('firebase_url');
-        var fb_secret = localStorage.getItem('fb_secret');
-        var firebase_server_key = localStorage.getItem('firebase_server_key');
-        config.databaseURL = "https://" + fb_url;
+        config.apiKey = fb_api_key;
+        config.databaseURL = fb_url;
         firebase.initializeApp(config);
 
-        // var fb_secret = localStorage.getItem('firebase_secret');
-        // console.log(fb_secret);
-        // firebase.auth().signInWithCustomToken(fb_secret).catch(function(error) {
+        var fb_username = localStorage.getItem('firebase_username');
+        var fb_password = localStorage.getItem('firebase_password');
+        // firebase.auth().createUserWithEmailAndPassword('alessio.pellegrinetti@gmail.com', 'slayer123').catch(function(error) {
+        //   console.log('create error');
         //   // Handle Errors here.
         //   var errorCode = error.code;
         //   var errorMessage = error.message;
         //   // ...
         // });
+        firebase.auth().signInWithEmailAndPassword(fb_username, fb_password).catch(function(error) {
+          console.log('auth error');
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // ...
+        });
       }
     }
   }
