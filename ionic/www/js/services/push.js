@@ -22,6 +22,8 @@ angular.module('app.services.push', [])
 
       if (ionic.Platform.isAndroid() == true) {
         // initialize
+        var messagingSenderId = localStorage.getItem('firebase_messagingSenderId');
+        options.android.senderID = messagingSenderId;
         $cordovaPushV5.initialize(options).then(function() {
           // start listening for new notifications
           $cordovaPushV5.onNotification();
@@ -31,17 +33,23 @@ angular.module('app.services.push', [])
           // register to get registrationId
           $cordovaPushV5.register().then(function(token) {
             // `data.registrationId` save it somewhere;
-            console.log(token);
-            var oldRegId = localStorage.getItem('registrationId');
-            if (oldRegId !== token) {
-              // Save new registration ID
-              localStorage.setItem('registrationId', token);
-              console.log('store registrationId to firebase DB');
-              // Post registrationId to your app server as the value has changed
-              var ref = firebase.database().ref("/");
-              var FCM_Registration_IDs_ref = ref.child('FCM_Registration_IDs');
-              FCM_Registration_IDs_ref.push(token);
-            }
+            console.log('FCM token: ' + token);
+            var tokenIDfound = false;
+            var ref = firebase.database().ref('FCM_Registration_IDs');
+            ref.on('value', function(snapshot) {
+              var RegIDs = snapshot;
+              RegIDs.forEach(function(id) {
+                if (id.val() == token) {
+                  tokenIDfound = true;
+                }
+              })
+              console.log('token ID found: ' + tokenIDfound);
+              if (tokenIDfound == false) {
+                // token not found. push it
+                ref.push(token);
+                console.log('token registered');
+              }
+            });
           })
         });
 
@@ -61,7 +69,7 @@ angular.module('app.services.push', [])
 
         // triggered every time error occurs
         $rootScope.$on('$cordovaPushV5:errorOcurred', function(event, e) {
-          // e.message
+          console.log('$cordovaPushV5:errorOcurred: ' + e.message);
         });
       }
     }
