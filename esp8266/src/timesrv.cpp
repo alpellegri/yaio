@@ -15,7 +15,8 @@ static uint8_t TimeServiceCnt;
 static char isodate[25]; // The current time in ISO format is being stored here
 static tmElements_t tm;
 
-char *getUTC(void) { return isodate; }
+char *getTmUTC(void) { return isodate; }
+tmElements_t getTmTime(void) { return tm; }
 
 /*-------- NTP code ----------*/
 
@@ -27,10 +28,10 @@ static const char ntpServerName[] = "us.pool.ntp.org";
 // static const char ntpServerName[] = "time-c.timefreq.bldrdoc.gov";
 
 // local port to listen for UDP packets
-uint16_t localPort = 8888;
+static uint16_t localPort = 8888;
 
 // NTP time stamp is in the first 48 bytes of the message
-const uint16_t NTP_PACKET_SIZE = 48;
+static const uint16_t NTP_PACKET_SIZE = 48;
 
 byte packetBuffer[NTP_PACKET_SIZE]; // buffer to hold incoming
 // and outgoing packets
@@ -48,7 +49,7 @@ static const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30,
 // break the given time_t into time components
 // this is a more compact version of the C library localtime function
 // note that year is offset from 1970 !!!
-void breakTime(time_t time, tmElements_t &tm) {
+static void breakTime(time_t time, tmElements_t &tm) {
 
   uint8_t year;
   uint8_t month, monthLength;
@@ -96,13 +97,13 @@ void breakTime(time_t time, tmElements_t &tm) {
   tm.Month = month + 1; // jan is month 1
   tm.Day = time + 1;    // day of month
 
-  sprintf(isodate, "%d-%02d-%02dT%02d:%02d:%02d", tm.Year, tm.Month, tm.Day,
+  sprintf(isodate, "%d-%02d-%02d %02d:%02d:%02d", tm.Year, tm.Month, tm.Day,
           tm.Hour, tm.Minute, tm.Second);
   // Serial.printf("isodate: %s\n", isodate);
 }
 
 // send an NTP request to the time server at the given address
-void sendNTPpacket(IPAddress &address) {
+static void sendNTPpacket(IPAddress &address) {
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request
@@ -155,8 +156,9 @@ bool TimeService(void) {
     timesrv_run = false;
     Udp.begin(localPort);
     Serial.println("init done");
+    TimeServiceCnt = 30;
   } else {
-    if (TimeServiceCnt < 5) {
+    if (TimeServiceCnt < 30) {
       TimeServiceCnt++;
     } else {
       Serial.println("getNtpTime");
@@ -165,6 +167,8 @@ bool TimeService(void) {
         timesrv_run = true;
         TimeServiceCnt = 0;
         breakTime(mytime, tm);
+      } else {
+        Serial.println("getNtpTime fails");
       }
     }
   }

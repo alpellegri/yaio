@@ -26,10 +26,10 @@ bool control_radio_learn = false;
 
 uint16_t fbm_task_cnt;
 uint32_t heap_size = 0;
-uint16_t fbm_logcnt = 0;
 uint16_t fbm_monitorcnt = 0;
 uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
+uint8_t fbm_minute_last = 0;
 
 /* main function task */
 bool FbmService(void) {
@@ -63,7 +63,7 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          String str = String(getUTC()) + String(" boot-up complete");
+          String str = String(getTmUTC()) + String(" boot-up complete");
           FcmSendPush(str);
           Firebase.pushString("logs/Reports", str);
           // Firebase.pushString("logs/Reports/entry", "boot-up complete");
@@ -74,7 +74,6 @@ bool FbmService(void) {
 
   if (boot == true) {
 
-    // Serial.printf("fbm_logcnt: %d\n", fbm_monitorcnt);
     // every 5 second
     if (++fbm_monitorcnt == (5 / 1)) {
       fbm_monitorcnt = 0;
@@ -124,19 +123,27 @@ bool FbmService(void) {
             }
           }
 
-          Serial.printf("fbm_logcnt: %d\n", fbm_logcnt);
+          tmElements_t time_now = getTmTime();
+          // modulo 60 arithmetic
+          uint8_t delta = ((time_now.Minute + 60) - fbm_minute_last) % 60;
           // log every 15 minutes
-          if (++fbm_logcnt == (60 * 15 / 5)) {
-            fbm_logcnt = 0;
+          if (delta > 15) {
             StaticJsonBuffer<128> jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
+            // timestamp in hour*10
+            th["@"] = 10 * time_now.Hour + time_now.Minute / 6;
             th["t"] = temperature_data;
             th["h"] = humidity_data;
             Firebase.push("logs/TH", JsonVariant(th));
             if (Firebase.failed()) {
               Serial.print("push failed: logs/TH");
               Serial.println(Firebase.error());
+            } else {
+              // update in case of success
+              fbm_minute_last = time_now.Minute;
             }
+          } else {
+            /* do nothing */
           }
         } else {
           Serial.print("monitor suspended\n");
@@ -175,7 +182,7 @@ bool FbmService(void) {
     // log alarm status
     if (status_alarm_last != status_alarm) {
       status_alarm_last = status_alarm;
-      String str = String(getUTC());
+      String str = String(getTmUTC());
       if (status_alarm == true) {
         str += String(" Alarm active");
       } else {
@@ -191,7 +198,7 @@ bool FbmService(void) {
     if (status_alarm == true) {
       if (code != 0) {
         if (RF_CheckRadioCodeDB(code) == true) {
-          String str = String(getUTC()) + String(" Intrusion!!!");
+          String str = String(getTmUTC()) + String(" Intrusion!!!");
           Serial.print(str);
           FcmSendPush(str);
           Firebase.pushString("logs/Reports", str);
@@ -206,7 +213,6 @@ bool FbmService(void) {
         }
       }
     }
-
   } else {
     Serial.print("fbm yield\n");
   }
