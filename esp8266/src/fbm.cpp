@@ -29,7 +29,7 @@ uint32_t heap_size = 0;
 uint16_t fbm_monitorcnt = 0;
 uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
-uint8_t fbm_minute_last = 0;
+uint32_t fbm_time_last = 0;
 
 /* main function task */
 bool FbmService(void) {
@@ -123,14 +123,15 @@ bool FbmService(void) {
             }
           }
 
-          tmElements_t time_now = getTmTime();
+          // convert to minutes
+          uint32_t time_now = getTime() / 60;
           // modulo 60 arithmetic
-          uint8_t delta = ((time_now.Minute + 60) - fbm_minute_last) % 60;
+          uint32_t delta = (time_now - fbm_time_last);
           // log every 15 minutes
           if (delta > 15) {
             StaticJsonBuffer<128> jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
-            th["time"] = 60*time_now.Hour + time_now.Minute;
+            th["time"] = time_now;
             th["t"] = temperature_data;
             th["h"] = humidity_data;
             Firebase.push("logs/TH", JsonVariant(th));
@@ -139,7 +140,7 @@ bool FbmService(void) {
               Serial.println(Firebase.error());
             } else {
               // update in case of success
-              fbm_minute_last = time_now.Minute;
+              fbm_time_last = time_now;
             }
           } else {
             /* do nothing */

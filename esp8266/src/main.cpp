@@ -63,7 +63,7 @@ void setup() {
 
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT);
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   EE_Setup();
 
