@@ -127,7 +127,7 @@ static void sendNTPpacket(IPAddress &address) {
   Udp.endPacket();
 }
 
-time_t getNtpTime(void) {
+static time_t getNtpTime(void) {
   IPAddress ntpServerIP; // NTP server's ip address
 
   while (Udp.parsePacket() > 0)
@@ -161,7 +161,9 @@ bool TimeService(void) {
     Serial.println("getNtpTime init done");
     TimeServiceCnt = -2;
   } else {
-    if (++TimeServiceCnt > 15) {
+    if (TimeServiceCnt < 15) {
+      TimeServiceCnt++;
+    } else {
       Serial.println("getNtpTime");
       time_t mytime = getNtpTime();
       if (mytime != 0) {
