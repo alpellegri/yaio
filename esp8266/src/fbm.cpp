@@ -130,8 +130,7 @@ bool FbmService(void) {
           if (delta > 15) {
             StaticJsonBuffer<128> jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
-            // timestamp in hour*10
-            th["@"] = 10 * time_now.Hour + time_now.Minute / 6;
+            th["time"] = 60*time_now.Hour + time_now.Minute;
             th["t"] = temperature_data;
             th["h"] = humidity_data;
             Firebase.push("logs/TH", JsonVariant(th));

@@ -155,7 +155,7 @@ bool TimeService(void) {
     timesrv_setup = 1;
     timesrv_run = false;
     Udp.begin(localPort);
-    Serial.println("init done");
+    Serial.println("getNtpTime init done");
     TimeServiceCnt = 30;
   } else {
     if (TimeServiceCnt < 30) {
@@ -167,6 +167,7 @@ bool TimeService(void) {
         timesrv_run = true;
         TimeServiceCnt = 0;
         breakTime(mytime, tm);
+        Serial.println(getTmUTC());
       } else {
         Serial.println("getNtpTime fails");
       }
