@@ -1,6 +1,14 @@
 <ion-view title="Chart" id="page3">
   <ion-content padding="true" scroll="true" class="has-header">
     <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
-    <canvas id="myChart" class="chart chart-line" chart-data="myJson.data" chart-labels="myJson.labels" chart-series="myJson.series" chart-options="myJson.options" chart-dataset-override="myJson.datasetOverride" chart-click="onClick" </canvas>
+    <div class="chart-line">
+      <canvas id="myChart" class="chart chart-line" chart-data="myJson.data" chart-labels="myJson.labels" chart-series="myJson.series" chart-options="myJson.options" chart-dataset-override="myJson.datasetOverride" chart-click="onClick" </canvas>
+    </div>
+    <div class="chart-radar">
+      <canvas id="myChart" class="chart chart-radar" chart-data="JsonT.data" chart-labels="myJson.labels" </canvas>
+    </div>
+    <div class="chart-radar">
+      <canvas id="myChart" class="chart chart-radar" chart-data="JsonH.data" chart-labels="myJson.labels" </canvas>
+    </div>
   </ion-content>
 </ion-view>
