@@ -39,7 +39,6 @@ angular.module('app.controllers.chart', [])
 
     var date = new Date();
     var curr = Math.round(4*(date.getHours() + date.getMinutes()/60));
-    console.log(curr);
 
     $scope.myJson.data[0] = [];
     $scope.myJson.data[1] = [];
