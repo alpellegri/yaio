@@ -37,17 +37,20 @@ angular.module('app.controllers.chart', [])
   $scope.doRefresh = function() {
     console.log('doRefresh');
 
+    var date = new Date();
+    var curr = Math.round(4*(date.getHours() + date.getMinutes()/60));
+    console.log(curr);
+
     $scope.myJson.data[0] = [];
     $scope.myJson.data[1] = [];
     $scope.myJson.labels = [];
-    // 2 days: 2 * (24 * 4)
-    var ref = firebase.database().ref('logs/TH').limitToLast(2 * 24 * 4);
-    var i = 0;
+    // 2 days: 2 * (24 * 4) -> 192
+    var ref = firebase.database().ref('logs/TH').limitToLast(192);
     ref.once('value', function(snapshot) {
-      snapshot.forEach(function(childSnapshot) {
-        // console.log(childSnapshot.val());
-        $scope.myJson.data[0].push(childSnapshot.val().t / 10);
-        $scope.myJson.data[1].push(childSnapshot.val().h / 10);
+      var i = curr - (snapshot.numChildren()-192);
+      snapshot.forEach(function(el) {
+        $scope.myJson.data[0].push(el.val().t / 10);
+        $scope.myJson.data[1].push(el.val().h / 10);
         if (i % 4 == 0) {
           var ii = (i / 4) % 24; // wrap hour: every one days
           $scope.myJson.labels.push(ii.toString());
