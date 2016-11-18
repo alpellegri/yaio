@@ -1,16 +1,31 @@
-angular.module('app.controllers')
+angular.module('app.controllers.firebase', [])
 
-.controller('firebaseCtrl', ['$scope', '$http', function($scope, serviceLog, $ionicPopup, $timeout) {
+.controller('firebaseCtrl', function($scope, FirebaseService, $ionicPopup, $timeout) {
   console.log('firebaseCtrl');
 
   $scope.settings = {};
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
+    $scope.settings.firebase_url = localStorage.getItem('firebase_url');
+    $scope.settings.firebase_messagingSenderId = localStorage.getItem('firebase_messagingSenderId');
+    $scope.settings.firebase_username = localStorage.getItem('firebase_username');
+    $scope.settings.firebase_password = localStorage.getItem('firebase_password');
+    $scope.settings.firebase_api_key = localStorage.getItem('firebase_api_key');
+    $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
+    $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
+  }
 
   $scope.doRefresh = function() {
-    console.log('doRefresh-firebase');
+    console.log('doRefresh-firebaseCtrl');
+    $scope.$broadcast('scroll.refreshComplete');
     $scope.$broadcast("scroll.infiniteScrollComplete");
   };
 
   $scope.InitFirebase = function() {
+    console.log('firebaseCtrl: InitFirebase Database');
+
+    // FirebaseService.init();
+
     var ref = firebase.database().ref("/");
 
     // init Firebase: control
@@ -24,6 +39,7 @@ angular.module('app.controllers')
       reboot: false,
       scheduler: 10
     });
+
     // init Firebase: status
     var starus_ref = ref.child('status');
     starus_ref.set({
@@ -39,24 +55,34 @@ angular.module('app.controllers')
   };
 
   $scope.ResetFirebase = function() {
+    console.log('firebaseCtrl: ResetFirebase');
+    localStorage.removeItem('firebase_init');
     localStorage.removeItem('firebase_url');
+    localStorage.removeItem('firebase_messagingSenderId');
+    localStorage.removeItem('firebase_username');
+    localStorage.removeItem('firebase_password');
+    localStorage.removeItem('firebase_api_key');
     localStorage.removeItem('firebase_secret');
     localStorage.removeItem('firebase_server_key');
+    $scope.settings = {};
   }
 
   // Triggered on a button click, or some other target
-  $scope.showPopup = function() {
+  $scope.showPopupFbConfig = function() {
     var PopupTemplate =
       '<form class="list">' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase url" name="firebase_url" ng-model="settings.firebase_url"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase secret" name="secret" ng-model="settings.secret"> </label>' +
-      '<label class="item item-input"> <input type="text" placeholder="firebase server key" name="server_key" ng-model="settings.server_key"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">databaseURL</h9>' +
+      '<label class="item item-input"> <input type="text" placeholder="databaseURL" ng-model="settings.firebase_url"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">messagingSenderId</h9>' +
+      '<label class="item item-input"> <input type="text" placeholder="messagingSenderId" ng-model="settings.firebase_messagingSenderId"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">apiKey</h9>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_api_key" ng-model="settings.firebase_api_key"> </label>' +
       '</form>';
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: PopupTemplate,
-      title: 'Firebase setup',
+      title: 'Firebase Setup',
       subTitle: '',
       scope: $scope,
       buttons: [{
@@ -65,14 +91,14 @@ angular.module('app.controllers')
         text: '<b>Save</b>',
         type: 'button-positive',
         onTap: function(e) {
-          if (!$scope.settings.firebase_url || !$scope.settings.secret || !$scope.settings.server_key) {
-            //don't allow the user to close unless he enters wifi password
+          if (!$scope.settings.firebase_url || !$scope.settings.firebase_messagingSenderId || !$scope.settings.firebase_api_key) {
+            // don't allow the user to close unless he enters wifi password
             e.preventDefault();
           } else {
-            // $scope.settings.ComposeText();
+            localStorage.setItem('firebase_init', true);
             localStorage.setItem('firebase_url', $scope.settings.firebase_url);
-            localStorage.setItem('firebase_secret', $scope.settings.secret);
-            localStorage.setItem('firebase_server_key', $scope.settings.server_key);
+            localStorage.setItem('firebase_messagingSenderId', $scope.settings.firebase_messagingSenderId);
+            localStorage.setItem('firebase_api_key', $scope.settings.firebase_api_key);
             return $scope.settings;
           }
         }
@@ -83,9 +109,93 @@ angular.module('app.controllers')
       console.log('Tapped!', $scope.settings);
     });
 
-    $timeout(function() {
-      myPopup.close(); //close the popup after 9 seconds for some reason
-    }, 90000);
+    // $timeout(function() {
+    //   myPopup.close();
+    // }, 90000);
+  };
+
+  // Triggered on a button click, or some other target
+  $scope.showPopupLogin = function() {
+    var PopupTemplate =
+      '<form class="list">' +
+      '<h9 id="setup-heading5" style="text-align:left;">username</h9>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_username" ng-model="settings.firebase_username"> </label>' +
+      '<h9 id="setup-heading5" style="text-align:left;">password</h9>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_password" ng-model="settings.firebase_password"> </label>' +
+      '</form>';
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      template: PopupTemplate,
+      title: 'Firebase Setup',
+      subTitle: '',
+      scope: $scope,
+      buttons: [{
+        text: 'Cancel'
+      }, {
+        text: '<b>Save</b>',
+        type: 'button-positive',
+        onTap: function(e) {
+          if (!$scope.settings.firebase_username || !$scope.settings.firebase_password) {
+            // don't allow the user to close unless he enters wifi password
+            e.preventDefault();
+          } else {
+            localStorage.setItem('firebase_username', $scope.settings.firebase_username);
+            localStorage.setItem('firebase_password', $scope.settings.firebase_password);
+            return $scope.settings;
+          }
+        }
+      }]
+    });
+
+    myPopup.then(function(res) {
+      console.log('Tapped!', $scope.settings);
+    });
+
+    // $timeout(function() {
+    //   myPopup.close();
+    // }, 90000);
+  };
+
+  // Triggered on a button click, or some other target
+  $scope.showPopupFbAdminSecrets = function() {
+    var PopupTemplate =
+      '<form class="list">' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_secret" ng-model="settings.firebase_secret"> </label>' +
+      '<label class="item item-input"> <input type="text" placeholder="firebase_server_key" ng-model="settings.firebase_server_key"> </label>' +
+      '</form>';
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      template: PopupTemplate,
+      title: 'Secrets Setup',
+      subTitle: '',
+      scope: $scope,
+      buttons: [{
+        text: 'Cancel'
+      }, {
+        text: '<b>Save</b>',
+        type: 'button-positive',
+        onTap: function(e) {
+          if (!$scope.settings.firebase_secret || !$scope.settings.firebase_server_key) {
+            // don't allow the user to close unless he enters wifi password
+            e.preventDefault();
+          } else {
+            localStorage.setItem('firebase_secret', $scope.settings.firebase_secret);
+            localStorage.setItem('firebase_server_key', $scope.settings.firebase_server_key);
+            return $scope.settings;
+          }
+        }
+      }]
+    });
+
+    myPopup.then(function(res) {
+      console.log('Tapped!', $scope.settings);
+    });
+
+    // $timeout(function() {
+    //   myPopup.close();
+    // }, 90000);
   };
 
   // An alert dialog
@@ -99,4 +209,4 @@ angular.module('app.controllers')
       console.log('Thank you for not eating my delicious ice cream cone');
     });
   };
-}]);
+})

@@ -1,22 +1,14 @@
-angular.module('app.controllers')
+angular.module('app.controllers.home', [])
 
-.controller('homeCtrl', ['$scope', '$http', '$ionicPlatform', function($ionicPlatform, $scope, PushService, serviceLog) {
+.controller('homeCtrl', function($ionicPlatform, $scope, PushService, FirebaseService) {
   console.log('homeCtrl');
 
-  var fb_url = localStorage.getItem('firebase_url');
-  if (fb_url != null) {
-    $scope.pushCtrl0 = {
-      checked: false
-    };
-    $scope.pushCtrl1 = {
-      checked: false
-    };
-    $scope.pushCtrl2 = {
-      checked: false
-    };
-    $scope.pushCtrl3 = {
-      checked: false
-    };
+  var fb_init = localStorage.getItem('firebase_init');
+  if (fb_init == 'true') {
+
+    FirebaseService.init();
+
+    $scope.control = {};
     $scope.status = {};
 
     // wait for device ready (cordova) before initialize push service
@@ -26,8 +18,7 @@ angular.module('app.controllers')
 
     $scope.pushCtrl0Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('alarm control ' + $scope.pushCtrl0.checked);
-      if ($scope.pushCtrl0.checked) {
+      if ($scope.control.alarm) {
         ref.update({
           alarm: true
         });
@@ -40,8 +31,7 @@ angular.module('app.controllers')
 
     $scope.pushCtrl1Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('led control ' + $scope.pushCtrl1.checked);
-      if ($scope.pushCtrl1.checked) {
+      if ($scope.control.led) {
         ref.update({
           led: true
         });
@@ -54,8 +44,7 @@ angular.module('app.controllers')
 
     $scope.pushCtrl2Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('reboot control ' + $scope.pushCtrl2.checked);
-      if ($scope.pushCtrl2.checked) {
+      if ($scope.control.reboot) {
         ref.update({
           reboot: true
         });
@@ -68,8 +57,7 @@ angular.module('app.controllers')
 
     $scope.pushCtrl3Change = function() {
       var ref = firebase.database().ref("control");
-      serviceLog.putlog('monitor control ' + $scope.pushCtrl3.checked);
-      if ($scope.pushCtrl3.checked) {
+      if ($scope.control.monitor) {
         ref.update({
           monitor: true
         });
@@ -81,42 +69,24 @@ angular.module('app.controllers')
     };
 
     $scope.doRefresh = function() {
-      serviceLog.putlog('refresh home');
-
+      console.log('doRefresh-HomeCtrl');
       var ref = firebase.database().ref("/");
       // Attach an asynchronous callback to read the data at our posts reference
       ref.on('value', function(snapshot) {
         var payload = snapshot.val();
-
-        if (payload.control.alarm == true) {
-          $scope.pushCtrl0.checked = true;
-        } else {
-          $scope.pushCtrl0.checked = false;
-        }
-
-        if (payload.control.led == true) {
-          $scope.pushCtrl1.checked = true;
-        } else {
-          $scope.pushCtrl1.checked = false;
-        }
-
-        if (payload.control.monitor == true) {
-          $scope.pushCtrl3.checked = true;
-        } else {
-          $scope.pushCtrl3.checked = false;
-        }
-
-        if (payload.control.reboot == true) {
-          $scope.pushCtrl2.checked = true;
-        } else {
-          $scope.pushCtrl2.checked = false;
-        }
-
+        $scope.control = payload.control;
         $scope.status = payload.status;
       }, function(errorObject) {
-        serviceLog.putlog("firebase failed: " + errorObject.code);
+        console.log("firebase failed: " + errorObject.code);
       });
       $scope.$broadcast('scroll.refreshComplete');
+      $scope.$broadcast("scroll.infiniteScrollComplete");
     };
+
+    $scope.doRefresh();
+  } else {
+    console.log('Firebase not initialized');
+    alert('Firebase not initialized');
+    $scope.$broadcast('scroll.refreshComplete');
   }
-}]);
+})

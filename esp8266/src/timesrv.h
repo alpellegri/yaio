@@ -14,6 +14,8 @@ typedef struct {
 } tmElements_t;
 
 extern bool TimeService(void);
-extern char* getUTC(void);
+extern char* getTmUTC(void);
+extern tmElements_t getTmTime(void);
+extern uint32_t getTime(void);
 
 #endif

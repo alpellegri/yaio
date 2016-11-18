@@ -27,8 +27,7 @@ uint8_t mode;
 uint8_t flip_mode = 1;
 uint16_t count = 0;
 
-/* schedule every 5s */
-uint16_t status_scheduler = 10;
+uint16_t status_scheduler = 1;
 uint16_t scheduler_cnt = 0;
 bool scheduler_flag = false;
 
@@ -64,11 +63,11 @@ void setup() {
 
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT);
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   EE_Setup();
 
-  flipper.attach(0.1, flip);
+  flipper.attach(1.0, flip);
 
   Serial.println();
   Serial.println("Starting");

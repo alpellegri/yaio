@@ -90,6 +90,7 @@ bool STA_Task(void) {
   Serial.printf("task_cnt: %d\n", sta_task_cnt);
 
   if (WiFi.status() == WL_CONNECTED) {
+    // wait for time service is up
     if (TimeService() == true) {
       FbmService();
       FcmService();
