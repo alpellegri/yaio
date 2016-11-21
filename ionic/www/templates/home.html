@@ -1,43 +1,23 @@
 <ion-view title="Home" id="page1">
-  <ion-content padding="true" scroll="true" class="has-header">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
     <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
-    <form class="list">
-      <ion-toggle toggle-class="toggle-assertive" ng-model="control.alarm" ng-change="pushCtrl0Change()">
-        Enable Alarm
-      </ion-toggle>
-      <ion-toggle toggle-class="toggle-positive" ng-model="control.led" ng-change="pushCtrl1Change()">
-        LED Output
-      </ion-toggle>
-      <ion-toggle toggle-class="toggle-positive" ng-model="control.monitor" ng-change="pushCtrl3Change()">
-        Enable Monitoring
-      </ion-toggle>
-      <ion-toggle toggle-class="toggle-assertive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
-        Request Reboot
-      </ion-toggle>
-
-      <div class="list">
-        <ion-checkbox ng-model="status.alarm">status.alarm</ion-checkbox>
-        <a class="item">
-            status.bootcnt
-            <span class="item-note">{{status.bootcnt}}</span>
-        </a>
-        <a class="item">
-            status.upcnt
-            <span class="item-note">{{status.upcnt}}</span>
-        </a>
-        <a class="item">
-            status.heap
-            <span class="item-note">{{status.heap}}</span>
-        </a>
-        <a class="item">
-            status.temperature
-            <span class="item-note">{{status.temperature/10}}</span>
-        </a>
-        <a class="item">
-            status.humidity
-            <span class="item-note">{{status.humidity/10}}</span>
-        </a>
-      </div>
-    </form>
+    <ion-toggle toggle-class="toggle-light" ng-model="control.alarm" ng-change="pushCtrl0Change()">
+      Enable Alarm
+    </ion-toggle>
+    <ion-toggle toggle-class="toggle-dark" ng-model="control.led" ng-change="pushCtrl1Change()">
+      LED Output
+    </ion-toggle>
+    <ion-toggle toggle-class="toggle-dark" ng-model="control.monitor" ng-change="pushCtrl3Change()">
+      Enable Monitoring
+    </ion-toggle>
+    <ion-toggle toggle-class="toggle-dark" ng-model="control.reboot" ng-change="pushCtrl2Change()">
+      Request Reboot
+    </ion-toggle>
+    <ion-checkbox ng-model="status.alarm">status.alarm</ion-checkbox>
+    <a class="item">status.bootcnt<span class="item-note">{{status.bootcnt}}</span>
+    <a class="item">status.upcnt<span class="item-note">{{status.upcnt}}</span></a>
+    <a class="item">status.heap<span class="item-note">{{status.heap}}</span></a>
+    <a class="item">status.temperature<span class="item-note">{{status.temperature/10}}</span></a>
+    <a class="item">status.humidity<span class="item-note">{{status.humidity/10}}</span></a>
   </ion-content>
 </ion-view>

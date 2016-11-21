@@ -1,22 +1,18 @@
 <ion-view title="Radio Setup" id="page6">
-  <ion-content padding="true" scroll="true" class="has-header">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
     <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
-    <form class="list">
-      <ion-toggle toggle-class="toggle-assertive" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
-        Enable Radio Codes Learning
-      </ion-toggle>
-    </form>
+    <ion-toggle toggle-class="toggle-dark" ng-model="pushCtrl0.checked" ng-change="pushCtrl0Change()">
+      Enable Radio Codes Learning
+    </ion-toggle>
     <div class="list card">
-      <div class="item item-divider">
-        Inactive Radio Codes
-      </div>
+      <div class="item item-divider">Inactive Radio Codes</div>
       <ion-list can-swipe="true">
         <ion-item ng-repeat="RadioCode in InactiveRadioCodes">
           <i class="icon ion-wifi"></i>
-          <ion-option-button class="button-positive icon-left ion-social-rss" ng-click="ActivateRadioCode($index)">
+          <ion-option-button class="button-light icon-left ion-social-rss" ng-click="ActivateRadioCode($index)">
             Activate
           </ion-option-button>
-          <ion-option-button class="button-info icon-left ion-trash-b" ng-click="RemoveInactiveRadioCode($index)">
+          <ion-option-button class="button-dark icon-left ion-trash-b" ng-click="RemoveInactiveRadioCode($index)">
             Remove
           </ion-option-button>
           {{RadioCode.val().toString(16).toUpperCase()}}
@@ -24,23 +20,21 @@
       </ion-list>
     </div>
     <div class="list card">
-      <div class="item item-divider">
-        Active Radio Codes
-      </div>
+      <div class="item item-divider">Active Radio Codes</div>
       <ion-list <ion-list can-swipe="true">
         <ion-item ng-repeat="RadioCode in ActiveRadioCodes">
           <i class="icon ion-wifi"></i>
-          <ion-option-button class="button-positive icon-left ion-social-rss-outline" ng-click="DeactivateRadioCode($index)">
+          <ion-option-button class="button-light icon-left ion-social-rss-outline" ng-click="DeactivateRadioCode($index)">
             Deactivate
           </ion-option-button>
-          <ion-option-button class="button-info icon-left ion-trash-b" ng-click="RemoveActiveRadioCode($index)">
+          <ion-option-button class="button-dark icon-left ion-trash-b" ng-click="RemoveActiveRadioCode($index)">
             Remove
           </ion-option-button>
           {{RadioCode.val().toString(16).toUpperCase()}}
         </ion-item>
       </ion-list>
     </div>
-    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-upload" on-touch="SetupRadio()">
+    <button id="setup-update" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-touch="SetupRadio()">
       Update Radio Codes Configuration
     </button>
   </ion-content>
