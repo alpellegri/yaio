@@ -36,7 +36,7 @@ WiFiUDP UDP;
 /**
  * The target IP address to send the magic packet to.
  */
-IPAddress computer_ip(192, 168, 1, 2);
+IPAddress computer_ip(192, 168, 1, 255);
 
 /**
  * The targets MAC address to send the packet to
