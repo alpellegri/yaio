@@ -53,6 +53,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     len = strlen((char *)payload);
     if (len != 0) {
       // save to epprom
+      EE_EraseData();
       EE_StoreData((uint8_t *)payload, len);
     }
     break;

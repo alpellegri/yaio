@@ -22,7 +22,10 @@ char *EE_GetSSID() { return sta_ssid; }
 
 char *EE_GetPassword() { return sta_password; }
 
-char *EE_GetFirebaseUrl() { return firebase_url; }
+char *EE_GetFirebaseUrl() {
+  /* strip 8 chars: "https://" */
+  return &firebase_url[8];
+}
 
 char *EE_GetFirebaseSecret() { return firebase_secret; }
 
