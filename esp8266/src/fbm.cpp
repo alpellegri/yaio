@@ -133,7 +133,7 @@ bool FbmService(void) {
           int temperature_data = 10 * dht.readTemperature();
 
           {
-            StaticJsonBuffer<256> jsonBuffer;
+            StaticJsonBuffer<512> jsonBuffer;
             JsonObject &status = jsonBuffer.createObject();
             status["alarm"] = status_alarm;
             // digitalWrite(LED, !(status_alarm == true));
@@ -145,6 +145,7 @@ bool FbmService(void) {
             status["humidity"] = humidity_data;
             status["temperature"] = temperature_data;
             status["upcnt"] = fbm_task_cnt++;
+            status["time"] = getTime();
             Firebase.set("status", JsonVariant(status));
             if (Firebase.failed()) {
               Serial.print("set failed: status");

@@ -1,23 +1,22 @@
 #include <ESP8266WiFi.h>
-#include <FirebaseArduino.h>
 #include <WiFiUdp.h>
 #include <string.h>
 
 #include "timesrv.h"
 
+/* seconds */
+#define NTP_UPDATE_INTERVAL (5*60)
+
 static const int timeZone = +1; // Time offset from GMT
 
 static uint8_t timesrv_setup = 0;
 static bool timesrv_run = false;
-static uint8_t TimeServiceCnt;
+static uint16_t TimeServiceCnt;
 
 static char isodate[25]; // The current time in ISO format is being stored here
 static tmElements_t tm;
-static uint32_t local_time;
-
-char *getTmUTC(void) { return isodate; }
-tmElements_t getTmTime(void) { return tm; }
-uint32_t getTime(void) { return local_time; }
+static time_t local_time;
+static time_t start_time;
 
 /*-------- NTP code ----------*/
 
@@ -54,7 +53,7 @@ static void breakTime(time_t time, tmElements_t &tm) {
 
   uint8_t year;
   uint8_t month, monthLength;
-  unsigned long days;
+  uint32_t days;
 
   local_time = time;
 
@@ -127,7 +126,7 @@ static void sendNTPpacket(IPAddress &address) {
   Udp.endPacket();
 }
 
-static time_t getNtpTime(void) {
+static uint32_t getNtpTime(void) {
   IPAddress ntpServerIP; // NTP server's ip address
 
   while (Udp.parsePacket() > 0)
@@ -141,7 +140,7 @@ static time_t getNtpTime(void) {
     int size = Udp.parsePacket();
     if (size >= NTP_PACKET_SIZE) {
       Udp.read(packetBuffer, NTP_PACKET_SIZE); // read packet into the buffer
-      unsigned long secsSince1900;
+      uint32_t secsSince1900;
       // convert four bytes starting at location 40 to a long integer
       secsSince1900 = (unsigned long)packetBuffer[40] << 24;
       secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
@@ -153,23 +152,42 @@ static time_t getNtpTime(void) {
   return 0; // return 0 if unable to get the time
 }
 
+char *getTmUTC(void) {
+  time_t mytime = getTime();
+  breakTime(mytime, tm);
+  return isodate;
+}
+
+tmElements_t getTmTime(void) {
+  time_t mytime = getTime();
+  breakTime(mytime, tm);
+  return tm;
+}
+
+void time_set(uint32_t time) {
+  start_time = millis() / 1000;
+  local_time = time;
+}
+
+time_t getTime(void) { return (millis() / 1000 - start_time + local_time); }
+
 bool TimeService(void) {
   if (timesrv_setup == 0) {
     timesrv_setup = 1;
     timesrv_run = false;
     Udp.begin(localPort);
     Serial.println("getNtpTime init done");
-    TimeServiceCnt = -2;
+    TimeServiceCnt = -1;
   } else {
-    if (TimeServiceCnt < 15) {
+    if (TimeServiceCnt < NTP_UPDATE_INTERVAL) {
       TimeServiceCnt++;
     } else {
       Serial.println("getNtpTime");
       time_t mytime = getNtpTime();
       if (mytime != 0) {
+        time_set(mytime);
         timesrv_run = true;
         TimeServiceCnt = 0;
-        breakTime(mytime, tm);
         Serial.println(getTmUTC());
       } else {
         Serial.println("getNtpTime fails");

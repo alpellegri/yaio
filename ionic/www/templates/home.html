@@ -13,9 +13,10 @@
     <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
       Request Reboot
     </ion-toggle>
-    <ion-checkbox ng-model="status.alarm">status.alarm</ion-checkbox>
+    <ion-checkbox class="item-checkbox-right" ng-model="status.alarm">status.alarm</ion-checkbox>
     <a class="item">status.bootcnt<span class="item-note">{{status.bootcnt}}</span>
     <a class="item">status.upcnt<span class="item-note">{{status.upcnt}}</span></a>
+    <a class="item">status.time<span class="item-note">{{status.time}}</span></a>
     <a class="item">status.heap<span class="item-note">{{status.heap}}</span></a>
     <a class="item">status.temperature<span class="item-note">{{status.temperature/10}}</span></a>
     <a class="item">status.humidity<span class="item-note">{{status.humidity/10}}</span></a>
