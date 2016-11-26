@@ -1,23 +1,13 @@
 <ion-view title="Node Setup" id="page2">
-  <ion-content padding="true" scroll="true" class="has-header">
-    <h4 id="setup-heading6" style="color:#000000;text-align:left;">Connection Status</h4>
-    <form class="list">
-      <label class="item item-input">
-        <span class="input-label">
-          {{WSStatus}} -> {{StsTxt}}
-        </span>
-        <textarea placeholder=""> </textarea>
-      </label>
-    </form>
-    <h4 id="setup-heading5" style="color:#000000;text-align:left;">Control</h4>
-    <button id="setup-connect" style="text-align:left;" class="button button-positive button-block icon-right ion-social-rss" on-touch="SetupComCmd()">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
+    <a class="item">Connection<span class="item-note">{{WSStatus}} -> {{StsTxt}}</span></a>
+    <button id="setup-connect" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-social-rss" on-touch="SetupComCmd()">
       {{ComButton}}
     </button>
-    <button id="setup-configure-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-arrow-dropright" on-touch="showPopup()">
+    <button id="setup-configure-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-arrow-dropright" on-touch="showPopup()">
       Node Configuration
     </button>
-    <p8 id="setup-heading6" style="white-space: pre; color:#000000;text-align:left;">{{NodeSettings}}</p8>
-    <button id="setup-update-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-upload" on-touch="SetupComSend(settings)">
+    <button id="setup-update-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-touch="SetupComSend(settings)">
       Store to Node
     </button>
     <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>

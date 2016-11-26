@@ -82,7 +82,7 @@ angular.module('app.controllers.firebase', [])
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: PopupTemplate,
-      title: 'Firebase Setup',
+      title: 'Firebase Configuration',
       subTitle: '',
       scope: $scope,
       buttons: [{
@@ -127,7 +127,7 @@ angular.module('app.controllers.firebase', [])
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: PopupTemplate,
-      title: 'Firebase Setup',
+      title: 'Firebase Login',
       subTitle: '',
       scope: $scope,
       buttons: [{
@@ -168,7 +168,7 @@ angular.module('app.controllers.firebase', [])
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: PopupTemplate,
-      title: 'Secrets Setup',
+      title: 'Firebase Admin Secrets',
       subTitle: '',
       scope: $scope,
       buttons: [{

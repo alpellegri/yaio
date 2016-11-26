@@ -1,6 +1,7 @@
 #include <Arduino.h>
-#include <DHT.h>
+#include <WiFiUDP.h>
 
+#include <DHT.h>
 #include <FirebaseArduino.h>
 
 #include <stdio.h>
@@ -31,6 +32,31 @@ uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
 uint32_t fbm_time_last = 0;
 
+WiFiUDP UDP;
+/**
+ * The target IP address to send the magic packet to.
+ */
+IPAddress computer_ip(192, 168, 1, 255);
+
+/**
+ * The targets MAC address to send the packet to
+ */
+byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
+
+void sendWOL(IPAddress addr, WiFiUDP udp, byte * mac,  size_t size_of_mac) {
+  byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  byte i;
+
+  udp.beginPacket(addr, 9); // sending packet at 9,
+
+  udp.write(preamble, sizeof preamble);
+  for (i = 0; i < 16; i++) {
+    udp.write(mac, size_of_mac);
+  }
+
+  udp.endPacket();
+}
+
 /* main function task */
 bool FbmService(void) {
   bool ret = false;
@@ -44,7 +70,6 @@ bool FbmService(void) {
     firebase_url = EE_GetFirebaseUrl();
     firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
-
     Firebase.setBool("control/reboot", false);
     if (Firebase.failed()) {
       Serial.print("set failed: control/reboot");
@@ -67,13 +92,13 @@ bool FbmService(void) {
           FcmSendPush(str);
           Firebase.pushString("logs/Reports", str);
           // Firebase.pushString("logs/Reports/entry", "boot-up complete");
+          UDP.begin(9); // start UDP client, not sure if really necessary.
         }
       }
     }
   }
 
   if (boot == true) {
-
     // every 5 second
     if (++fbm_monitorcnt == (5 / 1)) {
       fbm_monitorcnt = 0;
@@ -92,6 +117,10 @@ bool FbmService(void) {
 
         bool control_led = object["led"];
         digitalWrite(LED, !(control_led == true));
+        if (control_led == true) {
+          Serial.println("Sending WOL Packet...");
+          sendWOL(computer_ip, UDP, mac, sizeof mac);
+        }
 
         bool control_reboot = object["reboot"];
         if (control_reboot == true) {
@@ -104,7 +133,7 @@ bool FbmService(void) {
           int temperature_data = 10 * dht.readTemperature();
 
           {
-            StaticJsonBuffer<256> jsonBuffer;
+            StaticJsonBuffer<512> jsonBuffer;
             JsonObject &status = jsonBuffer.createObject();
             status["alarm"] = status_alarm;
             // digitalWrite(LED, !(status_alarm == true));
@@ -116,6 +145,7 @@ bool FbmService(void) {
             status["humidity"] = humidity_data;
             status["temperature"] = temperature_data;
             status["upcnt"] = fbm_task_cnt++;
+            status["time"] = getTime();
             Firebase.set("status", JsonVariant(status));
             if (Firebase.failed()) {
               Serial.print("set failed: status");
@@ -127,8 +157,8 @@ bool FbmService(void) {
           uint32_t time_now = getTime() / 60;
           // modulo 60 arithmetic
           uint32_t delta = (time_now - fbm_time_last);
-          // log every 15 minutes
-          if (delta > 15) {
+          // log every 30 minutes
+          if (delta > 30) {
             StaticJsonBuffer<128> jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
             th["time"] = time_now;

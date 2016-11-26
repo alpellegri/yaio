@@ -22,7 +22,10 @@ char *EE_GetSSID() { return sta_ssid; }
 
 char *EE_GetPassword() { return sta_password; }
 
-char *EE_GetFirebaseUrl() { return firebase_url; }
+char *EE_GetFirebaseUrl() {
+  /* strip 8 chars: "https://" */
+  return &firebase_url[8];
+}
 
 char *EE_GetFirebaseSecret() { return firebase_secret; }
 
@@ -58,7 +61,7 @@ bool EE_LoadData(void) {
     data[i] = EEPROM.read(i);
   }
 
-  StaticJsonBuffer<400> jsonBuffer;
+  StaticJsonBuffer<512> jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
 
   // Test if parsing succeeds.

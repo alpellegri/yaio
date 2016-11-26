@@ -3,22 +3,22 @@ angular.module('app.controllers.chart', [])
 .controller("chartCtrl", function($scope) {
   console.log('chartCtrl');
 
-  $scope.myJson = {};
-  $scope.myJson.labels = [];
-  $scope.myJson.series = ['temperature', 'humidity'];
-  $scope.myJson.data = [
+  $scope.JsonTH = {};
+  $scope.JsonTH.labels = [];
+  $scope.JsonTH.series = ['temperature', 'humidity'];
+  $scope.JsonTH.data = [
     [],
     []
   ];
-  $scope.myJson.onClick = function(points, evt) {
+  $scope.JsonTH.onClick = function(points, evt) {
     console.log(points, evt);
   };
-  $scope.myJson.datasetOverride = [{
+  $scope.JsonTH.datasetOverride = [{
     yAxisID: 'y-axis-1'
   }, {
     yAxisID: 'y-axis-2'
   }];
-  $scope.myJson.options = {
+  $scope.JsonTH.options = {
     scales: {
       yAxes: [{
         id: 'y-axis-1',
@@ -34,31 +34,43 @@ angular.module('app.controllers.chart', [])
     }
   };
 
+  $scope.JsonT = {};
+  $scope.JsonT.data = [
+    []
+  ];
+  $scope.JsonH = {};
+  $scope.JsonH.data = [
+    []
+  ];
+
   $scope.doRefresh = function() {
     console.log('doRefresh');
 
     var date = new Date();
-    var curr = Math.round(4*(date.getHours() + date.getMinutes()/60));
-    console.log(curr);
+    var curr = Math.round(4 * (date.getHours() + date.getMinutes() / 60));
 
-    $scope.myJson.data[0] = [];
-    $scope.myJson.data[1] = [];
-    $scope.myJson.labels = [];
-    // 2 days: 2 * (24 * 4) -> 192
-    var ref = firebase.database().ref('logs/TH').limitToLast(192);
+    $scope.JsonTH.data[0] = [];
+    $scope.JsonTH.data[1] = [];
+    $scope.JsonTH.labels = [];
+    $scope.JsonT.data[0] = [];
+    $scope.JsonH.data[0] = [];
+    // 2 days: 2 * (24 * 2) -> 96
+    var ref = firebase.database().ref('logs/TH').limitToLast(96);
     ref.once('value', function(snapshot) {
-      var i = curr - (snapshot.numChildren()-192);
+      var i = curr - (snapshot.numChildren() - 96);
       snapshot.forEach(function(el) {
-        $scope.myJson.data[0].push(el.val().t / 10);
-        $scope.myJson.data[1].push(el.val().h / 10);
+        $scope.JsonTH.data[0].push(el.val().t / 10);
+        $scope.JsonTH.data[1].push(el.val().h / 10);
         if (i % 4 == 0) {
           var ii = (i / 4) % 24; // wrap hour: every one days
-          $scope.myJson.labels.push(ii.toString());
+          $scope.JsonTH.labels.push(ii.toString());
         } else {
-          $scope.myJson.labels.push("");
+          $scope.JsonTH.labels.push("");
         }
         i++;
       });
+      $scope.JsonT.data[0] = $scope.JsonTH.data[0];
+      $scope.JsonH.data[0] = $scope.JsonTH.data[1];
     });
 
     // $scope.$broadcast("scroll.infiniteScrollComplete");
