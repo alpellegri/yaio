@@ -37,6 +37,43 @@
     .manual-remove-top-padding .scroll {
       padding-top: 0px !important;
     }
+    /*custom is class added to ion-content*/
+
+    .custom {
+      background-color: #404040 !important; /* This sets the background color*/
+     }
+
+    /*Set the background to transparent for ion-item*/
+    .custom .item {
+      background-color: transparent;
+      border:none;   /*Removes all borders*/
+      border-top: 0px solid;   /*Top Border for each menu item*/
+      border-bottom:0px solid;   /*Bottom border for each menu item*/
+      border-color: #666;   /*Sets colors for top and bottom border*/
+      color: white;    /*Text color for each item*/
+    }
+
+    /*Changes the border for the last item*/
+    .custom .item:last-child {
+      border-bottom: 0px solid #666;
+    }
+
+    .custom .item-complex .item-content, .dark .item-radio .item-divider .item-content {
+      background-color: transparent;
+    }
+    .card .item{
+      background: #555555 !important;
+    }
+
+    /*Just makes the type white*/
+    .custom h2,
+    .custom h3,
+    .custom p {
+      color: white;  /*Text color for each item, overrides the color property above*/
+    },
+    .custom a {
+      color: white;  /*Text color for each item, overrides the color property above*/
+    }
   </style>
 
   <script src="js/vendors/Chart.min.js"></script>

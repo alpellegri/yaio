@@ -2,6 +2,7 @@
 #define TIMESRV_H
 
 #include <Arduino.h>
+#include <time.h>
 
 typedef struct {
   uint8_t Second;
@@ -16,6 +17,6 @@ typedef struct {
 extern bool TimeService(void);
 extern char* getTmUTC(void);
 extern tmElements_t getTmTime(void);
-extern uint32_t getTime(void);
+extern time_t getTime(void);
 
 #endif

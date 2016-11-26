@@ -1,20 +1,19 @@
 <ion-view title="Firebase Setup" id="page5">
-  <ion-content padding="true" scroll="true" class="has-header">
-    <button id="setup-configure-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-settings" on-touch="showPopupFbConfig()">
+  <ion-content class="custom" padding="true" scroll="false" class="has-header">
+    <button id="setup-configure-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-settings" on-touch="showPopupFbConfig()">
       Firebase Configuration
     </button>
-    <button id="setup-configure-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-settings" on-touch="showPopupLogin()">
+    <button id="setup-configure-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-settings" on-touch="showPopupLogin()">
       Firebase Login
     </button>
-    <button id="setup-configure-node" style="text-align:left;" class="button button-positive button-block icon-right ion-android-settings" on-touch="showPopupFbAdminSecrets()">
+    <button id="setup-configure-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-settings" on-touch="showPopupFbAdminSecrets()">
       Firebase Admin Secrets
     </button>
-    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right icon-left ion-trash-b" on-touch="ResetFirebase()">
+    <button id="setup-update" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-trash-b" on-touch="ResetFirebase()">
       Reset Configuration
     </button>
-    <button id="setup-update" style="text-align:left;" class="button button-positive button-block icon-right ion-android-upload" on-touch="InitFirebase()">
+    <button id="setup-update" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-touch="InitFirebase()">
       Init Firebase Database
     </button>
-    <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>
   </ion-content>
 </ion-view>

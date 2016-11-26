@@ -10,6 +10,7 @@ angular.module('app.controllers.home', [])
 
     $scope.control = {};
     $scope.status = {};
+    $scope.system = {};
 
     // wait for device ready (cordova) before initialize push service
     $ionicPlatform.ready(function() {
@@ -76,6 +77,16 @@ angular.module('app.controllers.home', [])
         var payload = snapshot.val();
         $scope.control = payload.control;
         $scope.status = payload.status;
+        var date = new Date();
+        date.setTime($scope.status.time * 1000);
+        $scope.system.date = date.toString();
+        var current_date = new Date();
+        var delta = (current_date.getTime() - date.getTime());
+        if (delta > 1000*10) {
+          $scope.system.status = false;
+        } else {
+          $scope.system.status = true;
+        }
       }, function(errorObject) {
         console.log("firebase failed: " + errorObject.code);
       });
