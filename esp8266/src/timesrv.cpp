@@ -7,7 +7,7 @@
 /* seconds */
 #define NTP_UPDATE_INTERVAL (5*60)
 
-static const int timeZone = +1; // Time offset from GMT
+static const int timeZone = 0;
 
 static uint8_t timesrv_setup = 0;
 static bool timesrv_run = false;

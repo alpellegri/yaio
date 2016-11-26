@@ -24,30 +24,13 @@ Adafruit_SSD1306 display(OLED_RESET);
 Ticker flipper;
 
 uint8_t mode;
-uint8_t flip_mode = 1;
 uint16_t count = 0;
 
 uint16_t status_scheduler = 1;
 uint16_t scheduler_cnt = 0;
 bool scheduler_flag = false;
 
-void setflip_mode(int mode) { flip_mode = mode; }
-
 void flip(void) {
-  int trig;
-
-  if (flip_mode == 0) {
-    trig = (flip_mode == 0) ? (1) : (5);
-    if (count >= trig) {
-      int state = digitalRead(LED);
-      digitalWrite(LED, !state); // set pin to the opposite state
-      count = 0;
-    }
-  } else if (flip_mode == 2) {
-    digitalWrite(LED, 0);
-  } else {
-  }
-  count++;
 
   /* scheduler */
   if (scheduler_cnt < status_scheduler) {

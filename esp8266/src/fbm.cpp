@@ -157,8 +157,8 @@ bool FbmService(void) {
           uint32_t time_now = getTime() / 60;
           // modulo 60 arithmetic
           uint32_t delta = (time_now - fbm_time_last);
-          // log every 15 minutes
-          if (delta > 15) {
+          // log every 30 minutes
+          if (delta > 30) {
             StaticJsonBuffer<128> jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
             th["time"] = time_now;
