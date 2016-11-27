@@ -10,7 +10,7 @@ angular.module('app.services.push', [])
       var options = {
         android: {
           "clearNotifications": false,
-          "senderID": "110645288431"
+          "senderID": "XXXXXXXXXXX"
         },
         ios: {
           alert: "true",
