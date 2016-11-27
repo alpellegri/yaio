@@ -89,7 +89,7 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          String str = String(" boot-up complete");
+          String str = String("boot-up complete");
           fblog_log(str);
 
           UDP.begin(9); // start UDP client, not sure if really necessary.
@@ -214,9 +214,9 @@ bool FbmService(void) {
       status_alarm_last = status_alarm;
       String str;
       if (status_alarm == true) {
-        str = String(" Alarm active");
+        str = String("Alarm active");
       } else {
-        str = String(" Alarm inactive");
+        str = String("Alarm inactive");
       }
       fblog_log(str);
     }
@@ -227,7 +227,7 @@ bool FbmService(void) {
     if (status_alarm == true) {
       if (code != 0) {
         if (RF_CheckRadioCodeDB(code) == true) {
-          String str = String(" Intrusion!!!");
+          String str = String("Intrusion!!!");
           fblog_log(str);
         } else {
           if (control_radio_learn == true) {

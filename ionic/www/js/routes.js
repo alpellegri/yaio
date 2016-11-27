@@ -8,42 +8,12 @@ angular.module('app.routes', [])
   // Each state's controller can be found in controllers.js
   $stateProvider
 
-  .state('menu.Home', {
-    url: '/Home',
+  .state('menu.home', {
+    url: '/page1',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/home.Html',
+        templateUrl: 'templates/home.html',
         controller: 'homeCtrl'
-      }
-    }
-  })
-
-  .state('menu.NodeSetup', {
-    url: '/NodeSetup',
-    views: {
-      'side-menu21': {
-        templateUrl: 'templates/NodeSetup.html',
-        controller: 'NodeSetupCtrl'
-      }
-    }
-  })
-
-  .state('menu.chart', {
-    url: '/chart',
-    views: {
-      'side-menu21': {
-        templateUrl: 'templates/chart.html',
-        controller: 'chartCtrl'
-      }
-    }
-  })
-
-  .state('menu.History', {
-    url: '/History',
-    views: {
-      'side-menu21': {
-        templateUrl: 'templates/History.html',
-        controller: 'HistoryCtrl'
       }
     }
   })
@@ -58,6 +28,16 @@ angular.module('app.routes', [])
     }
   })
 
+  .state('menu.NodeSetup', {
+    url: '/page2',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/NodeSetup.html',
+        controller: 'NodeSetupCtrl'
+      }
+    }
+  })
+
   .state('menu.RadioSetup', {
     url: '/page6',
     views: {
@@ -68,8 +48,28 @@ angular.module('app.routes', [])
     }
   })
 
+  .state('menu.chart', {
+    url: '/page3',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/chart.html',
+        controller: 'chartCtrl'
+      }
+    }
+  })
+
+  .state('menu.History', {
+    url: '/page4',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/History.html',
+        controller: 'HistoryCtrl'
+      }
+    }
+  })
+
   .state('menu.NodeInfo', {
-    url: '/page7',
+    url: '/page4',
     views: {
       'side-menu21': {
         templateUrl: 'templates/NodeInfo.html',
@@ -84,6 +84,6 @@ angular.module('app.routes', [])
     abstract:true
   })
 
-  $urlRouterProvider.otherwise('/side-menu21/Home')
+  $urlRouterProvider.otherwise('/side-menu21/page1')
 
 });
