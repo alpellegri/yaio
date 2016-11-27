@@ -26,19 +26,12 @@ Ticker flipper;
 uint8_t mode;
 uint16_t count = 0;
 
-uint16_t status_scheduler = 1;
-uint16_t scheduler_cnt = 0;
 bool scheduler_flag = false;
 
 void flip(void) {
 
   /* scheduler */
-  if (scheduler_cnt < status_scheduler) {
-    scheduler_cnt++;
-  } else {
-    scheduler_cnt = 0;
-    scheduler_flag = 1;
-  }
+  scheduler_flag = 1;
 }
 
 void setup() {
