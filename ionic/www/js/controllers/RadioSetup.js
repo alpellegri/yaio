@@ -1,7 +1,7 @@
-angular.module('app.controllers.radio', [])
+angular.module('app.controllers.RadioSetup', [])
 
-.controller('RadioCtrl', function($scope, $ionicPopup, $timeout) {
-  console.log('RadioCtrl');
+.controller('RadioSetupCtrl', function($scope, $ionicPopup, $timeout) {
+  console.log('RadioSetupCtrl');
 
   var fb_init = localStorage.getItem('firebase_init');
   if (fb_init == 'true') {

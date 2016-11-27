@@ -1,7 +1,7 @@
-angular.module('app.controllers.node', [])
+angular.module('app.controllers.NodeSetup', [])
 
-.controller('NodeCtrl', function($scope, WebSocketService, $ionicPopup, $timeout) {
-  console.log('NodeCtrl');
+.controller('NodeSetupCtrl', function($scope, WebSocketService, $ionicPopup, $timeout) {
+  console.log('NodeSetupCtrl');
 
   var fb_init = localStorage.getItem('firebase_init');
   if (fb_init == 'true') {

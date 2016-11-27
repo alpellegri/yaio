@@ -9,6 +9,7 @@
 
 #include "ee.h"
 #include "fbm.h"
+#include "fblog.h"
 #include "fcm.h"
 #include "rf.h"
 #include "timesrv.h"
@@ -88,10 +89,9 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           boot = 1;
-          String str = String(getTmUTC()) + String(" boot-up complete");
-          FcmSendPush(str);
-          Firebase.pushString("logs/Reports", str);
-          // Firebase.pushString("logs/Reports/entry", "boot-up complete");
+          String str = String(" boot-up complete");
+          fblog_log(str);
+
           UDP.begin(9); // start UDP client, not sure if really necessary.
         }
       }
@@ -212,14 +212,13 @@ bool FbmService(void) {
     // log alarm status
     if (status_alarm_last != status_alarm) {
       status_alarm_last = status_alarm;
-      String str = String(getTmUTC());
+      String str;
       if (status_alarm == true) {
-        str += String(" Alarm active");
+        str = String(" Alarm active");
       } else {
-        str += String(" Alarm inactive");
+        str = String(" Alarm inactive");
       }
-      Serial.println(str);
-      Firebase.pushString("logs/Reports", str);
+      fblog_log(str);
     }
 
     // monitor for RF radio codes
@@ -228,10 +227,8 @@ bool FbmService(void) {
     if (status_alarm == true) {
       if (code != 0) {
         if (RF_CheckRadioCodeDB(code) == true) {
-          String str = String(getTmUTC()) + String(" Intrusion!!!");
-          Serial.print(str);
-          FcmSendPush(str);
-          Firebase.pushString("logs/Reports", str);
+          String str = String(" Intrusion!!!");
+          fblog_log(str);
         } else {
           if (control_radio_learn == true) {
             if (code != fbm_code_last) {

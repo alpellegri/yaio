@@ -1,0 +1,9 @@
+<ion-view title="Node Info" id="page7">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+    <ion-checkbox class="item-checkbox-right" ng-model="system.status">system.status</ion-checkbox>
+    <a class="item">status.bootcnt<span class="item-note">{{status.bootcnt}}</span>
+    <a class="item">status.upcnt<span class="item-note">{{status.upcnt}}</span></a>
+    <a class="item">status.heap<span class="item-note">{{status.heap}}</span></a>
+  </ion-content>
+</ion-view>

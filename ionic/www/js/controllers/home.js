@@ -79,7 +79,6 @@ angular.module('app.controllers.home', [])
         $scope.status = payload.status;
         var date = new Date();
         date.setTime($scope.status.time * 1000);
-        $scope.system.date = date.toString();
         var current_date = new Date();
         var delta = (current_date.getTime() - date.getTime());
         if (delta > 1000*10) {
