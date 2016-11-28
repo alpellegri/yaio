@@ -135,7 +135,7 @@ bool FbmService(void) {
           int temperature_data = 10 * dht.readTemperature();
 
           {
-            StaticJsonBuffer<512> jsonBuffer;
+            DynamicJsonBuffer jsonBuffer;
             JsonObject &status = jsonBuffer.createObject();
             status["alarm"] = status_alarm;
             // digitalWrite(LED, !(status_alarm == true));
@@ -157,12 +157,12 @@ bool FbmService(void) {
           yield();
 
           // convert to minutes
-          uint32_t time_now = getTime() / 60;
+          uint32_t time_now = getTime();
           // modulo 60 arithmetic
-          uint32_t delta = (time_now - fbm_time_last);
+          uint32_t delta = (time_now - fbm_time_last)/60;
           // log every 30 minutes
           if (delta > 30) {
-            StaticJsonBuffer<128> jsonBuffer;
+            DynamicJsonBuffer jsonBuffer;
             JsonObject &th = jsonBuffer.createObject();
             th["time"] = time_now;
             th["t"] = temperature_data;

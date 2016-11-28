@@ -9,7 +9,7 @@
 #include "fcm.h"
 
 void fblog_log(String& message) {
-  StaticJsonBuffer<256> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
 
   log["time"] = getTime();

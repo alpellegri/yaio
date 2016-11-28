@@ -87,7 +87,7 @@ bool STA_Task(void) {
   bool ret = true;
 
   sta_task_cnt++;
-  Serial.printf("task_cnt: %d\n", sta_task_cnt);
+  Serial.printf("task_cnt: %d, HEAP: %d\n", sta_task_cnt, ESP.getFreeHeap());
 
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
