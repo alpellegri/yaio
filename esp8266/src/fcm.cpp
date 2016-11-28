@@ -28,6 +28,7 @@ void FcmSendPush(String &message) {
     JsonVariant variant = fbRegistration_IDs.getJsonVariant();
     JsonObject &object = variant.as<JsonObject>();
     for (JsonObject::iterator it = object.begin(); it != object.end(); ++it) {
+      yield();
       Serial.println(it->key);
       Serial.println(it->value.asString());
       RegIDs[RegIDsLen++] = it->value.asString();
@@ -116,6 +117,7 @@ void FcmService(void) {
     // available() will return the number of characters
     // currently in the receive buffer.
     while (fcm_client.available()) {
+      yield();
       Serial.write(fcm_client.read()); // read() gets the FIFO char
     }
 

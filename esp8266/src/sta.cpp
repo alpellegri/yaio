@@ -92,8 +92,11 @@ bool STA_Task(void) {
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (TimeService() == true) {
+      yield();
       FbmService();
+      yield();
       FcmService();
+      yield();
     }
   } else {
     Serial.print("WiFi.status != WL_CONNECTED\n");

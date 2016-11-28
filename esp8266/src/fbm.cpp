@@ -8,8 +8,8 @@
 #include <string.h>
 
 #include "ee.h"
-#include "fbm.h"
 #include "fblog.h"
+#include "fbm.h"
 #include "fcm.h"
 #include "rf.h"
 #include "timesrv.h"
@@ -44,7 +44,7 @@ IPAddress computer_ip(192, 168, 1, 255);
  */
 byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
 
-void sendWOL(IPAddress addr, WiFiUDP udp, byte * mac,  size_t size_of_mac) {
+void sendWOL(IPAddress addr, WiFiUDP udp, byte *mac, size_t size_of_mac) {
   byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   byte i;
 
@@ -62,6 +62,7 @@ void sendWOL(IPAddress addr, WiFiUDP udp, byte * mac,  size_t size_of_mac) {
 bool FbmService(void) {
   bool ret = false;
 
+  Serial.println("FbmService");
   // boot counter
   if (boot == false) {
     bool ret = true;
@@ -97,17 +98,18 @@ bool FbmService(void) {
       }
     }
   }
-
+  yield();
   if (boot == true) {
     // every 5 second
     if (++fbm_monitorcnt == (5 / 1)) {
       fbm_monitorcnt = 0;
-
+      Serial.println("FbmService-monitor");
       FirebaseObject fbcontrol = Firebase.get("control");
       if (Firebase.failed() == true) {
         Serial.print("get failed: control");
         Serial.println(Firebase.error());
       } else {
+        yield();
         JsonVariant variant = fbcontrol.getJsonVariant();
         JsonObject &object = variant.as<JsonObject>();
 
@@ -152,6 +154,7 @@ bool FbmService(void) {
               Serial.println(Firebase.error());
             }
           }
+          yield();
 
           // convert to minutes
           uint32_t time_now = getTime() / 60;
@@ -180,6 +183,7 @@ bool FbmService(void) {
         }
       }
     }
+    yield();
 
     // monitor for alarm activation
     if (status_alarm != control_alarm) {
@@ -201,6 +205,7 @@ bool FbmService(void) {
             String string = it->value.asString();
             Serial.println(string);
             RF_AddRadioCodeDB(string);
+            yield();
           }
         }
         RF_Enable();
@@ -208,6 +213,7 @@ bool FbmService(void) {
         RF_Disable();
       }
     }
+    yield();
 
     // log alarm status
     if (status_alarm_last != status_alarm) {
@@ -220,6 +226,7 @@ bool FbmService(void) {
       }
       fblog_log(str);
     }
+    yield();
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
@@ -240,6 +247,7 @@ bool FbmService(void) {
         }
       }
     }
+    yield();
   } else {
     Serial.print("fbm yield\n");
   }
