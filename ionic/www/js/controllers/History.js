@@ -4,6 +4,14 @@ angular.module('app.controllers.History', [])
   console.log('HistoryCtrl');
 
   $scope.logsText = "";
+
+  $scope.ClearHistory = function() {
+    console.log('HistoryCtrl: ClearHistory');
+
+    firebase.database().ref('logs/Reports').remove();
+    $scope.doRefresh();
+  };
+
   $scope.doRefresh = function() {
     console.log('doRefresh');
     var ref = firebase.database().ref('logs/Reports');

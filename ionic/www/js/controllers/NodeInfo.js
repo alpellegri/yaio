@@ -10,6 +10,45 @@ angular.module('app.controllers.NodeInfo', [])
     $scope.status = {};
     $scope.system = {};
 
+    $scope.pushCtrl1Change = function() {
+      var ref = firebase.database().ref("control");
+      if ($scope.control.led) {
+        ref.update({
+          led: true
+        });
+      } else {
+        ref.update({
+          led: false
+        });
+      }
+    };
+
+    $scope.pushCtrl2Change = function() {
+      var ref = firebase.database().ref("control");
+      if ($scope.control.reboot) {
+        ref.update({
+          reboot: true
+        });
+      } else {
+        ref.update({
+          reboot: false
+        });
+      }
+    };
+
+    $scope.pushCtrl3Change = function() {
+      var ref = firebase.database().ref("control");
+      if ($scope.control.monitor) {
+        ref.update({
+          monitor: true
+        });
+      } else {
+        ref.update({
+          monitor: false
+        });
+      }
+    };
+
     $scope.doRefresh = function() {
       console.log('doRefresh-HomeCtrl');
       var ref = firebase.database().ref("/");

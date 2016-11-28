@@ -48,8 +48,6 @@ angular.module('app.controllers.FirebaseSetup', [])
       upcnt: 0,
       humidity: 0,
       temperature: 0,
-      fire: false,
-      flood: false,
       heap: 0
     });
   };

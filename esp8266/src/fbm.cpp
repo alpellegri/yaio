@@ -33,7 +33,6 @@ uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
 uint32_t fbm_time_last = 0;
 
-WiFiUDP UDP;
 /**
  * The target IP address to send the magic packet to.
  */
@@ -44,18 +43,25 @@ IPAddress computer_ip(192, 168, 1, 255);
  */
 byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
 
-void sendWOL(IPAddress addr, WiFiUDP udp, byte *mac, size_t size_of_mac) {
+void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   byte i;
 
-  udp.beginPacket(addr, 9); // sending packet at 9,
+  WiFiUDP udp;
 
+  udp.begin(9);
+  yield();
+  udp.beginPacket(addr, 9); // sending packet at 9,
+  yield();
   udp.write(preamble, sizeof preamble);
+  yield();
   for (i = 0; i < 16; i++) {
     udp.write(mac, size_of_mac);
+    yield();
   }
 
   udp.endPacket();
+  yield();
 }
 
 /* main function task */
@@ -92,16 +98,15 @@ bool FbmService(void) {
           boot = 1;
           String str = String("boot-up complete");
           fblog_log(str);
-
-          UDP.begin(9); // start UDP client, not sure if really necessary.
         }
       }
     }
   }
   yield();
+
   if (boot == true) {
     // every 5 second
-    if (++fbm_monitorcnt == (5 / 1)) {
+    if (++fbm_monitorcnt >= (5 / 1)) {
       fbm_monitorcnt = 0;
       Serial.println("FbmService-monitor");
       FirebaseObject fbcontrol = Firebase.get("control");
@@ -114,14 +119,13 @@ bool FbmService(void) {
         JsonObject &object = variant.as<JsonObject>();
 
         control_alarm = object["alarm"];
-
         control_radio_learn = object["radio_learn"];
 
         bool control_led = object["led"];
         digitalWrite(LED, !(control_led == true));
         if (control_led == true) {
           Serial.println("Sending WOL Packet...");
-          sendWOL(computer_ip, UDP, mac, sizeof mac);
+          sendWOL(computer_ip, mac, sizeof mac);
         }
 
         bool control_reboot = object["reboot"];
@@ -129,57 +133,49 @@ bool FbmService(void) {
           ESP.restart();
         }
 
+        uint32_t time_now = getTime();
+        uint32_t humidity_data = 10 * dht.readHumidity();
+        uint32_t temperature_data = 10 * dht.readTemperature();
+
         bool control_monitor = object["monitor"];
         if (control_monitor == true) {
-          int humidity_data = 10 * dht.readHumidity();
-          int temperature_data = 10 * dht.readTemperature();
+          DynamicJsonBuffer jsonBuffer;
+          JsonObject &status = jsonBuffer.createObject();
+          status["alarm"] = status_alarm;
+          // digitalWrite(LED, !(status_alarm == true));
 
-          {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &status = jsonBuffer.createObject();
-            status["alarm"] = status_alarm;
-            // digitalWrite(LED, !(status_alarm == true));
-
-            status["bootcnt"] = bootcnt;
-            status["fire"] = false;
-            status["flood"] = false;
-            status["heap"] = ESP.getFreeHeap();
-            status["humidity"] = humidity_data;
-            status["temperature"] = temperature_data;
-            status["upcnt"] = fbm_task_cnt++;
-            status["time"] = getTime();
-            Firebase.set("status", JsonVariant(status));
-            if (Firebase.failed()) {
-              Serial.print("set failed: status");
-              Serial.println(Firebase.error());
-            }
+          status["bootcnt"] = bootcnt;
+          status["heap"] = ESP.getFreeHeap();
+          status["humidity"] = humidity_data;
+          status["temperature"] = temperature_data;
+          status["time"] = time_now;
+          Firebase.set("status", JsonVariant(status));
+          if (Firebase.failed()) {
+            Serial.print("set failed: status");
+            Serial.println(Firebase.error());
           }
-          yield();
+        }
+        yield();
 
-          // convert to minutes
-          uint32_t time_now = getTime();
-          // modulo 60 arithmetic
-          uint32_t delta = (time_now - fbm_time_last)/60;
-          // log every 30 minutes
-          if (delta > 30) {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &th = jsonBuffer.createObject();
-            th["time"] = time_now;
-            th["t"] = temperature_data;
-            th["h"] = humidity_data;
-            Firebase.push("logs/TH", JsonVariant(th));
-            if (Firebase.failed()) {
-              Serial.print("push failed: logs/TH");
-              Serial.println(Firebase.error());
-            } else {
-              // update in case of success
-              fbm_time_last = time_now;
-            }
+        // convert to minutes
+        uint32_t delta = (time_now - fbm_time_last) / 60;
+        // log every 30 minutes
+        if (delta > 30) {
+          DynamicJsonBuffer jsonBuffer;
+          JsonObject &th = jsonBuffer.createObject();
+          th["time"] = time_now;
+          th["t"] = temperature_data;
+          th["h"] = humidity_data;
+          Firebase.push("logs/TH", JsonVariant(th));
+          if (Firebase.failed()) {
+            Serial.print("push failed: logs/TH");
+            Serial.println(Firebase.error());
           } else {
-            /* do nothing */
+            // update in case of success
+            fbm_time_last = time_now;
           }
         } else {
-          Serial.print("monitor suspended\n");
+          /* do nothing */
         }
       }
     }
@@ -248,8 +244,6 @@ bool FbmService(void) {
       }
     }
     yield();
-  } else {
-    Serial.print("fbm yield\n");
   }
 
   return ret;
