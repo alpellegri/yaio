@@ -5,11 +5,11 @@
 #include "timesrv.h"
 
 /* seconds */
-#define NTP_UPDATE_INTERVAL (5*60)
+#define NTP_UPDATE_INTERVAL (5 * 60)
 
 static const int timeZone = 0;
 
-static uint8_t timesrv_setup = 0;
+static uint8_t timesrv_sm = 0;
 static bool timesrv_run = false;
 static uint16_t TimeServiceCnt;
 
@@ -126,8 +126,10 @@ static void sendNTPpacket(IPAddress &address) {
   Udp.endPacket();
 }
 
-static uint32_t getNtpTime(void) {
+static void startNtpTime(void) {
   IPAddress ntpServerIP; // NTP server's ip address
+
+  Udp.begin(localPort);
 
   while (Udp.parsePacket() > 0)
     ; // discard any previously received packets
@@ -135,20 +137,25 @@ static uint32_t getNtpTime(void) {
   // get a random server from the pool
   WiFi.hostByName(ntpServerName, ntpServerIP);
   sendNTPpacket(ntpServerIP);
-  uint32_t beginWait = millis();
-  while (millis() - beginWait < 1500) {
-    int size = Udp.parsePacket();
-    if (size >= NTP_PACKET_SIZE) {
-      Udp.read(packetBuffer, NTP_PACKET_SIZE); // read packet into the buffer
-      uint32_t secsSince1900;
-      // convert four bytes starting at location 40 to a long integer
-      secsSince1900 = (unsigned long)packetBuffer[40] << 24;
-      secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
-      secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
-      secsSince1900 |= (unsigned long)packetBuffer[43];
-      return secsSince1900 - 2208988800UL + timeZone * 3600L;
-    }
+}
+
+static void stopNtpTime(void) { Udp.stop(); }
+
+static uint32_t getNtpTime(void) {
+
+  uint32_t size = Udp.parsePacket();
+
+  if (size >= NTP_PACKET_SIZE) {
+    Udp.read(packetBuffer, NTP_PACKET_SIZE); // read packet into the buffer
+    uint32_t secsSince1900;
+    // convert four bytes starting at location 40 to a long integer
+    secsSince1900 = (unsigned long)packetBuffer[40] << 24;
+    secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
+    secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
+    secsSince1900 |= (unsigned long)packetBuffer[43];
+    return secsSince1900 - 2208988800UL + timeZone * 3600L;
   }
+
   return 0; // return 0 if unable to get the time
 }
 
@@ -169,30 +176,43 @@ void time_set(uint32_t time) {
   local_time = time;
 }
 
-time_t getTime(void) { return (millis() / 1000 - start_time + local_time); }
+time_t getTime(void) {
+  time_t _time = millis() / 1000 - start_time + local_time;
+
+  return (_time);
+}
 
 bool TimeService(void) {
-  if (timesrv_setup == 0) {
-    timesrv_setup = 1;
+  switch (timesrv_sm) {
+  case 0: {
+    timesrv_sm = 1;
     timesrv_run = false;
-    Udp.begin(localPort);
     Serial.println("getNtpTime init done");
     TimeServiceCnt = -1;
-  } else {
+  } break;
+  case 1: {
     if (TimeServiceCnt < NTP_UPDATE_INTERVAL) {
       TimeServiceCnt++;
     } else {
-      Serial.println("getNtpTime");
-      time_t mytime = getNtpTime();
-      if (mytime != 0) {
-        time_set(mytime);
-        timesrv_run = true;
-        TimeServiceCnt = 0;
-        Serial.println(getTmUTC());
-      } else {
-        Serial.println("getNtpTime fails");
-      }
+      startNtpTime();
+      timesrv_sm = 2;
     }
+  } break;
+  case 2: {
+    Serial.println("getNtpTime");
+    time_t mytime = getNtpTime();
+    if (mytime != 0) {
+      time_set(mytime);
+      timesrv_run = true;
+      TimeServiceCnt = 0;
+      Serial.println(getTmUTC());
+    } else {
+      /* retry: TimeServiceCnt not reset */
+      Serial.println("getNtpTime fails");
+    }
+    stopNtpTime();
+    timesrv_sm = 1;
+  } break;
   }
 
   return timesrv_run;

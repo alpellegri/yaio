@@ -44,14 +44,14 @@ IPAddress computer_ip(192, 168, 1, 255);
 byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
 
 void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
-  byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  const byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   byte i;
 
   WiFiUDP udp;
 
   udp.begin(9);
   yield();
-  udp.beginPacket(addr, 9); // sending packet at 9,
+  udp.beginPacket(addr, 8889);
   yield();
   udp.write(preamble, sizeof preamble);
   yield();
