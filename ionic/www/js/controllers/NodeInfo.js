@@ -50,18 +50,23 @@ angular.module('app.controllers.NodeInfo', [])
     };
 
     $scope.doRefresh = function() {
-      console.log('doRefresh-HomeCtrl');
+      console.log('doRefresh-NodeInfoCtrl');
       var ref = firebase.database().ref("/");
       // Attach an asynchronous callback to read the data at our posts reference
       ref.on('value', function(snapshot) {
         var payload = snapshot.val();
+        var current_date = new Date();
+        var date = new Date();
+        // $scope.system.date = date.toString();
+        $scope.startup = payload.startup;
+        date.setTime($scope.startup.time * 1000);
+        $scope.StartupTime = date.toLocaleString();
+        var delta = (current_date.getTime() - date.getTime());
+        $scope.system.uptime = delta;
         $scope.control = payload.control;
         $scope.status = payload.status;
-        var date = new Date();
         date.setTime($scope.status.time * 1000);
-        $scope.system.date = date.toString();
-        var current_date = new Date();
-        var delta = (current_date.getTime() - date.getTime());
+        delta = (current_date.getTime() - date.getTime());
         if (delta > 1000*10) {
           $scope.system.status = false;
         } else {

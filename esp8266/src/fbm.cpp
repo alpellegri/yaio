@@ -20,11 +20,12 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-bool boot = false;
+uint8_t boot_sm = 0;
 bool status_alarm = false;
 bool status_alarm_last = false;
 bool control_alarm = false;
 bool control_radio_learn = false;
+bool control_monitor = false;
 
 uint16_t fbm_task_cnt;
 uint32_t heap_size = 0;
@@ -68,9 +69,8 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
 bool FbmService(void) {
   bool ret = false;
 
-  Serial.println("FbmService");
   // boot counter
-  if (boot == false) {
+  if (boot_sm == 0) {
     bool ret = true;
     char *firebase_url = NULL;
     char *firebase_secret = NULL;
@@ -78,114 +78,140 @@ bool FbmService(void) {
     firebase_url = EE_GetFirebaseUrl();
     firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
+    yield();
     Firebase.setBool("control/reboot", false);
     if (Firebase.failed()) {
       Serial.print("set failed: control/reboot");
       Serial.println(Firebase.error());
     } else {
-      bootcnt = Firebase.getInt("status/bootcnt");
-      if (Firebase.failed()) {
-        Serial.print("get failed: status/bootcnt");
-        Serial.println(Firebase.error());
-      } else {
-        Serial.printf("status/bootcnt: %d\n", bootcnt);
-        bootcnt++;
-        Firebase.setInt("status/bootcnt", bootcnt);
-        if (Firebase.failed()) {
-          Serial.print("set failed: status/bootcnt");
-          Serial.println(Firebase.error());
-        } else {
-          boot = 1;
-          String str = String("boot-up complete");
-          fblog_log(str);
-        }
-      }
+      boot_sm = 1;
     }
   }
   yield();
 
-  if (boot == true) {
-    // every 5 second
+  if (boot_sm == 1) {
+    yield();
+    FirebaseObject fbobject = Firebase.get("startup");
+    if (Firebase.failed()) {
+      Serial.println("set failed: status/bootcnt");
+      Serial.println(Firebase.error());
+    } else {
+      JsonVariant variant = fbobject.getJsonVariant();
+      JsonObject &object = variant.as<JsonObject>();
+      if (object.success()) {
+        bootcnt = object["bootcnt"];
+        object["bootcnt"] = ++bootcnt;
+        object["time"] = getTime();
+        Firebase.set("startup", JsonVariant(object));
+        yield();
+        if (Firebase.failed()) {
+          bootcnt--;
+          Serial.println("set failed: status/bootcnt");
+          Serial.println(Firebase.error());
+        } else {
+          boot_sm = 2;
+          String str = String("boot-up complete");
+          fblog_log(str);
+        }
+      } else {
+       Serial.println("parseObject() failed");
+     }
+    }
+  }
+  yield();
+
+  if (boot_sm == 2) {
+
+    // control monitor
     if (++fbm_monitorcnt >= (5 / 1)) {
+      Serial.println("FbmService - monitor");
       fbm_monitorcnt = 0;
-      Serial.println("FbmService-monitor");
-      FirebaseObject fbcontrol = Firebase.get("control");
+      FirebaseObject fbobject = Firebase.get("control");
       if (Firebase.failed() == true) {
         Serial.print("get failed: control");
         Serial.println(Firebase.error());
       } else {
         yield();
-        JsonVariant variant = fbcontrol.getJsonVariant();
+        JsonVariant variant = fbobject.getJsonVariant();
         JsonObject &object = variant.as<JsonObject>();
 
-        control_alarm = object["alarm"];
-        control_radio_learn = object["radio_learn"];
+        if (object.success()) {
+          control_alarm = object["alarm"];
+          control_radio_learn = object["radio_learn"];
 
-        bool control_led = object["led"];
-        digitalWrite(LED, !(control_led == true));
-        if (control_led == true) {
-          Serial.println("Sending WOL Packet...");
-          sendWOL(computer_ip, mac, sizeof mac);
-        }
-
-        bool control_reboot = object["reboot"];
-        if (control_reboot == true) {
-          ESP.restart();
-        }
-
-        uint32_t time_now = getTime();
-        uint32_t humidity_data = 10 * dht.readHumidity();
-        uint32_t temperature_data = 10 * dht.readTemperature();
-
-        bool control_monitor = object["monitor"];
-        if (control_monitor == true) {
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &status = jsonBuffer.createObject();
-          status["alarm"] = status_alarm;
-          // digitalWrite(LED, !(status_alarm == true));
-
-          status["bootcnt"] = bootcnt;
-          status["heap"] = ESP.getFreeHeap();
-          status["humidity"] = humidity_data;
-          status["temperature"] = temperature_data;
-          status["time"] = time_now;
-          Firebase.set("status", JsonVariant(status));
-          if (Firebase.failed()) {
-            Serial.print("set failed: status");
-            Serial.println(Firebase.error());
+          bool control_led = object["led"];
+          digitalWrite(LED, !(control_led == true));
+          if (control_led == true) {
+            Serial.println("Sending WOL Packet...");
+            sendWOL(computer_ip, mac, sizeof mac);
           }
-        }
-        yield();
 
-        // convert to minutes
-        uint32_t delta = (time_now - fbm_time_last) / 60;
-        // log every 30 minutes
-        if (delta > 30) {
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &th = jsonBuffer.createObject();
-          th["time"] = time_now;
-          th["t"] = temperature_data;
-          th["h"] = humidity_data;
-          Firebase.push("logs/TH", JsonVariant(th));
-          if (Firebase.failed()) {
-            Serial.print("push failed: logs/TH");
-            Serial.println(Firebase.error());
-          } else {
-            // update in case of success
-            fbm_time_last = time_now;
+          bool control_reboot = object["reboot"];
+          if (control_reboot == true) {
+            ESP.restart();
           }
+
+          control_monitor = object["monitor"];
         } else {
-          /* do nothing */
-        }
+         Serial.println("parseObject() failed");
+       }
       }
     }
     yield();
+
+    // status update
+    {
+      uint32_t time_now = getTime();
+      uint32_t humidity_data = 10 * dht.readHumidity();
+      uint32_t temperature_data = 10 * dht.readTemperature();
+
+      if (control_monitor == true) {
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject &status = jsonBuffer.createObject();
+        status["alarm"] = status_alarm;
+        // digitalWrite(LED, !(status_alarm == true));
+
+        status["heap"] = ESP.getFreeHeap();
+        status["humidity"] = humidity_data;
+        status["temperature"] = temperature_data;
+        status["time"] = time_now;
+        yield();
+        Firebase.set("status", JsonVariant(status));
+        if (Firebase.failed()) {
+          Serial.print("set failed: status");
+          Serial.println(Firebase.error());
+        }
+      }
+
+      // convert to minutes
+      uint32_t delta = (time_now - fbm_time_last) / 60;
+      // log every 30 minutes
+      if (delta > 30) {
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject &th = jsonBuffer.createObject();
+        th["time"] = time_now;
+        th["t"] = temperature_data;
+        th["h"] = humidity_data;
+        yield();
+        Firebase.push("logs/TH", JsonVariant(th));
+        if (Firebase.failed()) {
+          Serial.print("push failed: logs/TH");
+          Serial.println(Firebase.error());
+        } else {
+          // update in case of success
+          fbm_time_last = time_now;
+        }
+      } else {
+        /* do nothing */
+      }
+    }
 
     // monitor for alarm activation
     if (status_alarm != control_alarm) {
       status_alarm = control_alarm;
       if (status_alarm == true) {
         // acquire Active Radio Codes
+        yield();
         FirebaseObject fbradio = Firebase.get("RadioCodes/Active");
         if (Firebase.failed() == true) {
           Serial.print("get failed: control");
@@ -204,25 +230,22 @@ bool FbmService(void) {
             yield();
           }
         }
-        RF_Enable();
-      } else {
-        RF_Disable();
       }
     }
-    yield();
 
     // log alarm status
     if (status_alarm_last != status_alarm) {
       status_alarm_last = status_alarm;
       String str;
       if (status_alarm == true) {
+        RF_Enable();
         str = String("Alarm active");
       } else {
+        RF_Disable();
         str = String("Alarm inactive");
       }
       fblog_log(str);
     }
-    yield();
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
@@ -237,13 +260,18 @@ bool FbmService(void) {
             if (code != fbm_code_last) {
               fbm_code_last = code;
               Serial.printf("RadioCodes/Inactive: %d\n", code);
+              yield();
               Firebase.pushInt("RadioCodes/Inactive", code);
+              if (Firebase.failed()) {
+                Serial.print("set failed: control/reboot");
+                Serial.println(Firebase.error());
+              } else {
+              }
             }
           }
         }
       }
     }
-    yield();
   }
 
   return ret;

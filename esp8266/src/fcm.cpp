@@ -6,11 +6,20 @@
 #include "ee.h"
 #include "fcm.h"
 
+typedef enum {
+  Fcm_Sm_IDLE = 6,
+  Fcm_Sm_CONNECT = 0,
+  Fcm_Sm_SEND = 1,
+  Fcm_Sm_RECEIVE = 2,
+  Fcm_Sm_CLOSE = 4,
+  Fcm_Sm_ERROR = 5,
+} Fbm_StateMachine_t;
+
 const char FcmServer[50] = "fcm.googleapis.com";
 
 WiFiClient fcm_client;
-WiFiClient time_client;
-uint16_t fcm_sts = 5;
+uint16_t fcm_sts = Fcm_Sm_IDLE;
+uint16_t FcmServiceTimeout = 0;
 
 // up-to 5 devices
 String RegIDs[5];
@@ -19,7 +28,6 @@ String FcmMessage;
 
 void FcmSendPush(String &message) {
   RegIDsLen = 0;
-
   FirebaseObject fbRegistration_IDs = Firebase.get("FCM_Registration_IDs");
   if (Firebase.failed() == true) {
     Serial.print("get failed: FCM_Registration_IDs");
@@ -35,9 +43,9 @@ void FcmSendPush(String &message) {
     }
   }
 
-  if ((RegIDsLen > 0) && (fcm_sts == 5)) {
+  if ((RegIDsLen > 0) && (fcm_sts == Fcm_Sm_IDLE)) {
     FcmMessage = message;
-    fcm_sts = 0;
+    fcm_sts = Fcm_Sm_CONNECT;
   }
 }
 
@@ -84,60 +92,67 @@ static String FcmPostMsg(void) {
 }
 
 void FcmService(void) {
-  int in;
+  FcmServiceTimeout++;
 
   // Serial.printf("fcm_sts: %d\n", fcm_sts);
   switch (fcm_sts) {
-  case 0: {
-    int retVal = fcm_client.connect(FcmServer, 80);
+
+  case Fcm_Sm_CONNECT: {
+    FcmServiceTimeout = 0;
+
+    uint32_t retVal = fcm_client.connect(FcmServer, 80);
     if (retVal == -1) {
       Serial.println("fcm connect Time out");
-      fcm_sts = 4;
+      fcm_sts = Fcm_Sm_IDLE;
     } else if (retVal == -3) {
       Serial.println("fcm connect Fail connection");
-      fcm_sts = 4;
+      fcm_sts = Fcm_Sm_ERROR;
     } else if (retVal == 1) {
       Serial.println("fcm connect Connected with server!");
-      fcm_sts = 1;
+      fcm_sts = Fcm_Sm_SEND;
     }
     Serial.printf("retVal: %d\n", retVal);
   } break;
 
-  case 1: {
+  case Fcm_Sm_SEND: {
     // print and write can be used to send data to a connected
     // client connection.
     String httpPost = FcmPostMsg();
     Serial.println(httpPost);
     fcm_client.print(httpPost);
-    fcm_sts = 2;
+    fcm_sts = Fcm_Sm_RECEIVE;
   } break;
 
-  case 2: {
+  case Fcm_Sm_RECEIVE: {
     Serial.println("fcm http wait...");
     // available() will return the number of characters
     // currently in the receive buffer.
     while (fcm_client.available()) {
       yield();
+      FcmServiceTimeout = 0;
       Serial.write(fcm_client.read()); // read() gets the FIFO char
     }
 
+    /* close at timeout */
+    if (FcmServiceTimeout >= 2) {
+      fcm_sts = Fcm_Sm_CLOSE;
+    }
+  } break;
+
+  case Fcm_Sm_CLOSE: {
     // connected() is a boolean return value - 1 if the
     // connection is active, 0 if it's closed.
     if (fcm_client.connected()) {
       fcm_client.stop(); // stop() closes a TCP connection.
-      fcm_sts = 5;
+      fcm_sts = Fcm_Sm_IDLE;
     }
   } break;
 
-  case 4: {
+  case Fcm_Sm_ERROR:
     Serial.println("fcm error: end");
-  } break;
-
-  case 5:
-  default: {
-    fcm_sts = 5;
-    // Serial.println("fcm: idle");
+  default:
+    fcm_sts = Fcm_Sm_IDLE;
+  case Fcm_Sm_IDLE:
     break;
-  }
   }
 }

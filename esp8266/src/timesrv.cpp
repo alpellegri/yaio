@@ -139,9 +139,13 @@ static void startNtpTime(void) {
   sendNTPpacket(ntpServerIP);
 }
 
-static void stopNtpTime(void) { Udp.stop(); }
+static void stopNtpTime(void) {
+  /* stop udp client */
+  Udp.stop();
+}
 
 static uint32_t getNtpTime(void) {
+  uint32_t ret = 0;
 
   uint32_t size = Udp.parsePacket();
 
@@ -153,10 +157,10 @@ static uint32_t getNtpTime(void) {
     secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
     secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
     secsSince1900 |= (unsigned long)packetBuffer[43];
-    return secsSince1900 - 2208988800UL + timeZone * 3600L;
+    ret = secsSince1900 - 2208988800UL + timeZone * 3600L;
   }
 
-  return 0; // return 0 if unable to get the time
+  return ret; // return 0 if unable to get the time
 }
 
 char *getTmUTC(void) {

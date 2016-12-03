@@ -63,8 +63,9 @@ String FirebaseObject::getString(const String& path) const {
 
 JsonVariant FirebaseObject::getJsonVariant(const String& path) const {
   String key(path);
-  char* start = &key[0];
-  char* end = start + key.length();
+  // char* start = &key[0];
+  char const * start = key.c_str();
+  char const * end = start + key.length();
   // skip first `/`.
   if (*start == '/') {
     start++;
@@ -72,7 +73,7 @@ JsonVariant FirebaseObject::getJsonVariant(const String& path) const {
   JsonVariant json = json_;
   while (start < end) {
     // TODO(proppy) split in a separate function.
-    char* p = start;
+    char* p = (char*)start;
     // advance to next `/`.
     while (*p && (*p != '/')) p++;
     // make `start` a C string.
