@@ -47,7 +47,7 @@ angular.module('app.controllers.chart', [])
     console.log('doRefresh');
 
     var date = new Date();
-    var curr = Math.round(4 * (date.getHours() + date.getMinutes() / 60));
+    var curr = Math.round(2 * (date.getHours() + date.getMinutes() / 60));
 
     $scope.JsonTH.data[0] = [];
     $scope.JsonTH.data[1] = [];
@@ -61,8 +61,8 @@ angular.module('app.controllers.chart', [])
       snapshot.forEach(function(el) {
         $scope.JsonTH.data[0].push(el.val().t / 10);
         $scope.JsonTH.data[1].push(el.val().h / 10);
-        if (i % 4 == 0) {
-          var ii = (i / 4) % 24; // wrap hour: every one days
+        if (i % 2 == 0) {
+          var ii = (i / 2) % 24; // wrap hour: every one days
           $scope.JsonTH.labels.push(ii.toString());
         } else {
           $scope.JsonTH.labels.push("");

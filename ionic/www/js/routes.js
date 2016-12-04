@@ -18,32 +18,32 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('menu.firebase', {
+  .state('menu.FirebaseSetup', {
     url: '/page5',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/firebase.html',
-        controller: 'firebaseCtrl'
+        templateUrl: 'templates/FirebaseSetup.html',
+        controller: 'FirebaseSetupCtrl'
       }
     }
   })
 
-  .state('menu.node', {
+  .state('menu.NodeSetup', {
     url: '/page2',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/node.html',
-        controller: 'NodeCtrl'
+        templateUrl: 'templates/NodeSetup.html',
+        controller: 'NodeSetupCtrl'
       }
     }
   })
 
-  .state('menu.radio', {
+  .state('menu.RadioSetup', {
     url: '/page6',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/radio.html',
-        controller: 'RadioCtrl'
+        templateUrl: 'templates/RadioSetup.html',
+        controller: 'RadioSetupCtrl'
       }
     }
   })
@@ -58,12 +58,22 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('menu.logger', {
+  .state('menu.History', {
     url: '/page4',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/logger.html',
-        controller: 'loggerCtrl'
+        templateUrl: 'templates/History.html',
+        controller: 'HistoryCtrl'
+      }
+    }
+  })
+
+  .state('menu.NodeInfo', {
+    url: '/page4',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/NodeInfo.html',
+        controller: 'NodeInfoCtrl'
       }
     }
   })

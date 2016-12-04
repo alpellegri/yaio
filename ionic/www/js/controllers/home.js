@@ -17,6 +17,14 @@ angular.module('app.controllers.home', [])
       PushService.init();
     });
 
+    $scope.$on("$ionicView.enter", function(event, data) {
+      // console.log("$ionicView.enter: ", data);
+      var ref = firebase.database().ref("control");
+      ref.update({
+        monitor: true
+      });
+    });
+
     $scope.pushCtrl0Change = function() {
       var ref = firebase.database().ref("control");
       if ($scope.control.alarm) {
@@ -26,45 +34,6 @@ angular.module('app.controllers.home', [])
       } else {
         ref.update({
           alarm: false
-        });
-      }
-    };
-
-    $scope.pushCtrl1Change = function() {
-      var ref = firebase.database().ref("control");
-      if ($scope.control.led) {
-        ref.update({
-          led: true
-        });
-      } else {
-        ref.update({
-          led: false
-        });
-      }
-    };
-
-    $scope.pushCtrl2Change = function() {
-      var ref = firebase.database().ref("control");
-      if ($scope.control.reboot) {
-        ref.update({
-          reboot: true
-        });
-      } else {
-        ref.update({
-          reboot: false
-        });
-      }
-    };
-
-    $scope.pushCtrl3Change = function() {
-      var ref = firebase.database().ref("control");
-      if ($scope.control.monitor) {
-        ref.update({
-          monitor: true
-        });
-      } else {
-        ref.update({
-          monitor: false
         });
       }
     };
@@ -79,10 +48,9 @@ angular.module('app.controllers.home', [])
         $scope.status = payload.status;
         var date = new Date();
         date.setTime($scope.status.time * 1000);
-        $scope.system.date = date.toString();
         var current_date = new Date();
         var delta = (current_date.getTime() - date.getTime());
-        if (delta > 1000*10) {
+        if (delta > 1000 * 10) {
           $scope.system.status = false;
         } else {
           $scope.system.status = true;

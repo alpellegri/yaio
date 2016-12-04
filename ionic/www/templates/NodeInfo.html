@@ -1,0 +1,18 @@
+<ion-view title="Node Info" id="page7">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+    <a class="item">Last Startup time<span class="item-note">{{StartupTime}}</span></a>
+    <ion-checkbox class="item-checkbox-right" ng-model="system.status">System Status Up</ion-checkbox>
+    <ion-toggle toggle-class="toggle-positive" ng-model="control.led" ng-change="pushCtrl1Change()">
+      Wake Up On LAN
+    </ion-toggle>
+    <ion-toggle toggle-class="toggle-positive" ng-model="control.monitor" ng-change="pushCtrl3Change()">
+      Enable Monitoring
+    </ion-toggle>
+    <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
+      Request Reboot
+    </ion-toggle>
+    <a class="item">startup.bootcnt<span class="item-note">{{startup.bootcnt}}</span></a>
+    <a class="item">status.heap<span class="item-note">{{status.heap}}</span></a>
+  </ion-content>
+</ion-view>

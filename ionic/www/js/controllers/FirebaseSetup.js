@@ -1,7 +1,7 @@
-angular.module('app.controllers.firebase', [])
+angular.module('app.controllers.FirebaseSetup', [])
 
-.controller('firebaseCtrl', function($scope, FirebaseService, $ionicPopup, $timeout) {
-  console.log('firebaseCtrl');
+.controller('FirebaseSetupCtrl', function($scope, FirebaseService, $ionicPopup, $timeout) {
+  console.log('FirebaseSetupCtrl');
 
   $scope.settings = {};
   var fb_init = localStorage.getItem('firebase_init');
@@ -48,8 +48,6 @@ angular.module('app.controllers.firebase', [])
       upcnt: 0,
       humidity: 0,
       temperature: 0,
-      fire: false,
-      flood: false,
       heap: 0
     });
   };
