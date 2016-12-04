@@ -102,8 +102,8 @@ bool FbmService(void) {
         bootcnt = object["bootcnt"];
         object["bootcnt"] = ++bootcnt;
         object["time"] = getTime();
-        Firebase.set("startup", JsonVariant(object));
         yield();
+        Firebase.set("startup", JsonVariant(object));
         if (Firebase.failed()) {
           bootcnt--;
           Serial.println("set failed: status/bootcnt");
@@ -114,24 +114,25 @@ bool FbmService(void) {
           fblog_log(str);
         }
       } else {
-       Serial.println("parseObject() failed");
-     }
+        Serial.println("parseObject() failed");
+      }
     }
   }
-  yield();
 
   if (boot_sm == 2) {
-
-    // control monitor
     if (++fbm_monitorcnt >= (5 / 1)) {
+      uint32_t time_now = getTime();
+      uint32_t humidity_data = 10 * dht.readHumidity();
+      uint32_t temperature_data = 10 * dht.readTemperature();
+
       Serial.println("FbmService - monitor");
       fbm_monitorcnt = 0;
+      yield();
       FirebaseObject fbobject = Firebase.get("control");
       if (Firebase.failed() == true) {
         Serial.print("get failed: control");
         Serial.println(Firebase.error());
       } else {
-        yield();
         JsonVariant variant = fbobject.getJsonVariant();
         JsonObject &object = variant.as<JsonObject>();
 
@@ -143,6 +144,7 @@ bool FbmService(void) {
           digitalWrite(LED, !(control_led == true));
           if (control_led == true) {
             Serial.println("Sending WOL Packet...");
+            yield();
             sendWOL(computer_ip, mac, sizeof mac);
           }
 
@@ -153,17 +155,9 @@ bool FbmService(void) {
 
           control_monitor = object["monitor"];
         } else {
-         Serial.println("parseObject() failed");
-       }
+          Serial.println("parseObject() failed");
+        }
       }
-    }
-    yield();
-
-    // status update
-    {
-      uint32_t time_now = getTime();
-      uint32_t humidity_data = 10 * dht.readHumidity();
-      uint32_t temperature_data = 10 * dht.readTemperature();
 
       if (control_monitor == true) {
         DynamicJsonBuffer jsonBuffer;
@@ -177,6 +171,13 @@ bool FbmService(void) {
         status["time"] = time_now;
         yield();
         Firebase.set("status", JsonVariant(status));
+        if (Firebase.failed()) {
+          Serial.print("set failed: status");
+          Serial.println(Firebase.error());
+        }
+      } else {
+        yield();
+        Firebase.set("status/time", time_now);
         if (Firebase.failed()) {
           Serial.print("set failed: status");
           Serial.println(Firebase.error());
@@ -223,11 +224,11 @@ bool FbmService(void) {
           JsonObject &object = variant.as<JsonObject>();
           for (JsonObject::iterator it = object.begin(); it != object.end();
                ++it) {
+            yield();
             Serial.println(it->key);
             String string = it->value.asString();
             Serial.println(string);
             RF_AddRadioCodeDB(string);
-            yield();
           }
         }
       }
