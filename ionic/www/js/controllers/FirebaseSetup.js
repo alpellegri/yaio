@@ -28,6 +28,13 @@ angular.module('app.controllers.FirebaseSetup', [])
 
     var ref = firebase.database().ref("/");
 
+    // init Firebase: startup
+    var startup_ref = ref.child('startup');
+    startup_ref.set({
+      bootcnt: 0,
+      time: 0,
+    });
+
     // init Firebase: control
     var control_ref = ref.child('control');
     control_ref.set({
@@ -36,19 +43,17 @@ angular.module('app.controllers.FirebaseSetup', [])
       led: false,
       monitor: false,
       radio_learn: false,
-      reboot: false,
-      scheduler: 10
+      reboot: false
     });
 
     // init Firebase: status
     var starus_ref = ref.child('status');
     starus_ref.set({
       alarm: false,
-      bootcnt: 0,
-      upcnt: 0,
+      heap: 0,
       humidity: 0,
       temperature: 0,
-      heap: 0
+      time: 0
     });
   };
 
