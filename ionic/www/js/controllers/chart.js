@@ -43,6 +43,13 @@ angular.module('app.controllers.chart', [])
     []
   ];
 
+  $scope.ClearChart = function() {
+    console.log('chartCtrl: ClearChart');
+
+    firebase.database().ref('logs/TH').remove();
+    $scope.doRefresh();
+  };
+
   $scope.doRefresh = function() {
     console.log('doRefresh');
 
