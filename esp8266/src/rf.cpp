@@ -6,6 +6,7 @@
 
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
+bool RF_StatusEnable = false;
 
 uint32_t RadioCodes[10];
 uint16_t RadioCodesLen = 0;
@@ -20,15 +21,15 @@ bool RF_CheckRadioCodeDB(uint32_t code) {
   bool res = false;
 
   uint8_t i = 0;
+  Serial.printf("RF_CheckRadioCodeDB: code %x\n", code);
   while ((i < RadioCodesLen) && (res == false)) {
-    Serial.printf("> %x, %x\n", code, RadioCodes[i]);
+    Serial.printf("radio table: %x, %x\n", code, RadioCodes[i]);
     if (code == RadioCodes[i]) {
+      Serial.printf("radio code found in table\n");
       res = true;
     }
     i++;
   }
-
-  Serial.printf(">> %d\n", res);
 
   return res;
 }
@@ -42,24 +43,22 @@ uint32_t RF_GetRadioCode(void) {
   return Code;
 }
 
-bool RF_Enable(void) {
-  bool ret = true;
-
-  RadioCode = 0;
-  Serial.printf("RF Enable\n");
-  mySwitch.enableReceive(D7); // gpio13 D7
-
-  return ret;
+void RF_Enable(void) {
+  if (RF_StatusEnable == false) {
+    RF_StatusEnable = true;
+    RadioCode = 0;
+    Serial.printf("RF Enable\n");
+    mySwitch.enableReceive(D7); // gpio13 D7
+  }
 }
 
-bool RF_Disable(void) {
-  bool ret = true;
-
-  RadioCode = 0;
-  Serial.printf("RF disable\n");
-  mySwitch.disableReceive(); // gpio13 D7
-
-  return ret;
+void RF_Disable(void) {
+  if (RF_StatusEnable == true) {
+    RF_StatusEnable = false;
+    RadioCode = 0;
+    Serial.printf("RF disable\n");
+    mySwitch.disableReceive(); // gpio13 D7
+  }
 }
 
 void RF_Loop() {
