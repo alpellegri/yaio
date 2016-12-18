@@ -34,6 +34,9 @@ uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
 uint32_t fbm_time_last = 0;
 
+uint32_t humidity_data;
+uint32_t temperature_data;
+
 /**
  * The target IP address to send the magic packet to.
  */
@@ -143,8 +146,15 @@ bool FbmService(void) {
   if (boot_sm == 2) {
     if (++fbm_monitorcnt >= (5 / 1)) {
       uint32_t time_now = getTime();
-      uint32_t humidity_data = 10 * dht.readHumidity();
-      uint32_t temperature_data = 10 * dht.readTemperature();
+
+      float h = dht.readHumidity();
+      float t = dht.readTemperature();
+      if (isnan(h) || isnan(t)) {
+        Serial.println("Failed to read from DHT sensor!");
+      } else {
+        humidity_data = 10 * h;
+        temperature_data = 10 * h;
+      }
 
       Serial.println("FbmService - monitor");
       fbm_monitorcnt = 0;

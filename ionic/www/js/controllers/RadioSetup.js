@@ -65,6 +65,13 @@ angular.module('app.controllers.RadioSetup', [])
       }
     };
 
+    $scope.ResetRadioCodes = function() {
+      console.log('RadioSetupCtrl: ResetRadioCodes');
+
+      firebase.database().ref('RadioCodes').remove();
+      $scope.doRefresh();
+    };
+
     $scope.doRefresh = function() {
       console.log('doRefresh');
 
