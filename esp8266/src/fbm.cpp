@@ -153,7 +153,7 @@ bool FbmService(void) {
         Serial.println("Failed to read from DHT sensor!");
       } else {
         humidity_data = 10 * h;
-        temperature_data = 10 * h;
+        temperature_data = 10 * t;
       }
 
       Serial.println("FbmService - monitor");
