@@ -15,12 +15,12 @@
     "shelljs": "^0.3.0"
   },
   "cordovaPlugins": [
-    "cordova-plugin-device",
-    "cordova-plugin-console",
     "cordova-plugin-whitelist",
-    "cordova-plugin-splashscreen",
+    "cordova-plugin-console",
     "cordova-plugin-statusbar",
+    "cordova-plugin-device",
     "ionic-plugin-keyboard",
+    "cordova-plugin-splashscreen",
     {
       "variables": {
         "SENDER_ID": "XXXXXXXXXXX"
@@ -29,7 +29,5 @@
       "id": "phonegap-plugin-push"
     }
   ],
-  "cordovaPlatforms": [
-    "android"
-  ]
+  "cordovaPlatforms": []
 }

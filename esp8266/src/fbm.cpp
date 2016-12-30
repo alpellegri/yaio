@@ -34,6 +34,9 @@ uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
 uint32_t fbm_time_last = 0;
 
+uint32_t humidity_data;
+uint32_t temperature_data;
+
 /**
  * The target IP address to send the magic packet to.
  */
@@ -63,6 +66,27 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
 
   udp.endPacket();
   yield();
+}
+
+void FbmUpdateRadioCodes(void) {
+  yield();
+  Serial.printf("FbmUpdateRadioCodes\n");
+  FirebaseObject fbradio = Firebase.get("RadioCodes/Active");
+  if (Firebase.failed() == true) {
+    Serial.print("get failed: control");
+    Serial.println(Firebase.error());
+  } else {
+    RF_ResetRadioCodeDB();
+    JsonVariant variant = fbradio.getJsonVariant();
+    JsonObject &object = variant.as<JsonObject>();
+    for (JsonObject::iterator it = object.begin(); it != object.end(); ++it) {
+      yield();
+      Serial.println(it->key);
+      String string = it->value.asString();
+      Serial.println(string);
+      RF_AddRadioCodeDB(string);
+    }
+  }
 }
 
 /* main function task */
@@ -122,8 +146,15 @@ bool FbmService(void) {
   if (boot_sm == 2) {
     if (++fbm_monitorcnt >= (5 / 1)) {
       uint32_t time_now = getTime();
-      uint32_t humidity_data = 10 * dht.readHumidity();
-      uint32_t temperature_data = 10 * dht.readTemperature();
+
+      float h = dht.readHumidity();
+      float t = dht.readTemperature();
+      if (isnan(h) || isnan(t)) {
+        Serial.println("Failed to read from DHT sensor!");
+      } else {
+        humidity_data = 10 * h;
+        temperature_data = 10 * t;
+      }
 
       Serial.println("FbmService - monitor");
       fbm_monitorcnt = 0;
@@ -211,65 +242,50 @@ bool FbmService(void) {
     if (status_alarm != control_alarm) {
       status_alarm = control_alarm;
       if (status_alarm == true) {
-        // acquire Active Radio Codes
-        yield();
-        FirebaseObject fbradio = Firebase.get("RadioCodes/Active");
-        if (Firebase.failed() == true) {
-          Serial.print("get failed: control");
-          Serial.println(Firebase.error());
-        } else {
-          fbm_code_last = 0;
-          RF_ResetRadioCodeDB();
-          JsonVariant variant = fbradio.getJsonVariant();
-          JsonObject &object = variant.as<JsonObject>();
-          for (JsonObject::iterator it = object.begin(); it != object.end();
-               ++it) {
-            yield();
-            Serial.println(it->key);
-            String string = it->value.asString();
-            Serial.println(string);
-            RF_AddRadioCodeDB(string);
-          }
-        }
+        // acquire Active Radio Codes from FB
+        FbmUpdateRadioCodes();
       }
     }
 
-    // log alarm status
+    // manage RF activation/deactivation
+    if ((status_alarm == true) || (control_radio_learn == true)) {
+      RF_Enable();
+    } else {
+      RF_Disable();
+    }
+
+    // manage alarm activation/deactivation notifications
     if (status_alarm_last != status_alarm) {
       status_alarm_last = status_alarm;
-      String str;
-      if (status_alarm == true) {
-        RF_Enable();
-        str = String("Alarm active");
-      } else {
-        RF_Disable();
-        str = String("Alarm inactive");
-      }
+      String str = "Alarm ";
+      str += String((status_alarm == true) ? ("active") : ("inactive"));
       fblog_log(str);
     }
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
-    // Serial.printf("control_radio_learn: %d\n", control_radio_learn);
-    if (status_alarm == true) {
-      if (code != 0) {
+    if (code != 0) {
+      if (control_radio_learn == true) {
+        // acquire Active Radio Codes from FB
+        FbmUpdateRadioCodes();
+        if (code != fbm_code_last) {
+          if (RF_CheckRadioCodeDB(code) == false) {
+            Serial.printf("RadioCodes/Inactive: %x\n", code);
+            yield();
+            Firebase.pushInt("RadioCodes/Inactive", code);
+            if (Firebase.failed()) {
+              Serial.print("set failed: RadioCodes/Inactive");
+              Serial.println(Firebase.error());
+            } else {
+              fbm_code_last = code;
+            }
+          }
+        }
+      }
+      if (status_alarm == true) {
         if (RF_CheckRadioCodeDB(code) == true) {
           String str = String("Intrusion!!!");
           fblog_log(str);
-        } else {
-          if (control_radio_learn == true) {
-            if (code != fbm_code_last) {
-              fbm_code_last = code;
-              Serial.printf("RadioCodes/Inactive: %d\n", code);
-              yield();
-              Firebase.pushInt("RadioCodes/Inactive", code);
-              if (Firebase.failed()) {
-                Serial.print("set failed: control/reboot");
-                Serial.println(Firebase.error());
-              } else {
-              }
-            }
-          }
         }
       }
     }

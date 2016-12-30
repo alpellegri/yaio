@@ -66,8 +66,9 @@ angular.module('app.controllers.NodeInfo', [])
         $scope.control = payload.control;
         $scope.status = payload.status;
         date.setTime($scope.status.time * 1000);
+        $scope.HeartTime = date.toLocaleString();
         delta = (current_date.getTime() - date.getTime());
-        if (delta > 1000*10) {
+        if (delta > 1000*30) {
           $scope.system.status = false;
         } else {
           $scope.system.status = true;

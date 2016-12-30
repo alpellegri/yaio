@@ -50,7 +50,7 @@ angular.module('app.controllers.home', [])
         date.setTime($scope.status.time * 1000);
         var current_date = new Date();
         var delta = (current_date.getTime() - date.getTime());
-        if (delta > 1000 * 10) {
+        if (delta > 1000 * 30) {
           $scope.system.status = false;
         } else {
           $scope.system.status = true;
