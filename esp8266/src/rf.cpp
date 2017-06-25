@@ -14,6 +14,7 @@ uint16_t RadioCodesLen = 0;
 void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
 
 void RF_AddRadioCodeDB(String string) {
+  Serial.printf("RF_AddRadioCodeDB: %s\n", string.c_str());
   RadioCodes[RadioCodesLen++] = atoi(string.c_str());
 }
 
