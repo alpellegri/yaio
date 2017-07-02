@@ -1,13 +1,13 @@
 <ion-view title="Node Setup" id="page2">
   <ion-content class="custom" padding="true" scroll="true" class="has-header">
     <a class="item">Connection<span class="item-note">{{WSStatus}} -> {{StsTxt}}</span></a>
-    <button id="setup-connect" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-social-rss" on-touch="SetupComCmd()">
+    <button id="setup-connect" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-social-rss" on-hold="SetupComCmd()">
       {{ComButton}}
     </button>
-    <button id="setup-configure-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-arrow-dropright" on-touch="showPopup()">
+    <button id="setup-configure-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-arrow-dropright" on-hold="showPopup()">
       Node Configuration
     </button>
-    <button id="setup-update-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-touch="SetupComSend(settings)">
+    <button id="setup-update-node" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-hold="SetupComSend(settings)">
       Store to Node
     </button>
     <ion-infinite-scroll on-infinite="doRefresh()"></ion-infinite-scroll>

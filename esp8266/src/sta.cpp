@@ -76,8 +76,8 @@ void STA_Loop() {
   if (in != sta_button) {
     sta_button = in;
     if (in == false) {
-      //EE_EraseData();
-      //Serial.printf("EEPROM erased\n");
+      EE_EraseData();
+      Serial.printf("EEPROM erased\n");
     }
   }
 }

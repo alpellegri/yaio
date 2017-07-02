@@ -10,12 +10,21 @@ bool RF_StatusEnable = false;
 
 uint32_t RadioCodes[10];
 uint16_t RadioCodesLen = 0;
+uint32_t RadioCodesTx[10];
+uint16_t RadioCodesTxLen = 0;
 
 void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
+
+void RF_ResetRadioCodeTxDB(void) { RadioCodesTxLen = 0; }
 
 void RF_AddRadioCodeDB(String string) {
   Serial.printf("RF_AddRadioCodeDB: %s\n", string.c_str());
   RadioCodes[RadioCodesLen++] = atoi(string.c_str());
+}
+
+void RF_AddRadioCodeTxDB(String string) {
+  Serial.printf("RF_AddRadioCodeTxDB: %s\n", string.c_str());
+  RadioCodesTx[RadioCodesTxLen++] = atoi(string.c_str());
 }
 
 bool RF_CheckRadioCodeDB(uint32_t code) {

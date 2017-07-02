@@ -8,7 +8,7 @@
 #include "timesrv.h"
 #include "fcm.h"
 
-void fblog_log(String& message) {
+void fblog_log(String& message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
 
@@ -16,6 +16,8 @@ void fblog_log(String& message) {
   log["msg"] = message;
 
   Serial.println(message);
-  FcmSendPush(message);
+  if (fcm_notify == true) {
+    FcmSendPush(message);
+  }
   Firebase.push("logs/Reports", JsonVariant(log));
 }
