@@ -70,7 +70,8 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
 
 void FbmUpdateRadioCodes(void) {
   yield();
-  Serial.printf("FbmUpdateRadioCodes\n");
+
+  Serial.printf("FbmUpdateRadioCodes Rx\n");
   FirebaseObject fbradio = Firebase.get("RadioCodes/Active");
   if (Firebase.failed() == true) {
     Serial.print("get failed: control");
@@ -85,6 +86,24 @@ void FbmUpdateRadioCodes(void) {
       String string = it->value.asString();
       Serial.println(string);
       RF_AddRadioCodeDB(string);
+    }
+  }
+
+  Serial.printf("FbmUpdateRadioCodes Tx\n");
+  fbradio = Firebase.get("RadioCodes/ActiveTx");
+  if (Firebase.failed() == true) {
+    Serial.print("get failed: control");
+    Serial.println(Firebase.error());
+  } else {
+    RF_ResetRadioCodeTxDB();
+    JsonVariant variant = fbradio.getJsonVariant();
+    JsonObject &object = variant.as<JsonObject>();
+    for (JsonObject::iterator it = object.begin(); it != object.end(); ++it) {
+      yield();
+      Serial.println(it->key);
+      String string = it->value.asString();
+      Serial.println(string);
+      RF_AddRadioCodeTxDB(string);
     }
   }
 }
@@ -135,7 +154,7 @@ bool FbmService(void) {
         } else {
           boot_sm = 2;
           String str = String("boot-up complete");
-          fblog_log(str);
+          fblog_log(str, true);
         }
       } else {
         Serial.println("parseObject() failed");
@@ -259,7 +278,7 @@ bool FbmService(void) {
       status_alarm_last = status_alarm;
       String str = "Alarm ";
       str += String((status_alarm == true) ? ("active") : ("inactive"));
-      fblog_log(str);
+      fblog_log(str, false);
     }
 
     // monitor for RF radio codes
@@ -282,11 +301,10 @@ bool FbmService(void) {
           }
         }
       }
-      if (status_alarm == true) {
-        if (RF_CheckRadioCodeDB(code) == true) {
-          String str = String("Intrusion!!!");
-          fblog_log(str);
-        }
+
+      if (RF_CheckRadioCodeDB(code) == true) {
+        String str = String("Intrusion!!!");
+        fblog_log(str, status_alarm);
       }
     }
   }

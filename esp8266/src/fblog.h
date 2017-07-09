@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-extern void fblog_log(String& message);
+extern void fblog_log(String& message, boolean fcm_notify);
 
 #endif
