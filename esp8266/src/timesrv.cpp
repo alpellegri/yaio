@@ -19,8 +19,8 @@ static time_t start_time;
 /*-------- NTP code ----------*/
 
 // NTP Servers:
-static const char ntpServerName[] = "us.pool.ntp.org";
-// static const char ntpServerName[] = "time.nist.gov";
+// static const char ntpServerName[] = "us.pool.ntp.org";
+static const char ntpServerName[] = "time.nist.gov";
 // static const char ntpServerName[] = "time-a.timefreq.bldrdoc.gov";
 // static const char ntpServerName[] = "time-b.timefreq.bldrdoc.gov";
 // static const char ntpServerName[] = "time-c.timefreq.bldrdoc.gov";
@@ -155,7 +155,7 @@ static uint32_t getNtpTime(void) {
     secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
     secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
     secsSince1900 |= (unsigned long)packetBuffer[43];
-    ret = secsSince1900 - 2208988800UL * 3600L;
+    ret = secsSince1900 - 2208988800UL;
   }
 
   return ret; // return 0 if unable to get the time

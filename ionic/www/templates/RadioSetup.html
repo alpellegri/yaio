@@ -41,14 +41,6 @@
               Configure
             </ion-option-button>
             {{RadioCode.name}}
-            <span class="item-note">
-              {{RadioCode.id.toString(16).toUpperCase()}} ->
-              {{RadioCode.action.toString(16).toUpperCase()}} ->
-              ({{RadioCode.delay.toString()}}) ->
-              {{RadioCode.action_d.toString(16).toUpperCase()}}
-            </span>
-          </div>
-          <div>
             <select ng-model="selectedItem" ng-change="UpdateAction(RadioCode, selectedItem)">
               <option ng-repeat="item in ActiveRadioCodesTx" value="{{item.id}}">{{item.name}}</option>
             </select>
@@ -58,6 +50,14 @@
             <select ng-model="selectedItem_d" ng-change="UpdateActionDelayed(RadioCode, selectedItem_d)">
               <option ng-repeat="item in ActiveRadioCodesTx" value="{{item.id}}">{{item.name}}</option>
             </select>
+          </div>
+          <div>
+            <label>
+              {{RadioCode.id.toString(16).toUpperCase()}} ->
+              {{RadioCode.action.toString(16).toUpperCase()}} ->
+              ({{RadioCode.delay.toString()}}) ->
+              {{RadioCode.action_d.toString(16).toUpperCase()}}
+            </label>
           </div>
         </ion-item>
       </ion-list>

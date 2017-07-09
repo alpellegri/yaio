@@ -29,11 +29,5 @@
     <button id="setup-clear" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-trash-b" on-hold="ResetTimers()">
       Reset Timers
     </button>
-
-    <p>selected item is : {{selectedItem}}</p>
-    <select ng-model="selectedItem" selectedItem ="ciaao">
-      <option ng-repeat="item in ActiveRadioCodesTx" value="{{item.name}}">{{item.name}}</option>
-    </select>
-
   </ion-content>
 </ion-view>

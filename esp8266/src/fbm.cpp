@@ -38,6 +38,8 @@ uint32_t fbm_time_last = 0;
 uint32_t humidity_data;
 uint32_t temperature_data;
 
+uint16_t fbm_timer_monitor_cnt;
+
 /**
  * The target IP address to send the magic packet to.
  */
@@ -78,7 +80,7 @@ bool FbmUpdateRadioCodes(void) {
     Serial.printf("FbmUpdateRadioCodes Rx\n");
     FirebaseObject ref = Firebase.get("RadioCodes/Active");
     if (Firebase.failed() == true) {
-      Serial.print("get failed: control");
+      Serial.print("get failed: RadioCodes/Active");
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -104,7 +106,7 @@ bool FbmUpdateRadioCodes(void) {
     Serial.printf("FbmUpdateRadioCodes Tx\n");
     FirebaseObject ref = Firebase.get("RadioCodes/ActiveTx");
     if (Firebase.failed() == true) {
-      Serial.print("get failed: control");
+      Serial.print("get failed: RadioCodes/ActiveTx");
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -127,7 +129,7 @@ bool FbmUpdateRadioCodes(void) {
     Serial.printf("FbmUpdateRadioCodes Timers\n");
     FirebaseObject ref = Firebase.get("Timers");
     if (Firebase.failed() == true) {
-      Serial.print("get failed: control");
+      Serial.print("get failed: Timers");
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -154,6 +156,7 @@ bool FbmUpdateRadioCodes(void) {
 bool FbmService(void) {
   bool ret = false;
 
+  Serial.printf("boot_sm: %d\n", boot_sm);
   // firebase connect
   if (boot_sm == 0) {
     bool ret = true;
@@ -169,6 +172,7 @@ bool FbmService(void) {
       Serial.print("set failed: control/reboot");
       Serial.println(Firebase.error());
     } else {
+      Serial.print("firebase: connected!");
       boot_sm = 1;
     }
   }
@@ -196,7 +200,7 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           boot_sm = 2;
-          String str = String("boot-up complete");
+          String str = String("boot-up complete!");
           fblog_log(str, true);
         }
       } else {
@@ -209,6 +213,7 @@ bool FbmService(void) {
   if (boot_sm == 2) {
     bool res = FbmUpdateRadioCodes();
     if (res == true) {
+      Serial.println("firebase configuration downloaded!");
       boot_sm = 3;
     }
   }
@@ -348,7 +353,10 @@ bool FbmService(void) {
     }
 
     // monitor timers
-    RF_MonitorTimers();
+    if (fbm_timer_monitor_cnt >= 15) {
+      fbm_timer_monitor_cnt = 0;
+      RF_MonitorTimers();
+    }
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();

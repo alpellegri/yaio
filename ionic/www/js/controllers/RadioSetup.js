@@ -63,7 +63,10 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.ActivateRadioCode = function(data, i) {
         var radio = {
           name: "default",
-          id: $scope.InactiveRadioCodes[i]
+          id: $scope.InactiveRadioCodes[i],
+          action: 0,
+          delay: 0,
+          action_d: 0
         }
         data.push(radio);
         $scope.InactiveRadioCodes.splice(i, 1);
