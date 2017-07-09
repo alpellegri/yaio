@@ -7,8 +7,6 @@
 /* seconds */
 #define NTP_UPDATE_INTERVAL (5 * 60)
 
-static const int timeZone = 0;
-
 static uint8_t timesrv_sm = 0;
 static bool timesrv_run = false;
 static uint16_t TimeServiceCnt;
@@ -157,7 +155,7 @@ static uint32_t getNtpTime(void) {
     secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
     secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
     secsSince1900 |= (unsigned long)packetBuffer[43];
-    ret = secsSince1900 - 2208988800UL + timeZone * 3600L;
+    ret = secsSince1900 - 2208988800UL * 3600L;
   }
 
   return ret; // return 0 if unable to get the time

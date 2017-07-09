@@ -9,10 +9,50 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.pushCtrl0 = {
         checked: false
       };
+      $scope.pushCtrl1 = {
+        checked: false
+      };
 
+      $scope.settings = {};
       $scope.InactiveRadioCodes = [];
       $scope.ActiveRadioCodes = [];
-      $scope.ActiveRadioCodesTx = [];
+      $scope.Delays = [{
+          name: "1 sec",
+          time: 1
+        },
+        {
+          name: "2 sec",
+          time: 2
+        },
+        {
+          name: "5 sec",
+          time: 5
+        },
+        {
+          name: "15 sec",
+          time: 15
+        },
+        {
+          name: "30 sec",
+          time: 30
+        },
+        {
+          name: "1 min",
+          time: 1*60
+        },
+        {
+          name: "2 min",
+          time: 2*60
+        },
+        {
+          name: "5 min",
+          time: 5*60
+        },
+        {
+          name: "15 min",
+          time: 15*60
+        },
+      ];
 
       // remove radio code
       $scope.RemoveInactiveRadioCode = function(i) {
@@ -20,37 +60,24 @@ angular.module('app.controllers.RadioSetup', [])
       };
 
       // move radio code to active
-      $scope.ActivateRadioCode = function(i) {
-        $scope.ActiveRadioCodes.push($scope.InactiveRadioCodes[i]);
-        $scope.InactiveRadioCodes.splice(i, 1);
-      };
-
-      // move radio code to active
-      $scope.ActivateRadioCodeTx = function(i) {
-        $scope.ActiveRadioCodesTx.push($scope.InactiveRadioCodes[i]);
+      $scope.ActivateRadioCode = function(data, i) {
+        var radio = {
+          name: "default",
+          id: $scope.InactiveRadioCodes[i]
+        }
+        data.push(radio);
         $scope.InactiveRadioCodes.splice(i, 1);
       };
 
       // remove radio code
-      $scope.RemoveActiveRadioCode = function(i) {
-        $scope.ActiveRadioCodes.splice(i, 1);
-      };
-
-      // remove radio code
-      $scope.RemoveActiveRadioCodeTx = function(i) {
-        $scope.ActiveRadioCodesTx.splice(i, 1);
+      $scope.RemoveActiveRadioCode = function(data, i) {
+        data.splice(i, 1);
       };
 
       // move radio code to inactive
-      $scope.DeactivateRadioCode = function(i) {
-        $scope.InactiveRadioCodes.push($scope.ActiveRadioCodes[i]);
-        $scope.ActiveRadioCodes.splice(i, 1);
-      };
-
-      // move radio code to inactive
-      $scope.DeactivateRadioCodeTx = function(i) {
-        $scope.InactiveRadioCodes.push($scope.ActiveRadioCodesTx[i]);
-        $scope.ActiveRadioCodesTx.splice(i, 1);
+      $scope.DeactivateRadioCode = function(data, i) {
+        $scope.InactiveRadioCodes.push(data[i].id);
+        data.splice(i, 1);
       };
 
       $scope.SetupRadio = function() {
@@ -58,22 +85,60 @@ angular.module('app.controllers.RadioSetup', [])
         ref.child('Active').remove();
         console.log('active');
         $scope.ActiveRadioCodes.forEach(function(element) {
-          console.log(element.val());
-          ref.child('Active').push().set(element.val());
+          console.log('element');
+          console.log(element);
+          var radio = {
+            name: element.name,
+            id: element.id,
+            action: element.action,
+            delay: element.delay,
+            action_d: element.action_d
+          }
+          console.log('radio');
+          console.log(radio);
+          ref.child('Active').push().set(radio);
         });
+
         ref.child('ActiveTx').remove();
         console.log('active tx');
         $scope.ActiveRadioCodesTx.forEach(function(element) {
-          console.log(element.val());
-          ref.child('ActiveTx').push().set(element.val());
+          console.log(element);
+          var radio = {
+            name: element.name,
+            id: element.id
+          }
+          console.log(radio);
+          ref.child('ActiveTx').push().set(radio);
         });
+
         ref.child('Inactive').remove();
         console.log('inactive');
         $scope.InactiveRadioCodes.forEach(function(element) {
-          console.log(element.val());
-          ref.child('Inactive').push().set(element.val());
+          console.log(element);
+          ref.child('Inactive').push().set(element);
         });
       }
+
+      $scope.UpdateAction = function(RadioCode, action) {
+        console.log('UpdateAction');
+        console.log(action);
+        RadioCode.action = parseInt(action);
+        console.log(RadioCode);
+      };
+
+      $scope.UpdateDelay = function(RadioCode, delay) {
+        console.log('UpdateActionDelayed');
+        console.log(delay);
+        RadioCode.delay = parseInt(delay);
+        console.log(RadioCode);
+      };
+
+      $scope.UpdateActionDelayed = function(RadioCode, action) {
+        console.log('UpdateActionDelayed');
+        console.log(action);
+        RadioCode.action_d = parseInt(action);
+        console.log(RadioCode);
+      };
 
       $scope.pushCtrl0Change = function() {
         var ref = firebase.database().ref("control");
@@ -89,11 +154,70 @@ angular.module('app.controllers.RadioSetup', [])
         }
       };
 
+      $scope.pushCtrl1Change = function() {
+        var ref = firebase.database().ref("control");
+        console.log('radio_update control ' + $scope.pushCtrl1.checked);
+        if ($scope.pushCtrl1.checked) {
+          ref.update({
+            radio_update: true
+          });
+        } else {
+          ref.update({
+            radio_update: false
+          });
+        }
+      };
+
       $scope.ResetRadioCodes = function() {
         console.log('RadioSetupCtrl: ResetRadioCodes');
 
         firebase.database().ref('RadioCodes').remove();
         $scope.doRefresh();
+      };
+
+      // Triggered on a button click, or some other target
+      $scope.showPopupRadioEdit = function(data, i) {
+        $scope.settings._name = data[i].name;
+        $scope.settings._id = data[i].id;
+        var PopupTemplate =
+          '<form class="list">' +
+          '<h9 id="setup-heading5" style="text-align:left;">name</h9>' +
+          '<label class="item item-input"> <input type="text" placeholder="name" ng-model="settings._name"> </label>' +
+          '<h9 id="setup-heading5" style="text-align:left;">id</h9>' +
+          '<label class="item item-input"> <input type="text" placeholder="id" ng-model="settings._id"> </label>' +
+          '</form>';
+
+        // An elaborate, custom popup
+        var myPopup = $ionicPopup.show({
+          template: PopupTemplate,
+          title: 'Radio Configuration',
+          subTitle: '',
+          scope: $scope,
+          buttons: [{
+            text: 'Cancel'
+          }, {
+            text: '<b>Save</b>',
+            type: 'button-positive',
+            onTap: function(e) {
+              if (false) {
+                // don't allow the user to close unless he enters wifi password
+                e.preventDefault();
+              } else {
+                data[i].name = $scope.settings._name;
+                data[i].id = $scope.settings._id;
+                return $scope.settings;
+              }
+            }
+          }]
+        });
+
+        myPopup.then(function(res) {
+          console.log('Tapped!', $scope.settings);
+        });
+
+        // $timeout(function() {
+        //   myPopup.close();
+        // }, 90000);
       };
 
       $scope.doRefresh = function() {
@@ -105,7 +229,7 @@ angular.module('app.controllers.RadioSetup', [])
         ref_inactive.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
-            $scope.InactiveRadioCodes.push(childSnapshot);
+            $scope.InactiveRadioCodes.push(childSnapshot.val());
             i++;
           });
         });
@@ -116,7 +240,7 @@ angular.module('app.controllers.RadioSetup', [])
         ref_active.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
-            $scope.ActiveRadioCodes.push(childSnapshot);
+            $scope.ActiveRadioCodes.push(childSnapshot.val());
             i++;
           });
         });
@@ -127,7 +251,7 @@ angular.module('app.controllers.RadioSetup', [])
         ref_active.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
-            $scope.ActiveRadioCodesTx.push(childSnapshot);
+            $scope.ActiveRadioCodesTx.push(childSnapshot.val());
             i++;
           });
         });

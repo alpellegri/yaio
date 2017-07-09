@@ -69,11 +69,21 @@ angular.module('app.routes', [])
   })
 
   .state('menu.NodeInfo', {
-    url: '/page4',
+    url: '/page7',
     views: {
       'side-menu21': {
         templateUrl: 'templates/NodeInfo.html',
         controller: 'NodeInfoCtrl'
+      }
+    }
+  })
+
+  .state('menu.TimerSetup', {
+    url: '/page8',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/TimerSetup.html',
+        controller: 'TimerSetupCtrl'
       }
     }
   })

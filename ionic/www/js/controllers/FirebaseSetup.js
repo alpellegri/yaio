@@ -41,6 +41,7 @@ angular.module('app.controllers.FirebaseSetup', [])
         led: false,
         monitor: false,
         radio_learn: false,
+        radio_update: false,
         reboot: false
       });
 
