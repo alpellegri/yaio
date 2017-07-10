@@ -169,10 +169,11 @@ bool FbmService(void) {
     yield();
     Firebase.setBool("control/reboot", false);
     if (Firebase.failed()) {
-      Serial.print("set failed: control/reboot");
+      Serial.println("set failed: control/reboot");
       Serial.println(Firebase.error());
     } else {
       Serial.print("firebase: connected!");
+      Serial.println("firebase: connected!");
       boot_sm = 1;
     }
   }
@@ -238,6 +239,7 @@ bool FbmService(void) {
       FirebaseObject fbobject = Firebase.get("control");
       if (Firebase.failed() == true) {
         Serial.print("get failed: control");
+        Serial.println("get failed: control");
         Serial.println(Firebase.error());
       } else {
         JsonVariant variant = fbobject.getJsonVariant();
@@ -287,7 +289,7 @@ bool FbmService(void) {
         yield();
         Firebase.set("status/time", time_now);
         if (Firebase.failed()) {
-          Serial.print("set failed: status");
+          Serial.println("set failed: status");
           Serial.println(Firebase.error());
         }
       }
@@ -304,7 +306,7 @@ bool FbmService(void) {
         yield();
         Firebase.push("logs/TH", JsonVariant(th));
         if (Firebase.failed()) {
-          Serial.print("push failed: logs/TH");
+          Serial.println("push failed: logs/TH");
           Serial.println(Firebase.error());
         } else {
           // update in case of success
@@ -343,7 +345,7 @@ bool FbmService(void) {
       // clear request
       Firebase.setBool("control/radio_update", false);
       if (Firebase.failed()) {
-        Serial.print("set failed: control/radio_update");
+        Serial.println("set failed: control/radio_update");
         Serial.println(Firebase.error());
       } else {
         // force update DB
@@ -363,14 +365,14 @@ bool FbmService(void) {
     if (code != 0) {
       if (control_radio_learn == true) {
         // acquire Active Radio Codes from FB
-        FbmUpdateRadioCodes();
+        // FbmUpdateRadioCodes();
         if (code != fbm_code_last) {
           if (RF_CheckRadioCodeDB(code) == false) {
             Serial.printf("RadioCodes/Inactive: %x\n", code);
             yield();
             Firebase.pushInt("RadioCodes/Inactive", code);
             if (Firebase.failed()) {
-              Serial.print("set failed: RadioCodes/Inactive");
+              Serial.println("set failed: RadioCodes/Inactive");
               Serial.println(Firebase.error());
             } else {
               fbm_code_last = code;
