@@ -16,7 +16,23 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.settings = {};
       $scope.InactiveRadioCodes = [];
       $scope.ActiveRadioCodes = [];
+      $scope.ActiveTable = [];
+      $scope.Dout = [];
+      $scope.Types = [{
+          name: "dio",
+          type: 1
+        },
+        {
+          name: "rf",
+          type: 2
+        },
+      ];
+
       $scope.Delays = [{
+          name: "0 sec",
+          time: 0
+        },
+        {
           name: "1 sec",
           time: 1
         },
@@ -38,19 +54,19 @@ angular.module('app.controllers.RadioSetup', [])
         },
         {
           name: "1 min",
-          time: 1*60
+          time: 1 * 60
         },
         {
           name: "2 min",
-          time: 2*60
+          time: 2 * 60
         },
         {
           name: "5 min",
-          time: 5*60
+          time: 5 * 60
         },
         {
           name: "15 min",
-          time: 15*60
+          time: 15 * 60
         },
       ];
 
@@ -64,6 +80,7 @@ angular.module('app.controllers.RadioSetup', [])
         var radio = {
           name: "default",
           id: $scope.InactiveRadioCodes[i],
+          type: 0,
           action: 0,
           delay: 0,
           action_d: 0
@@ -93,6 +110,7 @@ angular.module('app.controllers.RadioSetup', [])
           var radio = {
             name: element.name,
             id: element.id,
+            type: element.type,
             action: element.action,
             delay: element.delay,
             action_d: element.action_d
@@ -117,10 +135,20 @@ angular.module('app.controllers.RadioSetup', [])
         ref.child('Inactive').remove();
         console.log('inactive');
         $scope.InactiveRadioCodes.forEach(function(element) {
-          console.log(element);
           ref.child('Inactive').push().set(element);
         });
       }
+
+      $scope.UpdateType = function(RadioCode, type) {
+        console.log('UpdateType');
+        console.log(type);
+        RadioCode.type = parseInt(type);
+        if (type == 1) {
+          $scope.ActiveTable = $scope.Dout;
+        } else if (type == 2) {
+          $scope.ActiveTable = $scope.ActiveRadioCodesTx;
+        } else {}
+      };
 
       $scope.UpdateAction = function(RadioCode, action) {
         console.log('UpdateAction');
@@ -226,10 +254,10 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.doRefresh = function() {
         console.log('doRefresh');
 
-        var ref_inactive = firebase.database().ref('RadioCodes/Inactive');
+        var ref = firebase.database().ref('RadioCodes/Inactive');
         var i = 0;
         $scope.InactiveRadioCodes = [];
-        ref_inactive.once('value', function(snapshot) {
+        ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
             $scope.InactiveRadioCodes.push(childSnapshot.val());
@@ -237,10 +265,10 @@ angular.module('app.controllers.RadioSetup', [])
           });
         });
 
-        var ref_active = firebase.database().ref('RadioCodes/Active');
+        var ref = firebase.database().ref('RadioCodes/Active');
         var i = 0;
         $scope.ActiveRadioCodes = [];
-        ref_active.once('value', function(snapshot) {
+        ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
             $scope.ActiveRadioCodes.push(childSnapshot.val());
@@ -248,13 +276,24 @@ angular.module('app.controllers.RadioSetup', [])
           });
         });
 
-        var ref_active = firebase.database().ref('RadioCodes/ActiveTx');
+        var ref = firebase.database().ref('RadioCodes/ActiveTx');
         var i = 0;
         $scope.ActiveRadioCodesTx = [];
-        ref_active.once('value', function(snapshot) {
+        ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
             $scope.ActiveRadioCodesTx.push(childSnapshot.val());
+            i++;
+          });
+        });
+
+        var ref = firebase.database().ref('DIO/Dout');
+        var i = 0;
+        $scope.Dout = [];
+        ref.once('value', function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            // console.log(childSnapshot.val());
+            $scope.Dout.push(childSnapshot.val());
             i++;
           });
         });

@@ -91,12 +91,13 @@ bool FbmUpdateRadioCodes(void) {
         yield();
         // Serial.println(i->key);
         JsonObject& nestedObject = i->value;
+        String type = nestedObject["type"];
         String action = nestedObject["action"];
         String action_d = nestedObject["action_d"];
         String delay = nestedObject["delay"];
         String id = nestedObject["id"];
         Serial.println(id);
-        RF_AddRadioCodeDB(id, action, delay, action_d);
+        RF_AddRadioCodeDB(id, type, action, delay, action_d);
       }
     }
   }
@@ -172,7 +173,6 @@ bool FbmService(void) {
       Serial.println("set failed: control/reboot");
       Serial.println(Firebase.error());
     } else {
-      Serial.print("firebase: connected!");
       Serial.println("firebase: connected!");
       boot_sm = 1;
     }
@@ -201,6 +201,7 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           boot_sm = 2;
+          Serial.println("firebase: configured!");
           String str = String("boot-up complete!");
           fblog_log(str, true);
         }
@@ -238,7 +239,6 @@ bool FbmService(void) {
       yield();
       FirebaseObject fbobject = Firebase.get("control");
       if (Firebase.failed() == true) {
-        Serial.print("get failed: control");
         Serial.println("get failed: control");
         Serial.println(Firebase.error());
       } else {

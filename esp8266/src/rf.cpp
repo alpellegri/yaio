@@ -6,12 +6,13 @@
 
 #include "rf.h"
 #include "timesrv.h"
+#include "fblog.h"
 
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 bool RF_StatusEnable = false;
 
-uint32_t RadioCodes[10][4];
+uint32_t RadioCodes[10][5];
 uint16_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[10];
 uint16_t RadioCodesTxLen = 0;
@@ -29,11 +30,12 @@ void RF_ResetTimerDB(void) {
   TimersLen = 0;
 }
 
-void RF_AddRadioCodeDB(String id, String action, String delay, String action_d) {
+void RF_AddRadioCodeDB(String id, String type, String action, String delay, String action_d) {
   RadioCodes[RadioCodesLen][0] = atoi(id.c_str());
-  RadioCodes[RadioCodesLen][1] = atoi(action.c_str());
+  RadioCodes[RadioCodesLen][1] = atoi(type.c_str());
+  RadioCodes[RadioCodesLen][2] = atoi(action.c_str());
   RadioCodes[RadioCodesLen][3] = atoi(delay.c_str());
-  RadioCodes[RadioCodesLen][2] = atoi(action_d.c_str());
+  RadioCodes[RadioCodesLen][4] = atoi(action_d.c_str());
   RadioCodesLen++;
 }
 
@@ -81,6 +83,7 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   ret = (t_test >= t_low) && (t_test <= t_high);
   return ret;
 }
+
 void RF_MonitorTimers(void) {
   // get time
   time_t mytime = getTime();
@@ -94,6 +97,8 @@ void RF_MonitorTimers(void) {
     if (res == true) {
       // action
       Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i, t247);
+      String log = "action on timer " + String(i) + " at time " + String(t247) + "\n";
+      fblog_log(log, false);
     }
   }
   t247_last = t247;
