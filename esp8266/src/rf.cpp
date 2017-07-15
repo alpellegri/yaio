@@ -64,36 +64,36 @@ void RF_AddDoutDB(String action) {
 
 uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
-  bool res;
+  uint8_t idx = 0xFF;
 
   Serial.printf("RF_CheckRadioCodeDB: code %x\n", code);
-  while ((i < RadioCodesLen) && (res == false)) {
+  while ((i < RadioCodesLen) && (idx == 0xFF)) {
     Serial.printf("radio table: %x, %x\n", code, RadioCodes[i]);
     if (code == RadioCodes[i][0]) {
       Serial.printf("radio code found in table\n");
-      res = true;
+      idx = i;
     }
     i++;
   }
 
-  return i;
+  return idx;
 }
 
 uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
   uint8_t i = 0;
-  bool res;
+  uint8_t idx = 0xFF;
 
   Serial.printf("RF_CheckRadioCodeTxDB: code %x\n", code);
-  while ((i < RadioCodesTxLen) && (res == false)) {
+  while ((i < RadioCodesTxLen) && (idx == 0xFF)) {
     Serial.printf("radio table: %x, %x\n", code, RadioCodesTx[i]);
     if (code == RadioCodesTx[i]) {
       Serial.printf("radio code found in table\n");
-      res = true;
+      idx = i;
     }
     i++;
   }
 
-  return i;
+  return idx;
 }
 
 uint32_t RF_GetRadioCode(void) {
@@ -113,11 +113,12 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
 }
 
 void RF_Action(uint8_t type, uint8_t idx, bool nofity) {
+  Serial.printf("RF_Action type %d\n", type);
   if (type == 1) {
     // dout
   } else if (type == 2) {
     // rf
-    String str = String("Intrusion!!!");
+    String str = String("Intrusion ") + String(RadioCodes[idx][0]) + String(" !!!");
     fblog_log(str, nofity);
   }
 }

@@ -177,7 +177,8 @@ bool FbmUpdateRadioCodes(void) {
 bool FbmService(void) {
   bool ret = false;
 
-  Serial.printf("boot_sm: %d\n", boot_sm);
+  Serial.printf("boot_sm: %d, status_alarm: %d, control_alarm: %d, control_radio_learn: %d\n",
+  boot_sm, status_alarm, control_alarm ,control_radio_learn);
   // firebase connect
   if (boot_sm == 0) {
     bool ret = true;
@@ -342,7 +343,7 @@ bool FbmService(void) {
       status_alarm = control_alarm;
       if (status_alarm == true) {
         // acquire Active Radio Codes from FB
-        boot_sm = 2;
+        // boot_sm = 2;
       }
     }
 
@@ -384,13 +385,12 @@ bool FbmService(void) {
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {
       uint32_t idx = RF_CheckRadioCodeDB(code);
-      if (idx != 0) {
+      if (idx != 0xFF) {
         RF_Action(2, idx, status_alarm); // rf action
       }
 
       if (control_radio_learn == true) {
         // acquire Active Radio Codes from FB
-        // FbmUpdateRadioCodes();
         if (code != fbm_code_last) {
           if (idx == 0) {
             uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
@@ -403,6 +403,7 @@ bool FbmService(void) {
                 Serial.println(Firebase.error());
               } else {
                 fbm_code_last = code;
+                boot_sm = 2;
               }
             }
           }
