@@ -378,6 +378,7 @@ bool FbmService(void) {
       fbm_timer_monitor_cnt = 0;
       RF_MonitorTimers();
     }
+    fbm_timer_monitor_cnt++;
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();

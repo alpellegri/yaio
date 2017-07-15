@@ -31,6 +31,13 @@ angular.module('app.controllers.chart', [])
           display: true,
           position: 'right'
         }]
+      },
+      elements: {
+        point: {
+          radius: 0,
+          hitRadius: 10,
+          hoverRadius: 5,
+        }
       }
     };
 

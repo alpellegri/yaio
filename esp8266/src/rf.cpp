@@ -116,7 +116,8 @@ void RF_Action(uint8_t type, uint8_t idx) {
   Serial.printf("RF_Action type %d\n", type);
   if (type == 1) {
     // dout
-    digitalWrite(idx>>1, idx&0x01);
+    Serial.printf("DIO: %d, value %d\n", Dout[idx]>>1, Dout[idx]&0x01);
+    digitalWrite(Dout[idx]>>1, Dout[idx]&0x01);
   } else if (type == 2) {
     // rf
   }
@@ -127,7 +128,7 @@ void RF_MonitorTimers(void) {
   time_t mytime = getTime();
   // Serial.printf(">> %d, %d, %d\n", (mytime/3600)%24, (mytime/60)%60, (mytime)%60);
   uint32_t t247 = 60*((mytime/3600)%24) + (mytime/60)%60;
-  Serial.printf(">> t247 %d\n", t247);
+  // Serial.printf(">> t247 %d\n", t247);
   // loop over timers
   for (uint8_t i=0; i<TimersLen; i++) {
     // test in range
@@ -135,10 +136,10 @@ void RF_MonitorTimers(void) {
     bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
-      RF_Action(1, i);
       Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i, t247);
       String log = "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
+      RF_Action(1, i);
     }
   }
   t247_last = t247;
