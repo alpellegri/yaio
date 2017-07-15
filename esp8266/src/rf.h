@@ -12,6 +12,7 @@ extern void RF_AddRadioCodeTxDB(String string);
 extern void RF_AddTimerDB(String type, String action, String hour, String minute);
 extern void RF_AddDoutDB(String action);
 extern uint8_t RF_CheckRadioCodeDB(uint32_t code);
+extern uint8_t RF_CheckRadioCodeTxDB(uint32_t code);
 
 extern uint32_t RF_GetRadioCode(void);
 extern void RF_Enable(void);

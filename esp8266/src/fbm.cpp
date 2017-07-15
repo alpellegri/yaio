@@ -342,7 +342,7 @@ bool FbmService(void) {
       status_alarm = control_alarm;
       if (status_alarm == true) {
         // acquire Active Radio Codes from FB
-        // FbmUpdateRadioCodes();
+        boot_sm = 2;
       }
     }
 
@@ -393,14 +393,17 @@ bool FbmService(void) {
         // FbmUpdateRadioCodes();
         if (code != fbm_code_last) {
           if (idx == 0) {
-            Serial.printf("RadioCodes/Inactive: %x\n", code);
-            yield();
-            Firebase.pushInt("RadioCodes/Inactive", code);
-            if (Firebase.failed()) {
-              Serial.println("set failed: RadioCodes/Inactive");
-              Serial.println(Firebase.error());
-            } else {
-              fbm_code_last = code;
+            uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
+            if (idxTx == 0) {
+              Serial.printf("RadioCodes/Inactive: %x\n", code);
+              yield();
+              Firebase.pushInt("RadioCodes/Inactive", code);
+              if (Firebase.failed()) {
+                Serial.println("set failed: RadioCodes/Inactive");
+                Serial.println(Firebase.error());
+              } else {
+                fbm_code_last = code;
+              }
             }
           }
         }

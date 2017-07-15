@@ -79,6 +79,23 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   return i;
 }
 
+uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
+  uint8_t i = 0;
+  bool res;
+
+  Serial.printf("RF_CheckRadioCodeTxDB: code %x\n", code);
+  while ((i < RadioCodesTxLen) && (res == false)) {
+    Serial.printf("radio table: %x, %x\n", code, RadioCodesTx[i]);
+    if (code == RadioCodesTx[i]) {
+      Serial.printf("radio code found in table\n");
+      res = true;
+    }
+    i++;
+  }
+
+  return i;
+}
+
 uint32_t RF_GetRadioCode(void) {
   uint32_t Code;
 
