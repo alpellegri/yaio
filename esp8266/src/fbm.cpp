@@ -177,8 +177,7 @@ bool FbmUpdateRadioCodes(void) {
 bool FbmService(void) {
   bool ret = false;
 
-  Serial.printf("boot_sm: %d, status_alarm: %d, control_alarm: %d, control_radio_learn: %d\n",
-  boot_sm, status_alarm, control_alarm ,control_radio_learn);
+  // Serial.printf("boot_sm: %d, status_alarm: %d, control_alarm: %d, control_radio_learn: %d\n", boot_sm, status_alarm, control_alarm ,control_radio_learn);
   // firebase connect
   if (boot_sm == 0) {
     bool ret = true;
@@ -271,9 +270,8 @@ bool FbmService(void) {
           control_radio_learn = object["radio_learn"];
           control_radio_update = object["radio_update"];
 
-          bool control_led = object["led"];
-          digitalWrite(LED, !(control_led == true));
-          if (control_led == true) {
+          bool control_wol = object["wol"];
+          if (control_wol == true) {
             Serial.println("Sending WOL Packet...");
             yield();
             sendWOL(computer_ip, mac, sizeof mac);
@@ -386,7 +384,8 @@ bool FbmService(void) {
     if (code != 0) {
       uint32_t idx = RF_CheckRadioCodeDB(code);
       if (idx != 0xFF) {
-        RF_Action(2, idx, status_alarm); // rf action
+        String str = String("Intrusion ") + String(code) + String(" !!!");
+        fblog_log(str, status_alarm);
       }
 
       if (control_radio_learn == true) {

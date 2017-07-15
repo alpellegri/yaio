@@ -12,7 +12,7 @@ angular.module('app.controllers.NodeInfo', [])
 
       $scope.pushCtrl1Change = function() {
         var ref = firebase.database().ref("control");
-        if ($scope.control.led) {
+        if ($scope.control.wol) {
           ref.update({
             led: true
           });

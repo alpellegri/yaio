@@ -112,14 +112,13 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   return ret;
 }
 
-void RF_Action(uint8_t type, uint8_t idx, bool nofity) {
+void RF_Action(uint8_t type, uint8_t idx) {
   Serial.printf("RF_Action type %d\n", type);
   if (type == 1) {
     // dout
+    digitalWrite(idx>>1, idx&0x01);
   } else if (type == 2) {
     // rf
-    String str = String("Intrusion ") + String(RadioCodes[idx][0]) + String(" !!!");
-    fblog_log(str, nofity);
   }
 }
 
@@ -136,7 +135,7 @@ void RF_MonitorTimers(void) {
     bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
-      RF_Action(1, i, false); // dout action
+      RF_Action(1, i);
       Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i, t247);
       String log = "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
