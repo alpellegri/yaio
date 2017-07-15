@@ -106,6 +106,7 @@ bool AP_Setup(void) {
 bool AP_Loop(void) {
   uint8_t in = digitalRead(BUTTON);
 
+#if 0
   if (in != ap_button) {
     ap_button = in;
     if (in == false) {
@@ -113,6 +114,7 @@ bool AP_Loop(void) {
       Serial.printf("EEPROM erased\n");
     }
   }
+#endif
 
   /* websocket only in mode 0 */
   webSocket.loop();

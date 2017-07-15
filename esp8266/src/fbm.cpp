@@ -138,11 +138,12 @@ bool FbmUpdateRadioCodes(void) {
         yield();
         // Serial.println(i->key);
         JsonObject& nestedObject = i->value;
+        String type = nestedObject["type"];
         String action = nestedObject["action"];
         String hour = nestedObject["hour"];
         String minute = nestedObject["minute"];
         Serial.println(action);
-        RF_AddTimerDB(action, hour, minute);
+        RF_AddTimerDB(type, action, hour, minute);
       }
     }
   }
@@ -382,11 +383,16 @@ bool FbmService(void) {
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {
+      uint32_t idx = RF_CheckRadioCodeDB(code);
+      if (idx != 0) {
+        RF_Action(2, idx, status_alarm); // rf action
+      }
+
       if (control_radio_learn == true) {
         // acquire Active Radio Codes from FB
         // FbmUpdateRadioCodes();
         if (code != fbm_code_last) {
-          if (RF_CheckRadioCodeDB(code) == false) {
+          if (idx == 0) {
             Serial.printf("RadioCodes/Inactive: %x\n", code);
             yield();
             Firebase.pushInt("RadioCodes/Inactive", code);
@@ -398,11 +404,6 @@ bool FbmService(void) {
             }
           }
         }
-      }
-
-      if (RF_CheckRadioCodeDB(code) == true) {
-        String str = String("Intrusion!!!");
-        fblog_log(str, status_alarm);
       }
     }
   }

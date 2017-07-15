@@ -17,10 +17,10 @@ uint16_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[10];
 uint16_t RadioCodesTxLen = 0;
 
-uint32_t Timers[10][2];
+uint32_t Timers[10][3];
 uint16_t TimersLen = 0;
 
-uint32_t Dout[10];
+uint8_t Dout[10];
 uint16_t DoutLen = 0;
 
 void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
@@ -49,10 +49,11 @@ void RF_AddRadioCodeTxDB(String string) {
   RadioCodesTxLen++;
 }
 
-void RF_AddTimerDB(String action, String hour, String minute) {
+void RF_AddTimerDB(String type, String action, String hour, String minute) {
   uint32_t evtime = 60*atoi(hour.c_str()) + atoi(minute.c_str());
-  Timers[TimersLen][0] = atoi(action.c_str());
-  Timers[TimersLen][1] = evtime;
+  Timers[TimersLen][0] = evtime;
+  Timers[TimersLen][1] = atoi(type.c_str());
+  Timers[TimersLen][2] = atoi(action.c_str());
   TimersLen++;
 }
 
@@ -61,10 +62,10 @@ void RF_AddDoutDB(String action) {
   DoutLen++;
 }
 
-bool RF_CheckRadioCodeDB(uint32_t code) {
-  bool res = false;
-
+uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
+  bool res;
+
   Serial.printf("RF_CheckRadioCodeDB: code %x\n", code);
   while ((i < RadioCodesLen) && (res == false)) {
     Serial.printf("radio table: %x, %x\n", code, RadioCodes[i]);
@@ -75,7 +76,7 @@ bool RF_CheckRadioCodeDB(uint32_t code) {
     i++;
   }
 
-  return res;
+  return i;
 }
 
 uint32_t RF_GetRadioCode(void) {
@@ -94,6 +95,16 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   return ret;
 }
 
+void RF_Action(uint8_t type, uint8_t idx, bool nofity) {
+  if (type == 1) {
+    // dout
+  } else if (type == 2) {
+    // rf
+    String str = String("Intrusion!!!");
+    fblog_log(str, nofity);
+  }
+}
+
 void RF_MonitorTimers(void) {
   // get time
   time_t mytime = getTime();
@@ -103,9 +114,11 @@ void RF_MonitorTimers(void) {
   // loop over timers
   for (uint8_t i=0; i<TimersLen; i++) {
     // test in range
-    bool res = RF_TestInRange(Timers[i][1], t247_last, t247);
+    uint32_t _time = Timers[i][0];
+    bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
+      RF_Action(1, i, false); // dout action
       Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i, t247);
       String log = "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
