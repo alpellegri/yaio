@@ -9,6 +9,17 @@ angular.module('app.controllers.TimerSetup', [])
       $scope.Timers = [];
       $scope.settings = {};
       $scope.ActiveRadioCodesTx = [];
+      $scope.ActiveTable = [];
+      $scope.Dout = [];
+      $scope.Types = [{
+          name: "dio",
+          type: 1
+        },
+        {
+          name: "rf",
+          type: 2
+        },
+      ];
 
       // remove timer
       $scope.RemoveTimer = function(i) {
@@ -25,10 +36,22 @@ angular.module('app.controllers.TimerSetup', [])
             name: element.name,
             hour: element.hour,
             minute: element.minute,
+            type: element.type,
             action: element.action
           });
         });
       }
+
+      $scope.UpdateType = function(Timer, type) {
+        console.log('UpdateType');
+        console.log(type);
+        Timer.type = parseInt(type);
+        if (type == 1) {
+          $scope.ActiveTable = $scope.Dout;
+        } else if (type == 2) {
+          $scope.ActiveTable = $scope.ActiveRadioCodesTx;
+        } else {}
+      };
 
       $scope.UpdateAction = function(Timer, action) {
         // console.log(action);
@@ -67,6 +90,7 @@ angular.module('app.controllers.TimerSetup', [])
                   name: $scope.settings._name,
                   hour: $scope.settings._hour,
                   minute: $scope.settings._minute,
+                  type: 0,
                   action: 0
                 };
                 // console.log(_timer);
@@ -140,9 +164,9 @@ angular.module('app.controllers.TimerSetup', [])
         console.log('doRefresh');
 
         $scope.Timers = [];
-        var ref_timers = firebase.database().ref('Timers');
+        var ref = firebase.database().ref('Timers');
         var i = 0;
-        ref_timers.once('value', function(snapshot) {
+        ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
             $scope.Timers.push(childSnapshot.val());
@@ -150,13 +174,24 @@ angular.module('app.controllers.TimerSetup', [])
           });
         });
 
-        var ref_active = firebase.database().ref('RadioCodes/ActiveTx');
+        var ref = firebase.database().ref('RadioCodes/ActiveTx');
         var i = 0;
         $scope.ActiveRadioCodesTx = [];
-        ref_active.once('value', function(snapshot) {
+        ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
             $scope.ActiveRadioCodesTx.push(childSnapshot.val());
+            i++;
+          });
+        });
+
+        var ref = firebase.database().ref('DIO/Dout');
+        var i = 0;
+        $scope.Dout = [];
+        ref.once('value', function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            // console.log(childSnapshot.val());
+            $scope.Dout.push(childSnapshot.val());
             i++;
           });
         });

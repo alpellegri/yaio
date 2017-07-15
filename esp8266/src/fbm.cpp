@@ -75,8 +75,7 @@ bool FbmUpdateRadioCodes(void) {
   bool ret = true;
   yield();
 
-  if (ret == true)
-  {
+  if (ret == true) {
     Serial.printf("FbmUpdateRadioCodes Rx\n");
     FirebaseObject ref = Firebase.get("RadioCodes/Active");
     if (Firebase.failed() == true) {
@@ -102,8 +101,7 @@ bool FbmUpdateRadioCodes(void) {
     }
   }
 
-  if (ret == true)
-  {
+  if (ret == true) {
     Serial.printf("FbmUpdateRadioCodes Tx\n");
     FirebaseObject ref = Firebase.get("RadioCodes/ActiveTx");
     if (Firebase.failed() == true) {
@@ -125,8 +123,7 @@ bool FbmUpdateRadioCodes(void) {
     }
   }
 
-  if (ret == true)
-  {
+  if (ret == true) {
     Serial.printf("FbmUpdateRadioCodes Timers\n");
     FirebaseObject ref = Firebase.get("Timers");
     if (Firebase.failed() == true) {
@@ -150,8 +147,7 @@ bool FbmUpdateRadioCodes(void) {
     }
   }
 
-  if (ret == true)
-  {
+  if (ret == true) {
     Serial.printf("FbmUpdateDIO Dout\n");
     FirebaseObject ref = Firebase.get("DIO/Dout");
     if (Firebase.failed() == true) {
@@ -377,7 +373,7 @@ bool FbmService(void) {
       }
     }
 
-    // monitor timers
+    // monitor timers, every 15 sec
     if (fbm_timer_monitor_cnt >= 15) {
       fbm_timer_monitor_cnt = 0;
       RF_MonitorTimers();

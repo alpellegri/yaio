@@ -16,8 +16,11 @@
             Configure
           </ion-option-button>
           {{Timer.name}}
+          <select ng-model="selectedItemType" ng-change="UpdateType(Timer, selectedItemType)">
+            <option ng-repeat="item in Types" value="{{item.type}}">{{item.name}}</option>
+          </select>
           <select ng-model="selectedItem" ng-change="UpdateAction(Timer, selectedItem)">
-            <option ng-repeat="item in ActiveRadioCodesTx" value="{{item.id}}">{{item.name}}</option>
+            <option ng-repeat="item in ActiveTable" value="{{item.id}}">{{item.name}}</option>
           </select>
           <span class="item-note">{{Timer.hour}}:{{Timer.minute}} -> {{Timer.action.toString(16).toUpperCase()}}</span>
         </ion-item>
