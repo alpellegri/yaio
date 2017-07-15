@@ -14,11 +14,11 @@ angular.module('app.controllers.NodeInfo', [])
         var ref = firebase.database().ref("control");
         if ($scope.control.wol) {
           ref.update({
-            led: true
+            wol: true
           });
         } else {
           ref.update({
-            led: false
+            wol: false
           });
         }
       };
