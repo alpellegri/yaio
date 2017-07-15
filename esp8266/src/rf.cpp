@@ -20,6 +20,9 @@ uint16_t RadioCodesTxLen = 0;
 uint32_t Timers[10][2];
 uint16_t TimersLen = 0;
 
+uint32_t Dout[10];
+uint16_t DoutLen = 0;
+
 void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
 void RF_ResetRadioCodeTxDB(void) { RadioCodesTxLen = 0; }
 
@@ -29,6 +32,8 @@ void RF_ResetTimerDB(void) {
   t247_last = 60*((mytime/3600)%24) + (mytime/60)%60;
   TimersLen = 0;
 }
+
+void RF_ResetDoutDB(void) { DoutLen = 0; }
 
 void RF_AddRadioCodeDB(String id, String type, String action, String delay, String action_d) {
   RadioCodes[RadioCodesLen][0] = atoi(id.c_str());
@@ -49,6 +54,11 @@ void RF_AddTimerDB(String action, String hour, String minute) {
   Timers[TimersLen][0] = atoi(action.c_str());
   Timers[TimersLen][1] = evtime;
   TimersLen++;
+}
+
+void RF_AddDoutDB(String action) {
+  Dout[DoutLen] = atoi(action.c_str());
+  DoutLen++;
 }
 
 bool RF_CheckRadioCodeDB(uint32_t code) {

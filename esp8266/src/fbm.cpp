@@ -150,6 +150,29 @@ bool FbmUpdateRadioCodes(void) {
     }
   }
 
+  if (ret == true)
+  {
+    Serial.printf("FbmUpdateDIO Dout\n");
+    FirebaseObject ref = Firebase.get("DIO/Dout");
+    if (Firebase.failed() == true) {
+      Serial.print("get failed: DIO/Dout");
+      Serial.println(Firebase.error());
+      ret = false;
+    } else {
+      RF_ResetDoutDB();
+      JsonVariant variant = ref.getJsonVariant();
+      JsonObject &object = variant.as<JsonObject>();
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        yield();
+        // Serial.println(i->key);
+        JsonObject& nestedObject = i->value;
+        String id = nestedObject["id"];
+        Serial.println(id);
+        RF_AddDoutDB(id);
+      }
+    }
+  }
+
   return ret;
 }
 

@@ -46,7 +46,7 @@ void setup() {
   flipper.attach(1.0, flip);
 
   Serial.println();
-  Serial.println("Starting");
+  Serial.println("Node starting...");
 
 #if 0
   // init oled display

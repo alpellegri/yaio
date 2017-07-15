@@ -11,6 +11,7 @@ angular.module('app.controllers.NodeSetup', [])
       if (node_init == 'true') {
         $scope.settings.ssid = localStorage.getItem('ssid');
         $scope.settings.password = localStorage.getItem('password');
+        $scope.settings.firebase_url = localStorage.getItem('firebase_url');
         $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
         $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
       }

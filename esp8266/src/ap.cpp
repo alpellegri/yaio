@@ -42,15 +42,15 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     /* disable wifi scan when locally connected */
     enable_WiFi_Scan = false;
     IPAddress ip = webSocket.remoteIP(num);
-    Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0],
-                  ip[1], ip[2], ip[3], payload);
+    Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n",
+                  num, ip[0], ip[1], ip[2], ip[3], payload);
     port_id = num;
   } break;
 
   case WStype_TEXT:
-    Serial.printf("[%u] get Text: %s\n", num, payload);
-
     len = strlen((char *)payload);
+    Serial.printf("[%u] get Text (%d): %s\n", num, len, payload);
+
     if (len != 0) {
       // save to epprom
       EE_EraseData();
@@ -104,6 +104,16 @@ bool AP_Setup(void) {
 }
 
 bool AP_Loop(void) {
+  uint8_t in = digitalRead(BUTTON);
+
+  if (in != ap_button) {
+    ap_button = in;
+    if (in == false) {
+      EE_EraseData();
+      Serial.printf("EEPROM erased\n");
+    }
+  }
+
   /* websocket only in mode 0 */
   webSocket.loop();
 }
@@ -114,6 +124,7 @@ bool AP_Task(void) {
   String str;
 
   if (enable_WiFi_Scan == true) {
+    Serial.println("networks scan");
     if (ap_task_cnt-- == 0) {
       ap_task_cnt = 10;
       int n = WiFi.scanNetworks();
