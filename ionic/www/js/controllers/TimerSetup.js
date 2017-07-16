@@ -86,9 +86,11 @@ angular.module('app.controllers.TimerSetup', [])
                 // don't allow the user to close unless he enters wifi password
                 e.preventDefault();
               } else {
+                date = new Date();
+                var offset = date.getTimezoneOffset()/60;
                 var _timer = {
                   name: $scope.settings._name,
-                  hour: $scope.settings._hour,
+                  hour: ((($scope.settings._hour)+offset+24)%24),
                   minute: $scope.settings._minute,
                   type: 0,
                   action: 0
@@ -141,8 +143,10 @@ angular.module('app.controllers.TimerSetup', [])
                 // don't allow the user to close unless he enters wifi password
                 e.preventDefault();
               } else {
+                date = new Date();
+                var offset = date.getTimezoneOffset()/60;
                 Timer.name = $scope.settings._name;
-                Timer.hour = $scope.settings._hour;
+                Timer.hour = ((($scope.settings._hour)+offset+24)%24);
                 Timer.minute = $scope.settings._minute;
                 Timer.action = 0
                 return $scope.settings;
