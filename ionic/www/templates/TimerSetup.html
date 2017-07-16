@@ -22,7 +22,7 @@
           <select ng-model="selectedItem" ng-change="UpdateAction(Timer, selectedItem)">
             <option ng-repeat="item in ActiveTable" value="{{item.id}}">{{item.name}}</option>
           </select>
-          <span class="item-note">{{Timer.hour}}:{{Timer.minute}} -> {{Timer.action.toString(16).toUpperCase()}}</span>
+          <span class="item-note">{{(Timer.hour-offset+24)%24}}:{{Timer.minute}} -> {{Timer.action.toString(16).toUpperCase()}}</span>
         </ion-item>
       </ion-list>
     </div>

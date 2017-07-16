@@ -6,6 +6,8 @@ angular.module('app.controllers.TimerSetup', [])
     var fb_init = localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
+      date = new Date();
+      $scope.offset = date.getTimezoneOffset()/60;
       $scope.Timers = [];
       $scope.settings = {};
       $scope.ActiveRadioCodesTx = [];
@@ -86,12 +88,10 @@ angular.module('app.controllers.TimerSetup', [])
                 // don't allow the user to close unless he enters wifi password
                 e.preventDefault();
               } else {
-                date = new Date();
-                var offset = date.getTimezoneOffset()/60;
                 var _timer = {
                   name: $scope.settings._name,
-                  hour: ((($scope.settings._hour)+offset+24)%24),
-                  minute: $scope.settings._minute,
+                  hour: ((parseInt($scope.settings._hour)+$scope.offset+24)%24),
+                  minute: parseInt($scope.settings._minute),
                   type: 0,
                   action: 0
                 };
@@ -115,7 +115,7 @@ angular.module('app.controllers.TimerSetup', [])
       // Triggered on a button click, or some other target
       $scope.showPopupTimerEdit = function(Timer) {
         $scope.settings._name = Timer.name;
-        $scope.settings._hour = Timer.hour;
+        $scope.settings._hour = (Timer.hour-$scope.offset+24)%24;
         $scope.settings._minute = Timer.minute;
         var PopupTemplate =
           '<form class="list">' +
@@ -143,12 +143,11 @@ angular.module('app.controllers.TimerSetup', [])
                 // don't allow the user to close unless he enters wifi password
                 e.preventDefault();
               } else {
-                date = new Date();
-                var offset = date.getTimezoneOffset()/60;
                 Timer.name = $scope.settings._name;
-                Timer.hour = ((($scope.settings._hour)+offset+24)%24);
-                Timer.minute = $scope.settings._minute;
+                Timer.hour = ((parseInt($scope.settings._hour)+$scope.offset+24)%24);
+                Timer.minute = parseInt($scope.settings._minute);
                 Timer.action = 0
+                // console.log(Timer);
                 return $scope.settings;
               }
             }
