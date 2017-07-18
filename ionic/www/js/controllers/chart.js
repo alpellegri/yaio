@@ -3,52 +3,62 @@ angular.module('app.controllers.chart', [])
   .controller("chartCtrl", function($scope) {
     console.log('chartCtrl');
 
-    $scope.JsonTH = {};
-    $scope.JsonTH.labels = [];
-    $scope.JsonTH.series = ['temperature', 'humidity'];
-    $scope.JsonTH.data = [
-      [],
-      []
-    ];
-    $scope.JsonTH.onClick = function(points, evt) {
-      console.log(points, evt);
-    };
-    $scope.JsonTH.datasetOverride = [{
-      yAxisID: 'y-axis-1'
-    }, {
-      yAxisID: 'y-axis-2'
-    }];
-    $scope.JsonTH.options = {
-      scales: {
-        yAxes: [{
-          id: 'y-axis-1',
-          type: 'linear',
-          display: true,
-          position: 'left'
-        }, {
-          id: 'y-axis-2',
-          type: 'linear',
-          display: true,
-          position: 'right'
-        }]
-      },
-      elements: {
-        point: {
-          radius: 0,
-          hitRadius: 10,
-          hoverRadius: 5,
-        }
-      }
-    };
-
-    $scope.JsonT = {};
-    $scope.JsonT.data = [
-      []
-    ];
     $scope.JsonH = {};
     $scope.JsonH.data = [
       []
     ];
+
+    $scope.JsonT = {};
+    $scope.JsonT.data = [];
+    // The angular-chart directive will use this as the label
+    $scope.JsonT.series = ['Scatter Dataset'];
+
+    $scope.JsonT.options = {
+      scales: {
+        xAxes: [{
+          type: "time",
+          unit: 'day',
+          unitStepSize: 1,
+          display: true,
+          time: {
+            displayFormats: {
+              'day': 'DD MMM'
+            }
+          }
+        }],
+      },
+      elements: {
+        point: {
+          radius: 0,
+        }
+      }
+    }
+
+    $scope.JsonH = {};
+    $scope.JsonH.data = [];
+    // The angular-chart directive will use this as the label
+    $scope.JsonH.series = ['Scatter Dataset'];
+
+    $scope.JsonH.options = {
+      scales: {
+        xAxes: [{
+          type: "time",
+          unit: 'day',
+          unitStepSize: 1,
+          display: true,
+          time: {
+            displayFormats: {
+              'day': 'DD MMM'
+            }
+          }
+        }],
+      },
+      elements: {
+        point: {
+          radius: 0,
+        }
+      }
+    }
 
     $scope.ClearChart = function() {
       console.log('chartCtrl: ClearChart');
@@ -60,32 +70,22 @@ angular.module('app.controllers.chart', [])
     $scope.doRefresh = function() {
       console.log('doRefresh');
 
-      var date = new Date();
-      var curr = Math.round(2 * (date.getHours() + date.getMinutes() / 60));
-
-      $scope.JsonTH.data[0] = [];
-      $scope.JsonTH.data[1] = [];
-      $scope.JsonTH.labels = [];
-      $scope.JsonT.data[0] = [];
-      $scope.JsonH.data[0] = [];
-      // 2 days: 2 * (24 * 2) -> 96
-      var steps = 7*(24*2);
+      $scope.JsonT.data = [];
+      $scope.JsonH.data = [];
+      // 7 days: 7 * (24 * 2) -> 96
+      var steps = 7 * (24 * 2);
       var ref = firebase.database().ref('logs/TH').limitToLast(steps);
       ref.once('value', function(snapshot) {
-        var i = curr - (snapshot.numChildren() - steps);
         snapshot.forEach(function(el) {
-          $scope.JsonTH.data[0].push(el.val().t / 10);
-          $scope.JsonTH.data[1].push(el.val().h / 10);
-          if (i % 2 == 0) {
-            var ii = (i / 2) % 24; // wrap hour: every one days
-            $scope.JsonTH.labels.push(ii.toString());
-          } else {
-            $scope.JsonTH.labels.push("");
-          }
-          i++;
+          $scope.JsonT.data.push({
+            x: el.val().time * 1000,
+            y: el.val().t / 10
+          });
+          $scope.JsonH.data.push({
+            x: el.val().time * 1000,
+            y: el.val().h / 10
+          });
         });
-        $scope.JsonT.data[0] = $scope.JsonTH.data[0];
-        $scope.JsonH.data[0] = $scope.JsonTH.data[1];
       });
 
       // $scope.$broadcast("scroll.infiniteScrollComplete");

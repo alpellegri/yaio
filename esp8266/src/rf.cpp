@@ -12,7 +12,9 @@ RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 bool RF_StatusEnable = false;
 
-uint32_t RadioCodes[10][5];
+// array 5 is used for delay timer running/idle
+// array 6 is used for delay timer time stamp
+uint32_t RadioCodes[10][7];
 uint16_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[10];
 uint16_t RadioCodesTxLen = 0;
@@ -68,10 +70,18 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
 
   Serial.printf("RF_CheckRadioCodeDB: code %x\n", code);
   while ((i < RadioCodesLen) && (idx == 0xFF)) {
-    Serial.printf("radio table: %x, %x\n", code, RadioCodes[i]);
+    Serial.printf("radio table: %x, %x\n", code, RadioCodes[i][0]);
     if (code == RadioCodes[i][0]) {
-      Serial.printf("radio code found in table\n");
+      Serial.printf("radio code found in table %x\n", RadioCodes[i][0]);
       idx = i;
+      // manage start delay timers if any
+      Serial.printf("radio code delay: %d\n", RadioCodes[i][3]);
+      if (RadioCodes[i][3] != 0) {
+        RadioCodes[i][5] = 1; // set timer running
+        RadioCodes[i][6] = getTime(); // set timer time stamp
+        // make an action
+        RF_Action(RadioCodes[i][1], RadioCodes[i][2]);
+      }
     }
     i++;
   }
@@ -87,7 +97,7 @@ uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
   while ((i < RadioCodesTxLen) && (idx == 0xFF)) {
     Serial.printf("radio table: %x, %x\n", code, RadioCodesTx[i]);
     if (code == RadioCodesTx[i]) {
-      Serial.printf("radio code found in table\n");
+      Serial.printf("radio Tx code found in table %x\n", RadioCodesTx[i]);
       idx = i;
     }
     i++;
@@ -107,17 +117,17 @@ uint32_t RF_GetRadioCode(void) {
 
 bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   bool ret = false;
-  Serial.printf(">> %d, %d, %d\n", t_low, t_test, t_high);
+  // Serial.printf(">> %d, %d, %d\n", t_low, t_test, t_high);
   ret = (t_test >= t_low) && (t_test <= t_high);
   return ret;
 }
 
-void RF_Action(uint8_t type, uint8_t idx) {
+void RF_Action(uint8_t type, uint8_t id) {
   Serial.printf("RF_Action type %d\n", type);
   if (type == 1) {
     // dout
-    Serial.printf("DIO: %d, value %d\n", Dout[idx]>>1, Dout[idx]&0x01);
-    digitalWrite(Dout[idx]>>1, Dout[idx]&0x01);
+    Serial.printf("DIO: %d, value %d\n", id>>1, id&0x01);
+    digitalWrite(id>>1, id&0x01);
   } else if (type == 2) {
     // rf
   }
@@ -129,6 +139,21 @@ void RF_MonitorTimers(void) {
   // Serial.printf(">> %d, %d, %d\n", (mytime/3600)%24, (mytime/60)%60, (mytime)%60);
   uint32_t t247 = 60*((mytime/3600)%24) + (mytime/60)%60;
   // Serial.printf(">> t247 %d\n", t247);
+
+  // loop delay timers
+  for (uint8_t i=0; i<RadioCodesLen; i++) {
+    // check if running
+    if (RadioCodes[i][5] == 1) {
+      uint32_t delay = mytime - RadioCodes[i][6];
+      Serial.printf("radio code [%d] delay, time %d, stamp %d, delay %d\n", i, mytime, RadioCodes[i][6], delay);
+      if (delay > RadioCodes[i][3]) {
+        // perform an action
+        RadioCodes[i][5] = 0; // set timer to idle
+        RF_Action(RadioCodes[i][1], RadioCodes[i][4]);
+      }
+    }
+  }
+
   // loop over timers
   for (uint8_t i=0; i<TimersLen; i++) {
     // test in range
@@ -139,7 +164,8 @@ void RF_MonitorTimers(void) {
       Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i, t247);
       String log = "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
-      RF_Action(1, i);
+
+      RF_Action(Timers[i][1], Timers[i][2]);
     }
   }
   t247_last = t247;
