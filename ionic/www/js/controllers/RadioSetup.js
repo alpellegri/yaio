@@ -81,9 +81,12 @@ angular.module('app.controllers.RadioSetup', [])
           name: "default",
           id: $scope.InactiveRadioCodes[i],
           type: 0,
+          type_name: "",
           action: 0,
+          action_name: "",
           delay: 0,
-          action_d: 0
+          action_d: 0,
+          action_d_name: ""
         }
         data.push(radio);
         $scope.InactiveRadioCodes.splice(i, 1);
@@ -111,9 +114,12 @@ angular.module('app.controllers.RadioSetup', [])
             name: element.name,
             id: element.id,
             type: element.type,
+            type_name: element.type_name,
             action: element.action,
+            action_name: element.action_name,
             delay: element.delay,
-            action_d: element.action_d
+            action_d: element.action_d,
+            action_d_name: element.action_d_name
           }
           console.log('radio');
           console.log(radio);
@@ -139,21 +145,26 @@ angular.module('app.controllers.RadioSetup', [])
         });
       }
 
-      $scope.UpdateType = function(RadioCode, type) {
+      $scope.UpdateType = function(RadioCode, item) {
         console.log('UpdateType');
-        console.log(type);
-        RadioCode.type = parseInt(type);
-        if (type == 1) {
+        item = JSON.parse(item);
+        console.log(item);
+        RadioCode.type = parseInt(item.type);
+        RadioCode.type_name = item.name;
+        if (item.type == 1) {
           $scope.ActiveTable = $scope.Dout;
-        } else if (type == 2) {
+        } else if (item.type == 2) {
           $scope.ActiveTable = $scope.ActiveRadioCodesTx;
         } else {}
+        console.log(RadioCode);
       };
 
-      $scope.UpdateAction = function(RadioCode, action) {
+      $scope.UpdateAction = function(RadioCode, item) {
         console.log('UpdateAction');
-        console.log(action);
-        RadioCode.action = parseInt(action);
+        item = JSON.parse(item);
+        console.log(item);
+        RadioCode.action = parseInt(item.id);
+        RadioCode.action_name = item.name;
         console.log(RadioCode);
       };
 
@@ -164,10 +175,12 @@ angular.module('app.controllers.RadioSetup', [])
         console.log(RadioCode);
       };
 
-      $scope.UpdateActionDelayed = function(RadioCode, action) {
+      $scope.UpdateActionDelayed = function(RadioCode, item) {
         console.log('UpdateActionDelayed');
-        console.log(action);
-        RadioCode.action_d = parseInt(action);
+        item = JSON.parse(item);
+        console.log(item);
+        RadioCode.action_d = parseInt(item.id);
+        RadioCode.action_d_name = item.name;
         console.log(RadioCode);
       };
 
