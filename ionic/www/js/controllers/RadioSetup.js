@@ -312,6 +312,20 @@ angular.module('app.controllers.RadioSetup', [])
           console.log("firebase failed: " + errorObject.code);
         });
 
+        var ref = firebase.database().ref("control/radio_update");
+        // Attach an asynchronous callback to read the data at our posts reference
+        ref.on('value', function(snapshot) {
+          var payload = snapshot.val();
+
+          if (payload == true) {
+            $scope.pushCtrl1.checked = true;
+          } else {
+            $scope.pushCtrl1.checked = false;
+          }
+        }, function(errorObject) {
+          console.log("firebase failed: " + errorObject.code);
+        });
+
         // $scope.$broadcast("scroll.infiniteScrollComplete");
         $scope.$broadcast('scroll.refreshComplete');
       };
