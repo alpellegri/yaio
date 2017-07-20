@@ -11,8 +11,6 @@ static uint8_t timesrv_sm = 0;
 static bool timesrv_run = false;
 static uint16_t TimeServiceCnt;
 
-static char isodate[25]; // The current time in ISO format is being stored here
-static tmElements_t tm;
 static time_t ntp_time;
 static time_t ntp_update_time;
 
@@ -36,71 +34,6 @@ byte packetBuffer[NTP_PACKET_SIZE]; // buffer to hold incoming
 // A UDP instance to let us send and receive packets over UDP
 
 WiFiUDP Udp;
-
-#define LEAP_YEAR(_year)                                                       \
-  (((((1970 + _year) % 4) == 0) && ((1970 + year) % 100 != 0)) ||              \
-   ((1970 + _year) % 400 == 0))
-
-static const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30,
-                                    31, 31, 30, 31, 30, 31};
-
-// break the given time_t into time components
-// this is a more compact version of the C library localtime function
-// note that year is offset from 1970 !!!
-static void breakTime(time_t time, tmElements_t &tm) {
-
-  uint8_t year;
-  uint8_t month, monthLength;
-  uint32_t days;
-
-  ntp_time = time;
-
-  tm.Second = time % 60;
-  time /= 60; // now it is minutes
-  tm.Minute = time % 60;
-  time /= 60; // now it is hours
-  tm.Hour = time % 24;
-  time /= 24;                     // now it is days
-  tm.Wday = ((time + 4) % 7) + 1; // Sunday is day 1
-
-  year = 0;
-  days = 0;
-  while ((unsigned)(days += (LEAP_YEAR(year) ? 366 : 365)) <= time) {
-    year++;
-  }
-  tm.Year = year; // year is offset from 1970
-  tm.Year += 1970;
-
-  days -= LEAP_YEAR(year) ? 366 : 365;
-  time -= days; // now it is days in this year, starting at 0
-
-  days = 0;
-  month = 0;
-  monthLength = 0;
-  for (month = 0; month < 12; month++) {
-    if (month == 1) { // february
-      if (LEAP_YEAR(year)) {
-        monthLength = 29;
-      } else {
-        monthLength = 28;
-      }
-    } else {
-      monthLength = monthDays[month];
-    }
-
-    if (time >= monthLength) {
-      time -= monthLength;
-    } else {
-      break;
-    }
-  }
-  tm.Month = month + 1; // jan is month 1
-  tm.Day = time + 1;    // day of month
-
-  sprintf(isodate, "%d-%02d-%02d %02d:%02d:%02d", tm.Year, tm.Month, tm.Day,
-          tm.Hour, tm.Minute, tm.Second);
-  // Serial.printf("isodate: %s\n", isodate);
-}
 
 // send an NTP request to the time server at the given address
 static void sendNTPpacket(IPAddress &address) {
@@ -161,18 +94,6 @@ static uint32_t getNtpTime(void) {
   return ret; // return 0 if unable to get the time
 }
 
-char *getTmUTC(void) {
-  time_t mytime = getTime();
-  breakTime(mytime, tm);
-  return isodate;
-}
-
-tmElements_t getTmTime(void) {
-  time_t mytime = getTime();
-  breakTime(mytime, tm);
-  return tm;
-}
-
 void time_set(uint32_t time) {
   ntp_update_time = millis();
   ntp_time = time;
@@ -207,7 +128,6 @@ bool TimeService(void) {
       time_set(mytime);
       timesrv_run = true;
       TimeServiceCnt = 0;
-      Serial.println(getTmUTC());
     } else {
       /* retry: TimeServiceCnt not reset */
       Serial.println("getNtpTime fails");
