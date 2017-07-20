@@ -13,8 +13,8 @@ static uint16_t TimeServiceCnt;
 
 static char isodate[25]; // The current time in ISO format is being stored here
 static tmElements_t tm;
-static time_t local_time;
-static time_t start_time;
+static time_t ntp_time;
+static time_t ntp_update_time;
 
 /*-------- NTP code ----------*/
 
@@ -53,7 +53,7 @@ static void breakTime(time_t time, tmElements_t &tm) {
   uint8_t month, monthLength;
   uint32_t days;
 
-  local_time = time;
+  ntp_time = time;
 
   tm.Second = time % 60;
   time /= 60; // now it is minutes
@@ -174,12 +174,12 @@ tmElements_t getTmTime(void) {
 }
 
 void time_set(uint32_t time) {
-  start_time = millis() / 1000;
-  local_time = time;
+  ntp_update_time = millis();
+  ntp_time = time;
 }
 
 time_t getTime(void) {
-  time_t _time = millis() / 1000 - start_time + local_time;
+  time_t _time = (millis()-ntp_update_time)/1000 + ntp_time;
 
   return (_time);
 }
