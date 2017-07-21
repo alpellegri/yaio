@@ -243,18 +243,19 @@ bool FbmService(void) {
   // firebase monitoring
   if (boot_sm == 3) {
     if (++fbm_monitorcnt >= (5 / 1)) {
+      // Serial.println("FbmService - monitor");
+
       uint32_t time_now = getTime();
 
       float h = dht.readHumidity();
       float t = dht.readTemperature();
       if (isnan(h) || isnan(t)) {
-        Serial.println("Failed to read from DHT sensor!");
+        // Serial.println("Failed to read from DHT sensor!");
       } else {
         humidity_data = 10 * h;
         temperature_data = 10 * t;
       }
 
-      Serial.println("FbmService - monitor");
       fbm_monitorcnt = 0;
       yield();
       FirebaseObject fbobject = Firebase.get("control");
