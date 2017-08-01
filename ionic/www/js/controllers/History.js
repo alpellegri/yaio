@@ -14,7 +14,7 @@ angular.module('app.controllers.History', [])
 
     $scope.doRefresh = function() {
       console.log('doRefresh');
-      var ref = firebase.database().ref('logs/Reports');
+      var ref = firebase.database().ref('logs/Reports').limitToLast(15);
       $scope.logsText = "";
       ref.once('value', function(snapshot) {
         var date = new Date();

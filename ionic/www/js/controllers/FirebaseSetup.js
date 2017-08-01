@@ -55,6 +55,7 @@ angular.module('app.controllers.FirebaseSetup', [])
       var starus_ref = ref.child('status');
       starus_ref.set({
         alarm: false,
+        monitor: false,
         heap: 0,
         humidity: 0,
         temperature: 0,
