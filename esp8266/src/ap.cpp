@@ -42,8 +42,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     /* disable wifi scan when locally connected */
     enable_WiFi_Scan = false;
     IPAddress ip = webSocket.remoteIP(num);
-    Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n",
-                  num, ip[0], ip[1], ip[2], ip[3], payload);
+    Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0],
+                  ip[1], ip[2], ip[3], payload);
     port_id = num;
   } break;
 

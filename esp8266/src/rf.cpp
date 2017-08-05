@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fblog.h"
 #include "rf.h"
 #include "timesrv.h"
-#include "fblog.h"
 
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
@@ -31,13 +31,14 @@ void RF_ResetRadioCodeTxDB(void) { RadioCodesTxLen = 0; }
 uint32_t t247_last = 0;
 void RF_ResetTimerDB(void) {
   time_t mytime = getTime();
-  t247_last = 60*((mytime/3600)%24) + (mytime/60)%60;
+  t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
   TimersLen = 0;
 }
 
 void RF_ResetDoutDB(void) { DoutLen = 0; }
 
-void RF_AddRadioCodeDB(String id, String type, String action, String delay, String action_d) {
+void RF_AddRadioCodeDB(String id, String type, String action, String delay,
+                       String action_d) {
   RadioCodes[RadioCodesLen][0] = atoi(id.c_str());
   RadioCodes[RadioCodesLen][1] = atoi(type.c_str());
   RadioCodes[RadioCodesLen][2] = atoi(action.c_str());
@@ -52,7 +53,7 @@ void RF_AddRadioCodeTxDB(String string) {
 }
 
 void RF_AddTimerDB(String type, String action, String hour, String minute) {
-  uint32_t evtime = 60*atoi(hour.c_str()) + atoi(minute.c_str());
+  uint32_t evtime = 60 * atoi(hour.c_str()) + atoi(minute.c_str());
   Timers[TimersLen][0] = evtime;
   Timers[TimersLen][1] = atoi(type.c_str());
   Timers[TimersLen][2] = atoi(action.c_str());
@@ -77,7 +78,7 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
       // manage start delay timers if any
       Serial.printf("radio code delay: %d\n", RadioCodes[i][3]);
       if (RadioCodes[i][3] != 0) {
-        RadioCodes[i][5] = 1; // set timer running
+        RadioCodes[i][5] = 1;         // set timer running
         RadioCodes[i][6] = getTime(); // set timer time stamp
         // make an action
         RF_Action(RadioCodes[i][1], RadioCodes[i][2]);
@@ -126,8 +127,8 @@ void RF_Action(uint8_t type, uint8_t id) {
   Serial.printf("RF_Action type %d\n", type);
   if (type == 1) {
     // dout
-    Serial.printf("DIO: %d, value %d\n", id>>1, id&0x01);
-    digitalWrite(id>>1, id&0x01);
+    Serial.printf("DIO: %d, value %d\n", id >> 1, id & 0x01);
+    digitalWrite(id >> 1, id & 0x01);
   } else if (type == 2) {
     // rf
   }
@@ -136,16 +137,18 @@ void RF_Action(uint8_t type, uint8_t id) {
 void RF_MonitorTimers(void) {
   // get time
   time_t mytime = getTime();
-  // Serial.printf(">> %d, %d, %d\n", (mytime/3600)%24, (mytime/60)%60, (mytime)%60);
-  uint32_t t247 = 60*((mytime/3600)%24) + (mytime/60)%60;
+  // Serial.printf(">> %d, %d, %d\n", (mytime/3600)%24, (mytime/60)%60,
+  // (mytime)%60);
+  uint32_t t247 = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
   // Serial.printf(">> t247 %d\n", t247);
 
   // loop delay timers
-  for (uint8_t i=0; i<RadioCodesLen; i++) {
+  for (uint8_t i = 0; i < RadioCodesLen; i++) {
     // check if running
     if (RadioCodes[i][5] == 1) {
       uint32_t delay = mytime - RadioCodes[i][6];
-      Serial.printf("radio code [%d] delay, time %d, stamp %d, delay %d\n", i, mytime, RadioCodes[i][6], delay);
+      Serial.printf("radio code [%d] delay, time %d, stamp %d, delay %d\n", i,
+                    mytime, RadioCodes[i][6], delay);
       if (delay > RadioCodes[i][3]) {
         // perform an action
         RadioCodes[i][5] = 0; // set timer to idle
@@ -155,14 +158,16 @@ void RF_MonitorTimers(void) {
   }
 
   // loop over timers
-  for (uint8_t i=0; i<TimersLen; i++) {
+  for (uint8_t i = 0; i < TimersLen; i++) {
     // test in range
     uint32_t _time = Timers[i][0];
     bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
-      Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i, t247);
-      String log = "action on timer " + String(i) + " at time " + String(t247) + "\n";
+      Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i,
+                    t247);
+      String log =
+          "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
 
       RF_Action(Timers[i][1], Timers[i][2]);

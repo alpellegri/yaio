@@ -25,14 +25,8 @@ Ticker flipper;
 
 uint8_t mode;
 uint16_t count = 0;
-
-bool scheduler_flag = false;
-
-void flip(void) {
-
-  /* scheduler */
-  scheduler_flag = 1;
-}
+uint32_t current_time;
+uint32_t schedule_time;
 
 void setup() {
   bool ret;
@@ -42,8 +36,6 @@ void setup() {
   Serial.begin(115200);
 
   EE_Setup();
-
-  flipper.attach(1.0, flip);
 
   Serial.println();
   Serial.println("Node starting...");
@@ -89,8 +81,9 @@ void loop() {
   } else {
   }
 
-  if (scheduler_flag == true) {
-    scheduler_flag = false;
+  current_time = millis();
+  if ((current_time - schedule_time) > 500) {
+    schedule_time = current_time;
     if (mode == 0) {
       ret = AP_Task();
       if (ret == false) {

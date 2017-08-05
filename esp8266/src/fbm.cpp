@@ -28,19 +28,18 @@ bool control_radio_learn = false;
 bool control_radio_update = false;
 bool control_monitor = false;
 bool control_monitor_last = false;
-uint8_t control_monitor_stop = 0;
 
-uint16_t fbm_task_cnt;
-uint32_t heap_size = 0;
-uint16_t fbm_monitorcnt = 0;
 uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
-uint32_t fbm_time_last = 0;
+time_t fbm_update_last = 0;
+time_t fbm_time_th_last = 0;
+time_t fbm_stop_monitor_time = 0;
+bool fbm_monitor_run = false;
 
 uint32_t humidity_data;
 uint32_t temperature_data;
 
-uint16_t fbm_timer_monitor_cnt;
+time_t fbm_update_timer_last;
 
 /**
  * The target IP address to send the magic packet to.
@@ -59,14 +58,10 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   WiFiUDP udp;
 
   udp.begin(9);
-  yield();
   udp.beginPacket(addr, 8889);
-  yield();
   udp.write(preamble, sizeof preamble);
-  yield();
   for (i = 0; i < 16; i++) {
     udp.write(mac, size_of_mac);
-    yield();
   }
 
   udp.endPacket();
@@ -91,7 +86,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
-        JsonObject& nestedObject = i->value;
+        JsonObject &nestedObject = i->value;
         String type = nestedObject["type"];
         String action = nestedObject["action"];
         String action_d = nestedObject["action_d"];
@@ -117,7 +112,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
-        JsonObject& nestedObject = i->value;
+        JsonObject &nestedObject = i->value;
         String id = nestedObject["id"];
         Serial.println(id);
         RF_AddRadioCodeTxDB(id);
@@ -139,7 +134,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
-        JsonObject& nestedObject = i->value;
+        JsonObject &nestedObject = i->value;
         String type = nestedObject["type"];
         String action = nestedObject["action"];
         String hour = nestedObject["hour"];
@@ -164,7 +159,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
-        JsonObject& nestedObject = i->value;
+        JsonObject &nestedObject = i->value;
         String id = nestedObject["id"];
         Serial.println(id);
         RF_AddDoutDB(id);
@@ -179,7 +174,9 @@ bool FbmUpdateRadioCodes(void) {
 bool FbmService(void) {
   bool ret = false;
 
-  // Serial.printf("boot_sm: %d, status_alarm: %d, control_alarm: %d, control_radio_learn: %d\n", boot_sm, status_alarm, control_alarm ,control_radio_learn);
+  // Serial.printf("boot_sm: %d, status_alarm: %d, control_alarm: %d,
+  // control_radio_learn: %d\n", boot_sm, status_alarm, control_alarm
+  // ,control_radio_learn);
   // firebase connect
   if (boot_sm == 0) {
     bool ret = true;
@@ -237,18 +234,19 @@ bool FbmService(void) {
   if (boot_sm == 2) {
     bool res = FbmUpdateRadioCodes();
     if (res == true) {
-      Serial.println("firebase configuration downloaded!");
+      Serial.println("Node is up!");
       boot_sm = 3;
     }
   }
 
   // firebase monitoring
   if (boot_sm == 3) {
-    if (++fbm_monitorcnt >= (10 / 1)) {
-      Serial.println("FbmService - monitor");
-      fbm_monitorcnt = 0;
 
-      uint32_t time_now = getTime();
+    // monitor
+    time_t time_now = getTime();
+    if ((time_now - fbm_update_last) >= 5) {
+      Serial.printf("FbmService - monitor: heap %d\n", ESP.getFreeHeap());
+      fbm_update_last = time_now;
 
       float h = dht.readHumidity();
       float t = dht.readTemperature();
@@ -268,7 +266,8 @@ bool FbmService(void) {
         if (control_monitor != control_monitor_last) {
           control_monitor_last = control_monitor;
           if (control_monitor == true) {
-            control_monitor_stop = 3;
+            fbm_stop_monitor_time = time_now + 10;
+            fbm_monitor_run = true;
           }
         }
         if (control_monitor == true) {
@@ -288,7 +287,6 @@ bool FbmService(void) {
               bool control_wol = object["wol"];
               if (control_wol == true) {
                 Serial.println("Sending WOL Packet...");
-                yield();
                 sendWOL(computer_ip, mac, sizeof mac);
               }
 
@@ -302,25 +300,24 @@ bool FbmService(void) {
           }
 
           if (control_monitor == true) {
-            Serial.printf("control_monitor %d, %d\n", control_monitor, control_monitor_stop);
+            Serial.printf("control_monitor %d, %d\n", control_monitor,
+                          fbm_stop_monitor_time);
 
-            if (control_monitor_stop > 1) {
-              control_monitor_stop--;
-            } else if (control_monitor_stop == 1) {
+            if ((time_now > fbm_stop_monitor_time) &&
+                (fbm_monitor_run == true)) {
               Firebase.setBool("control/monitor", false);
               if (Firebase.failed()) {
                 Serial.println("control/monitor");
                 Serial.println(Firebase.error());
               } else {
-                control_monitor_stop--;
+                fbm_monitor_run = false;
               }
-            } else {
             }
 
             DynamicJsonBuffer jsonBuffer;
             JsonObject &status = jsonBuffer.createObject();
             status["alarm"] = status_alarm;
-            status["monitor"] = (control_monitor_stop != 0);
+            status["monitor"] = fbm_monitor_run;
             status["heap"] = ESP.getFreeHeap();
             status["humidity"] = humidity_data;
             status["temperature"] = temperature_data;
@@ -336,10 +333,8 @@ bool FbmService(void) {
       }
       yield();
 
-      // convert to minutes
-      uint32_t delta = (time_now - fbm_time_last) / 60;
       // log every 30 minutes
-      if (delta > 30) {
+      if ((time_now - fbm_time_th_last) > (30 * 60)) {
         DynamicJsonBuffer jsonBuffer;
         JsonObject &th = jsonBuffer.createObject();
         th["time"] = time_now;
@@ -352,7 +347,7 @@ bool FbmService(void) {
           Serial.println(Firebase.error());
         } else {
           // update in case of success
-          fbm_time_last = time_now;
+          fbm_time_th_last = time_now;
         }
       } else {
         /* do nothing */
@@ -372,6 +367,7 @@ bool FbmService(void) {
     } else {
       RF_Disable();
     }
+    yield();
 
     // manage alarm activation/deactivation notifications
     if (status_alarm_last != status_alarm) {
@@ -380,6 +376,7 @@ bool FbmService(void) {
       str += String((status_alarm == true) ? ("active") : ("inactive"));
       fblog_log(str, false);
     }
+    yield();
 
     if (control_radio_update == true) {
       // clear request
@@ -393,13 +390,14 @@ bool FbmService(void) {
         boot_sm = 2;
       }
     }
+    yield();
 
     // monitor timers, every 15 sec
-    if (fbm_timer_monitor_cnt >= 15) {
-      fbm_timer_monitor_cnt = 0;
+    if ((time_now - fbm_update_timer_last) >= 15) {
+      fbm_update_timer_last = time_now;
       RF_MonitorTimers();
     }
-    fbm_timer_monitor_cnt++;
+    yield();
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
