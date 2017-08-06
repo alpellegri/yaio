@@ -58,6 +58,10 @@ angular.module('app.controllers.home', [])
         }, function(errorObject) {
           console.log("firebase failed: " + errorObject.code);
         });
+
+        var ref = firebase.database().ref("control/monitor");
+        ref.set(true);
+
         $scope.$broadcast('scroll.refreshComplete');
         $scope.$broadcast("scroll.infiniteScrollComplete");
       };

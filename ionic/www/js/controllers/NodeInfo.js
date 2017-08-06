@@ -80,6 +80,9 @@ angular.module('app.controllers.NodeInfo', [])
         $scope.$broadcast("scroll.infiniteScrollComplete");
       };
 
+      var ref = firebase.database().ref("control/monitor");
+      ref.set(true);
+
       $scope.doRefresh();
     } else {
       console.log('Firebase not initialized');

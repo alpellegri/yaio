@@ -27,7 +27,7 @@ bool control_alarm = false;
 bool control_radio_learn = false;
 bool control_radio_update = false;
 bool control_monitor = false;
-bool control_monitor_last = false;
+uint8_t control_monitor_last;
 
 uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
@@ -236,6 +236,7 @@ bool FbmService(void) {
     if (res == true) {
       Serial.println("Node is up!");
       boot_sm = 3;
+      control_monitor_last = 0x55; // trick
     }
   }
 
@@ -264,6 +265,9 @@ bool FbmService(void) {
         Serial.println(Firebase.error());
       } else {
         if (control_monitor != control_monitor_last) {
+          if (control_monitor_last == 0x55) {
+            control_monitor = true; // trick
+          }
           control_monitor_last = control_monitor;
           if (control_monitor == true) {
             fbm_stop_monitor_time = time_now + 10;

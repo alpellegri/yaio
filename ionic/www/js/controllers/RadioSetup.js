@@ -143,6 +143,8 @@ angular.module('app.controllers.RadioSetup', [])
 
         var ref = firebase.database().ref("control/radio_update");
         ref.set(true);
+        var ref = firebase.database().ref("control/monitor");
+        ref.set(true);
       }
 
       $scope.UpdateType = function(RadioCode, item) {
@@ -310,6 +312,9 @@ angular.module('app.controllers.RadioSetup', [])
         }, function(errorObject) {
           console.log("firebase failed: " + errorObject.code);
         });
+
+        var ref = firebase.database().ref("control/monitor");
+        ref.set(true);
 
         // $scope.$broadcast("scroll.infiniteScrollComplete");
         $scope.$broadcast('scroll.refreshComplete');
