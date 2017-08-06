@@ -9,9 +9,6 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.pushCtrl0 = {
         checked: false
       };
-      $scope.pushCtrl1 = {
-        checked: false
-      };
 
       $scope.settings = {};
       $scope.InactiveRadioCodes = [];
@@ -143,6 +140,9 @@ angular.module('app.controllers.RadioSetup', [])
         $scope.InactiveRadioCodes.forEach(function(element) {
           ref.child('Inactive').push().set(element);
         });
+
+        var ref = firebase.database().ref("control/radio_update");
+        ref.set(true);
       }
 
       $scope.UpdateType = function(RadioCode, item) {
@@ -198,20 +198,6 @@ angular.module('app.controllers.RadioSetup', [])
         }
       };
 
-      $scope.pushCtrl1Change = function() {
-        var ref = firebase.database().ref("control");
-        console.log('radio_update control ' + $scope.pushCtrl1.checked);
-        if ($scope.pushCtrl1.checked) {
-          ref.update({
-            radio_update: true
-          });
-        } else {
-          ref.update({
-            radio_update: false
-          });
-        }
-      };
-
       $scope.ResetRadioCodes = function() {
         console.log('RadioSetupCtrl: ResetRadioCodes');
 
@@ -228,7 +214,7 @@ angular.module('app.controllers.RadioSetup', [])
           '<h9 id="setup-heading5" style="text-align:left;">name</h9>' +
           '<label class="item item-input"> <input type="text" placeholder="name" ng-model="settings._name"> </label>' +
           '<h9 id="setup-heading5" style="text-align:left;">id</h9>' +
-          '<label class="item item-input"> <input type="text" placeholder="id" ng-model="settings._id"> </label>' +
+          '<label class="item item-input"> <input type="text" placeholder="id" ng-model="settings._id.toString(16).toUpperCase()"> </label>' +
           '</form>';
 
         // An elaborate, custom popup
@@ -320,20 +306,6 @@ angular.module('app.controllers.RadioSetup', [])
             $scope.pushCtrl0.checked = true;
           } else {
             $scope.pushCtrl0.checked = false;
-          }
-        }, function(errorObject) {
-          console.log("firebase failed: " + errorObject.code);
-        });
-
-        var ref = firebase.database().ref("control/radio_update");
-        // Attach an asynchronous callback to read the data at our posts reference
-        ref.on('value', function(snapshot) {
-          var payload = snapshot.val();
-
-          if (payload == true) {
-            $scope.pushCtrl1.checked = true;
-          } else {
-            $scope.pushCtrl1.checked = false;
           }
         }, function(errorObject) {
           console.log("firebase failed: " + errorObject.code);

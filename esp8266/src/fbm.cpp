@@ -404,7 +404,9 @@ bool FbmService(void) {
     if (code != 0) {
       uint32_t idx = RF_CheckRadioCodeDB(code);
       if (idx != 0xFF) {
-        String str = String("Intrusion ") + String(code) + String(" !!!");
+        char hex[10];
+        sprintf(hex, "%x", code);
+        String str = String("Intrusion ") + String(hex) + String(" !!!");
         fblog_log(str, status_alarm);
       }
 
@@ -429,6 +431,17 @@ bool FbmService(void) {
         }
       }
     }
+  }
+
+  if (boot_sm == 4) {
+    Serial.printf("boot_sm - %d: heap %d\n", boot_sm, ESP.getFreeHeap());
+    RF_Enable();
+    boot_sm = 5;
+  }
+
+  if (boot_sm == 5) {
+    uint32_t code = RF_GetRadioCode();
+    Serial.printf("code - %d: heap %d\n", code, ESP.getFreeHeap());
   }
 
   return ret;

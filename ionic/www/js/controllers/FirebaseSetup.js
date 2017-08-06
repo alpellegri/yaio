@@ -44,7 +44,6 @@ angular.module('app.controllers.FirebaseSetup', [])
       var control_ref = ref.child('control');
       control_ref.set({
         alarm: false,
-        led: false,
         monitor: false,
         radio_learn: false,
         radio_update: false,
