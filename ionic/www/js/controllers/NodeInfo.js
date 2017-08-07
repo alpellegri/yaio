@@ -36,26 +36,17 @@ angular.module('app.controllers.NodeInfo', [])
         }
       };
 
-      $scope.pushCtrl3Change = function() {
-        var ref = firebase.database().ref("control");
-        if ($scope.control.monitor) {
-          ref.update({
-            monitor: true
-          });
-        } else {
-          ref.update({
-            monitor: false
-          });
-        }
-      };
-
       $scope.doRefresh = function() {
         console.log('doRefresh-NodeInfoCtrl');
+        var current_date = new Date();
+
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime()/1000));
+
         var ref = firebase.database().ref("/");
         // Attach an asynchronous callback to read the data at our posts reference
         ref.on('value', function(snapshot) {
           var payload = snapshot.val();
-          var current_date = new Date();
           var date = new Date();
           // $scope.system.date = date.toString();
           $scope.startup = payload.startup;
@@ -79,9 +70,6 @@ angular.module('app.controllers.NodeInfo', [])
         $scope.$broadcast('scroll.refreshComplete');
         $scope.$broadcast("scroll.infiniteScrollComplete");
       };
-
-      var ref = firebase.database().ref("control/monitor");
-      ref.set(true);
 
       $scope.doRefresh();
     } else {

@@ -44,10 +44,10 @@ angular.module('app.controllers.FirebaseSetup', [])
       var control_ref = ref.child('control');
       control_ref.set({
         alarm: false,
-        monitor: false,
         radio_learn: false,
         radio_update: false,
-        reboot: false
+        reboot: false,
+        time: 0
       });
 
       // init Firebase: status

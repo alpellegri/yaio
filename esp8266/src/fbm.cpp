@@ -26,8 +26,8 @@ bool status_alarm_last = false;
 bool control_alarm = false;
 bool control_radio_learn = false;
 bool control_radio_update = false;
-bool control_monitor = false;
-uint8_t control_monitor_last;
+uint32_t control_time;
+uint32_t control_time_last;
 
 uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
@@ -236,7 +236,7 @@ bool FbmService(void) {
     if (res == true) {
       Serial.println("Node is up!");
       boot_sm = 3;
-      control_monitor_last = 0x55; // trick
+      control_time_last = 0; // trick
     }
   }
 
@@ -259,22 +259,21 @@ bool FbmService(void) {
       }
       yield();
 
-      control_monitor = Firebase.getBool("control/monitor");
+      control_time = Firebase.getInt("control/time");
       if (Firebase.failed() == true) {
-        Serial.println("get failed: control/monitor");
+        Serial.println("get failed: control/time");
         Serial.println(Firebase.error());
       } else {
-        if (control_monitor != control_monitor_last) {
-          if (control_monitor_last == 0x55) {
-            control_monitor = true; // trick
-          }
-          control_monitor_last = control_monitor;
-          if (control_monitor == true) {
-            fbm_stop_monitor_time = time_now + 10;
-            fbm_monitor_run = true;
-          }
+        if (control_time != control_time_last) {
+          control_time_last = control_time;
+          fbm_stop_monitor_time = time_now + 10;
+          fbm_monitor_run = true;
         }
-        if (control_monitor == true) {
+        if (fbm_monitor_run == true) {
+          if (time_now > fbm_stop_monitor_time) {
+            fbm_monitor_run = false;
+          }
+
           FirebaseObject fbobject = Firebase.get("control");
           if (Firebase.failed() == true) {
             Serial.println("get failed: control");
@@ -286,7 +285,7 @@ bool FbmService(void) {
               control_alarm = object["alarm"];
               control_radio_learn = object["radio_learn"];
               control_radio_update = object["radio_update"];
-              control_monitor = object["monitor"];
+              control_time = object["time"];
 
               bool control_wol = object["wol"];
               if (control_wol == true) {
@@ -303,35 +302,22 @@ bool FbmService(void) {
             }
           }
 
-          if (control_monitor == true) {
-            Serial.printf("control_monitor %d, %d\n", control_monitor,
-                          fbm_stop_monitor_time);
+          Serial.printf("control_monitor %d, %d\n", time_now,
+                        fbm_stop_monitor_time);
 
-            if ((time_now > fbm_stop_monitor_time) &&
-                (fbm_monitor_run == true)) {
-              Firebase.setBool("control/monitor", false);
-              if (Firebase.failed()) {
-                Serial.println("control/monitor");
-                Serial.println(Firebase.error());
-              } else {
-                fbm_monitor_run = false;
-              }
-            }
-
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &status = jsonBuffer.createObject();
-            status["alarm"] = status_alarm;
-            status["monitor"] = fbm_monitor_run;
-            status["heap"] = ESP.getFreeHeap();
-            status["humidity"] = humidity_data;
-            status["temperature"] = temperature_data;
-            status["time"] = time_now;
-            yield();
-            Firebase.set("status", JsonVariant(status));
-            if (Firebase.failed()) {
-              Serial.print("set failed: status");
-              Serial.println(Firebase.error());
-            }
+          DynamicJsonBuffer jsonBuffer;
+          JsonObject &status = jsonBuffer.createObject();
+          status["alarm"] = status_alarm;
+          status["monitor"] = fbm_monitor_run;
+          status["heap"] = ESP.getFreeHeap();
+          status["humidity"] = humidity_data;
+          status["temperature"] = temperature_data;
+          status["time"] = time_now;
+          yield();
+          Firebase.set("status", JsonVariant(status));
+          if (Firebase.failed()) {
+            Serial.print("set failed: status");
+            Serial.println(Firebase.error());
           }
         }
       }

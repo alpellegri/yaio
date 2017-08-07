@@ -197,8 +197,10 @@ void RF_Disable(void) {
 void RF_Loop() {
   if (mySwitch.available()) {
 
+    noInterrupts();
     uint32_t value = (uint32_t)mySwitch.getReceivedValue();
     mySwitch.resetAvailable();
+    interrupts();
 
     if (value == 0) {
       Serial.print("Unknown encoding");

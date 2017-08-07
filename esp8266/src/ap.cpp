@@ -133,6 +133,7 @@ bool AP_Task(void) {
       Serial.println("scan done");
       if (n == 0) {
         Serial.println("no networks found");
+        ESP.restart();
       } else {
         char *sta_ssid = EE_GetSSID();
 
