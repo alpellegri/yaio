@@ -27,8 +27,13 @@ First, install Node.js 6.x LTS.
 ```
 npm install -g cordova ionic
 cd ionic
-ionic platform add android
-ionic run android
+ionic start . --no-overwriting
+
+#### to start app on browser
+ionic serve
+
+#### to install app on device
+ionic cordova run android
 ```
 ### ESP8266
 Install platformio. Build esp8266 folder
