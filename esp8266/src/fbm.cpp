@@ -408,7 +408,6 @@ bool FbmService(void) {
       if (idx != 0xFF) {
         char hex[10];
         sprintf(hex, "%x", code);
-        Serial.printf("3 %s\n", RF_GetRadioName(idx));
         String str = String("Intrusion in: ") + String(RF_GetRadioName(idx)) +
                      String(" !!!");
         fblog_log(str, status_alarm);

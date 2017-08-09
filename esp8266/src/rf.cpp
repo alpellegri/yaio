@@ -13,14 +13,24 @@
 #define NUM_TIMER_MAX 8
 #define NUM_DOUT_MAX 8
 
+typedef struct {
+  uint32_t id;
+  uint8_t type;
+  uint32_t action;
+  uint32_t delay;
+  uint32_t action_d;
+  uint32_t stop_time;
+  bool running;
+  char name[23];
+} RF_RadioCodeSts_t;
+
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 bool RF_StatusEnable = false;
 
 // array 5 is used for delay timer running/idle
 // array 6 is used for delay timer time stamp
-uint32_t RadioCodes[NUM_RADIO_CODE_RX_MAX][7];
-char RadioCodesName[NUM_RADIO_CODE_RX_MAX][25];
+RF_RadioCodeSts_t RadioCodes[NUM_RADIO_CODE_RX_MAX];
 uint16_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
 uint16_t RadioCodesTxLen = 0;
@@ -45,17 +55,16 @@ void RF_ResetDoutDB(void) { DoutLen = 0; }
 
 void RF_AddRadioCodeDB(String id, String name, String type, String action,
                        String delay, String action_d) {
-  RadioCodes[RadioCodesLen][0] = atoi(id.c_str());
-  strcpy(RadioCodesName[RadioCodesLen], name.c_str());
-
-  RadioCodes[RadioCodesLen][1] = atoi(type.c_str());
-  RadioCodes[RadioCodesLen][2] = atoi(action.c_str());
-  RadioCodes[RadioCodesLen][3] = atoi(delay.c_str());
-  RadioCodes[RadioCodesLen][4] = atoi(action_d.c_str());
+  RadioCodes[RadioCodesLen].id = atoi(id.c_str());
+  strcpy(RadioCodes[RadioCodesLen].name, name.c_str());
+  RadioCodes[RadioCodesLen].type = atoi(type.c_str());
+  RadioCodes[RadioCodesLen].action = atoi(action.c_str());
+  RadioCodes[RadioCodesLen].delay = atoi(delay.c_str());
+  RadioCodes[RadioCodesLen].action_d = atoi(action_d.c_str());
   RadioCodesLen++;
 }
 
-char *RF_GetRadioName(uint8_t idx) { return (RadioCodesName[idx]); }
+char *RF_GetRadioName(uint8_t idx) { return (RadioCodes[idx].name); }
 
 void RF_AddRadioCodeTxDB(String string) {
   RadioCodesTx[RadioCodesTxLen] = atoi(string.c_str());
@@ -81,17 +90,20 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
 
   Serial.printf("RF_CheckRadioCodeDB: code %x\n", code);
   while ((i < RadioCodesLen) && (idx == 0xFF)) {
-    Serial.printf("radio table: %x, %x\n", code, RadioCodes[i][0]);
-    if (code == RadioCodes[i][0]) {
-      Serial.printf("radio code found in table %x\n", RadioCodes[i][0]);
+    Serial.printf("radio table: %x, %x\n", code, RadioCodes[i].id);
+    if (code == RadioCodes[i].id) {
+      Serial.printf("radio code found in table %x\n", RadioCodes[i].id);
       idx = i;
       // manage start delay timers if any
-      Serial.printf("radio code delay: %d\n", RadioCodes[i][3]);
-      if (RadioCodes[i][3] != 0) {
-        RadioCodes[i][5] = 1;         // set timer running
-        RadioCodes[i][6] = getTime(); // set timer time stamp
+      Serial.printf("radio code delay: %d\n", RadioCodes[i].delay);
+      if (RadioCodes[i].delay != 0) {
+        RadioCodes[i].running = true; // set timer running
+        RadioCodes[i].stop_time =
+            getTime() + RadioCodes[i].delay; // set timer time stamp
         // make an action
-        RF_Action(RadioCodes[i][1], RadioCodes[i][2]);
+        RF_Action(RadioCodes[i].type, RadioCodes[i].action);
+      } else {
+        RF_Action(RadioCodes[i].type, RadioCodes[i].action);
       }
     }
     i++;
@@ -155,14 +167,13 @@ void RF_MonitorTimers(void) {
   // loop delay timers
   for (uint8_t i = 0; i < RadioCodesLen; i++) {
     // check if running
-    if (RadioCodes[i][5] == 1) {
-      uint32_t delay = mytime - RadioCodes[i][6];
-      Serial.printf("radio code [%d] delay, time %d, stamp %d, delay %d\n", i,
-                    mytime, RadioCodes[i][6], delay);
-      if (delay > RadioCodes[i][3]) {
+    if (RadioCodes[i].running == true) {
+      Serial.printf("radio code [%d] delay, time %d, stamp %d\n", i, mytime,
+                    RadioCodes[i].stop_time);
+      if (mytime > RadioCodes[i].stop_time) {
         // perform an action
-        RadioCodes[i][5] = 0; // set timer to idle
-        RF_Action(RadioCodes[i][1], RadioCodes[i][4]);
+        RadioCodes[i].running = false; // set timer to idle
+        RF_Action(RadioCodes[i].type, RadioCodes[i].action_d);
       }
     }
   }
