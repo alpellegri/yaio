@@ -141,9 +141,10 @@ angular.module('app.controllers.RadioSetup', [])
           ref.child('Inactive').push().set(element);
         });
 
+        var current_date = new Date();
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
         var ref = firebase.database().ref("control/radio_update");
-        ref.set(true);
-        var ref = firebase.database().ref("control/monitor");
         ref.set(true);
       }
 
@@ -254,6 +255,10 @@ angular.module('app.controllers.RadioSetup', [])
 
       $scope.doRefresh = function() {
         console.log('doRefresh');
+        var current_date = new Date();
+
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
 
         var ref = firebase.database().ref('RadioCodes/Inactive');
         var i = 0;
@@ -312,9 +317,6 @@ angular.module('app.controllers.RadioSetup', [])
         }, function(errorObject) {
           console.log("firebase failed: " + errorObject.code);
         });
-
-        var ref = firebase.database().ref("control/monitor");
-        ref.set(true);
 
         // $scope.$broadcast("scroll.infiniteScrollComplete");
         $scope.$broadcast('scroll.refreshComplete');

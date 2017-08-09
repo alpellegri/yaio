@@ -19,9 +19,7 @@
 
 #define OLED_RESET LED_BUILTIN // 4
 
-Adafruit_SSD1306 display(OLED_RESET);
-
-Ticker flipper;
+// Adafruit_SSD1306 display(OLED_RESET);
 
 uint8_t mode;
 uint16_t count = 0;

@@ -101,7 +101,7 @@ bool STA_Task(void) {
       yield();
     }
   } else {
-    Serial.print("WiFi.status != WL_CONNECTED\n");
+    Serial.print("WiFi.status != WL_CONNECTED");
   }
 
   return ret;

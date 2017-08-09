@@ -8,27 +8,33 @@
 #include "rf.h"
 #include "timesrv.h"
 
+#define NUM_RADIO_CODE_RX_MAX 8
+#define NUM_RADIO_CODE_TX_MAX 8
+#define NUM_TIMER_MAX 8
+#define NUM_DOUT_MAX 8
+
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 bool RF_StatusEnable = false;
 
 // array 5 is used for delay timer running/idle
 // array 6 is used for delay timer time stamp
-uint32_t RadioCodes[10][7];
+uint32_t RadioCodes[NUM_RADIO_CODE_RX_MAX][7];
+char RadioCodesName[NUM_RADIO_CODE_RX_MAX][25];
 uint16_t RadioCodesLen = 0;
-uint32_t RadioCodesTx[10];
+uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
 uint16_t RadioCodesTxLen = 0;
 
-uint32_t Timers[10][3];
+uint32_t Timers[NUM_TIMER_MAX][3];
 uint16_t TimersLen = 0;
 
-uint8_t Dout[10];
+uint8_t Dout[NUM_DOUT_MAX];
 uint16_t DoutLen = 0;
+uint32_t t247_last = 0;
 
 void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
 void RF_ResetRadioCodeTxDB(void) { RadioCodesTxLen = 0; }
 
-uint32_t t247_last = 0;
 void RF_ResetTimerDB(void) {
   time_t mytime = getTime();
   t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
@@ -37,15 +43,19 @@ void RF_ResetTimerDB(void) {
 
 void RF_ResetDoutDB(void) { DoutLen = 0; }
 
-void RF_AddRadioCodeDB(String id, String type, String action, String delay,
-                       String action_d) {
+void RF_AddRadioCodeDB(String id, String name, String type, String action,
+                       String delay, String action_d) {
   RadioCodes[RadioCodesLen][0] = atoi(id.c_str());
+  strcpy(RadioCodesName[RadioCodesLen], name.c_str());
+
   RadioCodes[RadioCodesLen][1] = atoi(type.c_str());
   RadioCodes[RadioCodesLen][2] = atoi(action.c_str());
   RadioCodes[RadioCodesLen][3] = atoi(delay.c_str());
   RadioCodes[RadioCodesLen][4] = atoi(action_d.c_str());
   RadioCodesLen++;
 }
+
+char *RF_GetRadioName(uint8_t idx) { return (RadioCodesName[idx]); }
 
 void RF_AddRadioCodeTxDB(String string) {
   RadioCodesTx[RadioCodesTxLen] = atoi(string.c_str());

@@ -7,7 +7,7 @@ angular.module('app.controllers.TimerSetup', [])
     if (fb_init == 'true') {
 
       date = new Date();
-      $scope.offset = date.getTimezoneOffset()/60;
+      $scope.offset = date.getTimezoneOffset() / 60;
       $scope.Timers = [];
       $scope.settings = {};
       $scope.ActiveRadioCodesTx = [];
@@ -42,6 +42,12 @@ angular.module('app.controllers.TimerSetup', [])
             action: element.action
           });
         });
+
+        var current_date = new Date();
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
+        var ref = firebase.database().ref("control/radio_update");
+        ref.set(true);
       }
 
       $scope.UpdateType = function(Timer, type) {
@@ -90,7 +96,7 @@ angular.module('app.controllers.TimerSetup', [])
               } else {
                 var _timer = {
                   name: $scope.settings._name,
-                  hour: ((parseInt($scope.settings._hour)+$scope.offset+24)%24),
+                  hour: ((parseInt($scope.settings._hour) + $scope.offset + 24) % 24),
                   minute: parseInt($scope.settings._minute),
                   type: 0,
                   action: 0
@@ -115,7 +121,7 @@ angular.module('app.controllers.TimerSetup', [])
       // Triggered on a button click, or some other target
       $scope.showPopupTimerEdit = function(Timer) {
         $scope.settings._name = Timer.name;
-        $scope.settings._hour = (Timer.hour-$scope.offset+24)%24;
+        $scope.settings._hour = (Timer.hour - $scope.offset + 24) % 24;
         $scope.settings._minute = Timer.minute;
         var PopupTemplate =
           '<form class="list">' +
@@ -144,7 +150,7 @@ angular.module('app.controllers.TimerSetup', [])
                 e.preventDefault();
               } else {
                 Timer.name = $scope.settings._name;
-                Timer.hour = ((parseInt($scope.settings._hour)+$scope.offset+24)%24);
+                Timer.hour = ((parseInt($scope.settings._hour) + $scope.offset + 24) % 24);
                 Timer.minute = parseInt($scope.settings._minute);
                 Timer.action = 0
                 // console.log(Timer);
@@ -165,6 +171,10 @@ angular.module('app.controllers.TimerSetup', [])
 
       $scope.doRefresh = function() {
         console.log('doRefresh');
+        var current_date = new Date();
+
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
 
         $scope.Timers = [];
         var ref = firebase.database().ref('Timers');

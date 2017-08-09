@@ -14,9 +14,18 @@
 #include "rf.h"
 #include "timesrv.h"
 
+extern "C" {
+#include "user_interface.h"
+}
+
 #define LED D0
 #define DHTPIN D6
 #define DHTTYPE DHT22
+
+const char *const RST_REASONS[7] = {
+    "REASON_DEFAULT_RST",  "REASON_WDT_RST",      "REASON_EXCEPTION_RST",
+    "REASON_SOFT_WDT_RST", "REASON_SOFT_RESTART", "REASON_DEEP_SLEEP_AWAKE",
+    "REASON_EXT_SYS_RST"};
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -87,13 +96,14 @@ bool FbmUpdateRadioCodes(void) {
         yield();
         // Serial.println(i->key);
         JsonObject &nestedObject = i->value;
+        String name = nestedObject["name"];
         String type = nestedObject["type"];
         String action = nestedObject["action"];
         String action_d = nestedObject["action_d"];
         String delay = nestedObject["delay"];
         String id = nestedObject["id"];
         Serial.println(id);
-        RF_AddRadioCodeDB(id, type, action, delay, action_d);
+        RF_AddRadioCodeDB(id, name, type, action, delay, action_d);
       }
     }
   }
@@ -221,7 +231,9 @@ bool FbmService(void) {
         } else {
           boot_sm = 2;
           Serial.println("firebase: configured!");
-          String str = String("boot-up complete!");
+
+          String str = String("reset for ") +
+                       String(RST_REASONS[system_get_rst_info()->reason]);
           fblog_log(str, true);
         }
       } else {
@@ -396,16 +408,18 @@ bool FbmService(void) {
       if (idx != 0xFF) {
         char hex[10];
         sprintf(hex, "%x", code);
-        String str = String("Intrusion ") + String(hex) + String(" !!!");
+        Serial.printf("3 %s\n", RF_GetRadioName(idx));
+        String str = String("Intrusion in: ") + String(RF_GetRadioName(idx)) +
+                     String(" !!!");
         fblog_log(str, status_alarm);
       }
 
       if (control_radio_learn == true) {
         // acquire Active Radio Codes from FB
         if (code != fbm_code_last) {
-          if (idx == 0) {
+          if (idx == 0xFF) {
             uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
-            if (idxTx == 0) {
+            if (idxTx == 0xFF) {
               Serial.printf("RadioCodes/Inactive: %x\n", code);
               yield();
               Firebase.pushInt("RadioCodes/Inactive", code);

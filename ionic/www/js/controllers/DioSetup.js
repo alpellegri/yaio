@@ -25,6 +25,11 @@ angular.module('app.controllers.DioSetup', [])
             id: element.id
           });
         });
+        var current_date = new Date();
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
+        var ref = firebase.database().ref("control/radio_update");
+        ref.set(true);
       }
 
       $scope.ResetDIO = function() {
@@ -134,6 +139,10 @@ angular.module('app.controllers.DioSetup', [])
 
       $scope.doRefresh = function() {
         console.log('doRefresh');
+        var current_date = new Date();
+
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
 
         var ref = firebase.database().ref('DIO/Dout');
         var i = 0;
