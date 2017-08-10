@@ -239,7 +239,7 @@ bool FbmService(void) {
     bool res = FbmUpdateRadioCodes();
     if (res == true) {
       Serial.println("Node is up!");
-      boot_sm = 4;
+      boot_sm = 3;
       control_time_last = 0; // trick
     }
   } break;
