@@ -413,7 +413,7 @@ bool FbmService(void) {
               Serial.print(F("RadioCodes/Inactive: "));
               Serial.println(code);
               yield();
-              Firebase.pushInt("RadioCodes/Inactive", code);
+              Firebase.setInt("RadioCodes/Inactive/last", code);
               if (Firebase.failed()) {
                 Serial.print(F("set failed: RadioCodes/Inactive"));
                 Serial.println(Firebase.error());
