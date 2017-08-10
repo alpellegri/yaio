@@ -30,6 +30,7 @@ void setup() {
   bool ret;
 
   pinMode(LED, OUTPUT);
+  pinMode(D1, OUTPUT);
   pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 
@@ -80,7 +81,7 @@ void loop() {
   }
 
   current_time = millis();
-  if ((current_time - schedule_time) > 500) {
+  if ((current_time - schedule_time) > 5000) {
     schedule_time = current_time;
     if (mode == 0) {
       ret = AP_Task();
