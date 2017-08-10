@@ -77,7 +77,7 @@ bool FbmUpdateRadioCodes(void) {
   yield();
 
   if (ret == true) {
-    Serial.print(F("FbmUpdateRadioCodes Rx"));
+    Serial.println(F("FbmUpdateRadioCodes Rx"));
     FirebaseObject ref = Firebase.get("RadioCodes/Active");
     if (Firebase.failed() == true) {
       Serial.print(F("get failed: RadioCodes/Active"));
