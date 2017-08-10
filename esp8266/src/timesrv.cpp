@@ -190,7 +190,7 @@ bool TimeService(void) {
     timesrv_sm = 2;
   } break;
   case 2: {
-    Serial.println("getNtpTime");
+    Serial.println(F("getNtpTime"));
     time_t _time = getNtpTime();
     if (_time != 0) {
       time_set(_time);
@@ -199,7 +199,7 @@ bool TimeService(void) {
       Serial.println(getTmUTC());
       timesrv_sm = 0;
     } else {
-      Serial.println("getNtpTime fails");
+      Serial.println(F("getNtpTime fails"));
       timesrv_sm = 1;
     }
     stopNtpTime();

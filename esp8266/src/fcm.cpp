@@ -30,7 +30,7 @@ void FcmSendPush(String &message) {
   RegIDsLen = 0;
   FirebaseObject fbRegistration_IDs = Firebase.get("FCM_Registration_IDs");
   if (Firebase.failed() == true) {
-    Serial.print("get failed: FCM_Registration_IDs");
+    Serial.print(F("get failed: FCM_Registration_IDs"));
     Serial.println(Firebase.error());
   } else {
     JsonVariant variant = fbRegistration_IDs.getJsonVariant();
@@ -102,13 +102,13 @@ void FcmService(void) {
 
     uint32_t retVal = fcm_client.connect(FcmServer, 80);
     if (retVal == -1) {
-      Serial.println("fcm connect Time out");
+      Serial.println(F("fcm connect Time out"));
       fcm_sts = Fcm_Sm_IDLE;
     } else if (retVal == -3) {
-      Serial.println("fcm connect Fail connection");
+      Serial.println(F("fcm connect Fail connection"));
       fcm_sts = Fcm_Sm_ERROR;
     } else if (retVal == 1) {
-      Serial.println("fcm connect Connected with server!");
+      Serial.println(F("fcm connect Connected with server!"));
       fcm_sts = Fcm_Sm_SEND;
     }
     Serial.printf("retVal: %d\n", retVal);
@@ -124,7 +124,7 @@ void FcmService(void) {
   } break;
 
   case Fcm_Sm_RECEIVE: {
-    Serial.println("fcm http wait...");
+    Serial.println(F("fcm http wait..."));
     // available() will return the number of characters
     // currently in the receive buffer.
     while (fcm_client.available()) {
@@ -149,7 +149,7 @@ void FcmService(void) {
   } break;
 
   case Fcm_Sm_ERROR:
-    Serial.println("fcm error: end");
+    Serial.println(F("fcm error: end"));
   default:
     fcm_sts = Fcm_Sm_IDLE;
   case Fcm_Sm_IDLE:

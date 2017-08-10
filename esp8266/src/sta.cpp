@@ -31,8 +31,8 @@ bool STA_Setup(void) {
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
 
-  Serial.printf("connecting mode STA\n");
-  Serial.printf("Configuration parameters:\n");
+  Serial.println(F("connecting mode STA"));
+  Serial.println(F("Configuration parameters:"));
   sts = EE_LoadData();
   if (sts == true) {
     WiFi.mode(WIFI_STA);
@@ -42,19 +42,20 @@ bool STA_Setup(void) {
 
     sta_ssid = EE_GetSSID();
     sta_password = EE_GetPassword();
-    Serial.printf("sta_ssid: %s\n", sta_ssid);
-    Serial.printf("sta_password: %s\n", sta_password);
-    Serial.printf("\ntrying to connect...\n");
+    Serial.print(F("sta_ssid: "));
+    Serial.println(sta_ssid);
+    Serial.print(F("sta_password: "));
+    Serial.println(sta_password);
+    Serial.println(F("trying to connect..."));
     WiFi.begin(sta_ssid, sta_password);
     cnt = 0;
     while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
-      Serial.print(".");
+      Serial.print(F("."));
       delay(500);
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println();
-      Serial.print("connected: ");
+      Serial.print(F("\nconnected: "));
       Serial.println(WiFi.localIP());
     } else {
       sts = false;
@@ -62,7 +63,6 @@ bool STA_Setup(void) {
   }
 
   if (sts != true) {
-    Serial.println();
     Serial.println("not connected to router");
     ret = false;
   }
@@ -101,7 +101,7 @@ bool STA_Task(void) {
       yield();
     }
   } else {
-    Serial.print("WiFi.status != WL_CONNECTED");
+    Serial.println(F("WiFi.status != WL_CONNECTED"));
   }
 
   return ret;

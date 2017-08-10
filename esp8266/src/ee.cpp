@@ -41,7 +41,7 @@ void EE_EraseData() {
 void EE_StoreData(uint8_t *data, uint16_t len) {
   uint16_t i;
 
-  Serial.printf("EE_StoreData\n");
+  Serial.println(F("EE_StoreData"));
   for (i = 0; i < len; i++) {
     yield();
     // Serial.printf("%c", data[i]);
@@ -56,7 +56,7 @@ bool EE_LoadData(void) {
   char data[EE_SIZE];
   uint16_t i;
 
-  Serial.println("EEPROM loading...");
+  Serial.println(F("EEPROM loading..."));
   for (i = 0; i < EE_SIZE; i++) {
     yield();
     data[i] = EEPROM.read(i);
@@ -70,15 +70,20 @@ bool EE_LoadData(void) {
   // Test if parsing succeeds.
   if (root.success() == 1) {
     const char *ssid = root["ssid"];
-    Serial.printf("ssid %s\n", ssid);
+    Serial.print(F("ssid "));
+    Serial.println(ssid);
     const char *password = root["password"];
-    Serial.printf("password %s\n", password);
+    Serial.print(F("password "));
+    Serial.println(password);
     const char *firebase_url = root["firebase_url"];
-    Serial.printf("firebase_url %s\n", firebase_url);
+    Serial.print(F("firebase_url "));
+    Serial.println(firebase_url);
     const char *firebase_secret = root["firebase_secret"];
-    Serial.printf("firebase_secret %s\n", firebase_secret);
+    Serial.print(F("firebase_secret "));
+    Serial.println(firebase_secret);
     const char *firebase_server_key = root["firebase_server_key"];
-    Serial.printf("firebase_server_key %s\n", firebase_server_key);
+    Serial.print(F("firebase_server_key "));
+    Serial.println(firebase_server_key);
     if ((ssid != NULL) && (password != NULL) && (firebase_url != NULL) &&
         (firebase_secret != NULL) && (firebase_server_key != NULL)) {
       strcpy(sta_ssid, ssid);
@@ -86,13 +91,13 @@ bool EE_LoadData(void) {
       strcpy(sta_firebase_url, firebase_url);
       strcpy(sta_firebase_secret, firebase_secret);
       strcpy(sta_firebase_server_key, firebase_server_key);
-      Serial.println("EEPROM ok");
+      Serial.println(F("EEPROM ok"));
       ret = true;
     } else {
-      Serial.println("EEPROM content not ok");
+      Serial.println(F("EEPROM content not ok"));
     }
   } else {
-    Serial.println("parseObject() failed");
+    Serial.println(F("parseObject() failed"));
   }
 
   return ret;

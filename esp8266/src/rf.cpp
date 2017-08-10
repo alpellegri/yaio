@@ -55,47 +55,59 @@ void RF_ResetDoutDB(void) { DoutLen = 0; }
 
 void RF_AddRadioCodeDB(String id, String name, String type, String action,
                        String delay, String action_d) {
-  RadioCodes[RadioCodesLen].id = atoi(id.c_str());
-  strcpy(RadioCodes[RadioCodesLen].name, name.c_str());
-  RadioCodes[RadioCodesLen].type = atoi(type.c_str());
-  RadioCodes[RadioCodesLen].action = atoi(action.c_str());
-  RadioCodes[RadioCodesLen].delay = atoi(delay.c_str());
-  RadioCodes[RadioCodesLen].action_d = atoi(action_d.c_str());
-  RadioCodesLen++;
+  if (RadioCodesLen < NUM_RADIO_CODE_RX_MAX) {
+    RadioCodes[RadioCodesLen].id = atoi(id.c_str());
+    strcpy(RadioCodes[RadioCodesLen].name, name.c_str());
+    RadioCodes[RadioCodesLen].type = atoi(type.c_str());
+    RadioCodes[RadioCodesLen].action = atoi(action.c_str());
+    RadioCodes[RadioCodesLen].delay = atoi(delay.c_str());
+    RadioCodes[RadioCodesLen].action_d = atoi(action_d.c_str());
+    RadioCodesLen++;
+  }
 }
 
 char *RF_GetRadioName(uint8_t idx) { return (RadioCodes[idx].name); }
 
 void RF_AddRadioCodeTxDB(String string) {
-  RadioCodesTx[RadioCodesTxLen] = atoi(string.c_str());
-  RadioCodesTxLen++;
+  if (RadioCodesTxLen < NUM_RADIO_CODE_TX_MAX) {
+    RadioCodesTx[RadioCodesTxLen] = atoi(string.c_str());
+    RadioCodesTxLen++;
+  }
 }
 
 void RF_AddTimerDB(String type, String action, String hour, String minute) {
-  uint32_t evtime = 60 * atoi(hour.c_str()) + atoi(minute.c_str());
-  Timers[TimersLen][0] = evtime;
-  Timers[TimersLen][1] = atoi(type.c_str());
-  Timers[TimersLen][2] = atoi(action.c_str());
-  TimersLen++;
+  if (TimersLen < NUM_TIMER_MAX) {
+    uint32_t evtime = 60 * atoi(hour.c_str()) + atoi(minute.c_str());
+    Timers[TimersLen][0] = evtime;
+    Timers[TimersLen][1] = atoi(type.c_str());
+    Timers[TimersLen][2] = atoi(action.c_str());
+    TimersLen++;
+  }
 }
 
 void RF_AddDoutDB(String action) {
-  Dout[DoutLen] = atoi(action.c_str());
-  DoutLen++;
+  if (DoutLen < NUM_DOUT_MAX) {
+    Dout[DoutLen] = atoi(action.c_str());
+    DoutLen++;
+  }
 }
 
 uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
 
-  Serial.printf("RF_CheckRadioCodeDB: code %x\n", code);
+  Serial.print(F("RF_CheckRadioCodeDB: code "));
+  Serial.println(code);
   while ((i < RadioCodesLen) && (idx == 0xFF)) {
-    Serial.printf("radio table: %x, %x\n", code, RadioCodes[i].id);
+    Serial.print(F("radio table: "));
+    Serial.println(RadioCodes[i].id);
     if (code == RadioCodes[i].id) {
-      Serial.printf("radio code found in table %x\n", RadioCodes[i].id);
+      Serial.print(F("radio code found in table "));
+      Serial.println(RadioCodes[i].id);
       idx = i;
       // manage start delay timers if any
-      Serial.printf("radio code delay: %d\n", RadioCodes[i].delay);
+      Serial.print(F("radio code delay: "));
+      Serial.println(RadioCodes[i].delay);
       if (RadioCodes[i].delay != 0) {
         RadioCodes[i].running = true; // set timer running
         RadioCodes[i].stop_time =
@@ -116,11 +128,14 @@ uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
 
-  Serial.printf("RF_CheckRadioCodeTxDB: code %x\n", code);
+  Serial.print(F("RF_CheckRadioCodeTxDB: code "));
+  Serial.println(code);
   while ((i < RadioCodesTxLen) && (idx == 0xFF)) {
-    Serial.printf("radio table: %x, %x\n", code, RadioCodesTx[i]);
+    Serial.print(F("radio table: "));
+    Serial.println(RadioCodesTx[i]);
     if (code == RadioCodesTx[i]) {
-      Serial.printf("radio Tx code found in table %x\n", RadioCodesTx[i]);
+      Serial.print(F("radio Tx code found in table "));
+      Serial.println(RadioCodesTx[i]);
       idx = i;
     }
     i++;
@@ -146,7 +161,8 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
 }
 
 void RF_Action(uint8_t type, uint8_t id) {
-  Serial.printf("RF_Action type %d\n", type);
+  Serial.print(F("RF_Action type "));
+  Serial.println(type);
   if (type == 1) {
     // dout
     Serial.printf("DIO: %d, value %d\n", id >> 1, id & 0x01);
@@ -170,7 +186,7 @@ void RF_MonitorTimers(void) {
     if (RadioCodes[i].running == true) {
       Serial.printf("radio code [%d] delay, time %d, stamp %d\n", i, mytime,
                     RadioCodes[i].stop_time);
-      if (mytime > RadioCodes[i].stop_time) {
+      if (mytime >= RadioCodes[i].stop_time) {
         // perform an action
         RadioCodes[i].running = false; // set timer to idle
         RF_Action(RadioCodes[i].type, RadioCodes[i].action_d);
@@ -185,8 +201,7 @@ void RF_MonitorTimers(void) {
     bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
-      Serial.printf(">>>>>>>>>>>>>>>>>>>> action on timer %d at time %d\n", i,
-                    t247);
+      Serial.printf(">>> action on timer %d at time %d\n", i, t247);
       String log =
           "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
@@ -201,8 +216,8 @@ void RF_Enable(void) {
   if (RF_StatusEnable == false) {
     RF_StatusEnable = true;
     RadioCode = 0;
-    Serial.printf("RF Enable\n");
-    mySwitch.enableReceive(D7); // gpio13 D7
+    Serial.println(F("RF Enable"));
+    mySwitch.enableReceive(D7);
   }
 }
 
@@ -210,8 +225,8 @@ void RF_Disable(void) {
   if (RF_StatusEnable == true) {
     RF_StatusEnable = false;
     RadioCode = 0;
-    Serial.printf("RF disable\n");
-    mySwitch.disableReceive(); // gpio13 D7
+    Serial.println(F("RF Disable"));
+    mySwitch.disableReceive();
   }
 }
 
@@ -224,7 +239,7 @@ void RF_Loop() {
     interrupts();
 
     if (value == 0) {
-      Serial.print("Unknown encoding");
+      Serial.print(F("Unknown encoding"));
     } else {
       // Serial.printf(">>%x\n", value);
       // Serial.print(" / ");
@@ -233,10 +248,11 @@ void RF_Loop() {
       // Serial.print("Protocol: ");
       // Serial.println(mySwitch.getReceivedProtocol());
       if (RadioCode == 0) {
-        Serial.printf("radio code: %x\n", value);
+        Serial.print(F("radio code: "));
+        Serial.println(value);
         RadioCode = value;
       } else {
-        Serial.printf(".\n", value);
+        Serial.println(F("."));
       }
     }
   }

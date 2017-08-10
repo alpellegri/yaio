@@ -22,11 +22,6 @@ extern "C" {
 #define DHTPIN D6
 #define DHTTYPE DHT22
 
-const char *const RST_REASONS[7] = {
-    "REASON_DEFAULT_RST",  "REASON_WDT_RST",      "REASON_EXCEPTION_RST",
-    "REASON_SOFT_WDT_RST", "REASON_SOFT_RESTART", "REASON_DEEP_SLEEP_AWAKE",
-    "REASON_EXT_SYS_RST"};
-
 DHT dht(DHTPIN, DHTTYPE);
 
 uint8_t boot_sm = 0;
@@ -82,10 +77,10 @@ bool FbmUpdateRadioCodes(void) {
   yield();
 
   if (ret == true) {
-    Serial.printf("FbmUpdateRadioCodes Rx\n");
+    Serial.print(F("FbmUpdateRadioCodes Rx"));
     FirebaseObject ref = Firebase.get("RadioCodes/Active");
     if (Firebase.failed() == true) {
-      Serial.print("get failed: RadioCodes/Active");
+      Serial.print(F("get failed: RadioCodes/Active"));
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -109,7 +104,7 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.printf("FbmUpdateRadioCodes Tx\n");
+    Serial.println(F("FbmUpdateRadioCodes Tx"));
     FirebaseObject ref = Firebase.get("RadioCodes/ActiveTx");
     if (Firebase.failed() == true) {
       Serial.print("get failed: RadioCodes/ActiveTx");
@@ -131,7 +126,7 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.printf("FbmUpdateRadioCodes Timers\n");
+    Serial.println(F("FbmUpdateRadioCodes Timers"));
     FirebaseObject ref = Firebase.get("Timers");
     if (Firebase.failed() == true) {
       Serial.print("get failed: Timers");
@@ -156,7 +151,7 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.printf("FbmUpdateDIO Dout\n");
+    Serial.println(F("FbmUpdateDIO Dout"));
     FirebaseObject ref = Firebase.get("DIO/Dout");
     if (Firebase.failed() == true) {
       Serial.print("get failed: DIO/Dout");
@@ -184,11 +179,9 @@ bool FbmUpdateRadioCodes(void) {
 bool FbmService(void) {
   bool ret = false;
 
-  // Serial.printf("boot_sm: %d, status_alarm: %d, control_alarm: %d,
-  // control_radio_learn: %d\n", boot_sm, status_alarm, control_alarm
-  // ,control_radio_learn);
-  // firebase connect
-  if (boot_sm == 0) {
+  switch (boot_sm) {
+  // firebase init
+  case 0: {
     bool ret = true;
     char *firebase_url = NULL;
     char *firebase_secret = NULL;
@@ -199,22 +192,21 @@ bool FbmService(void) {
     yield();
     Firebase.setBool("control/reboot", false);
     if (Firebase.failed()) {
-      Serial.println("set failed: control/reboot");
+      Serial.print(F("set failed: control/reboot"));
       Serial.println(Firebase.error());
     } else {
-      Serial.println("firebase: connected!");
+      Serial.println(F("firebase: connected!"));
       boot_sm = 1;
     }
-  }
-  yield();
+    yield();
+  } break;
 
   // firebase control/status init
-  if (boot_sm == 1) {
-    yield();
+  case 1: {
     FirebaseObject fbobject = Firebase.get("startup");
     if (Firebase.failed()) {
-      Serial.println("set failed: status/bootcnt");
-      Serial.println(Firebase.error());
+      Serial.println(F("set failed: status/bootcnt"));
+      Serial.print(Firebase.error());
     } else {
       JsonVariant variant = fbobject.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
@@ -226,36 +218,34 @@ bool FbmService(void) {
         Firebase.set("startup", JsonVariant(object));
         if (Firebase.failed()) {
           bootcnt--;
-          Serial.println("set failed: status/bootcnt");
+          Serial.println(F("set failed: status/bootcnt"));
           Serial.println(Firebase.error());
         } else {
           boot_sm = 2;
-          Serial.println("firebase: configured!");
+          Serial.println(F("firebase: configured!"));
 
-          String str = String("reset for ") +
-                       String(RST_REASONS[system_get_rst_info()->reason]);
+          String str = String(ESP.getResetReason());
           fblog_log(str, true);
+          yield();
         }
       } else {
-        Serial.println("parseObject() failed");
+        Serial.println(F("parseObject() failed"));
       }
     }
-  }
+  } break;
 
   // firebase timer/radio init
-  if (boot_sm == 2) {
+  case 2: {
     bool res = FbmUpdateRadioCodes();
     if (res == true) {
       Serial.println("Node is up!");
-      boot_sm = 3;
+      boot_sm = 4;
       control_time_last = 0; // trick
     }
-  }
+  } break;
 
   // firebase monitoring
-  if (boot_sm == 3) {
-
-    // monitor
+  case 3: {
     time_t time_now = getTime();
     if ((time_now - fbm_update_last) >= 5) {
       Serial.printf("FbmService - monitor: heap %d\n", ESP.getFreeHeap());
@@ -264,7 +254,7 @@ bool FbmService(void) {
       float h = dht.readHumidity();
       float t = dht.readTemperature();
       if (isnan(h) || isnan(t)) {
-        Serial.println("Failed to read from DHT sensor!");
+        Serial.println(F("Failed to read from DHT sensor!"));
       } else {
         humidity_data = 10 * h;
         temperature_data = 10 * t;
@@ -273,7 +263,7 @@ bool FbmService(void) {
 
       control_time = Firebase.getInt("control/time");
       if (Firebase.failed() == true) {
-        Serial.println("get failed: control/time");
+        Serial.print(F("get failed: control/time"));
         Serial.println(Firebase.error());
       } else {
         if (control_time != control_time_last) {
@@ -288,8 +278,8 @@ bool FbmService(void) {
 
           FirebaseObject fbobject = Firebase.get("control");
           if (Firebase.failed() == true) {
-            Serial.println("get failed: control");
-            Serial.println(Firebase.error());
+            Serial.println(F("get failed: control"));
+            Serial.print(Firebase.error());
           } else {
             JsonVariant variant = fbobject.getJsonVariant();
             JsonObject &object = variant.as<JsonObject>();
@@ -301,7 +291,7 @@ bool FbmService(void) {
 
               bool control_wol = object["wol"];
               if (control_wol == true) {
-                Serial.println("Sending WOL Packet...");
+                Serial.println(F("Sending WOL Packet..."));
                 sendWOL(computer_ip, mac, sizeof mac);
               }
 
@@ -310,7 +300,7 @@ bool FbmService(void) {
                 ESP.restart();
               }
             } else {
-              Serial.println("parseObject() failed");
+              Serial.println(F("parseObject() failed"));
             }
           }
 
@@ -328,7 +318,7 @@ bool FbmService(void) {
           yield();
           Firebase.set("status", JsonVariant(status));
           if (Firebase.failed()) {
-            Serial.print("set failed: status");
+            Serial.print(F("set failed: status"));
             Serial.println(Firebase.error());
           }
         }
@@ -345,7 +335,7 @@ bool FbmService(void) {
         yield();
         Firebase.push("logs/TH", JsonVariant(th));
         if (Firebase.failed()) {
-          Serial.println("push failed: logs/TH");
+          Serial.print(F("push failed: logs/TH"));
           Serial.println(Firebase.error());
         } else {
           // update in case of success
@@ -377,14 +367,14 @@ bool FbmService(void) {
       String str = "Alarm ";
       str += String((status_alarm == true) ? ("active") : ("inactive"));
       fblog_log(str, false);
+      yield();
     }
-    yield();
 
     if (control_radio_update == true) {
       // clear request
       Firebase.setBool("control/radio_update", false);
       if (Firebase.failed()) {
-        Serial.println("set failed: control/radio_update");
+        Serial.print(F("set failed: control/radio_update"));
         Serial.println(Firebase.error());
       } else {
         // force update DB
@@ -408,9 +398,10 @@ bool FbmService(void) {
       if (idx != 0xFF) {
         char hex[10];
         sprintf(hex, "%x", code);
-        String str = String("Intrusion in: ") + String(RF_GetRadioName(idx)) +
-                     String(" !!!");
+        String str = String(F("Intrusion in: ")) +
+                     String(RF_GetRadioName(idx)) + String(F(" !!!"));
         fblog_log(str, status_alarm);
+        yield();
       }
 
       if (control_radio_learn == true) {
@@ -419,11 +410,12 @@ bool FbmService(void) {
           if (idx == 0xFF) {
             uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
             if (idxTx == 0xFF) {
-              Serial.printf("RadioCodes/Inactive: %x\n", code);
+              Serial.print(F("RadioCodes/Inactive: "));
+              Serial.println(code);
               yield();
               Firebase.pushInt("RadioCodes/Inactive", code);
               if (Firebase.failed()) {
-                Serial.println("set failed: RadioCodes/Inactive");
+                Serial.print(F("set failed: RadioCodes/Inactive"));
                 Serial.println(Firebase.error());
               } else {
                 fbm_code_last = code;
@@ -434,17 +426,30 @@ bool FbmService(void) {
         }
       }
     }
-  }
+  } break;
 
-  if (boot_sm == 4) {
+  case 4: {
     Serial.printf("boot_sm - %d: heap %d\n", boot_sm, ESP.getFreeHeap());
     RF_Enable();
     boot_sm = 5;
-  }
+  } break;
 
-  if (boot_sm == 5) {
+  case 5: {
+    Serial.printf("boot_sm - %d: heap %d\n", boot_sm, ESP.getFreeHeap());
+    RF_MonitorTimers();
     uint32_t code = RF_GetRadioCode();
-    Serial.printf("code - %d: heap %d\n", code, ESP.getFreeHeap());
+    if (code != 0) {
+      uint32_t idx = RF_CheckRadioCodeDB(code);
+      if (idx != 0xFF) {
+        char hex[10];
+        sprintf(hex, "%x", code);
+        String str = String(F("Intrusion in: ")) +
+                     String(RF_GetRadioName(idx)) + String(F(" !!!"));
+        fblog_log(str, status_alarm);
+        yield();
+      }
+    }
+  } break;
   }
 
   return ret;
