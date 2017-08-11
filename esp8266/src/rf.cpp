@@ -160,7 +160,7 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   return ret;
 }
 
-void RF_Action(uint8_t type, uint8_t id) {
+void RF_Action(uint8_t type, uint32_t id) {
   Serial.print(F("RF_Action type "));
   Serial.println(type);
   if (type == 1) {
@@ -169,6 +169,7 @@ void RF_Action(uint8_t type, uint8_t id) {
     digitalWrite(id >> 1, id & 0x01);
   } else if (type == 2) {
     // rf
+    mySwitch.send(id, 24);
   }
 }
 
