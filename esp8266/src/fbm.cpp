@@ -415,6 +415,8 @@ bool FbmService(void) {
         // if (code != fbm_code_last) {
         if (1) {
           if (idx == 0xFF) {
+            fbm_stop_monitor_time = time_now + 10;
+            fbm_monitor_run = true;
             uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
             if (idxTx == 0xFF) {
               Serial.print(F("RadioCodes/Inactive: "));
