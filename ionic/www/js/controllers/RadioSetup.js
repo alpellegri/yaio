@@ -16,6 +16,9 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.ActiveTable = [];
       $scope.Dout = [];
       $scope.Types = [{
+          name: "Empty",
+          type: 0
+        }, {
           name: "DIO",
           type: 1
         },

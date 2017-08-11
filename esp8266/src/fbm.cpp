@@ -248,7 +248,10 @@ bool FbmService(void) {
   case 3: {
     time_t time_now = getTime();
     if ((time_now - fbm_update_last) >= 5) {
-      Serial.printf("FbmService - monitor: heap %d\n", ESP.getFreeHeap());
+      Serial.print(F("boot_sm "));
+      Serial.print(boot_sm);
+      Serial.print(F(": heap "));
+      Serial.println(ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       float h = dht.readHumidity();
@@ -406,7 +409,8 @@ bool FbmService(void) {
 
       if (control_radio_learn == true) {
         // acquire Active Radio Codes from FB
-        if (code != fbm_code_last) {
+        // if (code != fbm_code_last) {
+        if (1) {
           if (idx == 0xFF) {
             uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
             if (idxTx == 0xFF) {
@@ -429,13 +433,19 @@ bool FbmService(void) {
   } break;
 
   case 4: {
-    Serial.printf("boot_sm - %d: heap %d\n", boot_sm, ESP.getFreeHeap());
+    Serial.print(F("boot_sm "));
+    Serial.print(boot_sm);
+    Serial.print(F(": heap "));
+    Serial.println(ESP.getFreeHeap());
     RF_Enable();
     boot_sm = 5;
   } break;
 
   case 5: {
-    Serial.printf("boot_sm - %d: heap %d\n", boot_sm, ESP.getFreeHeap());
+    Serial.print(F("boot_sm "));
+    Serial.print(boot_sm);
+    Serial.print(F(": heap "));
+    Serial.println(ESP.getFreeHeap());
     RF_MonitorTimers();
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {

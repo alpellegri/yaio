@@ -12,7 +12,6 @@ typedef enum {
   Fcm_Sm_SEND = 1,
   Fcm_Sm_RECEIVE = 2,
   Fcm_Sm_CLOSE = 4,
-  Fcm_Sm_ERROR = 5,
 } Fbm_StateMachine_t;
 
 const char FcmServer[50] = "fcm.googleapis.com";
@@ -101,17 +100,13 @@ void FcmService(void) {
     FcmServiceTimeout = 0;
 
     uint32_t retVal = fcm_client.connect(FcmServer, 80);
-    if (retVal == -1) {
-      Serial.println(F("fcm connect Time out"));
-      fcm_sts = Fcm_Sm_IDLE;
-    } else if (retVal == -3) {
-      Serial.println(F("fcm connect Fail connection"));
-      fcm_sts = Fcm_Sm_ERROR;
-    } else if (retVal == 1) {
+    if (retVal == 1) {
       Serial.println(F("fcm connect Connected with server!"));
       fcm_sts = Fcm_Sm_SEND;
+    } else {
+      Serial.println(F("fcm connect error"));
+      fcm_sts = Fcm_Sm_CLOSE;
     }
-    Serial.printf("retVal: %d\n", retVal);
   } break;
 
   case Fcm_Sm_SEND: {
@@ -134,7 +129,7 @@ void FcmService(void) {
     }
 
     /* close at timeout */
-    if (FcmServiceTimeout >= 2) {
+    if (FcmServiceTimeout >= 5) {
       fcm_sts = Fcm_Sm_CLOSE;
     }
   } break;
@@ -147,12 +142,5 @@ void FcmService(void) {
       fcm_sts = Fcm_Sm_IDLE;
     }
   } break;
-
-  case Fcm_Sm_ERROR:
-    Serial.println(F("fcm error: end"));
-  default:
-    fcm_sts = Fcm_Sm_IDLE;
-  case Fcm_Sm_IDLE:
-    break;
   }
 }
