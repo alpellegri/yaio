@@ -29,48 +29,47 @@
  * a tree structure.
  */
 class FirebaseObject {
- public:
+public:
   /**
    * Construct from json.
    * \param data JSON formatted string.
    */
-  FirebaseObject(const char* data);
+  FirebaseObject(const char *data);
 
   /**
    * Return the value as a boolean.
    * \param optional path in the JSON object.
    * \return result as a bool.
    */
-  bool getBool(const String& path = "") const;
+  bool getBool(const String &path = "") const;
 
   /**
    * Return the value as an int.
    * \param optional path in the JSON object.
    * \return result as an integer.
    */
-  int getInt(const String& path = "") const;
+  int getInt(const String &path = "") const;
 
   /**
    * Return the value as a float.
    * \param optional path in the JSON object.
    * \return result as a float.
    */
-  float getFloat(const String& path = "") const;
+  float getFloat(const String &path = "") const;
 
   /**
    * Return the value as a String.
    * \param optional path in the JSON object.
    * \return result as a String.
    */
-  String getString(const String& path = "") const;
+  String getString(const String &path = "") const;
 
   /**
    * Return the value as a JsonVariant.
    * \param optional path in the JSON object.
    * \return result as a JsonVariant.
    */
-  JsonVariant getJsonVariant(const String& path = "") const;
-
+  JsonVariant getJsonVariant(const String &path = "") const;
 
   /**
    *
@@ -88,11 +87,12 @@ class FirebaseObject {
    *
    * \return Error message if failed() is true.
    */
-  const String& error() const;
+  const String &error() const;
 
- private:
+private:
   String data_;
-  StaticJsonBuffer<FIREBASE_JSONBUFFER_SIZE> buffer_;
+  // StaticJsonBuffer<FIREBASE_JSONBUFFER_SIZE> buffer_;
+  DynamicJsonBuffer buffer_;
   JsonVariant json_;
   mutable String error_;
 };

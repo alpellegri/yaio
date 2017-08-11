@@ -87,18 +87,22 @@ bool FbmUpdateRadioCodes(void) {
       RF_ResetRadioCodeDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String name = nestedObject["name"];
-        String type = nestedObject["type"];
-        String action = nestedObject["action"];
-        String action_d = nestedObject["action_d"];
-        String delay = nestedObject["delay"];
-        String id = nestedObject["id"];
-        Serial.println(id);
-        RF_AddRadioCodeDB(id, name, type, action, delay, action_d);
+      if (object.success()) {
+        for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+          yield();
+          // Serial.println(i->key);
+          JsonObject &nestedObject = i->value;
+          String name = nestedObject["name"];
+          String type = nestedObject["type"];
+          String action = nestedObject["action"];
+          String action_d = nestedObject["action_d"];
+          String delay = nestedObject["delay"];
+          String id = nestedObject["id"];
+          Serial.println(id);
+          RF_AddRadioCodeDB(id, name, type, action, delay, action_d);
+        }
+      } else {
+        ret = false;
       }
     }
   }
@@ -114,13 +118,17 @@ bool FbmUpdateRadioCodes(void) {
       RF_ResetRadioCodeTxDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String id = nestedObject["id"];
-        Serial.println(id);
-        RF_AddRadioCodeTxDB(id);
+      if (object.success()) {
+        for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+          yield();
+          // Serial.println(i->key);
+          JsonObject &nestedObject = i->value;
+          String id = nestedObject["id"];
+          Serial.println(id);
+          RF_AddRadioCodeTxDB(id);
+        }
+      } else {
+        ret = false;
       }
     }
   }
@@ -136,16 +144,20 @@ bool FbmUpdateRadioCodes(void) {
       RF_ResetTimerDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String type = nestedObject["type"];
-        String action = nestedObject["action"];
-        String hour = nestedObject["hour"];
-        String minute = nestedObject["minute"];
-        Serial.println(action);
-        RF_AddTimerDB(type, action, hour, minute);
+      if (object.success()) {
+        for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+          yield();
+          // Serial.println(i->key);
+          JsonObject &nestedObject = i->value;
+          String type = nestedObject["type"];
+          String action = nestedObject["action"];
+          String hour = nestedObject["hour"];
+          String minute = nestedObject["minute"];
+          Serial.println(action);
+          RF_AddTimerDB(type, action, hour, minute);
+        }
+      } else {
+        ret = false;
       }
     }
   }
@@ -161,13 +173,17 @@ bool FbmUpdateRadioCodes(void) {
       RF_ResetDoutDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String id = nestedObject["id"];
-        Serial.println(id);
-        RF_AddDoutDB(id);
+      if (object.success()) {
+        for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+          yield();
+          // Serial.println(i->key);
+          JsonObject &nestedObject = i->value;
+          String id = nestedObject["id"];
+          Serial.println(id);
+          RF_AddDoutDB(id);
+        }
+      } else {
+        ret = false;
       }
     }
   }
@@ -398,10 +414,10 @@ bool FbmService(void) {
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {
-      fbm_stop_monitor_time = time_now + 10;
-      fbm_monitor_run = true;
       uint32_t idx = RF_CheckRadioCodeDB(code);
       if (idx != 0xFF) {
+        fbm_stop_monitor_time = time_now + 10;
+        fbm_monitor_run = true;
         char hex[10];
         sprintf(hex, "%x", code);
         String str = String(F("Intrusion in: ")) +
@@ -428,7 +444,7 @@ bool FbmService(void) {
                 Serial.println(Firebase.error());
               } else {
                 fbm_code_last = code;
-                boot_sm = 2;
+                // boot_sm = 2;
               }
             }
           }
