@@ -247,7 +247,8 @@ bool FbmService(void) {
   // firebase monitoring
   case 3: {
     time_t time_now = getTime();
-    if ((time_now - fbm_update_last) >= 5) {
+    if ((time_now - fbm_update_last) >=
+        ((fbm_monitor_run == true) ? (1) : (5))) {
       Serial.print(F("boot_sm "));
       Serial.print(boot_sm);
       Serial.print(F(": heap "));
@@ -397,6 +398,8 @@ bool FbmService(void) {
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {
+      fbm_stop_monitor_time = time_now + 10;
+      fbm_monitor_run = true;
       uint32_t idx = RF_CheckRadioCodeDB(code);
       if (idx != 0xFF) {
         char hex[10];
