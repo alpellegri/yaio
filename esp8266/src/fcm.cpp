@@ -18,7 +18,9 @@ const char FcmServer[50] = "fcm.googleapis.com";
 
 WiFiClient fcm_client;
 uint16_t fcm_sts = Fcm_Sm_IDLE;
-uint16_t FcmServiceTimeout = 0;
+uint32_t FcmServiceTimeout;
+bool FcmServiceRxRun;
+bool FcmServiceRxStop;
 
 // up-to 5 devices
 String RegIDs[5];
@@ -115,6 +117,9 @@ void FcmService(void) {
     String httpPost = FcmPostMsg();
     Serial.println(httpPost);
     fcm_client.print(httpPost);
+    FcmServiceTimeout = millis() + (5 * 1000);
+    FcmServiceRxRun = false;
+    FcmServiceRxStop = false;
     fcm_sts = Fcm_Sm_RECEIVE;
   } break;
 
@@ -122,14 +127,19 @@ void FcmService(void) {
     Serial.println(F("fcm http wait..."));
     // available() will return the number of characters
     // currently in the receive buffer.
-    while (fcm_client.available()) {
-      yield();
-      FcmServiceTimeout = 0;
-      Serial.write(fcm_client.read()); // read() gets the FIFO char
+    uint32_t avail = fcm_client.available();
+
+    if (avail > 0) {
+      FcmServiceRxRun = true;
+      while (avail--) {
+        Serial.write(fcm_client.read()); // read() gets the FIFO char
+      }
+    } else {
+      FcmServiceRxStop = (FcmServiceRxRun == true);
     }
 
     /* close at timeout */
-    if (FcmServiceTimeout >= 5) {
+    if ((millis() >= FcmServiceTimeout) || (FcmServiceRxStop == true)) {
       fcm_sts = Fcm_Sm_CLOSE;
     }
   } break;
