@@ -46,7 +46,7 @@ static const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30,
 // break the given time_t into time components
 // this is a more compact version of the C library localtime function
 // note that year is offset from 1970 !!!
-static void breakTime(time_t time, tmElements_t &tm) {
+static void breakTime(uint32_t time, tmElements_t &tm) {
 
   uint8_t year;
   uint8_t month, monthLength;
@@ -173,7 +173,7 @@ bool TimeService(void) {
     if (timesrv_run == false) {
       timesrv_sm = 1;
     } else {
-      time_t _time = getTime();
+      uint32_t _time = getTime();
       if ((_time - TimeServiceLastUpdate) > NTP_UPDATE_INTERVAL) {
         timesrv_sm = 1;
       }
@@ -185,7 +185,7 @@ bool TimeService(void) {
   } break;
   case 2: {
     Serial.println(F("getNtpTime"));
-    time_t _time = getNtpTime();
+    uint32_t _time = getNtpTime();
     if (_time != 0) {
       time_set(_time);
       timesrv_run = true;

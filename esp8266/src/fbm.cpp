@@ -30,15 +30,15 @@ uint32_t control_time_last;
 
 uint16_t bootcnt = 0;
 uint32_t fbm_code_last = 0;
-time_t fbm_update_last = 0;
-time_t fbm_time_th_last = 0;
-time_t fbm_monitor_last = 0;
+uint32_t fbm_update_last = 0;
+uint32_t fbm_time_th_last = 0;
+uint32_t fbm_monitor_last = 0;
 bool fbm_monitor_run = false;
 
 uint32_t humidity_data;
 uint32_t temperature_data;
 
-time_t fbm_update_timer_last;
+uint32_t fbm_update_timer_last;
 
 /**
  * The target IP address to send the magic packet to.
@@ -241,7 +241,7 @@ bool FbmService(void) {
 
   // firebase monitoring
   case 3: {
-    time_t time_now = getTime();
+    uint32_t time_now = getTime();
     if ((time_now - fbm_update_last) >=
         ((fbm_monitor_run == true) ? (1) : (5))) {
       Serial.print(F("boot_sm "));
@@ -406,24 +406,20 @@ bool FbmService(void) {
 
       if (control_radio_learn == true) {
         // acquire Active Radio Codes from FB
-        // if (code != fbm_code_last) {
-        if (1) {
-          if (idx == 0xFF) {
-            fbm_monitor_last = time_now;
-            fbm_monitor_run = true;
-            uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
-            if (idxTx == 0xFF) {
-              Serial.print(F("RadioCodes/Inactive: "));
-              Serial.println(code);
-              yield();
-              Firebase.setInt(F("RadioCodes/Inactive/last"), code);
-              if (Firebase.failed()) {
-                Serial.print(F("set failed: RadioCodes/Inactive"));
-                Serial.println(Firebase.error());
-              } else {
-                fbm_code_last = code;
-                // boot_sm = 2;
-              }
+        if (idx == 0xFF) {
+          fbm_monitor_last = time_now;
+          fbm_monitor_run = true;
+          uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
+          if (idxTx == 0xFF) {
+            Serial.print(F("RadioCodes/Inactive: "));
+            Serial.println(code);
+            yield();
+            Firebase.setInt(F("RadioCodes/Inactive/last"), code);
+            if (Firebase.failed()) {
+              Serial.print(F("set failed: RadioCodes/Inactive"));
+              Serial.println(Firebase.error());
+            } else {
+              fbm_code_last = code;
             }
           }
         }

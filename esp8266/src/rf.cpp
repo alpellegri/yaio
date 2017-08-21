@@ -46,7 +46,7 @@ void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
 void RF_ResetRadioCodeTxDB(void) { RadioCodesTxLen = 0; }
 
 void RF_ResetTimerDB(void) {
-  time_t mytime = getTime();
+  uint32_t mytime = getTime();
   t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
   TimersLen = 0;
 }
@@ -166,6 +166,7 @@ void RF_Action(uint8_t type, uint32_t id) {
   if (type == 1) {
     // dout
     Serial.printf("DIO: %d, value %d\n", id >> 1, id & 0x01);
+    pinMode(id >> 1, OUTPUT);
     digitalWrite(id >> 1, id & 0x01);
   } else if (type == 2) {
     // rf
@@ -175,7 +176,7 @@ void RF_Action(uint8_t type, uint32_t id) {
 
 void RF_MonitorTimers(void) {
   // get time
-  time_t mytime = getTime();
+  uint32_t mytime = getTime();
   // Serial.printf(">> %d, %d, %d\n", (mytime/3600)%24, (mytime/60)%60,
   // (mytime)%60);
   uint32_t t247 = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
