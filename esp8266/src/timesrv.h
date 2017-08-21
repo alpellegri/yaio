@@ -16,6 +16,6 @@ typedef struct {
 
 extern bool TimeService(void);
 extern char *getTmUTC(void);
-extern time_t getTime(void);
+extern uint32_t getTime(void);
 
 #endif

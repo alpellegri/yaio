@@ -37,7 +37,7 @@ void setup() {
   EE_Setup();
 
   Serial.println();
-  Serial.println("Node starting...");
+  Serial.println(F("Node starting..."));
 
 #if 0
   // init oled display
@@ -81,7 +81,7 @@ void loop() {
   }
 
   current_time = millis();
-  if ((current_time - schedule_time) > 500) {
+  if ((current_time - schedule_time) > 1000) {
     schedule_time = current_time;
     if (mode == 0) {
       ret = AP_Task();

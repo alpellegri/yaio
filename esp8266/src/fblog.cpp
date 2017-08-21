@@ -19,5 +19,5 @@ void fblog_log(String &message, boolean fcm_notify) {
   if (fcm_notify == true) {
     FcmSendPush(message);
   }
-  Firebase.push("logs/Reports", JsonVariant(log));
+  Firebase.push(F("logs/Reports"), JsonVariant(log));
 }

@@ -9,12 +9,11 @@
 
 static uint8_t timesrv_sm = 0;
 static bool timesrv_run = false;
-static time_t TimeServiceLastUpdate;
+static uint32_t TimeServiceLastUpdate;
 
-static char isodate[25]; // The current time in ISO format is being stored here
 static tmElements_t tm;
-static time_t ntp_time;
-static time_t ntp_update_time;
+static uint32_t ntp_time;
+static uint32_t ntp_update_time;
 
 /*-------- NTP code ----------*/
 
@@ -95,8 +94,8 @@ static void breakTime(time_t time, tmElements_t &tm) {
   tm.Month = month + 1; // jan is month 1
   tm.Day = time + 1;    // day of month
 
-  sprintf(isodate, "%d-%02d-%02d %02d:%02d:%02d", tm.Year, tm.Month, tm.Day,
-          tm.Hour, tm.Minute, tm.Second);
+  Serial.printf("%d-%02d-%02d %02d:%02d:%02d\n", tm.Year, tm.Month, tm.Day,
+                tm.Hour, tm.Minute, tm.Second);
 }
 
 // send an NTP request to the time server at the given address
@@ -157,19 +156,14 @@ static uint32_t getNtpTime(void) {
   return ret; // return 0 if unable to get the time
 }
 
-char *getTmUTC(void) {
-  time_t mytime = getTime();
-  breakTime(mytime, tm);
-  return isodate;
-}
-
 void time_set(uint32_t _time) {
   ntp_update_time = millis();
   ntp_time = _time;
+  breakTime(_time, tm);
 }
 
-time_t getTime(void) {
-  time_t _time = (millis() - ntp_update_time) / 1000 + ntp_time;
+uint32_t getTime(void) {
+  uint32_t _time = (millis() - ntp_update_time) / 1000 + ntp_time;
   return (_time);
 }
 
@@ -196,7 +190,6 @@ bool TimeService(void) {
       time_set(_time);
       timesrv_run = true;
       TimeServiceLastUpdate = _time;
-      Serial.println(getTmUTC());
       timesrv_sm = 0;
     } else {
       Serial.println(F("getNtpTime fails"));

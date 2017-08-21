@@ -15,7 +15,6 @@
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-uint16_t sta_task_cnt;
 uint8_t sta_button = 0x55;
 
 bool STA_Setup(void) {
@@ -26,7 +25,6 @@ bool STA_Setup(void) {
   char *sta_password = NULL;
 
   digitalWrite(LED, true);
-  sta_task_cnt = 0;
 
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
@@ -63,7 +61,7 @@ bool STA_Setup(void) {
   }
 
   if (sts != true) {
-    Serial.println("not connected to router");
+    Serial.println(F("not connected to router"));
     ret = false;
   }
 
@@ -87,9 +85,6 @@ void STA_Loop() {
 /* main function task */
 bool STA_Task(void) {
   bool ret = true;
-
-  sta_task_cnt++;
-  // Serial.printf("task_cnt: %d, HEAP: %d\n", sta_task_cnt, ESP.getFreeHeap());
 
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
