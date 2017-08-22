@@ -24,6 +24,12 @@ typedef struct {
   char name[23];
 } RF_RadioCodeSts_t;
 
+typedef struct {
+  uint32_t time;
+  uint32_t action;
+  uint8_t type;
+} Timer_t;
+
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 bool RF_StatusEnable = false;
@@ -35,7 +41,7 @@ uint16_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
 uint16_t RadioCodesTxLen = 0;
 
-uint32_t Timers[NUM_TIMER_MAX][3];
+Timer_t Timers[NUM_TIMER_MAX];
 uint16_t TimersLen = 0;
 
 uint8_t Dout[NUM_DOUT_MAX];
@@ -78,9 +84,9 @@ void RF_AddRadioCodeTxDB(String string) {
 void RF_AddTimerDB(String type, String action, String hour, String minute) {
   if (TimersLen < NUM_TIMER_MAX) {
     uint32_t evtime = 60 * atoi(hour.c_str()) + atoi(minute.c_str());
-    Timers[TimersLen][0] = evtime;
-    Timers[TimersLen][1] = atoi(type.c_str());
-    Timers[TimersLen][2] = atoi(action.c_str());
+    Timers[TimersLen].time = evtime;
+    Timers[TimersLen].type = atoi(type.c_str());
+    Timers[TimersLen].action = atoi(action.c_str());
     TimersLen++;
   }
 }
@@ -199,7 +205,7 @@ void RF_MonitorTimers(void) {
   // loop over timers
   for (uint8_t i = 0; i < TimersLen; i++) {
     // test in range
-    uint32_t _time = Timers[i][0];
+    uint32_t _time = Timers[i].time;
     bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
@@ -208,7 +214,7 @@ void RF_MonitorTimers(void) {
           "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
 
-      RF_Action(Timers[i][1], Timers[i][2]);
+      RF_Action(Timers[i].type, Timers[i].action);
     }
   }
   t247_last = t247;
