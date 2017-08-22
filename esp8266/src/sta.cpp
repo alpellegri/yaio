@@ -10,6 +10,7 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fcm.h"
+#include "rf.h"
 #include "timesrv.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
@@ -89,6 +90,8 @@ bool STA_Task(void) {
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (TimeService() == true) {
+      yield();
+      RF_Task();
       yield();
       FbmService();
       yield();

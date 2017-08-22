@@ -263,6 +263,5 @@ void RF_Loop() {
 /* main function task */
 bool RF_Task(void) {
   bool ret = true;
-
   return ret;
 }

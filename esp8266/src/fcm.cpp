@@ -29,7 +29,7 @@ String FcmMessage;
 
 void FcmSendPush(String &message) {
   RegIDsLen = 0;
-  FirebaseObject fbRegistration_IDs = Firebase.get("FCM_Registration_IDs");
+  FirebaseObject fbRegistration_IDs = Firebase.get(F("FCM_Registration_IDs"));
   if (Firebase.failed() == true) {
     Serial.print(F("get failed: FCM_Registration_IDs"));
     Serial.println(Firebase.error());

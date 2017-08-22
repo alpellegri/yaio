@@ -8,7 +8,7 @@
 #define NTP_UPDATE_INTERVAL (30 * 60 + 0)
 
 static uint8_t timesrv_sm = 0;
-static bool timesrv_run = false;
+static bool timesrv_rdy = false;
 static uint32_t TimeServiceLastUpdate;
 
 static tmElements_t tm;
@@ -170,7 +170,7 @@ uint32_t getTime(void) {
 bool TimeService(void) {
   switch (timesrv_sm) {
   case 0: {
-    if (timesrv_run == false) {
+    if (timesrv_rdy == false) {
       timesrv_sm = 1;
     } else {
       uint32_t _time = getTime();
@@ -188,7 +188,7 @@ bool TimeService(void) {
     uint32_t _time = getNtpTime();
     if (_time != 0) {
       time_set(_time);
-      timesrv_run = true;
+      timesrv_rdy = true;
       TimeServiceLastUpdate = _time;
       timesrv_sm = 0;
     } else {
@@ -199,5 +199,5 @@ bool TimeService(void) {
   } break;
   }
 
-  return timesrv_run;
+  return timesrv_rdy;
 }
