@@ -23,7 +23,20 @@ angular.module('app.controllers.TimerSetup', [])
         },
       ];
 
-      // remove timer
+      // remove all timer
+      $scope.ResetTimers = function() {
+        var ref = firebase.database().ref("Timers");
+        ref.remove();
+        console.log('ResetTimers');
+        var current_date = new Date();
+        var ref = firebase.database().ref("control/time");
+        ref.set(Math.floor(current_date.getTime() / 1000));
+        var ref = firebase.database().ref("control/radio_update");
+        ref.set(true);
+        $scope.doRefresh();
+      };
+
+      // remove a timer
       $scope.RemoveTimer = function(i) {
         $scope.Timers.splice(i, 1);
       };
