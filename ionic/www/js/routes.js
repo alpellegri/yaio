@@ -88,12 +88,22 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('menu.DioSetup', {
+  .state('menu.DigitalIOSetup', {
     url: '/page9',
     views: {
       'side-menu21': {
-        templateUrl: 'templates/DioSetup.html',
-        controller: 'DioSetupCtrl'
+        templateUrl: 'templates/DigitalIOSetup.html',
+        controller: 'DigitalIOSetupCtrl'
+      }
+    }
+  })
+
+  .state('menu.LogicalIOSetup', {
+    url: '/page10',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/LogicalIOSetup.html',
+        controller: 'LogicalIOSetupCtrl'
       }
     }
   })

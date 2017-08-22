@@ -67,6 +67,81 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   yield();
 }
 
+#define FBM_FUNC_SRV_QUEUE_LEN 5
+typedef struct {
+  uint8_t func;
+  uint8_t value;
+  uint8_t src_type;
+  uint8_t src_idx;
+} FbmFuncSrvQueque_t;
+
+uint8_t FbmFuncSrvQuequeWrPos = 0;
+uint8_t FbmFuncSrvQuequeRdPos = 0;
+FbmFuncSrvQueque_t FbmFuncSrvQueque[FBM_FUNC_SRV_QUEUE_LEN];
+
+void FbmReqFunction(uint8_t src_type, uint8_t src_idx, uint8_t lin,
+                    bool value) {
+  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].src_type = src_type;
+  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].src_idx = src_idx;
+  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].func = lin;
+  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].value = value;
+  FbmFuncSrvQuequeWrPos++;
+  if (FbmFuncSrvQuequeWrPos >= FBM_FUNC_SRV_QUEUE_LEN) {
+    FbmFuncSrvQuequeWrPos = 0;
+  }
+  if (FbmFuncSrvQuequeWrPos == FbmFuncSrvQuequeRdPos) {
+    Serial.println(F("FbmFuncSrvQueque overrun"));
+  }
+}
+
+/* function mapping requests
+* lin=0: value=1 -> arm alarm / value=0 -> disarm alarm
+*/
+static bool FbmFuncAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
+                          bool value) {
+  bool ret = false;
+  Serial.print(F("FbmFuncAction "));
+  Serial.print(F("lin "));
+  Serial.print(lin);
+  Serial.print(F(" value "));
+  Serial.print(value);
+  Serial.println();
+  if (lin == 0) {
+    Firebase.setBool(F("control/alarm"), value);
+    if (Firebase.failed()) {
+      Serial.print(F("set failed: control/alarm"));
+      Serial.println(Firebase.error());
+    } else {
+      Serial.println(F("set ok: control/alarm"));
+      ret = true;
+    }
+  } else if (lin == 1) {
+    String str = String(F("Intrusion in: ")) +
+                 String(RF_GetRadioName(src_idx)) + String(F(" !!!"));
+    fblog_log(str, status_alarm);
+    ret = true;
+  } else {
+    Serial.println(F("FbmFuncAction error: unmapped action"));
+  }
+
+  return ret;
+}
+
+static void FbmFuncSrv() {
+  if (FbmFuncSrvQuequeWrPos != FbmFuncSrvQuequeRdPos) {
+    bool ret = FbmFuncAction(FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].src_type,
+                             FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].src_idx,
+                             FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].func,
+                             FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].value);
+    if (ret == true) {
+      FbmFuncSrvQuequeRdPos++;
+      if (FbmFuncSrvQuequeRdPos >= FBM_FUNC_SRV_QUEUE_LEN) {
+        FbmFuncSrvQuequeRdPos = 0;
+      }
+    }
+  }
+}
+
 bool FbmUpdateRadioCodes(void) {
   bool ret = true;
   yield();
@@ -163,6 +238,28 @@ bool FbmUpdateRadioCodes(void) {
         String id = nestedObject["id"];
         Serial.println(id);
         RF_AddDoutDB(id);
+      }
+    }
+  }
+
+  if (ret == true) {
+    Serial.println(F("FbmUpdateLIO Lout"));
+    FirebaseObject ref = Firebase.get(F("LIO/Lout"));
+    if (Firebase.failed() == true) {
+      Serial.print(F("get failed: LIO/Lout"));
+      Serial.println(Firebase.error());
+      ret = false;
+    } else {
+      RF_ResetLoutDB();
+      JsonVariant variant = ref.getJsonVariant();
+      JsonObject &object = variant.as<JsonObject>();
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        yield();
+        // Serial.println(i->key);
+        JsonObject &nestedObject = i->value;
+        String id = nestedObject["id"];
+        Serial.println(id);
+        RF_AddLoutDB(id);
       }
     }
   }
@@ -392,16 +489,12 @@ bool FbmService(void) {
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {
-      uint32_t idx = RF_CheckRadioCodeDB(code);
+      uint8_t idx = RF_CheckRadioCodeDB(code);
       if (idx != 0xFF) {
         fbm_monitor_last = time_now;
         fbm_monitor_run = true;
-        char hex[10];
-        sprintf(hex, "%x", code);
-        String str = String(F("Intrusion in: ")) +
-                     String(RF_GetRadioName(idx)) + String(F(" !!!"));
-        fblog_log(str, status_alarm);
-        yield();
+        // RF found in Rx DB, make an action
+        RF_ExecuteRadioCodeDB(idx);
       }
 
       if (control_radio_learn == true) {
@@ -425,6 +518,9 @@ bool FbmService(void) {
         }
       }
     }
+
+    // call function service
+    FbmFuncSrv();
   } break;
   default:
     break;

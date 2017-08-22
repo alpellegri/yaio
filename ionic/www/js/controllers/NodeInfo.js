@@ -39,9 +39,7 @@ angular.module('app.controllers.NodeInfo', [])
       $scope.doRefresh = function() {
         console.log('doRefresh-NodeInfoCtrl');
         var current_date = new Date();
-
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime()/1000));
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime()/1000));
 
         var ref = firebase.database().ref("/");
         // Attach an asynchronous callback to read the data at our posts reference

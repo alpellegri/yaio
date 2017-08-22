@@ -5,13 +5,15 @@
 #include <string.h>
 
 #include "fblog.h"
+#include "fbm.h"
 #include "rf.h"
 #include "timesrv.h"
 
 #define NUM_RADIO_CODE_RX_MAX 8
 #define NUM_RADIO_CODE_TX_MAX 8
-#define NUM_TIMER_MAX 8
-#define NUM_DOUT_MAX 8
+#define NUM_TIMER_MAX 4
+#define NUM_DOUT_MAX 4
+#define NUM_LOUT_MAX 4
 
 typedef struct {
   uint32_t id;
@@ -40,24 +42,30 @@ RF_RadioCodeSts_t RadioCodes[NUM_RADIO_CODE_RX_MAX];
 uint16_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
 uint16_t RadioCodesTxLen = 0;
-
 Timer_t Timers[NUM_TIMER_MAX];
 uint16_t TimersLen = 0;
-
 uint8_t Dout[NUM_DOUT_MAX];
 uint16_t DoutLen = 0;
+uint8_t Lout[NUM_LOUT_MAX];
+uint16_t LoutLen = 0;
+
 uint32_t t247_last = 0;
 
-void RF_ResetRadioCodeDB(void) { RadioCodesLen = 0; }
-void RF_ResetRadioCodeTxDB(void) { RadioCodesTxLen = 0; }
-
+void RF_ResetRadioCodeDB(void) {
+  RadioCodesLen = 0;
+  RadioCode = 0;
+}
+void RF_ResetRadioCodeTxDB(void) {
+  RadioCodesTxLen = 0;
+  RadioCode;
+}
 void RF_ResetTimerDB(void) {
   uint32_t mytime = getTime();
   t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
   TimersLen = 0;
 }
-
 void RF_ResetDoutDB(void) { DoutLen = 0; }
+void RF_ResetLoutDB(void) { LoutLen = 0; }
 
 void RF_AddRadioCodeDB(String id, String name, String type, String action,
                        String delay, String action_d) {
@@ -98,6 +106,13 @@ void RF_AddDoutDB(String action) {
   }
 }
 
+void RF_AddLoutDB(String action) {
+  if (LoutLen < NUM_LOUT_MAX) {
+    Lout[DoutLen] = atoi(action.c_str());
+    LoutLen++;
+  }
+}
+
 uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
@@ -111,23 +126,15 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
       Serial.print(F("radio code found in table "));
       Serial.println(RadioCodes[i].id);
       idx = i;
-      // manage start delay timers if any
-      Serial.print(F("radio code delay: "));
-      Serial.println(RadioCodes[i].delay);
-      if (RadioCodes[i].delay != 0) {
-        RadioCodes[i].running = true; // set timer running
-        RadioCodes[i].stop_time =
-            getTime() + RadioCodes[i].delay; // set timer time stamp
-        // make an action
-        RF_Action(RadioCodes[i].type, RadioCodes[i].action);
-      } else {
-        RF_Action(RadioCodes[i].type, RadioCodes[i].action);
-      }
     }
     i++;
   }
 
   return idx;
+}
+
+void RF_ExecuteRadioCodeDB(uint8_t idx) {
+  RF_Action(2, idx, RadioCodes[idx].type, RadioCodes[idx].action);
 }
 
 uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
@@ -150,15 +157,6 @@ uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
   return idx;
 }
 
-uint32_t RF_GetRadioCode(void) {
-  uint32_t Code;
-
-  Code = RadioCode;
-  RadioCode = 0;
-
-  return Code;
-}
-
 bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   bool ret = false;
   // Serial.printf(">> %d, %d, %d\n", t_low, t_test, t_high);
@@ -166,17 +164,29 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   return ret;
 }
 
-void RF_Action(uint8_t type, uint32_t id) {
+void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id) {
   Serial.print(F("RF_Action type "));
   Serial.println(type);
   if (type == 1) {
     // dout
-    Serial.printf("DIO: %d, value %d\n", id >> 1, id & 0x01);
+    uint8_t pin = id >> 1;
+    uint8_t value = id & 0x01;
+    Serial.printf("DIO: %d, value %d\n", pin, value);
     pinMode(id >> 1, OUTPUT);
-    digitalWrite(id >> 1, id & 0x01);
+    digitalWrite(pin, value);
   } else if (type == 2) {
     // rf
     mySwitch.send(id, 24);
+  } else if (type == 3) {
+    // lout
+    uint8_t lin = id >> 1;
+    uint8_t value = id & 0x01;
+    Serial.printf("LIO: %d, value %d\n", lin, value);
+    /* logical actions */
+    FbmReqFunction(src_type, src_idx, lin, value);
+  } else {
+    // unmapped
+    Serial.println(F("RF_Action error: unmapped type"));
   }
 }
 
@@ -197,7 +207,7 @@ void RF_MonitorTimers(void) {
       if (mytime >= RadioCodes[i].stop_time) {
         // perform an action
         RadioCodes[i].running = false; // set timer to idle
-        RF_Action(RadioCodes[i].type, RadioCodes[i].action_d);
+        RF_Action(2, 0, RadioCodes[i].type, RadioCodes[i].action_d);
       }
     }
   }
@@ -214,7 +224,7 @@ void RF_MonitorTimers(void) {
           "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
 
-      RF_Action(Timers[i].type, Timers[i].action);
+      RF_Action(4, 0, Timers[i].type, Timers[i].action);
     }
   }
   t247_last = t247;
@@ -232,10 +242,18 @@ void RF_Enable(void) {
 void RF_Disable(void) {
   if (RF_StatusEnable == true) {
     RF_StatusEnable = false;
-    RadioCode = 0;
     Serial.println(F("RF Disable"));
     mySwitch.disableReceive();
   }
+}
+
+uint32_t RF_GetRadioCode(void) {
+  uint32_t Code;
+
+  Code = RadioCode;
+  RadioCode = 0;
+
+  return Code;
 }
 
 void RF_Loop() {

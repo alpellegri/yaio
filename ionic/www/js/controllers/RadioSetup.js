@@ -15,19 +15,20 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.ActiveRadioCodes = [];
       $scope.ActiveTable = [];
       $scope.Dout = [];
+      $scope.Lout = [];
       $scope.Types = [{
           name: "Empty",
           type: 0
         }, {
-          name: "DOUT",
+          name: "Digital IO",
           type: 1
         },
         {
-          name: "RF RX",
+          name: "Radio IO",
           type: 2
         },
         {
-          name: "LOUT",
+          name: "Logical IO",
           type: 3
         },
       ];
@@ -163,7 +164,11 @@ angular.module('app.controllers.RadioSetup', [])
           $scope.ActiveTable = $scope.Dout;
         } else if (item.type == 2) {
           $scope.ActiveTable = $scope.ActiveRadioCodesTx;
-        } else {}
+        } else if (item.type == 3) {
+          $scope.ActiveTable = $scope.Lout;
+        } else {
+          $scope.ActiveTable = [];
+        }
         console.log(RadioCode);
       };
 
@@ -303,6 +308,17 @@ angular.module('app.controllers.RadioSetup', [])
           snapshot.forEach(function(childSnapshot) {
             // console.log(childSnapshot.val());
             $scope.Dout.push(childSnapshot.val());
+            i++;
+          });
+        });
+
+        var ref = firebase.database().ref('LIO/Lout');
+        var i = 0;
+        $scope.Lout = [];
+        ref.once('value', function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            // console.log(childSnapshot.val());
+            $scope.Lout.push(childSnapshot.val());
             i++;
           });
         });

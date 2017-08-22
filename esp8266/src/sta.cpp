@@ -52,9 +52,10 @@ bool STA_Setup(void) {
       Serial.print(F("."));
       delay(500);
     }
+    Serial.println();
 
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.print(F("\nconnected: "));
+      Serial.print(F("connected: "));
       Serial.println(WiFi.localIP());
     } else {
       sts = false;

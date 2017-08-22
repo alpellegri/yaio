@@ -137,7 +137,8 @@ void FcmService(void) {
         /* retrig timeout on receive */
         FcmServiceStamp = curr_time;
         while (avail--) {
-          Serial.write(fcm_client.read()); // read() gets the FIFO char
+          // Serial.write(fcm_client.read()); // read() gets the FIFO char
+          fcm_client.read();
         }
       } else {
         FcmServiceRxStop = FcmServiceRxRun;
