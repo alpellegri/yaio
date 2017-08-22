@@ -19,12 +19,16 @@ angular.module('app.controllers.RadioSetup', [])
           name: "Empty",
           type: 0
         }, {
-          name: "DIO",
+          name: "DOUT",
           type: 1
         },
         {
           name: "RF RX",
           type: 2
+        },
+        {
+          name: "LOUT",
+          type: 3
         },
       ];
 
@@ -145,10 +149,8 @@ angular.module('app.controllers.RadioSetup', [])
         });
 
         var current_date = new Date();
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
-        var ref = firebase.database().ref("control/radio_update");
-        ref.set(true);
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/radio_update").set(true);
       }
 
       $scope.UpdateType = function(RadioCode, item) {
@@ -259,9 +261,7 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.doRefresh = function() {
         console.log('doRefresh');
         var current_date = new Date();
-
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
 
         var ref = firebase.database().ref('RadioCodes/Inactive');
         var i = 0;

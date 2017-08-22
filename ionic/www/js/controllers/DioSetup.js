@@ -25,11 +25,10 @@ angular.module('app.controllers.DioSetup', [])
             id: element.id
           });
         });
+
         var current_date = new Date();
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
-        var ref = firebase.database().ref("control/radio_update");
-        ref.set(true);
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/radio_update").set(true);
       }
 
       $scope.ResetDIO = function() {
@@ -69,7 +68,7 @@ angular.module('app.controllers.DioSetup', [])
               } else {
                 var _dio = {
                   name: $scope.settings._name,
-                  id: 2*parseInt($scope.settings._dio) + parseInt($scope.settings._value)
+                  id: 2 * parseInt($scope.settings._dio) + parseInt($scope.settings._value)
                 };
                 console.log(_dio);
                 $scope.Dout.push(_dio);
@@ -91,8 +90,8 @@ angular.module('app.controllers.DioSetup', [])
       // Triggered on a button click, or some other target
       $scope.showPopupDoutEdit = function(Dout) {
         $scope.settings._name = Dout.name;
-        $scope.settings._dio = parseInt(Dout.id/2);
-        $scope.settings._value = parseInt(Dout.id%2);
+        $scope.settings._dio = parseInt(Dout.id / 2);
+        $scope.settings._value = parseInt(Dout.id % 2);
         var PopupTemplate =
           '<form class="list">' +
           '<h9 id="setup-heading5" style="text-align:left;">name</h9>' +
@@ -120,7 +119,7 @@ angular.module('app.controllers.DioSetup', [])
                 e.preventDefault();
               } else {
                 Dout.name = $scope.settings._name;
-                Dout.id = 2*parseInt($scope.settings._dio) + parseInt($scope.settings._value);
+                Dout.id = 2 * parseInt($scope.settings._dio) + parseInt($scope.settings._value);
                 console.log(Dout);
                 return $scope.settings;
               }
@@ -140,9 +139,7 @@ angular.module('app.controllers.DioSetup', [])
       $scope.doRefresh = function() {
         console.log('doRefresh');
         var current_date = new Date();
-
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
 
         var ref = firebase.database().ref('DIO/Dout');
         var i = 0;

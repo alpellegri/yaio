@@ -25,14 +25,11 @@ angular.module('app.controllers.TimerSetup', [])
 
       // remove all timer
       $scope.ResetTimers = function() {
-        var ref = firebase.database().ref("Timers");
-        ref.remove();
         console.log('ResetTimers');
-        var current_date = new Date();
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
-        var ref = firebase.database().ref("control/radio_update");
-        ref.set(true);
+        firebase.database().ref('Timers').remove();
+        let current_date = new Date();
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/radio_update").set(true);
         $scope.doRefresh();
       };
 
@@ -57,10 +54,8 @@ angular.module('app.controllers.TimerSetup', [])
         });
 
         var current_date = new Date();
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
-        var ref = firebase.database().ref("control/radio_update");
-        ref.set(true);
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/radio_update").set(true);
       }
 
       $scope.UpdateType = function(Timer, type) {
@@ -185,9 +180,7 @@ angular.module('app.controllers.TimerSetup', [])
       $scope.doRefresh = function() {
         console.log('doRefresh');
         var current_date = new Date();
-
-        var ref = firebase.database().ref("control/time");
-        ref.set(Math.floor(current_date.getTime() / 1000));
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
 
         $scope.Timers = [];
         var ref = firebase.database().ref('Timers');
