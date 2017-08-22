@@ -253,7 +253,7 @@ bool FbmService(void) {
       float h = dht.readHumidity();
       float t = dht.readTemperature();
       if (isnan(h) || isnan(t)) {
-        Serial.println(F("Failed to read from DHT sensor!"));
+        // Serial.println(F("Failed to read from DHT sensor!"));
       } else {
         humidity_data = 10 * h;
         temperature_data = 10 * t;
