@@ -6,6 +6,8 @@
 #include "ee.h"
 #include "fcm.h"
 
+#define FCM_SERVICE_TIMEOUT (5 * 1000)
+
 typedef enum {
   Fcm_Sm_IDLE = 6,
   Fcm_Sm_CONNECT = 0,
@@ -18,7 +20,7 @@ const char FcmServer[50] = "fcm.googleapis.com";
 
 WiFiClient fcm_client;
 uint16_t fcm_sts = Fcm_Sm_IDLE;
-uint32_t FcmServiceTimeout;
+uint32_t FcmServiceStamp;
 bool FcmServiceRxRun;
 bool FcmServiceRxStop;
 
@@ -93,14 +95,10 @@ static String FcmPostMsg(void) {
 }
 
 void FcmService(void) {
-  FcmServiceTimeout++;
+  uint32_t curr_time = millis();
 
-  // Serial.printf("fcm_sts: %d\n", fcm_sts);
   switch (fcm_sts) {
-
   case Fcm_Sm_CONNECT: {
-    FcmServiceTimeout = 0;
-
     uint32_t retVal = fcm_client.connect(FcmServer, 80);
     if (retVal == 1) {
       Serial.println(F("fcm connect Connected with server!"));
@@ -117,7 +115,7 @@ void FcmService(void) {
     String httpPost = FcmPostMsg();
     Serial.println(httpPost);
     fcm_client.print(httpPost);
-    FcmServiceTimeout = millis() + (5 * 1000);
+    FcmServiceStamp = curr_time;
     FcmServiceRxRun = false;
     FcmServiceRxStop = false;
     fcm_sts = Fcm_Sm_RECEIVE;
@@ -125,22 +123,25 @@ void FcmService(void) {
 
   case Fcm_Sm_RECEIVE: {
     Serial.println(F("fcm http wait..."));
-    // available() will return the number of characters
-    // currently in the receive buffer.
-    uint32_t avail = fcm_client.available();
-
-    if (avail > 0) {
-      FcmServiceRxRun = true;
-      while (avail--) {
-        Serial.write(fcm_client.read()); // read() gets the FIFO char
-      }
-    } else {
-      FcmServiceRxStop = (FcmServiceRxRun == true);
-    }
-
-    /* close at timeout */
-    if ((millis() >= FcmServiceTimeout) || (FcmServiceRxStop == true)) {
+    /* close at timeout or communication complete */
+    if (((curr_time - FcmServiceStamp) > FCM_SERVICE_TIMEOUT) ||
+        (FcmServiceRxStop == true)) {
       fcm_sts = Fcm_Sm_CLOSE;
+    } else {
+      // available() will return the number of characters
+      // currently in the receive buffer.
+      uint32_t avail = fcm_client.available();
+
+      if (avail > 0) {
+        FcmServiceRxRun = true;
+        /* retrig timeout on receive */
+        FcmServiceStamp = curr_time;
+        while (avail--) {
+          Serial.write(fcm_client.read()); // read() gets the FIFO char
+        }
+      } else {
+        FcmServiceRxStop = FcmServiceRxRun;
+      }
     }
   } break;
 
