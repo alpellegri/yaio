@@ -9,7 +9,8 @@ extern void RF_ResetTimerDB(void);
 extern void RF_ResetDoutDB(void);
 extern void RF_ResetLoutDB(void);
 extern void RF_AddRadioCodeDB(String id, String name, String type,
-                              String action, String delay, String action_d);
+                              String action, String delay, String type_d,
+                              String action_d);
 extern char *RF_GetRadioName(uint8_t idx);
 
 extern void RF_AddRadioCodeTxDB(String string);

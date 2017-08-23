@@ -14,6 +14,7 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.InactiveRadioCodes = [];
       $scope.ActiveRadioCodes = [];
       $scope.ActiveTable = [];
+      $scope.ActiveTable_d = [];
       $scope.Dout = [];
       $scope.Lout = [];
       $scope.Types = [{
@@ -75,6 +76,10 @@ angular.module('app.controllers.RadioSetup', [])
         },
       ];
 
+      $scope.pushCtrl0Change = function() {
+        firebase.database().ref("control/radio_learn").set($scope.pushCtrl0.checked==true);
+      };
+
       // remove radio code
       $scope.RemoveInactiveRadioCode = function(i) {
         $scope.InactiveRadioCodes.splice(i, 1);
@@ -90,6 +95,8 @@ angular.module('app.controllers.RadioSetup', [])
           action: 0,
           action_name: "",
           delay: 0,
+          type_d: 0,
+          type_d_name: "",
           action_d: 0,
           action_d_name: ""
         }
@@ -123,6 +130,8 @@ angular.module('app.controllers.RadioSetup', [])
             action: element.action,
             action_name: element.action_name,
             delay: element.delay,
+            type_d: element.type_d,
+            type_d_name: element.type_d_name,
             action_d: element.action_d,
             action_d_name: element.action_d_name
           }
@@ -169,6 +178,7 @@ angular.module('app.controllers.RadioSetup', [])
         } else {
           $scope.ActiveTable = [];
         }
+        console.log($scope.ActiveTable);
         console.log(RadioCode);
       };
 
@@ -182,33 +192,38 @@ angular.module('app.controllers.RadioSetup', [])
       };
 
       $scope.UpdateDelay = function(RadioCode, delay) {
-        console.log('UpdateActionDelayed');
+        console.log('UpdateDelay');
         console.log(delay);
         RadioCode.delay = parseInt(delay);
         console.log(RadioCode);
       };
 
-      $scope.UpdateActionDelayed = function(RadioCode, item) {
-        console.log('UpdateActionDelayed');
+      $scope.UpdateType_d = function(RadioCode, item) {
+        console.log('UpdateType_d');
+        item = JSON.parse(item);
+        console.log(item);
+        RadioCode.type_d = parseInt(item.type);
+        RadioCode.type_d_name = item.name;
+        if (item.type == 1) {
+          $scope.ActiveTable_d = $scope.Dout;
+        } else if (item.type == 2) {
+          $scope.ActiveTable_d = $scope.ActiveRadioCodesTx;
+        } else if (item.type == 3) {
+          $scope.ActiveTable_d = $scope.Lout;
+        } else {
+          $scope.ActiveTable_d = [];
+        }
+        console.log($scope.ActiveTable_d);
+        console.log(RadioCode);
+      };
+
+      $scope.UpdateAction_d = function(RadioCode, item) {
+        console.log('UpdateAction_d');
         item = JSON.parse(item);
         console.log(item);
         RadioCode.action_d = parseInt(item.id);
         RadioCode.action_d_name = item.name;
         console.log(RadioCode);
-      };
-
-      $scope.pushCtrl0Change = function() {
-        var ref = firebase.database().ref("control");
-        console.log('radio_learn control ' + $scope.pushCtrl0.checked);
-        if ($scope.pushCtrl0.checked) {
-          ref.update({
-            radio_learn: true
-          });
-        } else {
-          ref.update({
-            radio_learn: false
-          });
-        }
       };
 
       $scope.ResetRadioCodes = function() {

@@ -161,14 +161,15 @@ bool FbmUpdateRadioCodes(void) {
         yield();
         // Serial.println(i->key);
         JsonObject &nestedObject = i->value;
+        String id = nestedObject["id"];
         String name = nestedObject["name"];
         String type = nestedObject["type"];
         String action = nestedObject["action"];
-        String action_d = nestedObject["action_d"];
         String delay = nestedObject["delay"];
-        String id = nestedObject["id"];
+        String type_d = nestedObject["type_d"];
+        String action_d = nestedObject["action_d"];
         Serial.println(id);
-        RF_AddRadioCodeDB(id, name, type, action, delay, action_d);
+        RF_AddRadioCodeDB(id, name, type, action, delay, type_d, action_d);
       }
     }
   }

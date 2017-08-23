@@ -47,8 +47,11 @@
             <select ng-model="selectedItemDelay" ng-change="UpdateDelay(RadioCode, selectedItemDelay)">
               <option ng-repeat="item in Delays" value="{{item.time}}">{{item.name}}</option>
             </select>
-            <select ng-model="selectedItem_d" ng-change="UpdateActionDelayed(RadioCode, selectedItem_d)">
-              <option ng-repeat="item in ActiveTable" value="{{item}}">{{item.name}}</option>
+            <select ng-model="selectedItemType_d" ng-change="UpdateType_d(RadioCode, selectedItemType_d)">
+              <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItem_d" ng-change="UpdateAction_d(RadioCode, selectedItem_d)">
+              <option ng-repeat="item in ActiveTable_d" value="{{item}}">{{item.name}}</option>
             </select>
           </div>
           <div>
@@ -57,6 +60,7 @@
               {{RadioCode.type_name}} ->
               {{RadioCode.action_name}} ->
               ({{RadioCode.delay.toString()}}) ->
+              {{RadioCode.type_d_name}} ->
               {{RadioCode.action_d_name}}
             </label>
           </div>

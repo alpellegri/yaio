@@ -11,35 +11,17 @@ angular.module('app.controllers.NodeInfo', [])
       $scope.system = {};
 
       $scope.pushCtrl1Change = function() {
-        var ref = firebase.database().ref("control");
-        if ($scope.control.wol) {
-          ref.update({
-            wol: true
-          });
-        } else {
-          ref.update({
-            wol: false
-          });
-        }
+        firebase.database().ref("control/wol").set($scope.control.wol == true);
       };
 
       $scope.pushCtrl2Change = function() {
-        var ref = firebase.database().ref("control");
-        if ($scope.control.reboot) {
-          ref.update({
-            reboot: true
-          });
-        } else {
-          ref.update({
-            reboot: false
-          });
-        }
+        firebase.database().ref("control/reboot").set($scope.control.reboot == true);
       };
 
       $scope.doRefresh = function() {
         console.log('doRefresh-NodeInfoCtrl');
         var current_date = new Date();
-        firebase.database().ref("control/time").set(Math.floor(current_date.getTime()/1000));
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
 
         var ref = firebase.database().ref("/");
         // Attach an asynchronous callback to read the data at our posts reference

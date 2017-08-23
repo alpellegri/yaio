@@ -16,8 +16,9 @@
 #define NUM_LOUT_MAX 4
 
 typedef struct {
-  uint32_t id;
   uint8_t type;
+  uint8_t type_d;
+  uint32_t id;
   uint32_t action;
   uint32_t delay;
   uint32_t action_d;
@@ -68,13 +69,14 @@ void RF_ResetDoutDB(void) { DoutLen = 0; }
 void RF_ResetLoutDB(void) { LoutLen = 0; }
 
 void RF_AddRadioCodeDB(String id, String name, String type, String action,
-                       String delay, String action_d) {
+                       String delay, String type_d, String action_d) {
   if (RadioCodesLen < NUM_RADIO_CODE_RX_MAX) {
     RadioCodes[RadioCodesLen].id = atoi(id.c_str());
     strcpy(RadioCodes[RadioCodesLen].name, name.c_str());
     RadioCodes[RadioCodesLen].type = atoi(type.c_str());
     RadioCodes[RadioCodesLen].action = atoi(action.c_str());
     RadioCodes[RadioCodesLen].delay = atoi(delay.c_str());
+    RadioCodes[RadioCodesLen].type = atoi(type_d.c_str());
     RadioCodes[RadioCodesLen].action_d = atoi(action_d.c_str());
     RadioCodesLen++;
   }
