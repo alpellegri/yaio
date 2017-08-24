@@ -17,29 +17,15 @@ angular.module('app.controllers.home', [])
         PushService.init();
       });
 
-      $scope.$on("$ionicView.enter", function(event, data) {
-        // console.log("$ionicView.enter: ", data);
-        var ref = firebase.database().ref("control");
-        ref.update({
-          monitor: true
-        });
-      });
-
       $scope.pushCtrl0Change = function() {
-        var ref = firebase.database().ref("control");
-        if ($scope.control.alarm) {
-          ref.update({
-            alarm: true
-          });
-        } else {
-          ref.update({
-            alarm: false
-          });
-        }
+        firebase.database().ref("control/alarm").set($scope.control.alarm == true);
       };
 
       $scope.doRefresh = function() {
         console.log('doRefresh-HomeCtrl');
+        var current_date = new Date();
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
+
         var ref = firebase.database().ref("/");
         // Attach an asynchronous callback to read the data at our posts reference
         ref.on('value', function(snapshot) {
@@ -58,6 +44,7 @@ angular.module('app.controllers.home', [])
         }, function(errorObject) {
           console.log("firebase failed: " + errorObject.code);
         });
+
         $scope.$broadcast('scroll.refreshComplete');
         $scope.$broadcast("scroll.infiniteScrollComplete");
       };

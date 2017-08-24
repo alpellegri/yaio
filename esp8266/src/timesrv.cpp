@@ -5,24 +5,21 @@
 #include "timesrv.h"
 
 /* seconds */
-#define NTP_UPDATE_INTERVAL (5 * 60)
-
-static const int timeZone = 0;
+#define NTP_UPDATE_INTERVAL (30 * 60 + 0)
 
 static uint8_t timesrv_sm = 0;
-static bool timesrv_run = false;
-static uint16_t TimeServiceCnt;
+static bool timesrv_rdy = false;
+static uint32_t TimeServiceLastUpdate;
 
-static char isodate[25]; // The current time in ISO format is being stored here
 static tmElements_t tm;
-static time_t local_time;
-static time_t start_time;
+static uint32_t ntp_time;
+static uint32_t ntp_update_time;
 
 /*-------- NTP code ----------*/
 
 // NTP Servers:
-static const char ntpServerName[] = "us.pool.ntp.org";
-// static const char ntpServerName[] = "time.nist.gov";
+// static const char ntpServerName[] = "us.pool.ntp.org";
+static const char ntpServerName[] = "time.nist.gov";
 // static const char ntpServerName[] = "time-a.timefreq.bldrdoc.gov";
 // static const char ntpServerName[] = "time-b.timefreq.bldrdoc.gov";
 // static const char ntpServerName[] = "time-c.timefreq.bldrdoc.gov";
@@ -49,13 +46,11 @@ static const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30,
 // break the given time_t into time components
 // this is a more compact version of the C library localtime function
 // note that year is offset from 1970 !!!
-static void breakTime(time_t time, tmElements_t &tm) {
+static void breakTime(uint32_t time, tmElements_t &tm) {
 
   uint8_t year;
   uint8_t month, monthLength;
   uint32_t days;
-
-  local_time = time;
 
   tm.Second = time % 60;
   time /= 60; // now it is minutes
@@ -99,9 +94,8 @@ static void breakTime(time_t time, tmElements_t &tm) {
   tm.Month = month + 1; // jan is month 1
   tm.Day = time + 1;    // day of month
 
-  sprintf(isodate, "%d-%02d-%02d %02d:%02d:%02d", tm.Year, tm.Month, tm.Day,
-          tm.Hour, tm.Minute, tm.Second);
-  // Serial.printf("isodate: %s\n", isodate);
+  Serial.printf("%d-%02d-%02d %02d:%02d:%02d\n", tm.Year, tm.Month, tm.Day,
+                tm.Hour, tm.Minute, tm.Second);
 }
 
 // send an NTP request to the time server at the given address
@@ -148,7 +142,6 @@ static uint32_t getNtpTime(void) {
   uint32_t ret = 0;
 
   uint32_t size = Udp.parsePacket();
-
   if (size >= NTP_PACKET_SIZE) {
     Udp.read(packetBuffer, NTP_PACKET_SIZE); // read packet into the buffer
     uint32_t secsSince1900;
@@ -157,67 +150,54 @@ static uint32_t getNtpTime(void) {
     secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
     secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
     secsSince1900 |= (unsigned long)packetBuffer[43];
-    ret = secsSince1900 - 2208988800UL + timeZone * 3600L;
+    ret = secsSince1900 - 2208988800UL;
   }
 
   return ret; // return 0 if unable to get the time
 }
 
-char *getTmUTC(void) {
-  time_t mytime = getTime();
-  breakTime(mytime, tm);
-  return isodate;
+void time_set(uint32_t _time) {
+  ntp_update_time = millis();
+  ntp_time = _time;
+  breakTime(_time, tm);
 }
 
-tmElements_t getTmTime(void) {
-  time_t mytime = getTime();
-  breakTime(mytime, tm);
-  return tm;
-}
-
-void time_set(uint32_t time) {
-  start_time = millis() / 1000;
-  local_time = time;
-}
-
-time_t getTime(void) {
-  time_t _time = millis() / 1000 - start_time + local_time;
-
+uint32_t getTime(void) {
+  uint32_t _time = (millis() - ntp_update_time) / 1000 + ntp_time;
   return (_time);
 }
 
 bool TimeService(void) {
   switch (timesrv_sm) {
   case 0: {
-    timesrv_sm = 1;
-    timesrv_run = false;
-    Serial.println("getNtpTime init done");
-    TimeServiceCnt = -1;
+    if (timesrv_rdy == false) {
+      timesrv_sm = 1;
+    } else {
+      uint32_t _time = getTime();
+      if ((_time - TimeServiceLastUpdate) > NTP_UPDATE_INTERVAL) {
+        timesrv_sm = 1;
+      }
+    }
   } break;
   case 1: {
-    if (TimeServiceCnt < NTP_UPDATE_INTERVAL) {
-      TimeServiceCnt++;
-    } else {
-      startNtpTime();
-      timesrv_sm = 2;
-    }
+    startNtpTime();
+    timesrv_sm = 2;
   } break;
   case 2: {
-    Serial.println("getNtpTime");
-    time_t mytime = getNtpTime();
-    if (mytime != 0) {
-      time_set(mytime);
-      timesrv_run = true;
-      TimeServiceCnt = 0;
-      Serial.println(getTmUTC());
+    Serial.println(F("getNtpTime"));
+    uint32_t _time = getNtpTime();
+    if (_time != 0) {
+      time_set(_time);
+      timesrv_rdy = true;
+      TimeServiceLastUpdate = _time;
+      timesrv_sm = 0;
     } else {
-      /* retry: TimeServiceCnt not reset */
-      Serial.println("getNtpTime fails");
+      Serial.println(F("getNtpTime fails"));
+      timesrv_sm = 1;
     }
     stopNtpTime();
-    timesrv_sm = 1;
   } break;
   }
 
-  return timesrv_run;
+  return timesrv_rdy;
 }

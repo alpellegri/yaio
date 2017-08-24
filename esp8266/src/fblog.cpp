@@ -5,10 +5,10 @@
 #include <string.h>
 
 #include "ee.h"
-#include "timesrv.h"
 #include "fcm.h"
+#include "timesrv.h"
 
-void fblog_log(String& message, boolean fcm_notify) {
+void fblog_log(String &message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
 
@@ -19,5 +19,5 @@ void fblog_log(String& message, boolean fcm_notify) {
   if (fcm_notify == true) {
     FcmSendPush(message);
   }
-  Firebase.push("logs/Reports", JsonVariant(log));
+  Firebase.push(F("logs/Reports"), JsonVariant(log));
 }

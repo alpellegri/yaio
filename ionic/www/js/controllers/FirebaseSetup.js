@@ -26,6 +26,13 @@ angular.module('app.controllers.FirebaseSetup', [])
 
       var ref = firebase.database().ref("/");
 
+      ref.child('FCM_Registration_IDs').remove();
+      ref.child('RadioCodes').remove();
+      ref.child('startup').remove();
+      ref.child('status').remove();
+      ref.child('control').remove();
+      ref.child('logs').remove();
+
       // init Firebase: startup
       var startup_ref = ref.child('startup');
       startup_ref.set({
@@ -37,17 +44,17 @@ angular.module('app.controllers.FirebaseSetup', [])
       var control_ref = ref.child('control');
       control_ref.set({
         alarm: false,
-        heap: false,
-        led: false,
-        monitor: false,
         radio_learn: false,
-        reboot: false
+        radio_update: false,
+        reboot: false,
+        time: 0
       });
 
       // init Firebase: status
       var starus_ref = ref.child('status');
       starus_ref.set({
         alarm: false,
+        monitor: false,
         heap: 0,
         humidity: 0,
         temperature: 0,

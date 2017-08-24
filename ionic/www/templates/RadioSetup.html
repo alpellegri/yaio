@@ -9,16 +9,16 @@
       <ion-list can-swipe="true">
         <ion-item ng-repeat="RadioCode in InactiveRadioCodes">
           <i class="icon ion-wifi"></i>
-          <ion-option-button class="button-dark icon-left ion-trash-b" ng-hold="RemoveInactiveRadioCode($index)">
+          <ion-option-button class="button-dark icon-left ion-trash-b" on-hold="RemoveInactiveRadioCode($index)">
             Remove
           </ion-option-button>
-          <ion-option-button class="button-light icon-left ion-social-rss" ng-hold="ActivateRadioCodeTx($index)">
+          <ion-option-button class="button-light icon-left ion-social-rss" on-hold="ActivateRadioCode(ActiveRadioCodesTx, $index)">
             Activate Tx
           </ion-option-button>
-          <ion-option-button class="button-light icon-left ion-social-rss" ng-hold="ActivateRadioCode($index)">
+          <ion-option-button class="button-light icon-left ion-social-rss" on-hold="ActivateRadioCode(ActiveRadioCodes, $index)">
             Activate Rx
           </ion-option-button>
-          {{RadioCode.val().toString(16).toUpperCase()}}
+          {{RadioCode.toString(16).toUpperCase()}}
         </ion-item>
       </ion-list>
     </div>
@@ -26,14 +26,44 @@
       <div class="item item-divider">Active Radio Codes Rx</div>
       <ion-list <ion-list can-swipe="true">
         <ion-item ng-repeat="RadioCode in ActiveRadioCodes">
-          <i class="icon ion-wifi"></i>
-          <ion-option-button class="button-dark icon-left ion-trash-b" ng-hold="RemoveActiveRadioCode($index)">
-            Remove
-          </ion-option-button>
-          <ion-option-button class="button-light icon-left ion-social-rss-outline" ng-hold="DeactivateRadioCode($index)">
-            Deactivate
-          </ion-option-button>
-          {{RadioCode.val().toString(16).toUpperCase()}}
+          <div>
+            <i class="icon ion-wifi"></i>
+            <ion-option-button class="button-dark icon-left ion-trash-b" on-hold="RemoveActiveRadioCode(ActiveRadioCodes, $index)">
+              Remove
+            </ion-option-button>
+            <ion-option-button class="button-light icon-left ion-social-rss-outline" on-hold="DeactivateRadioCode(ActiveRadioCodes, $index)">
+              Deactivate
+            </ion-option-button>
+            <ion-option-button class="button-light icon-left ion-social-rss" on-hold="showPopupRadioEdit(ActiveRadioCodes, $index)">
+              Configure
+            </ion-option-button>
+            {{RadioCode.name}}
+            <select ng-model="selectedItemType" ng-change="UpdateType(RadioCode, selectedItemType)">
+              <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItem" ng-change="UpdateAction(RadioCode, selectedItem)">
+              <option ng-repeat="item in ActiveTable" value="{{item}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItemDelay" ng-change="UpdateDelay(RadioCode, selectedItemDelay)">
+              <option ng-repeat="item in Delays" value="{{item.time}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItemType_d" ng-change="UpdateType_d(RadioCode, selectedItemType_d)">
+              <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItem_d" ng-change="UpdateAction_d(RadioCode, selectedItem_d)">
+              <option ng-repeat="item in ActiveTable_d" value="{{item}}">{{item.name}}</option>
+            </select>
+          </div>
+          <div>
+            <label>
+              {{RadioCode.id.toString(16).toUpperCase()}} ->
+              {{RadioCode.type_name}} ->
+              {{RadioCode.action_name}} ->
+              ({{RadioCode.delay.toString()}}) ->
+              {{RadioCode.type_d_name}} ->
+              {{RadioCode.action_d_name}}
+            </label>
+          </div>
         </ion-item>
       </ion-list>
     </div>
@@ -42,13 +72,17 @@
       <ion-list <ion-list can-swipe="true">
         <ion-item ng-repeat="RadioCode in ActiveRadioCodesTx">
           <i class="icon ion-wifi"></i>
-          <ion-option-button class="button-dark icon-left ion-trash-b" ng-hold="RemoveActiveRadioCodeTx($index)">
+          <ion-option-button class="button-dark icon-left ion-trash-b" on-hold="RemoveActiveRadioCode(ActiveRadioCodesTx, $index)">
             Remove
           </ion-option-button>
-          <ion-option-button class="button-light icon-left ion-social-rss-outline" ng-hold="DeactivateRadioCodeTx($index)">
+          <ion-option-button class="button-light icon-left ion-social-rss-outline" on-hold="DeactivateRadioCode(ActiveRadioCodesTx, $index)">
             Deactivate
           </ion-option-button>
-          {{RadioCode.val().toString(16).toUpperCase()}}
+          <ion-option-button class="button-light icon-left ion-social-rss" on-hold="showPopupRadioEdit(ActiveRadioCodesTx, $index)">
+            Configure
+          </ion-option-button>
+          {{RadioCode.name}}
+          <span class="item-note">{{RadioCode.id.toString(16).toUpperCase()}}</span>
         </ion-item>
       </ion-list>
     </div>

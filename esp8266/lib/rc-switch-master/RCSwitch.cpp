@@ -1,7 +1,7 @@
 /*
   RCSwitch - Arduino libary for remote control outlet switches
   Copyright (c) 2011 Suat Özgür.  All right reserved.
-  
+
   Contributors:
   - Andre Koehler / info(at)tomate-online(dot)de
   - Gordeev Andrey Vladimirovich / gordeev(at)openpyro(dot)com
@@ -13,7 +13,7 @@
   - Robert ter Vehn / <first name>.<last name>(at)gmail(dot)com
   - Johann Richard / <first name>.<last name>(at)gmail(dot)com
   - Vlad Gheorghe / <first name>.<last name>(at)gmail(dot)com https://github.com/vgheo
-  
+
   Project home: https://github.com/sui77/rc-switch/
 
   This library is free software; you can redistribute it and/or
@@ -51,7 +51,7 @@
 
 /* Format for protocol definitions:
  * {pulselength, Sync bit, "0" bit, "1" bit}
- * 
+ *
  * pulselength: pulse length in microseconds, e.g. 350
  * Sync bit: {1, 31} means 1 high pulse and 31 low pulses
  *     (perceived as a 31*pulselength long pulse, total length of sync bit is
@@ -161,7 +161,7 @@ void RCSwitch::setReceiveTolerance(int nPercent) {
   RCSwitch::nReceiveTolerance = nPercent;
 }
 #endif
-  
+
 
 /**
  * Enable transmissions
@@ -364,7 +364,7 @@ char* RCSwitch::getCodeWordC(char sFamily, int nGroup, int nDevice, bool bStatus
   if ( nFamily < 0 || nFamily > 15 || nGroup < 1 || nGroup > 4 || nDevice < 1 || nDevice > 4) {
     return 0;
   }
-  
+
   // encode the family into four bits
   sReturn[nReturnPos++] = (nFamily & 1) ? 'F' : '0';
   sReturn[nReturnPos++] = (nFamily & 2) ? 'F' : '0';
@@ -400,7 +400,7 @@ char* RCSwitch::getCodeWordC(char sFamily, int nGroup, int nDevice, bool bStatus
  *
  * Source: http://www.the-intruder.net/funksteckdosen-von-rev-uber-arduino-ansteuern/
  *
- * @param sGroup        Name of the switch group (A..D, resp. a..d) 
+ * @param sGroup        Name of the switch group (A..D, resp. a..d)
  * @param nDevice       Number of the switch itself (1..3)
  * @param bStatus       Whether to switch on (true) or off (false)
  *
@@ -519,7 +519,7 @@ void RCSwitch::send(unsigned long code, unsigned int length) {
 void RCSwitch::transmit(HighLow pulses) {
   uint8_t firstLogicLevel = (this->protocol.invertedSignal) ? LOW : HIGH;
   uint8_t secondLogicLevel = (this->protocol.invertedSignal) ? HIGH : LOW;
-  
+
   digitalWrite(this->nTransmitterPin, firstLogicLevel);
   delayMicroseconds( this->protocol.pulseLength * pulses.high);
   digitalWrite(this->nTransmitterPin, secondLogicLevel);
@@ -607,7 +607,7 @@ bool RECEIVE_ATTR RCSwitch::receiveProtocol(const int p, unsigned int changeCoun
     const unsigned int syncLengthInPulses =  ((pro.syncFactor.low) > (pro.syncFactor.high)) ? (pro.syncFactor.low) : (pro.syncFactor.high);
     const unsigned int delay = RCSwitch::timings[0] / syncLengthInPulses;
     const unsigned int delayTolerance = delay * RCSwitch::nReceiveTolerance / 100;
-    
+
     /* For protocols that start low, the sync period looks like
      *               _________
      * _____________|         |XXXXXXXXXXXX|
@@ -653,7 +653,13 @@ bool RECEIVE_ATTR RCSwitch::receiveProtocol(const int p, unsigned int changeCoun
     return false;
 }
 
+#include "interrupts.h"
+
 void RECEIVE_ATTR RCSwitch::handleInterrupt() {
+
+InterruptLock lock;
+
+// noInterrupts();
 
   static unsigned int changeCount = 0;
   static unsigned long lastTime = 0;
@@ -684,7 +690,7 @@ void RECEIVE_ATTR RCSwitch::handleInterrupt() {
     }
     changeCount = 0;
   }
- 
+
   // detect overflow
   if (changeCount >= RCSWITCH_MAX_CHANGES) {
     changeCount = 0;
@@ -692,6 +698,7 @@ void RECEIVE_ATTR RCSwitch::handleInterrupt() {
   }
 
   RCSwitch::timings[changeCount++] = duration;
-  lastTime = time;  
+  lastTime = time;
+// interrupts();
 }
 #endif

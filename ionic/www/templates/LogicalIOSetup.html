@@ -1,0 +1,29 @@
+<ion-view title="LogicalIO Setup" id="page10">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+    <button id="Add timer" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-plus" on-hold="showPopupLoutAdd()">
+      Add Logical OUT
+    </button>
+    <div class="list card">
+      <div class="item item-divider">Lout</div>
+      <ion-list can-swipe="true">
+        <ion-item ng-repeat="item in Lout">
+          <i class="icon ion-pricetag"></i>
+          <ion-option-button class="button-dark icon-left ion-trash-b" on-hold="RemoveLout($index)">
+            Remove
+          </ion-option-button>
+          <ion-option-button class="button-light icon-left ion-social-rss" on-hold="showPopupLoutEdit(item)">
+            Configure
+          </ion-option-button>
+          {{item.name}}
+        </ion-item>
+      </ion-list>
+    </div>
+    <button id="setup-update" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-hold="SetupLIO()">
+      Update Logical IO Configuration
+    </button>
+    <button id="setup-clear" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-trash-b" on-hold="ResetLIO()">
+      Reset Logical IO Configuration
+    </button>
+  </ion-content>
+</ion-view>

@@ -19,34 +19,25 @@
 
 #define OLED_RESET LED_BUILTIN // 4
 
-Adafruit_SSD1306 display(OLED_RESET);
-
-Ticker flipper;
+// Adafruit_SSD1306 display(OLED_RESET);
 
 uint8_t mode;
 uint16_t count = 0;
-
-bool scheduler_flag = false;
-
-void flip(void) {
-
-  /* scheduler */
-  scheduler_flag = 1;
-}
+uint32_t current_time;
+uint32_t schedule_time;
 
 void setup() {
   bool ret;
 
   pinMode(LED, OUTPUT);
+  pinMode(D1, OUTPUT);
   pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 
   EE_Setup();
 
-  flipper.attach(1.0, flip);
-
   Serial.println();
-  Serial.println("Starting");
+  Serial.println(F("Node starting..."));
 
 #if 0
   // init oled display
@@ -89,8 +80,9 @@ void loop() {
   } else {
   }
 
-  if (scheduler_flag == true) {
-    scheduler_flag = false;
+  current_time = millis();
+  if ((current_time - schedule_time) > 1000) {
+    schedule_time = current_time;
     if (mode == 0) {
       ret = AP_Task();
       if (ret == false) {

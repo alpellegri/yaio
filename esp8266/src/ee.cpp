@@ -12,9 +12,9 @@
 
 char sta_ssid[25] = "";
 char sta_password[25] = "";
-char firebase_url[50] = "";
-char firebase_secret[50] = "";
-char firebase_server_key[50] = "";
+char sta_firebase_url[50] = "";
+char sta_firebase_secret[50] = "";
+char sta_firebase_server_key[50] = "";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
@@ -22,13 +22,11 @@ char *EE_GetSSID() { return sta_ssid; }
 
 char *EE_GetPassword() { return sta_password; }
 
-char *EE_GetFirebaseUrl() {
-  return firebase_url;
-}
+char *EE_GetFirebaseUrl() { return sta_firebase_url; }
 
-char *EE_GetFirebaseSecret() { return firebase_secret; }
+char *EE_GetFirebaseSecret() { return sta_firebase_secret; }
 
-char *EE_GetFirebaseServerKey() { return firebase_server_key; }
+char *EE_GetFirebaseServerKey() { return sta_firebase_server_key; }
 
 void EE_EraseData() {
   int i;
@@ -43,10 +41,13 @@ void EE_EraseData() {
 void EE_StoreData(uint8_t *data, uint16_t len) {
   uint16_t i;
 
+  Serial.println(F("EE_StoreData"));
   for (i = 0; i < len; i++) {
     yield();
+    // Serial.printf("%c", data[i]);
     EEPROM.write(i, data[i]);
   }
+  // Serial.printf("\n");
   EEPROM.commit();
 }
 
@@ -55,10 +56,13 @@ bool EE_LoadData(void) {
   char data[EE_SIZE];
   uint16_t i;
 
+  Serial.println(F("EEPROM loading..."));
   for (i = 0; i < EE_SIZE; i++) {
     yield();
     data[i] = EEPROM.read(i);
+    Serial.printf("%c", data[i]);
   }
+  Serial.printf("\n");
 
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
@@ -66,26 +70,34 @@ bool EE_LoadData(void) {
   // Test if parsing succeeds.
   if (root.success() == 1) {
     const char *ssid = root["ssid"];
+    Serial.print(F("ssid "));
+    Serial.println(ssid);
     const char *password = root["password"];
-    const char *firebase = root["firebase_url"];
-    const char *secret = root["secret"];
-    const char *server_key = root["server_key"];
-    if ((ssid != NULL) && (password != NULL) && (firebase != NULL) &&
-        (secret != NULL) && (server_key != NULL)) {
+    Serial.print(F("password "));
+    Serial.println(password);
+    const char *firebase_url = root["firebase_url"];
+    Serial.print(F("firebase_url "));
+    Serial.println(firebase_url);
+    const char *firebase_secret = root["firebase_secret"];
+    Serial.print(F("firebase_secret "));
+    Serial.println(firebase_secret);
+    const char *firebase_server_key = root["firebase_server_key"];
+    Serial.print(F("firebase_server_key "));
+    Serial.println(firebase_server_key);
+    if ((ssid != NULL) && (password != NULL) && (firebase_url != NULL) &&
+        (firebase_secret != NULL) && (firebase_server_key != NULL)) {
       strcpy(sta_ssid, ssid);
       strcpy(sta_password, password);
-      strcpy(firebase_url, firebase);
-      strcpy(firebase_secret, secret);
-      strcpy(firebase_server_key, server_key);
-      Serial.printf("sta_ssid %s\n", sta_ssid);
-      Serial.printf("sta_password %s\n", sta_password);
-      Serial.printf("firebase_url %s\n", firebase_url);
-      Serial.printf("firebase_secret %s\n", firebase_secret);
-      Serial.printf("firebase_server_key %s\n", firebase_server_key);
+      strcpy(sta_firebase_url, firebase_url);
+      strcpy(sta_firebase_secret, firebase_secret);
+      strcpy(sta_firebase_server_key, firebase_server_key);
+      Serial.println(F("EEPROM ok"));
       ret = true;
+    } else {
+      Serial.println(F("EEPROM content not ok"));
     }
   } else {
-    Serial.println("parseObject() failed");
+    Serial.println(F("parseObject() failed"));
   }
 
   return ret;

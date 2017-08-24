@@ -35,7 +35,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
   case WStype_DISCONNECTED:
     /* try to enable wifi scan when locally diconnected */
     enable_WiFi_Scan = EE_LoadData();
-    Serial.printf("[%u] Disconnected!\n", num);
+    Serial.print(F("["));
+    Serial.print(num);
+    Serial.print(F(" Disconnected!"));
     break;
 
   case WStype_CONNECTED: {
@@ -48,9 +50,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
   } break;
 
   case WStype_TEXT:
-    Serial.printf("[%u] get Text: %s\n", num, payload);
-
     len = strlen((char *)payload);
+    Serial.printf("[%u] get Text (%d): %s\n", num, len, payload);
+
     if (len != 0) {
       // save to epprom
       EE_EraseData();
@@ -59,7 +61,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     break;
 
   case WStype_ERROR:
-    Serial.printf("[%u] Error!\n", num);
+    Serial.print(F("["));
+    Serial.print(num);
+    Serial.print(F(" Error!"));
     break;
 
   default:
@@ -83,7 +87,7 @@ bool AP_Setup(void) {
   enable_WiFi_Scan = EE_LoadData();
 
   port_id = 0xFF;
-  Serial.printf("connecting mode AP\n");
+  Serial.println(F("connecting mode AP"));
 
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
@@ -94,7 +98,7 @@ bool AP_Setup(void) {
   WiFi.softAP(ap_ssid, ap_password);
 
   IPAddress myIP = WiFi.softAPIP();
-  Serial.println("AP mode enabled");
+  Serial.println(F("AP mode enabled"));
   Serial.print("IP address: ");
   Serial.println(myIP);
   webSocket.begin();
@@ -104,6 +108,18 @@ bool AP_Setup(void) {
 }
 
 bool AP_Loop(void) {
+  uint8_t in = digitalRead(BUTTON);
+
+#if 0
+  if (in != ap_button) {
+    ap_button = in;
+    if (in == false) {
+      EE_EraseData();
+      Serial.printf("EEPROM erased\n");
+    }
+  }
+#endif
+
   /* websocket only in mode 0 */
   webSocket.loop();
 }
@@ -114,12 +130,14 @@ bool AP_Task(void) {
   String str;
 
   if (enable_WiFi_Scan == true) {
+    Serial.println(F("networks scan"));
     if (ap_task_cnt-- == 0) {
       ap_task_cnt = 10;
       int n = WiFi.scanNetworks();
-      Serial.println("scan done");
+      Serial.println(F("scan done"));
       if (n == 0) {
-        Serial.println("no networks found");
+        Serial.println(F("no networks found"));
+        ESP.restart();
       } else {
         char *sta_ssid = EE_GetSSID();
 
@@ -127,7 +145,7 @@ bool AP_Task(void) {
           yield();
           int test = WiFi.SSID(i).compareTo(String(sta_ssid));
           if (test == 0) {
-            Serial.print("network found: ");
+            Serial.print(F("network found: "));
             Serial.println(WiFi.SSID(i));
             ret = false;
           }
