@@ -108,6 +108,16 @@ angular.module('app.routes', [])
     }
   })
 
+  .state('menu.FunctionSetup', {
+    url: '/page11',
+    views: {
+      'side-menu21': {
+        templateUrl: 'templates/FunctionSetup.html',
+        controller: 'FunctionSetupCtrl'
+      }
+    }
+  })
+
   .state('menu', {
     url: '/side-menu21',
     templateUrl: 'templates/menu.html',

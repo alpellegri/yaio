@@ -67,7 +67,7 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   yield();
 }
 
-#define FBM_FUNC_SRV_QUEUE_LEN 5
+#define FBM_LOGIC_QUEUE_LEN 5
 typedef struct {
   uint8_t func;
   uint8_t value;
@@ -75,32 +75,31 @@ typedef struct {
   uint8_t src_idx;
 } FbmFuncSrvQueque_t;
 
-uint8_t FbmFuncSrvQuequeWrPos = 0;
-uint8_t FbmFuncSrvQuequeRdPos = 0;
-FbmFuncSrvQueque_t FbmFuncSrvQueque[FBM_FUNC_SRV_QUEUE_LEN];
+uint8_t FbmLogicQuequeWrPos = 0;
+uint8_t FbmLogicQuequeRdPos = 0;
+FbmFuncSrvQueque_t FbmLogicQueque[FBM_LOGIC_QUEUE_LEN];
 
-void FbmReqFunction(uint8_t src_type, uint8_t src_idx, uint8_t lin,
-                    bool value) {
-  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].src_type = src_type;
-  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].src_idx = src_idx;
-  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].func = lin;
-  FbmFuncSrvQueque[FbmFuncSrvQuequeWrPos].value = value;
-  FbmFuncSrvQuequeWrPos++;
-  if (FbmFuncSrvQuequeWrPos >= FBM_FUNC_SRV_QUEUE_LEN) {
-    FbmFuncSrvQuequeWrPos = 0;
+void FbmLogicReq(uint8_t src_type, uint8_t src_idx, uint8_t lin, bool value) {
+  FbmLogicQueque[FbmLogicQuequeWrPos].src_type = src_type;
+  FbmLogicQueque[FbmLogicQuequeWrPos].src_idx = src_idx;
+  FbmLogicQueque[FbmLogicQuequeWrPos].func = lin;
+  FbmLogicQueque[FbmLogicQuequeWrPos].value = value;
+  FbmLogicQuequeWrPos++;
+  if (FbmLogicQuequeWrPos >= FBM_LOGIC_QUEUE_LEN) {
+    FbmLogicQuequeWrPos = 0;
   }
-  if (FbmFuncSrvQuequeWrPos == FbmFuncSrvQuequeRdPos) {
-    Serial.println(F("FbmFuncSrvQueque overrun"));
+  if (FbmLogicQuequeWrPos == FbmLogicQuequeRdPos) {
+    Serial.println(F("FbmLogicQueque overrun"));
   }
 }
 
 /* function mapping requests
 * lin=0: value=1 -> arm alarm / value=0 -> disarm alarm
 */
-static bool FbmFuncAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
-                          bool value) {
+static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
+                           bool value) {
   bool ret = false;
-  Serial.print(F("FbmFuncAction "));
+  Serial.print(F("FbmLogicAction "));
   Serial.print(F("lin "));
   Serial.print(lin);
   Serial.print(F(" value "));
@@ -121,22 +120,22 @@ static bool FbmFuncAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
     fblog_log(str, status_alarm);
     ret = true;
   } else {
-    Serial.println(F("FbmFuncAction error: unmapped action"));
+    Serial.println(F("FbmLogicAction error: unmapped action"));
   }
 
   return ret;
 }
 
-static void FbmFuncSrv() {
-  if (FbmFuncSrvQuequeWrPos != FbmFuncSrvQuequeRdPos) {
-    bool ret = FbmFuncAction(FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].src_type,
-                             FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].src_idx,
-                             FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].func,
-                             FbmFuncSrvQueque[FbmFuncSrvQuequeRdPos].value);
+void FbmLogicSrv() {
+  if (FbmLogicQuequeWrPos != FbmLogicQuequeRdPos) {
+    bool ret = FbmLogicAction(FbmLogicQueque[FbmLogicQuequeRdPos].src_type,
+                              FbmLogicQueque[FbmLogicQuequeRdPos].src_idx,
+                              FbmLogicQueque[FbmLogicQuequeRdPos].func,
+                              FbmLogicQueque[FbmLogicQuequeRdPos].value);
     if (ret == true) {
-      FbmFuncSrvQuequeRdPos++;
-      if (FbmFuncSrvQuequeRdPos >= FBM_FUNC_SRV_QUEUE_LEN) {
-        FbmFuncSrvQuequeRdPos = 0;
+      FbmLogicQuequeRdPos++;
+      if (FbmLogicQuequeRdPos >= FBM_LOGIC_QUEUE_LEN) {
+        FbmLogicQuequeRdPos = 0;
       }
     }
   }
@@ -163,13 +162,9 @@ bool FbmUpdateRadioCodes(void) {
         JsonObject &nestedObject = i->value;
         String id = nestedObject["id"];
         String name = nestedObject["name"];
-        String type = nestedObject["type"];
-        String action = nestedObject["action"];
-        String delay = nestedObject["delay"];
-        String type_d = nestedObject["type_d"];
-        String action_d = nestedObject["action_d"];
+        String func = nestedObject["func"];
         Serial.println(id);
-        RF_AddRadioCodeDB(id, name, type, action, delay, type_d, action_d);
+        RF_AddRadioCodeDB(id, name, func);
       }
     }
   }
@@ -261,6 +256,32 @@ bool FbmUpdateRadioCodes(void) {
         String id = nestedObject["id"];
         Serial.println(id);
         RF_AddLoutDB(id);
+      }
+    }
+  }
+
+  if (ret == true) {
+    Serial.println(F("FbmUpdateFuncions"));
+    FirebaseObject ref = Firebase.get(F("Functions"));
+    if (Firebase.failed() == true) {
+      Serial.print(F("get failed: Funcions"));
+      Serial.println(Firebase.error());
+      ret = false;
+    } else {
+      RF_ResetFunctionsDB();
+      JsonVariant variant = ref.getJsonVariant();
+      JsonObject &object = variant.as<JsonObject>();
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        yield();
+        // Serial.println(i->key);
+        JsonObject &nestedObject = i->value;
+        String name = nestedObject["name"];
+        String type = nestedObject["type"];
+        String action = nestedObject["action"];
+        String delay = nestedObject["delay"];
+        String next = nestedObject["next"];
+        Serial.println(name);
+        RF_AddFunctionsDB(name, type, action, delay, next);
       }
     }
   }
@@ -457,7 +478,7 @@ bool FbmService(void) {
     }
     yield();
 
-    // manage alarm activation/deactivation notifications
+    // manage alarm arming/disarming notifications
     if (status_alarm_last != status_alarm) {
       status_alarm_last = status_alarm;
       String str = F("Alarm ");
@@ -521,7 +542,8 @@ bool FbmService(void) {
     }
 
     // call function service
-    FbmFuncSrv();
+    FunctionSrv();
+    FbmLogicSrv();
   } break;
   default:
     break;

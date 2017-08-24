@@ -16,15 +16,9 @@
 #define NUM_LOUT_MAX 4
 
 typedef struct {
-  uint8_t type;
-  uint8_t type_d;
   uint32_t id;
-  uint32_t action;
-  uint32_t delay;
-  uint32_t action_d;
-  uint32_t stop_time;
-  bool running;
-  char name[23];
+  char name[25];
+  char func[25];
 } RF_RadioCodeSts_t;
 
 typedef struct {
@@ -33,6 +27,16 @@ typedef struct {
   uint8_t type;
 } Timer_t;
 
+typedef struct {
+  char name[25];
+  char next[25];
+  uint8_t type;
+  uint32_t action;
+  uint32_t delay;
+  uint32_t timer;
+  uint8_t timer_run;
+} Function_t;
+
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
 bool RF_StatusEnable = false;
@@ -40,15 +44,17 @@ bool RF_StatusEnable = false;
 // array 5 is used for delay timer running/idle
 // array 6 is used for delay timer time stamp
 RF_RadioCodeSts_t RadioCodes[NUM_RADIO_CODE_RX_MAX];
-uint16_t RadioCodesLen = 0;
+uint8_t RadioCodesLen = 0;
 uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
-uint16_t RadioCodesTxLen = 0;
+uint8_t RadioCodesTxLen = 0;
 Timer_t Timers[NUM_TIMER_MAX];
-uint16_t TimersLen = 0;
+uint8_t TimersLen = 0;
 uint8_t Dout[NUM_DOUT_MAX];
-uint16_t DoutLen = 0;
+uint8_t DoutLen = 0;
 uint8_t Lout[NUM_LOUT_MAX];
-uint16_t LoutLen = 0;
+uint8_t LoutLen = 0;
+Function_t Function[5];
+uint8_t FunctionLen = 5;
 
 uint32_t t247_last = 0;
 
@@ -58,7 +64,7 @@ void RF_ResetRadioCodeDB(void) {
 }
 void RF_ResetRadioCodeTxDB(void) {
   RadioCodesTxLen = 0;
-  RadioCode;
+  RadioCode = 0;
 }
 void RF_ResetTimerDB(void) {
   uint32_t mytime = getTime();
@@ -67,17 +73,13 @@ void RF_ResetTimerDB(void) {
 }
 void RF_ResetDoutDB(void) { DoutLen = 0; }
 void RF_ResetLoutDB(void) { LoutLen = 0; }
+void RF_ResetFunctionsDB(void) { FunctionLen = 0; }
 
-void RF_AddRadioCodeDB(String id, String name, String type, String action,
-                       String delay, String type_d, String action_d) {
+void RF_AddRadioCodeDB(String id, String name, String func) {
   if (RadioCodesLen < NUM_RADIO_CODE_RX_MAX) {
     RadioCodes[RadioCodesLen].id = atoi(id.c_str());
     strcpy(RadioCodes[RadioCodesLen].name, name.c_str());
-    RadioCodes[RadioCodesLen].type = atoi(type.c_str());
-    RadioCodes[RadioCodesLen].action = atoi(action.c_str());
-    RadioCodes[RadioCodesLen].delay = atoi(delay.c_str());
-    RadioCodes[RadioCodesLen].type = atoi(type_d.c_str());
-    RadioCodes[RadioCodesLen].action_d = atoi(action_d.c_str());
+    strcpy(RadioCodes[RadioCodesLen].func, func.c_str());
     RadioCodesLen++;
   }
 }
@@ -115,6 +117,96 @@ void RF_AddLoutDB(String action) {
   }
 }
 
+void RF_AddFunctionsDB(String name, String type, String action, String delay,
+                       String next) {
+  if (FunctionLen < NUM_RADIO_CODE_RX_MAX) {
+    strcpy(Function[FunctionLen].name, name.c_str());
+    Function[FunctionLen].type = atoi(type.c_str());
+    Function[FunctionLen].action = atoi(action.c_str());
+    Function[FunctionLen].delay = atoi(delay.c_str());
+    strcpy(Function[FunctionLen].next, next.c_str());
+    FunctionLen++;
+  }
+}
+
+uint8_t FunctionGetIdx(char *name) {
+  uint8_t i = 0;
+  uint8_t idx = 0xFF;
+  uint8_t res;
+  Serial.printf("FunctionGetIdx %s\n", name);
+
+  while ((i < FunctionLen) && (idx == 0xFF)) {
+    res = strcmp(Function[i].name, name);
+    if (res == 0) {
+      idx = i;
+      Serial.printf("FunctionGetIdx found @ %d\n", idx);
+    }
+    i++;
+  }
+
+  return idx;
+}
+
+char FunctionReqName[25];
+uint8_t FunctionReqPending;
+uint8_t FunctionReqIdx = 0xFF;
+void FunctionReq(char *name) {
+  uint8_t idx;
+
+  Serial.printf("request %s\n", name);
+  idx = FunctionGetIdx(name);
+  if (idx != 0xFF) {
+    strcpy(FunctionReqName, name);
+    FunctionReqIdx = idx;
+    FunctionReqPending = 1;
+  } else {
+    Serial.printf("request %s not found\n", name);
+  }
+}
+
+void FunctionRel(void) {
+  Serial.println("release");
+  FunctionReqName[0] = '\0';
+  FunctionReqPending = 0;
+  FunctionReqIdx = 0xFF;
+}
+
+void FunctionExec(uint8_t idx) {
+  Serial.printf("execute %d, %s, action %x\n", idx, Function[idx].name,
+                Function[idx].action);
+  RF_Action(2, 0, Function[idx].type, Function[idx].action, NULL);
+}
+
+void FunctionSrv(void) {
+  uint32_t curr_time;
+  uint8_t i;
+
+  curr_time = getTime();
+
+  // manage requests
+  if (FunctionReqPending == 1) {
+    Serial.printf("FunctionReqPending @ time %x\n", curr_time);
+    Function[FunctionReqIdx].timer = curr_time;
+    Function[FunctionReqIdx].timer_run = 1;
+    FunctionExec(FunctionReqIdx);
+    FunctionRel();
+  }
+
+  // delay manager (many delayed action may be cuncurrent)
+  for (i = 0; i < FunctionLen; i++) {
+    // printf("delay manager @ id %d timer_run %d\n", i, Function[i].timer_run);
+    if (Function[i].timer_run == 1) {
+      if ((curr_time - Function[i].timer) >= Function[i].delay) {
+        Serial.printf("time %x expired timer %d\n", curr_time, i);
+        Function[i].timer_run = 0;
+        if (Function[i].next[0] != '\0') {
+          FunctionReq(Function[i].next);
+        }
+      }
+    }
+  }
+}
+
 uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
@@ -136,7 +228,8 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
 }
 
 void RF_ExecuteRadioCodeDB(uint8_t idx) {
-  RF_Action(2, idx, RadioCodes[idx].type, RadioCodes[idx].action);
+  // call
+  FunctionReq(RadioCodes[idx].func);
 }
 
 uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
@@ -166,7 +259,8 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   return ret;
 }
 
-void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id) {
+void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id,
+               char *name) {
   Serial.print(F("RF_Action type "));
   Serial.println(type);
   if (type == 1) {
@@ -184,8 +278,8 @@ void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id) {
     uint8_t lin = id >> 1;
     uint8_t value = id & 0x01;
     Serial.printf("LIO: %d, value %d\n", lin, value);
-    /* logical actions */
-    FbmReqFunction(src_type, src_idx, lin, value);
+    /* logical actions req */
+    FbmLogicReq(src_type, src_idx, lin, value);
   } else {
     // unmapped
     Serial.println(F("RF_Action error: unmapped type"));
@@ -200,20 +294,6 @@ void RF_MonitorTimers(void) {
   uint32_t t247 = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
   // Serial.printf(">> t247 %d\n", t247);
 
-  // loop delay timers
-  for (uint8_t i = 0; i < RadioCodesLen; i++) {
-    // check if running
-    if (RadioCodes[i].running == true) {
-      Serial.printf("radio code [%d] delay, time %d, stamp %d\n", i, mytime,
-                    RadioCodes[i].stop_time);
-      if (mytime >= RadioCodes[i].stop_time) {
-        // perform an action
-        RadioCodes[i].running = false; // set timer to idle
-        RF_Action(2, 0, RadioCodes[i].type, RadioCodes[i].action_d);
-      }
-    }
-  }
-
   // loop over timers
   for (uint8_t i = 0; i < TimersLen; i++) {
     // test in range
@@ -226,7 +306,7 @@ void RF_MonitorTimers(void) {
           "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
 
-      RF_Action(4, 0, Timers[i].type, Timers[i].action);
+      RF_Action(5, 0, Timers[i].type, Timers[i].action, NULL);
     }
   }
   t247_last = t247;
