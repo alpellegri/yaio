@@ -29,7 +29,6 @@ uint32_t control_time;
 uint32_t control_time_last;
 
 uint16_t bootcnt = 0;
-uint32_t fbm_code_last = 0;
 uint32_t fbm_update_last = 0;
 uint32_t fbm_time_th_last = 0;
 uint32_t fbm_monitor_last = 0;
@@ -99,19 +98,10 @@ void FbmLogicReq(uint8_t src_type, uint8_t src_idx, uint8_t lin, bool value) {
 static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
                            bool value) {
   bool ret = false;
-  Serial.print(F("FbmLogicAction "));
-  Serial.print(F("lin "));
-  Serial.print(lin);
-  Serial.print(F(" value "));
-  Serial.print(value);
-  Serial.println();
   if (lin == 0) {
     Firebase.setBool(F("control/alarm"), value);
     if (Firebase.failed()) {
-      Serial.print(F("set failed: control/alarm"));
-      Serial.println(Firebase.error());
     } else {
-      Serial.println(F("set ok: control/alarm"));
       ret = true;
     }
   } else if (lin == 1) {
@@ -120,7 +110,7 @@ static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
     fblog_log(str, status_alarm);
     ret = true;
   } else {
-    Serial.println(F("FbmLogicAction error: unmapped action"));
+    ret = true;
   }
 
   return ret;
@@ -534,7 +524,6 @@ bool FbmService(void) {
               Serial.print(F("set failed: RadioCodes/Inactive"));
               Serial.println(Firebase.error());
             } else {
-              fbm_code_last = code;
             }
           }
         }
@@ -542,7 +531,6 @@ bool FbmService(void) {
     }
 
     // call function service
-    FunctionSrv();
     FbmLogicSrv();
   } break;
   default:

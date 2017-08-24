@@ -29,6 +29,7 @@ String RegIDs[5];
 uint16_t RegIDsLen;
 String FcmMessage;
 
+// TODO: it may fails!!
 void FcmSendPush(String &message) {
   RegIDsLen = 0;
   FirebaseObject fbRegistration_IDs = Firebase.get(F("FCM_Registration_IDs"));

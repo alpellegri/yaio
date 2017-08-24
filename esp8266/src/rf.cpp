@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <RCSwitch.h>
+#include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -36,6 +37,9 @@ typedef struct {
   uint32_t timer;
   uint8_t timer_run;
 } Function_t;
+
+Ticker FunctionTimer;
+Ticker RFRcvTimer;
 
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
@@ -133,13 +137,11 @@ uint8_t FunctionGetIdx(char *name) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
-  Serial.printf("FunctionGetIdx %s\n", name);
 
   while ((i < FunctionLen) && (idx == 0xFF)) {
     res = strcmp(Function[i].name, name);
     if (res == 0) {
       idx = i;
-      Serial.printf("FunctionGetIdx found @ %d\n", idx);
     }
     i++;
   }
@@ -147,33 +149,30 @@ uint8_t FunctionGetIdx(char *name) {
   return idx;
 }
 
+void FunctionSrv(void);
 char FunctionReqName[25];
 uint8_t FunctionReqPending;
 uint8_t FunctionReqIdx = 0xFF;
 void FunctionReq(char *name) {
   uint8_t idx;
 
-  Serial.printf("request %s\n", name);
   idx = FunctionGetIdx(name);
   if (idx != 0xFF) {
     strcpy(FunctionReqName, name);
     FunctionReqIdx = idx;
     FunctionReqPending = 1;
+    FunctionTimer.attach(0.1, FunctionSrv);
   } else {
-    Serial.printf("request %s not found\n", name);
   }
 }
 
 void FunctionRel(void) {
-  Serial.println("release");
   FunctionReqName[0] = '\0';
   FunctionReqPending = 0;
   FunctionReqIdx = 0xFF;
 }
 
 void FunctionExec(uint8_t idx) {
-  Serial.printf("execute %d, %s, action %x\n", idx, Function[idx].name,
-                Function[idx].action);
   RF_Action(2, 0, Function[idx].type, Function[idx].action, NULL);
 }
 
@@ -181,11 +180,10 @@ void FunctionSrv(void) {
   uint32_t curr_time;
   uint8_t i;
 
-  curr_time = getTime();
+  curr_time = millis();
 
   // manage requests
   if (FunctionReqPending == 1) {
-    Serial.printf("FunctionReqPending @ time %x\n", curr_time);
     Function[FunctionReqIdx].timer = curr_time;
     Function[FunctionReqIdx].timer_run = 1;
     FunctionExec(FunctionReqIdx);
@@ -197,8 +195,8 @@ void FunctionSrv(void) {
     // printf("delay manager @ id %d timer_run %d\n", i, Function[i].timer_run);
     if (Function[i].timer_run == 1) {
       if ((curr_time - Function[i].timer) >= Function[i].delay) {
-        Serial.printf("time %x expired timer %d\n", curr_time, i);
         Function[i].timer_run = 0;
+        FunctionTimer.detach();
         if (Function[i].next[0] != '\0') {
           FunctionReq(Function[i].next);
         }
@@ -267,7 +265,6 @@ void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id,
     // dout
     uint8_t pin = id >> 1;
     uint8_t value = id & 0x01;
-    Serial.printf("DIO: %d, value %d\n", pin, value);
     pinMode(id >> 1, OUTPUT);
     digitalWrite(pin, value);
   } else if (type == 2) {
@@ -277,12 +274,9 @@ void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id,
     // lout
     uint8_t lin = id >> 1;
     uint8_t value = id & 0x01;
-    Serial.printf("LIO: %d, value %d\n", lin, value);
     /* logical actions req */
     FbmLogicReq(src_type, src_idx, lin, value);
   } else {
-    // unmapped
-    Serial.println(F("RF_Action error: unmapped type"));
   }
 }
 
@@ -329,13 +323,18 @@ void RF_Disable(void) {
   }
 }
 
+uint32_t RadioCodeLast;
 uint32_t RF_GetRadioCode(void) {
-  uint32_t Code;
-
-  Code = RadioCode;
+  RadioCodeLast = RadioCode;
   RadioCode = 0;
 
-  return Code;
+  return RadioCodeLast;
+}
+
+// avoid receiving multiple code from same telegram
+void RF_Unmask(void) {
+  RadioCodeLast = 0;
+  RFRcvTimer.detach();
 }
 
 void RF_Loop() {
@@ -355,10 +354,11 @@ void RF_Loop() {
       // Serial.print("bit ");
       // Serial.print("Protocol: ");
       // Serial.println(mySwitch.getReceivedProtocol());
-      if (RadioCode == 0) {
+      if (value != RadioCodeLast) {
         Serial.print(F("radio code: "));
         Serial.println(value);
         RadioCode = value;
+        RFRcvTimer.attach(2.0, RF_Unmask);
       } else {
         Serial.println(F("."));
       }
