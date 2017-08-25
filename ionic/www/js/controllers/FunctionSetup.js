@@ -34,44 +34,40 @@ angular.module('app.controllers.FunctionSetup', [])
       ];
 
       $scope.Delays = [{
-          name: "0 sec",
+          name: "0 ms",
           time: 0
         },
         {
-          name: "1 sec",
-          time: 1
+          name: "100 ms",
+          time: 100
         },
         {
-          name: "2 sec",
-          time: 2
+          name: "500 ms",
+          time: 500
         },
         {
-          name: "5 sec",
-          time: 5
+          name: "1 s",
+          time: 1000
         },
         {
-          name: "15 sec",
-          time: 15
+          name: "5 s",
+          time: 5000
         },
         {
-          name: "30 sec",
-          time: 30
+          name: "10 s",
+          time: 10000
         },
         {
           name: "1 min",
-          time: 1 * 60
-        },
-        {
-          name: "2 min",
-          time: 2 * 60
+          time: 60000
         },
         {
           name: "5 min",
-          time: 5 * 60
+          time: 5 * 60000
         },
         {
-          name: "15 min",
-          time: 15 * 60
+          name: "10 min",
+          time: 10 * 60000
         },
       ];
 
