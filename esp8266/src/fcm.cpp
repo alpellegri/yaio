@@ -10,11 +10,11 @@
 #define FCM_NUM_REGIDS_MAX (5)
 
 typedef enum {
-  Fcm_Sm_IDLE = 6,
-  Fcm_Sm_CONNECT = 0,
-  Fcm_Sm_SEND = 1,
-  Fcm_Sm_RECEIVE = 2,
-  Fcm_Sm_CLOSE = 4,
+  Fcm_Sm_IDLE = 0,
+  Fcm_Sm_CONNECT,
+  Fcm_Sm_SEND,
+  Fcm_Sm_RECEIVE,
+  Fcm_Sm_CLOSE,
 } Fbm_StateMachine_t;
 
 const char FcmServer[50] = "fcm.googleapis.com";
