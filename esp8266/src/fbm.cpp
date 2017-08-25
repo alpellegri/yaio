@@ -20,6 +20,7 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 uint8_t boot_sm = 0;
+bool boot_first = false;
 bool status_alarm = false;
 bool status_alarm_last = false;
 bool control_alarm = false;
@@ -134,6 +135,27 @@ void FbmLogicSrv() {
 bool FbmUpdateRadioCodes(void) {
   bool ret = true;
   yield();
+
+  if (ret == true) {
+    FirebaseObject ref = Firebase.get(F("FCM_Registration_IDs"));
+    if (Firebase.failed() == true) {
+      Serial.print(F("get failed: FCM_Registration_IDs"));
+      Serial.println(Firebase.error());
+      ret = false;
+    } else {
+      FcmResetRegIDsDB();
+      JsonVariant variant = ref.getJsonVariant();
+      JsonObject &object = variant.as<JsonObject>();
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        yield();
+        // Serial.println(i->key);
+        JsonObject &nestedObject = i->value;
+        String id = i->value.asString();
+        Serial.println(id);
+        FcmAddRegIDsDB(id);
+      }
+    }
+  }
 
   if (ret == true) {
     Serial.println(F("FbmUpdateRadioCodes Rx"));
@@ -327,9 +349,6 @@ bool FbmService(void) {
         } else {
           boot_sm = 2;
           Serial.println(F("firebase: configured!"));
-
-          String str = String(ESP.getResetReason());
-          fblog_log(str, true);
           yield();
         }
       } else {
@@ -342,9 +361,18 @@ bool FbmService(void) {
   case 2: {
     bool res = FbmUpdateRadioCodes();
     if (res == true) {
+      if (boot_first == false) {
+        boot_first = true;
+        String str = String(ESP.getResetReason());
+        fblog_log(str, true);
+      }
+
       Serial.println(F("Node is up!"));
+      // trick
+      RF_ForceDisable();
+      status_alarm = false;
+      control_time_last = 0;
       boot_sm = 3;
-      control_time_last = 0; // trick
     }
   } break;
 

@@ -26,6 +26,7 @@ extern uint8_t RF_CheckRadioCodeTxDB(uint32_t code);
 extern uint32_t RF_GetRadioCode(void);
 extern void RF_Enable(void);
 extern void RF_Disable(void);
+extern void RF_ForceDisable(void);
 
 extern void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type,
                       uint32_t id, char *name);

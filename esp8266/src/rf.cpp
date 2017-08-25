@@ -66,15 +66,18 @@ void RF_ResetRadioCodeDB(void) {
   RadioCodesLen = 0;
   RadioCode = 0;
 }
+
 void RF_ResetRadioCodeTxDB(void) {
   RadioCodesTxLen = 0;
   RadioCode = 0;
 }
+
 void RF_ResetTimerDB(void) {
   uint32_t mytime = getTime();
   t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
   TimersLen = 0;
 }
+
 void RF_ResetDoutDB(void) { DoutLen = 0; }
 void RF_ResetLoutDB(void) { LoutLen = 0; }
 void RF_ResetFunctionsDB(void) { FunctionLen = 0; }
@@ -321,6 +324,12 @@ void RF_Disable(void) {
     Serial.println(F("RF Disable"));
     mySwitch.disableReceive();
   }
+}
+
+void RF_ForceDisable(void) {
+  RF_StatusEnable = false;
+  Serial.println(F("RF Disable"));
+  mySwitch.disableReceive();
 }
 
 uint32_t RadioCodeLast;
