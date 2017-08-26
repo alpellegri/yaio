@@ -9,7 +9,7 @@
       <ion-list <ion-list can-swipe="true">
         <ion-item ng-repeat="Function in Functions">
           <div>
-            <i class="icon ion-wifi"></i>
+            <i class="icon ion-pricetag"></i>
             <ion-option-button class="button-dark icon-left ion-trash-b" on-hold="RemoveActiveRadioCode(Functions, $index)">
               Remove
             </ion-option-button>
@@ -17,6 +17,13 @@
               Configure
             </ion-option-button>
             {{Function.name}}
+            <span class="item-note">
+              {{Function.action_name}} ({{Function.type_name}}) : ...
+              {{Function.delay.toString()}} ->
+              {{Function.next}}
+            </span>
+          </div>
+          <div>
             <select ng-model="selectedItemType" ng-change="UpdateType(Function, selectedItemType)">
               <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
             </select>
@@ -29,15 +36,6 @@
             <select ng-model="selectedItem_d" ng-change="UpdateNext(Function, selectedItem_d)">
               <option ng-repeat="item in Functions" value="{{item}}">{{item.name}}</option>
             </select>
-          </div>
-          <div>
-            <label>
-              {{Function.id.toString(16).toUpperCase()}} ->
-              {{Function.type_name}} ->
-              {{Function.action_name}} ->
-              ({{Function.delay.toString()}}) ->
-              {{Function.next}}
-            </label>
           </div>
         </ion-item>
       </ion-list>

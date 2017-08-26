@@ -78,7 +78,7 @@ void STA_Loop() {
     if (in == false) {
       // EE_EraseData();
       // Serial.printf("EEPROM erased\n");
-      // RF_ExecuteRadioCodeDB(0);
+      // RF_ExecuteRadioCodeDB(1);
     }
   }
 }

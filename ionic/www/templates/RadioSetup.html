@@ -38,16 +38,16 @@
               Configure
             </ion-option-button>
             {{RadioCode.name}}
-            <select ng-model="selectedItem" ng-change="UpdateAction(RadioCode, selectedItem)">
-              <option ng-repeat="item in Functions" value="{{item}}">{{item.name}}</option>
-            </select>
-          </div>
-          <div>
-            <label>
+            <span class="item-note">
               {{RadioCode.id.toString(16).toUpperCase()}} :
               {{RadioCode.type_name}} ->
               {{RadioCode.func}}
-            </label>
+            </span>
+          </div>
+          <select ng-model="selectedItem" ng-change="UpdateAction(RadioCode, selectedItem)">
+            <option ng-repeat="item in Functions" value="{{item}}">{{item.name}}</option>
+          </select>
+          <div>
           </div>
         </ion-item>
       </ion-list>

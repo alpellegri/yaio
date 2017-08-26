@@ -15,6 +15,7 @@
 #define NUM_TIMER_MAX 4
 #define NUM_DOUT_MAX 4
 #define NUM_LOUT_MAX 4
+#define NUM_FINCTION_MAX 5
 
 typedef struct {
   uint32_t id;
@@ -31,11 +32,13 @@ typedef struct {
 typedef struct {
   char name[25];
   char next[25];
+  uint8_t src_type;
+  uint8_t src_idx;
   uint8_t type;
+  uint8_t timer_run;
   uint32_t action;
   uint32_t delay;
   uint32_t timer;
-  uint8_t timer_run;
 } Function_t;
 
 Ticker FunctionTimer;
@@ -53,12 +56,12 @@ uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
 uint8_t RadioCodesTxLen = 0;
 Timer_t Timers[NUM_TIMER_MAX];
 uint8_t TimersLen = 0;
-uint8_t Dout[NUM_DOUT_MAX];
+uint16_t Dout[NUM_DOUT_MAX];
 uint8_t DoutLen = 0;
-uint8_t Lout[NUM_LOUT_MAX];
+uint16_t Lout[NUM_LOUT_MAX];
 uint8_t LoutLen = 0;
-Function_t Function[5];
-uint8_t FunctionLen = 5;
+Function_t Function[NUM_FINCTION_MAX];
+uint8_t FunctionLen = 0;
 
 uint32_t t247_last = 0;
 
@@ -126,7 +129,7 @@ void RF_AddLoutDB(String action) {
 
 void RF_AddFunctionsDB(String name, String type, String action, String delay,
                        String next) {
-  if (FunctionLen < NUM_RADIO_CODE_RX_MAX) {
+  if (FunctionLen < NUM_FINCTION_MAX) {
     strcpy(Function[FunctionLen].name, name.c_str());
     Function[FunctionLen].type = atoi(type.c_str());
     Function[FunctionLen].action = atoi(action.c_str());
@@ -156,7 +159,8 @@ void FunctionSrv(void);
 char FunctionReqName[25];
 uint8_t FunctionReqPending;
 uint8_t FunctionReqIdx = 0xFF;
-void FunctionReq(char *name) {
+
+void FunctionReq(uint8_t src_type, uint8_t src_idx, char *name) {
   uint8_t idx;
 
   idx = FunctionGetIdx(name);
@@ -164,6 +168,8 @@ void FunctionReq(char *name) {
     strcpy(FunctionReqName, name);
     FunctionReqIdx = idx;
     FunctionReqPending = 1;
+    Function[idx].src_type = src_type;
+    Function[idx].src_idx = src_idx;
     FunctionTimer.attach(0.1, FunctionSrv);
   } else {
   }
@@ -176,7 +182,8 @@ void FunctionRel(void) {
 }
 
 void FunctionExec(uint8_t idx) {
-  RF_Action(2, 0, Function[idx].type, Function[idx].action, NULL);
+  RF_Action(Function[idx].src_type, Function[idx].src_idx, Function[idx].type,
+            Function[idx].action, NULL);
 }
 
 void FunctionSrv(void) {
@@ -201,7 +208,8 @@ void FunctionSrv(void) {
         Function[i].timer_run = 0;
         FunctionTimer.detach();
         if (Function[i].next[0] != '\0') {
-          FunctionReq(Function[i].next);
+          FunctionReq(Function[i].src_type, Function[i].src_idx,
+                      Function[i].next);
         }
       }
     }
@@ -230,7 +238,7 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
 
 void RF_ExecuteRadioCodeDB(uint8_t idx) {
   // call
-  FunctionReq(RadioCodes[idx].func);
+  FunctionReq(2, idx, RadioCodes[idx].func);
 }
 
 uint8_t RF_CheckRadioCodeTxDB(uint32_t code) {
@@ -260,23 +268,24 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
   return ret;
 }
 
-void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t id,
+void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t action,
                char *name) {
   Serial.print(F("RF_Action type "));
   Serial.println(type);
+
   if (type == 1) {
     // dout
-    uint8_t pin = id >> 1;
-    uint8_t value = id & 0x01;
-    pinMode(id >> 1, OUTPUT);
+    uint8_t pin = action >> 1;
+    uint8_t value = action & 0x00000001;
+    pinMode(pin, OUTPUT);
     digitalWrite(pin, value);
   } else if (type == 2) {
     // rf
-    mySwitch.send(id, 24);
+    mySwitch.send(action, 24);
   } else if (type == 3) {
     // lout
-    uint8_t lin = id >> 1;
-    uint8_t value = id & 0x01;
+    uint8_t lin = action >> 1;
+    uint8_t value = action & 0x00000001;
     /* logical actions req */
     FbmLogicReq(src_type, src_idx, lin, value);
   } else {
