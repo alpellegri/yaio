@@ -73,15 +73,14 @@ bool STA_Setup(void) {
 void STA_Loop() {
   uint8_t in = digitalRead(BUTTON);
 
-#if 0
   if (in != sta_button) {
     sta_button = in;
     if (in == false) {
-      EE_EraseData();
-      Serial.printf("EEPROM erased\n");
+      // EE_EraseData();
+      // Serial.printf("EEPROM erased\n");
+      // RF_ExecuteRadioCodeDB(1);
     }
   }
-#endif
 }
 
 /* main function task */

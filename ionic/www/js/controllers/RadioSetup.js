@@ -13,71 +13,10 @@ angular.module('app.controllers.RadioSetup', [])
       $scope.settings = {};
       $scope.InactiveRadioCodes = [];
       $scope.ActiveRadioCodes = [];
-      $scope.ActiveTable = [];
-      $scope.ActiveTable_d = [];
-      $scope.Dout = [];
-      $scope.Lout = [];
-      $scope.Types = [{
-          name: "Empty",
-          type: 0
-        }, {
-          name: "Digital IO",
-          type: 1
-        },
-        {
-          name: "Radio IO",
-          type: 2
-        },
-        {
-          name: "Logical IO",
-          type: 3
-        },
-      ];
-
-      $scope.Delays = [{
-          name: "0 sec",
-          time: 0
-        },
-        {
-          name: "1 sec",
-          time: 1
-        },
-        {
-          name: "2 sec",
-          time: 2
-        },
-        {
-          name: "5 sec",
-          time: 5
-        },
-        {
-          name: "15 sec",
-          time: 15
-        },
-        {
-          name: "30 sec",
-          time: 30
-        },
-        {
-          name: "1 min",
-          time: 1 * 60
-        },
-        {
-          name: "2 min",
-          time: 2 * 60
-        },
-        {
-          name: "5 min",
-          time: 5 * 60
-        },
-        {
-          name: "15 min",
-          time: 15 * 60
-        },
-      ];
+      $scope.Functions = [];
 
       $scope.pushCtrl0Change = function() {
-        firebase.database().ref("control/radio_learn").set($scope.pushCtrl0.checked==true);
+        firebase.database().ref("control/radio_learn").set($scope.pushCtrl0.checked == true);
       };
 
       // remove radio code
@@ -90,15 +29,7 @@ angular.module('app.controllers.RadioSetup', [])
         var radio = {
           name: "default",
           id: $scope.InactiveRadioCodes[i],
-          type: 0,
-          type_name: "",
-          action: 0,
-          action_name: "",
-          delay: 0,
-          type_d: 0,
-          type_d_name: "",
-          action_d: 0,
-          action_d_name: ""
+          func: ""
         }
         data.push(radio);
         $scope.InactiveRadioCodes.splice(i, 1);
@@ -122,22 +53,14 @@ angular.module('app.controllers.RadioSetup', [])
         $scope.ActiveRadioCodes.forEach(function(element) {
           console.log('element');
           console.log(element);
-          var radio = {
+          var _radio = {
             name: element.name,
             id: element.id,
-            type: element.type,
-            type_name: element.type_name,
-            action: element.action,
-            action_name: element.action_name,
-            delay: element.delay,
-            type_d: element.type_d,
-            type_d_name: element.type_d_name,
-            action_d: element.action_d,
-            action_d_name: element.action_d_name
+            func: element.func,
           }
-          console.log('radio');
-          console.log(radio);
-          ref.child('Active').push().set(radio);
+          console.log('_radio');
+          console.log(_radio);
+          ref.child('Active').push().set(_radio);
         });
 
         ref.child('ActiveTx').remove();
@@ -163,66 +86,11 @@ angular.module('app.controllers.RadioSetup', [])
         firebase.database().ref("control/radio_update").set(true);
       }
 
-      $scope.UpdateType = function(RadioCode, item) {
-        console.log('UpdateType');
-        item = JSON.parse(item);
-        console.log(item);
-        RadioCode.type = parseInt(item.type);
-        RadioCode.type_name = item.name;
-        if (item.type == 1) {
-          $scope.ActiveTable = $scope.Dout;
-        } else if (item.type == 2) {
-          $scope.ActiveTable = $scope.ActiveRadioCodesTx;
-        } else if (item.type == 3) {
-          $scope.ActiveTable = $scope.Lout;
-        } else {
-          $scope.ActiveTable = [];
-        }
-        console.log($scope.ActiveTable);
-        console.log(RadioCode);
-      };
-
       $scope.UpdateAction = function(RadioCode, item) {
         console.log('UpdateAction');
         item = JSON.parse(item);
         console.log(item);
-        RadioCode.action = parseInt(item.id);
-        RadioCode.action_name = item.name;
-        console.log(RadioCode);
-      };
-
-      $scope.UpdateDelay = function(RadioCode, delay) {
-        console.log('UpdateDelay');
-        console.log(delay);
-        RadioCode.delay = parseInt(delay);
-        console.log(RadioCode);
-      };
-
-      $scope.UpdateType_d = function(RadioCode, item) {
-        console.log('UpdateType_d');
-        item = JSON.parse(item);
-        console.log(item);
-        RadioCode.type_d = parseInt(item.type);
-        RadioCode.type_d_name = item.name;
-        if (item.type == 1) {
-          $scope.ActiveTable_d = $scope.Dout;
-        } else if (item.type == 2) {
-          $scope.ActiveTable_d = $scope.ActiveRadioCodesTx;
-        } else if (item.type == 3) {
-          $scope.ActiveTable_d = $scope.Lout;
-        } else {
-          $scope.ActiveTable_d = [];
-        }
-        console.log($scope.ActiveTable_d);
-        console.log(RadioCode);
-      };
-
-      $scope.UpdateAction_d = function(RadioCode, item) {
-        console.log('UpdateAction_d');
-        item = JSON.parse(item);
-        console.log(item);
-        RadioCode.action_d = parseInt(item.id);
-        RadioCode.action_d_name = item.name;
+        RadioCode.func = item.name;
         console.log(RadioCode);
       };
 
@@ -316,24 +184,13 @@ angular.module('app.controllers.RadioSetup', [])
           });
         });
 
-        var ref = firebase.database().ref('DIO/Dout');
+        var ref = firebase.database().ref('Functions');
         var i = 0;
-        $scope.Dout = [];
+        $scope.Functions = [];
         ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
-            // console.log(childSnapshot.val());
-            $scope.Dout.push(childSnapshot.val());
-            i++;
-          });
-        });
-
-        var ref = firebase.database().ref('LIO/Lout');
-        var i = 0;
-        $scope.Lout = [];
-        ref.once('value', function(snapshot) {
-          snapshot.forEach(function(childSnapshot) {
-            // console.log(childSnapshot.val());
-            $scope.Lout.push(childSnapshot.val());
+            console.log(childSnapshot.val());
+            $scope.Functions.push(childSnapshot.val());
             i++;
           });
         });

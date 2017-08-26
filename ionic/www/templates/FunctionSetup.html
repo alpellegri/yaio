@@ -1,0 +1,50 @@
+<ion-view title="Function Setup" id="page11">
+  <ion-content class="custom" padding="true" scroll="true" class="has-header">
+    <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+    <button id="Add timer" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-plus" on-hold="showPopupFunctionAdd()">
+      Add Function
+    </button>
+    <div class="list card">
+      <div class="item item-divider">Functions</div>
+      <ion-list <ion-list can-swipe="true">
+        <ion-item ng-repeat="Function in Functions">
+          <div>
+            <i class="icon ion-pricetag"></i>
+            <ion-option-button class="button-dark icon-left ion-trash-b" on-hold="RemoveActiveRadioCode(Functions, $index)">
+              Remove
+            </ion-option-button>
+            <ion-option-button class="button-light icon-left ion-social-rss" on-hold="showPopupFunctionEdit(Functions, $index)">
+              Configure
+            </ion-option-button>
+            {{Function.name}}
+            <span class="item-note">
+              {{Function.action_name}} ({{Function.type_name}}) : ...
+              {{Function.delay.toString()}} ->
+              {{Function.next}}
+            </span>
+          </div>
+          <div>
+            <select ng-model="selectedItemType" ng-change="UpdateType(Function, selectedItemType)">
+              <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItem" ng-change="UpdateAction(Function, selectedItem)">
+              <option ng-repeat="item in ActiveTable" value="{{item}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItemDelay" ng-change="UpdateDelay(Function, selectedItemDelay)">
+              <option ng-repeat="item in Delays" value="{{item.time}}">{{item.name}}</option>
+            </select>
+            <select ng-model="selectedItem_d" ng-change="UpdateNext(Function, selectedItem_d)">
+              <option ng-repeat="item in Functions" value="{{item}}">{{item.name}}</option>
+            </select>
+          </div>
+        </ion-item>
+      </ion-list>
+    </div>
+    <button id="setup-update" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-android-upload" on-hold="SetupFunctions()">
+      Update Function Configuration
+    </button>
+    <button id="setup-clear" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-trash-b" on-hold="ResetFunctions()">
+      Reset Function Configuration
+    </button>
+  </ion-content>
+</ion-view>

@@ -38,31 +38,16 @@
               Configure
             </ion-option-button>
             {{RadioCode.name}}
-            <select ng-model="selectedItemType" ng-change="UpdateType(RadioCode, selectedItemType)">
-              <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
-            </select>
-            <select ng-model="selectedItem" ng-change="UpdateAction(RadioCode, selectedItem)">
-              <option ng-repeat="item in ActiveTable" value="{{item}}">{{item.name}}</option>
-            </select>
-            <select ng-model="selectedItemDelay" ng-change="UpdateDelay(RadioCode, selectedItemDelay)">
-              <option ng-repeat="item in Delays" value="{{item.time}}">{{item.name}}</option>
-            </select>
-            <select ng-model="selectedItemType_d" ng-change="UpdateType_d(RadioCode, selectedItemType_d)">
-              <option ng-repeat="item in Types" value="{{item}}">{{item.name}}</option>
-            </select>
-            <select ng-model="selectedItem_d" ng-change="UpdateAction_d(RadioCode, selectedItem_d)">
-              <option ng-repeat="item in ActiveTable_d" value="{{item}}">{{item.name}}</option>
-            </select>
-          </div>
-          <div>
-            <label>
-              {{RadioCode.id.toString(16).toUpperCase()}} ->
+            <span class="item-note">
+              {{RadioCode.id.toString(16).toUpperCase()}} :
               {{RadioCode.type_name}} ->
-              {{RadioCode.action_name}} ->
-              ({{RadioCode.delay.toString()}}) ->
-              {{RadioCode.type_d_name}} ->
-              {{RadioCode.action_d_name}}
-            </label>
+              {{RadioCode.func}}
+            </span>
+          </div>
+          <select ng-model="selectedItem" ng-change="UpdateAction(RadioCode, selectedItem)">
+            <option ng-repeat="item in Functions" value="{{item}}">{{item.name}}</option>
+          </select>
+          <div>
           </div>
         </ion-item>
       </ion-list>
@@ -90,7 +75,7 @@
       Update Radio Codes Configuration
     </button>
     <button id="setup-clear" style="text-align:left;" class="button button-clear button-light button-block icon-right ion-trash-b" on-hold="ResetRadioCodes()">
-      Reset Radio Codes
+      Reset Radio Codes Configuration
     </button>
   </ion-content>
 </ion-view>

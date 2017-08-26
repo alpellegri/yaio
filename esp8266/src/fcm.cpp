@@ -7,13 +7,14 @@
 #include "fcm.h"
 
 #define FCM_SERVICE_TIMEOUT (5 * 1000)
+#define FCM_NUM_REGIDS_MAX (5)
 
 typedef enum {
-  Fcm_Sm_IDLE = 6,
-  Fcm_Sm_CONNECT = 0,
-  Fcm_Sm_SEND = 1,
-  Fcm_Sm_RECEIVE = 2,
-  Fcm_Sm_CLOSE = 4,
+  Fcm_Sm_IDLE = 0,
+  Fcm_Sm_CONNECT,
+  Fcm_Sm_SEND,
+  Fcm_Sm_RECEIVE,
+  Fcm_Sm_CLOSE,
 } Fbm_StateMachine_t;
 
 const char FcmServer[50] = "fcm.googleapis.com";
@@ -25,27 +26,20 @@ bool FcmServiceRxRun;
 bool FcmServiceRxStop;
 
 // up-to 5 devices
-String RegIDs[5];
-uint16_t RegIDsLen;
+String RegIDs[FCM_NUM_REGIDS_MAX];
+uint8_t RegIDsLen;
 String FcmMessage;
 
-void FcmSendPush(String &message) {
-  RegIDsLen = 0;
-  FirebaseObject fbRegistration_IDs = Firebase.get(F("FCM_Registration_IDs"));
-  if (Firebase.failed() == true) {
-    Serial.print(F("get failed: FCM_Registration_IDs"));
-    Serial.println(Firebase.error());
-  } else {
-    JsonVariant variant = fbRegistration_IDs.getJsonVariant();
-    JsonObject &object = variant.as<JsonObject>();
-    for (JsonObject::iterator it = object.begin(); it != object.end(); ++it) {
-      yield();
-      Serial.println(it->key);
-      Serial.println(it->value.asString());
-      RegIDs[RegIDsLen++] = it->value.asString();
-    }
-  }
+void FcmResetRegIDsDB(void) { RegIDsLen = 0; }
 
+void FcmAddRegIDsDB(String string) {
+  if (RegIDsLen < FCM_NUM_REGIDS_MAX) {
+    RegIDs[RegIDsLen] = string;
+    RegIDsLen++;
+  }
+}
+
+void FcmSendPush(String &message) {
   if ((RegIDsLen > 0) && (fcm_sts == Fcm_Sm_IDLE)) {
     FcmMessage = message;
     fcm_sts = Fcm_Sm_CONNECT;

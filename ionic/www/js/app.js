@@ -19,6 +19,7 @@ angular.module('starter', ['ionic', 'chart.js',
   'app.controllers.TimerSetup',
   'app.controllers.DioSetup',
   'app.controllers.LogicalIOSetup',
+  'app.controllers.FunctionSetup',
   'app.routes', 'app.directives',
   'ngCordova'
 ])
