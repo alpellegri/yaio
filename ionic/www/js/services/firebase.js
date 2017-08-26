@@ -49,7 +49,7 @@ angular.module('app.services.firebase', [])
     }
 
     service.GetmessagingSenderId = function() {
-      return config.messagingSenderId;
+      return service.google_services.project_info.project_number;
     }
 
     return service;

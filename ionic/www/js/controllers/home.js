@@ -53,7 +53,7 @@ angular.module('app.controllers.home', [])
         $scope.$broadcast("scroll.infiniteScrollComplete");
       };
 
-      $scope.doRefresh();
+      // $scope.doRefresh();
     } else {
       console.log('Firebase not initialized');
       alert('Firebase not initialized');

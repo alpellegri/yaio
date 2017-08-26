@@ -23,6 +23,7 @@ angular.module('app.services.push', [])
         if (ionic.Platform.isAndroid() == true) {
           // initialize
           options.android.senderID = FirebaseService.GetmessagingSenderId();
+
           $cordovaPushV5.initialize(options).then(function() {
             // start listening for new notifications
             $cordovaPushV5.onNotification();
