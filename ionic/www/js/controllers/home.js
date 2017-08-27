@@ -1,6 +1,6 @@
 angular.module('app.controllers.home', [])
 
-  .controller('homeCtrl', function($ionicPlatform, $scope, PushService, FirebaseService) {
+  .controller('homeCtrl', function($ionicPlatform, $scope, FirebaseService) {
     console.log('homeCtrl');
 
     $scope.control = {};
@@ -9,21 +9,6 @@ angular.module('app.controllers.home', [])
 
     var fb_init = localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
-
-      $ionicPlatform.ready(function() {
-        PushService.init();
-      });
-
-      FirebaseService.init();
-      var isup = FirebaseService.up();
-      if (FirebaseService.up() == true) {
-        // wait for device ready (cordova) before initialize push service
-
-        $scope.pushCtrl0Change = function() {
-          firebase.database().ref("control/alarm").set($scope.control.alarm == true);
-        };
-        // $scope.doRefresh();
-      }
       $scope.doRefresh = function() {
         console.log('doRefresh-HomeCtrl');
         if (FirebaseService.up() == true) {
@@ -48,12 +33,20 @@ angular.module('app.controllers.home', [])
           }, function(errorObject) {
             console.log("firebase failed: " + errorObject.code);
           });
+          if (($scope.control.time - $scope.status.time) < 10) {
+            $scope.$broadcast('scroll.refreshComplete');
+          } else {
+            setTimeout(function() {
+              $scope.doRefresh();
+            }, 500);
+          }
+        } else {
+          setTimeout(function() {
+            $scope.doRefresh();
+          }, 500);
         }
-        $scope.$broadcast('scroll.refreshComplete');
-        $scope.$broadcast("scroll.infiniteScrollComplete");
       };
-
-      // $scope.doRefresh();
+      $scope.doRefresh();
     } else {
       console.log('Firebase not initialized');
       alert('Firebase not initialized');

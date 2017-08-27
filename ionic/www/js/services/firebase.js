@@ -1,6 +1,6 @@
 angular.module('app.services.firebase', [])
 
-  .factory('FirebaseService', function($http) {
+  .factory('FirebaseService', function($ionicPlatform, $rootScope, $http, PushService) {
     console.log('FirebaseService: InitFirebase');
 
     var service_init_done = false;
@@ -38,8 +38,10 @@ angular.module('app.services.firebase', [])
                 // ...
               });
               service.status = true;
-            }
-          );
+              $ionicPlatform.ready(function() {
+                PushService.init(config.messagingSenderId);
+              });
+            });
         }
       }
     }

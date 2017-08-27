@@ -1,11 +1,11 @@
 angular.module('app.services.push', [])
 
-  .factory('PushService', function($ionicPlatform, $rootScope, $http, $cordovaPushV5, FirebaseService) {
+  .factory('PushService', function($ionicPlatform, $rootScope, $http, $cordovaPushV5) {
     var service = {};
 
     console.log('services');
     $ionicPlatform.ready(function() {
-      service.init = function() {
+      service.init = function(messagingSenderId) {
 
         var options = {
           android: {
@@ -22,7 +22,7 @@ angular.module('app.services.push', [])
 
         if (ionic.Platform.isAndroid() == true) {
           // initialize
-          options.android.senderID = FirebaseService.GetmessagingSenderId();
+          options.android.senderID = messagingSenderId;//FirebaseService.GetmessagingSenderId();
 
           $cordovaPushV5.initialize(options).then(function() {
             // start listening for new notifications
