@@ -9,6 +9,7 @@ angular.module('app.services.firebase', [])
       service.status = false;
       if (service_init_done == false) {
         service_init_done = true;
+        console.log('FirebaseService: service.init');
         var fb_user_init = localStorage.getItem('firebase_user_init');
         if (fb_user_init == 'true') {
           $http.get('google-services.json')

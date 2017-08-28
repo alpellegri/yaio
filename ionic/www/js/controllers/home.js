@@ -6,6 +6,7 @@ angular.module('app.controllers.home', [])
     $scope.control = {};
     $scope.status = {};
     $scope.system = {};
+    $scope.loading = true;
 
     var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
@@ -35,6 +36,7 @@ angular.module('app.controllers.home', [])
           });
           if (($scope.control.time - $scope.status.time) < 10) {
             $scope.$broadcast('scroll.refreshComplete');
+            $scope.loading = false;
           } else {
             setTimeout(function() {
               $scope.doRefresh();
