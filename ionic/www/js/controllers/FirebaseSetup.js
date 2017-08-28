@@ -4,8 +4,8 @@ angular.module('app.controllers.FirebaseSetup', [])
     console.log('FirebaseSetupCtrl');
 
     $scope.settings = {};
-    var fb_init = localStorage.getItem('firebase_init');
-    if (fb_init == 'true') {
+    var fb_user_init = localStorage.getItem('firebase_user_init');
+    if (fb_user_init == 'true') {
       $scope.settings.firebase_username = localStorage.getItem('firebase_username');
       $scope.settings.firebase_password = localStorage.getItem('firebase_password');
     }
@@ -61,7 +61,7 @@ angular.module('app.controllers.FirebaseSetup', [])
 
     $scope.ResetFirebase = function() {
       console.log('firebaseCtrl: ResetFirebase');
-      localStorage.removeItem('firebase_init');
+      localStorage.removeItem('firebase_user_init');
       localStorage.removeItem('firebase_username');
       localStorage.removeItem('firebase_password');
       $scope.settings = {};
@@ -93,6 +93,7 @@ angular.module('app.controllers.FirebaseSetup', [])
               // don't allow the user to close unless he enters wifi password
               e.preventDefault();
             } else {
+              localStorage.setItem('firebase_user_init', true);
               localStorage.setItem('firebase_username', $scope.settings.firebase_username);
               localStorage.setItem('firebase_password', $scope.settings.firebase_password);
               return $scope.settings;

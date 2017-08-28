@@ -3,7 +3,7 @@ angular.module('app.controllers.NodeInfo', [])
   .controller('NodeInfoCtrl', function($ionicPlatform, $scope, PushService, FirebaseService) {
     console.log('NodeInfoCtrl');
 
-    var fb_init = localStorage.getItem('firebase_init');
+    var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
       $scope.control = {};

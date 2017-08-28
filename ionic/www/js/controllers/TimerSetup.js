@@ -3,7 +3,7 @@ angular.module('app.controllers.TimerSetup', [])
   .controller('TimerSetupCtrl', function($scope, $ionicPopup, $timeout) {
     console.log('TimerSetupCtrl');
 
-    var fb_init = localStorage.getItem('firebase_init');
+    var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
       date = new Date();

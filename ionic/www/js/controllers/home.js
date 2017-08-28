@@ -7,7 +7,7 @@ angular.module('app.controllers.home', [])
     $scope.status = {};
     $scope.system = {};
 
-    var fb_init = localStorage.getItem('firebase_init');
+    var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
       $scope.doRefresh = function() {
         console.log('doRefresh-HomeCtrl');

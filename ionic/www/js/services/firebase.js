@@ -9,10 +9,8 @@ angular.module('app.services.firebase', [])
       service.status = false;
       if (service_init_done == false) {
         service_init_done = true;
-        var fb_init = localStorage.getItem('firebase_init');
-        // console.log('FirebaseService firebase_init');
-        // console.log(fb_init);
-        if (fb_init == 'true') {
+        var fb_user_init = localStorage.getItem('firebase_user_init');
+        if (fb_user_init == 'true') {
           $http.get('google-services.json')
             .success(function(data) {
               var config = {
@@ -22,6 +20,8 @@ angular.module('app.services.firebase', [])
                 storageBucket: "",
                 messagingSenderId: ""
               };
+              console.log('google-services.json');
+              console.log(data);
               // The json data will now be in scope.
               service.google_services = data;
               config.apiKey = service.google_services.client[0].api_key[0].current_key;
@@ -32,6 +32,7 @@ angular.module('app.services.firebase', [])
               var fb_password = localStorage.getItem('firebase_password');
               firebase.auth().signInWithEmailAndPassword(fb_username, fb_password).catch(function(error) {
                 console.log('auth error');
+                alert('Firebase Authentication Error');
                 // Handle Errors here.
                 var errorCode = error.code;
                 var errorMessage = error.message;
@@ -47,6 +48,7 @@ angular.module('app.services.firebase', [])
     }
 
     service.up = function() {
+      console.log("service.up: " + service.status);
       return service.status;
     }
 

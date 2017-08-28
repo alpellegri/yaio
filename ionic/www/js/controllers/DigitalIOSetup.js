@@ -3,7 +3,7 @@ angular.module('app.controllers.DioSetup', [])
   .controller('DigitalIOSetupCtrl', function($scope, $ionicPopup, $timeout) {
     console.log('DigitalIOSetupCtrl');
 
-    var fb_init = localStorage.getItem('firebase_init');
+    var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
       $scope.Dout = [];
