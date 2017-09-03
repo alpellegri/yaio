@@ -13,6 +13,7 @@
 #include "ee.h"
 #include "rf.h"
 #include "sta.h"
+#include "vers.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -37,6 +38,7 @@ void setup() {
   EE_Setup();
 
   Serial.println();
+  Serial.println(VERS_getVersion());
   Serial.println(F("Node starting..."));
 
 #if 0

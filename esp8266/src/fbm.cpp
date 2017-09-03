@@ -13,6 +13,7 @@
 #include "fcm.h"
 #include "rf.h"
 #include "timesrv.h"
+#include "vers.h"
 
 #define DHTPIN D6
 #define DHTTYPE DHT22
@@ -340,6 +341,7 @@ bool FbmService(void) {
         bootcnt = object["bootcnt"];
         object["bootcnt"] = ++bootcnt;
         object["time"] = getTime();
+        object["version"] = String(VERS_getVersion());
         yield();
         Firebase.set(F("startup"), JsonVariant(object));
         if (Firebase.failed()) {
