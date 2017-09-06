@@ -3,7 +3,7 @@ angular.module('app.controllers.RadioSetup', [])
   .controller('RadioSetupCtrl', function($scope, $ionicPopup, $timeout) {
     console.log('RadioSetupCtrl');
 
-    var fb_init = localStorage.getItem('firebase_init');
+    var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
       $scope.pushCtrl0 = {

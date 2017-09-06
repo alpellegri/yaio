@@ -3,7 +3,7 @@ angular.module('app.controllers.LogicalIOSetup', [])
   .controller('LogicalIOSetupCtrl', function($scope, $ionicPopup, $timeout) {
     console.log('LogicalIOSetupCtrl');
 
-    var fb_init = localStorage.getItem('firebase_init');
+    var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
       $scope.Lout = [];
