@@ -17,7 +17,7 @@ typedef enum {
   Fcm_Sm_CLOSE,
 } Fbm_StateMachine_t;
 
-const char FcmServer[50] = "fcm.googleapis.com";
+const char FcmServer[25] = "fcm.googleapis.com";
 
 WiFiClient fcm_client;
 uint16_t fcm_sts = Fcm_Sm_IDLE;

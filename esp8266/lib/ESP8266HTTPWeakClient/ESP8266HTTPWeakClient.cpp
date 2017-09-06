@@ -288,6 +288,12 @@ void HTTPWeakClient::setTimeout(uint16_t timeout) {
 void HTTPWeakClient::useHTTP10(bool useHTTP10) { _useHTTP10 = useHTTP10; }
 
 /**
+ * send a HEAD request
+ * @return http code
+ */
+int HTTPWeakClient::HEAD() { return sendRequest("HEAD"); }
+
+/**
  * send a GET request
  * @return http code
  */
@@ -867,6 +873,8 @@ bool HTTPWeakClient::sendHeader(const char *type) {
   }
 
   header += _headers + "\r\n";
+
+  DEBUG_HTTPCLIENT("[HTTP-Client][Header] TX: '%s'\n", header.c_str());
 
   return (_tcp->write((const uint8_t *)header.c_str(), header.length()) ==
           header.length());

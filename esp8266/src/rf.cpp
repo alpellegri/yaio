@@ -10,12 +10,12 @@
 #include "rf.h"
 #include "timesrv.h"
 
-#define NUM_RADIO_CODE_RX_MAX 8
-#define NUM_RADIO_CODE_TX_MAX 8
-#define NUM_TIMER_MAX 4
-#define NUM_DOUT_MAX 4
-#define NUM_LOUT_MAX 4
-#define NUM_FINCTION_MAX 5
+#define NUM_RADIO_CODE_RX_MAX 5
+#define NUM_RADIO_CODE_TX_MAX 5
+#define NUM_TIMER_MAX 5
+#define NUM_DOUT_MAX 3
+#define NUM_LOUT_MAX 5
+#define NUM_FUNCTION_MAX 8
 
 typedef struct {
   uint32_t id;
@@ -46,24 +46,38 @@ Ticker RFRcvTimer;
 
 RCSwitch mySwitch = RCSwitch();
 uint32_t RadioCode;
+uint32_t RadioCodeLast;
 bool RF_StatusEnable = false;
 
-// array 5 is used for delay timer running/idle
-// array 6 is used for delay timer time stamp
-RF_RadioCodeSts_t RadioCodes[NUM_RADIO_CODE_RX_MAX];
+RF_RadioCodeSts_t *RadioCodes;
 uint8_t RadioCodesLen = 0;
-uint32_t RadioCodesTx[NUM_RADIO_CODE_TX_MAX];
+uint32_t *RadioCodesTx;
 uint8_t RadioCodesTxLen = 0;
-Timer_t Timers[NUM_TIMER_MAX];
+Timer_t *Timers;
 uint8_t TimersLen = 0;
-uint16_t Dout[NUM_DOUT_MAX];
+uint16_t *Dout;
 uint8_t DoutLen = 0;
-uint16_t Lout[NUM_LOUT_MAX];
+uint16_t *Lout;
 uint8_t LoutLen = 0;
-Function_t Function[NUM_FINCTION_MAX];
+Function_t *Function;
 uint8_t FunctionLen = 0;
 
 uint32_t t247_last = 0;
+
+void FunctionSrv(void);
+char FunctionReqName[25];
+uint8_t FunctionReqPending;
+uint8_t FunctionReqIdx = 0xFF;
+
+void RF_Init(void) {
+  RadioCodes = (RF_RadioCodeSts_t *)malloc(NUM_RADIO_CODE_RX_MAX *
+                                           sizeof(RF_RadioCodeSts_t));
+  RadioCodesTx = (uint32_t *)malloc(NUM_RADIO_CODE_TX_MAX * sizeof(uint32_t));
+  Timers = (Timer_t *)malloc(NUM_TIMER_MAX * sizeof(Timer_t));
+  Dout = (uint16_t *)malloc(NUM_DOUT_MAX * sizeof(uint16_t));
+  Lout = (uint16_t *)malloc(NUM_LOUT_MAX * sizeof(uint16_t));
+  Function = (Function_t *)malloc(NUM_FUNCTION_MAX * sizeof(Function_t));
+}
 
 void RF_ResetRadioCodeDB(void) {
   RadioCodesLen = 0;
@@ -129,7 +143,7 @@ void RF_AddLoutDB(String action) {
 
 void RF_AddFunctionsDB(String name, String type, String action, String delay,
                        String next) {
-  if (FunctionLen < NUM_FINCTION_MAX) {
+  if (FunctionLen < NUM_FUNCTION_MAX) {
     strcpy(Function[FunctionLen].name, name.c_str());
     Function[FunctionLen].type = atoi(type.c_str());
     Function[FunctionLen].action = atoi(action.c_str());
@@ -154,11 +168,6 @@ uint8_t FunctionGetIdx(char *name) {
 
   return idx;
 }
-
-void FunctionSrv(void);
-char FunctionReqName[25];
-uint8_t FunctionReqPending;
-uint8_t FunctionReqIdx = 0xFF;
 
 void FunctionReq(uint8_t src_type, uint8_t src_idx, char *name) {
   uint8_t idx;
@@ -307,7 +316,7 @@ void RF_MonitorTimers(void) {
     bool res = RF_TestInRange(_time, t247_last, t247);
     if (res == true) {
       // action
-      Serial.printf(">>> action on timer %d at time %d\n", i, t247);
+      Serial.printf_P(PSTR(">>> action on timer %d at time %d\n"), i, t247);
       String log =
           "action on timer " + String(i) + " at time " + String(t247) + "\n";
       fblog_log(log, false);
@@ -341,7 +350,6 @@ void RF_ForceDisable(void) {
   mySwitch.disableReceive();
 }
 
-uint32_t RadioCodeLast;
 uint32_t RF_GetRadioCode(void) {
   RadioCodeLast = RadioCode;
   RadioCode = 0;

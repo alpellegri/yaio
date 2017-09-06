@@ -29,6 +29,8 @@
 #include <WiFiClient.h>
 #include <memory>
 
+// #define DEBUG_ESP_HTTP_CLIENT 1
+// #define DEBUG_ESP_PORT Serial
 #ifdef DEBUG_ESP_HTTP_CLIENT
 #ifdef DEBUG_ESP_PORT
 #define DEBUG_HTTPCLIENT(...) DEBUG_ESP_PORT.printf(__VA_ARGS__)
@@ -150,6 +152,7 @@ public:
   void useHTTP10(bool usehttp10 = true);
 
   /// request handling
+  int HEAD();
   int GET();
   int POST(uint8_t *payload, size_t size);
   int POST(String payload);

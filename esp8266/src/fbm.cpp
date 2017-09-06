@@ -12,6 +12,7 @@
 #include "fbm.h"
 #include "fcm.h"
 #include "rf.h"
+#include "sta.h"
 #include "timesrv.h"
 #include "vers.h"
 
@@ -435,7 +436,8 @@ bool FbmService(void) {
 
               bool control_reboot = object["reboot"];
               if (control_reboot == true) {
-                ESP.restart();
+                // ESP.restart();
+                boot_sm = 4;
               }
             } else {
               Serial.println(F("parseObject() failed"));
@@ -563,6 +565,11 @@ bool FbmService(void) {
     // call function service
     FbmLogicSrv();
   } break;
+
+  case 4:
+    STA_FotaReq();
+    boot_sm = 5;
+    break;
   default:
     break;
   }

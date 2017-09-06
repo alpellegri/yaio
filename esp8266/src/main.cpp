@@ -23,7 +23,6 @@
 // Adafruit_SSD1306 display(OLED_RESET);
 
 uint8_t mode;
-uint16_t count = 0;
 uint32_t current_time;
 uint32_t schedule_time;
 
@@ -31,7 +30,6 @@ void setup() {
   bool ret;
 
   pinMode(LED, OUTPUT);
-  pinMode(D1, OUTPUT);
   pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 

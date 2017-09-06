@@ -32,6 +32,7 @@ extern void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type,
                       uint32_t id, char *name);
 extern void RF_MonitorTimers(void);
 
+extern void RF_Init(void);
 extern void RF_Loop(void);
 extern bool RF_Task(void);
 

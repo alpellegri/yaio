@@ -94,8 +94,8 @@ static void breakTime(uint32_t time, tmElements_t &tm) {
   tm.Month = month + 1; // jan is month 1
   tm.Day = time + 1;    // day of month
 
-  Serial.printf("%d-%02d-%02d %02d:%02d:%02d\n", tm.Year, tm.Month, tm.Day,
-                tm.Hour, tm.Minute, tm.Second);
+  Serial.printf_P(PSTR("%d-%02d-%02d %02d:%02d:%02d\n"), tm.Year, tm.Month,
+                  tm.Day, tm.Hour, tm.Minute, tm.Second);
 }
 
 // send an NTP request to the time server at the given address

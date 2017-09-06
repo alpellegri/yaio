@@ -7,10 +7,10 @@
     <ion-toggle toggle-class="toggle-positive" ng-model="control.wol" ng-change="pushCtrl1Change()">
       Wake Up On LAN
     </ion-toggle>
-    <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
-      Request Reboot
-    </ion-toggle>
     <a class="item">startup.bootcnt<span class="item-note">{{startup.bootcnt}}</span></a>
     <a class="item">status.heap<span class="item-note">{{status.heap}}</span></a>
+    <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
+      Update Firmware
+    </ion-toggle>
   </ion-content>
 </ion-view>

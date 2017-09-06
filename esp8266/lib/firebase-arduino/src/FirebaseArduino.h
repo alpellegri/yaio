@@ -30,14 +30,14 @@
  * Firebase.h.
  */
 class FirebaseArduino {
- public:
+public:
   /**
    * Must be called first. This initialize the client with the given
    * firebase host and credentials.
    * \param host Your firebase db host, usually X.firebaseio.com.
    * \param auth Optional credentials for the db, a secret or token.
    */
-  void begin(const String& host, const String& auth = "");
+  void begin(const String &host, const String &auth = "");
 
   /**
    * Appends the integer value to the node at path.
@@ -47,7 +47,7 @@ class FirebaseArduino {
    * \param value Integer value that you wish to append to the node.
    * \return The unique key of the new child node.
    */
-  String pushInt(const String& path, int value);
+  String pushInt(const String &path, int value);
 
   /**
    * Appends the float value to the node at path.
@@ -57,7 +57,7 @@ class FirebaseArduino {
    * \param value Float value that you wish to append to the node.
    * \return The unique key of the new child node.
    */
-  String pushFloat(const String& path, float value);
+  String pushFloat(const String &path, float value);
 
   /**
    * Appends the bool value to the node at path.
@@ -67,7 +67,7 @@ class FirebaseArduino {
    * \param value Bool value that you wish to append to the node.
    * \return The unique key of the new child node.
    */
-  String pushBool(const String& path, bool value);
+  String pushBool(const String &path, bool value);
 
   /**
    * Appends the String value to the node at path.
@@ -77,7 +77,7 @@ class FirebaseArduino {
    * \param value String value that you wish to append to the node.
    * \return The unique key of the new child node.
    */
-  String pushString(const String& path, const String& value);
+  String pushString(const String &path, const String &value);
 
   /**
    * Appends the JSON data to the node at path.
@@ -87,7 +87,7 @@ class FirebaseArduino {
    * \param value JSON data that you wish to append to the node.
    * \return The unique key of the new child node.
    */
-  String push(const String& path, const JsonVariant& value);
+  String push(const String &path, const JsonVariant &value);
 
   /**
    * Writes the integer value to the node located at path equivalent to the
@@ -96,7 +96,7 @@ class FirebaseArduino {
    * \param path The path inside of your db to the node you wish to update.
    * \param value Integer value that you wish to write.
    */
-  void setInt(const String& path, int value);
+  void setInt(const String &path, int value);
 
   /**
    * Writes the float value to the node located at path equivalent to the
@@ -105,7 +105,7 @@ class FirebaseArduino {
    * \param path The path inside of your db to the node you wish to update.
    * \param value Float value that you wish to write.
    */
-  void setFloat(const String& path, float value);
+  void setFloat(const String &path, float value);
 
   /**
    * Writes the bool value to the node located at path equivalent to the
@@ -114,7 +114,7 @@ class FirebaseArduino {
    * \param path The path inside of your db to the node you wish to update.
    * \param value Bool value that you wish to write.
    */
-  void setBool(const String& path, bool value);
+  void setBool(const String &path, bool value);
 
   /**
    * Writes the String value to the node located at path equivalent to the
@@ -123,7 +123,7 @@ class FirebaseArduino {
    * \param path The path inside of your db to the node you wish to update.
    * \param value String value that you wish to write.
    */
-  void setString(const String& path, const String& value);
+  void setString(const String &path, const String &value);
 
   /**
    * Writes the JSON data to the node located at path.
@@ -132,48 +132,52 @@ class FirebaseArduino {
    * \param path The path inside of your db to the node you wish to update.
    * \param value JSON data that you wish to write.
    */
-  void set(const String& path, const JsonVariant& value);
-
+  void set(const String &path, const JsonVariant &value);
 
   /**
    * Gets the integer value located at path.
    * You should check success() after calling.
    * \param path The path to the node you wish to retrieve.
-   * \return The integer value located at that path. Will only be populated if success() is true.
+   * \return The integer value located at that path. Will only be populated if
+   * success() is true.
    */
-  int getInt(const String& path);
+  int getInt(const String &path);
 
   /**
    * Gets the float value located at path.
    * You should check success() after calling.
    * \param path The path to the node you wish to retrieve.
-   * \return The float value located at that path. Will only be populated if success() is true.
+   * \return The float value located at that path. Will only be populated if
+   * success() is true.
    */
-  float getFloat(const String& path);
+  float getFloat(const String &path);
 
   /**
    * Gets the string value located at path.
    * You should check success() after calling.
    * \param path The path to the node you wish to retrieve.
-   * \return The string value located at that path. Will only be populated if success() is true.
+   * \return The string value located at that path. Will only be populated if
+   * success() is true.
    */
-  String getString(const String& path);
+  String getString(const String &path);
 
   /**
    * Gets the boolean value located at path.
    * You should check success() after calling.
    * \param path The path to the node you wish to retrieve.
-   * \return The boolean value located at that path. Will only be populated if success() is true.
+   * \return The boolean value located at that path. Will only be populated if
+   * success() is true.
    */
-  bool getBool(const String& path);
+  bool getBool(const String &path);
 
   /**
    * Gets the json object value located at path.
    * You should check success() after calling.
    * \param path The path to the node you wish to retrieve.
-   * \return a FirebaseObject value located at that path. Will only be populated if success() is true.
+   * \return a FirebaseObject value located at that path. Will only be populated
+   * if success() is true.
    */
-  FirebaseObject get(const String& path);
+  FirebaseObject get(const String &path);
 
   /**
    * Remove the node, and possibly entire tree, located at path.
@@ -181,7 +185,7 @@ class FirebaseArduino {
    * \param path The path to the node you wish to remove,
    * including all of its children.
    */
-  void remove(const String& path);
+  void remove(const String &path);
 
   /**
    * Starts streaming any changes made to the node located at path, including
@@ -194,7 +198,7 @@ class FirebaseArduino {
    * https://github.com/googlesamples/firebase-arduino/issues/48
    * \param path The path inside of your db to the node you wish to monitor.
    */
-  void stream(const String& path);
+  void stream(const String &path);
 
   /**
    * Checks if there are new events available. This is only meaningful once
@@ -206,7 +210,8 @@ class FirebaseArduino {
   /**
    * Reads the next event in a stream. This is only meaningful once stream() has
    * been called.
-   * \return FirebaseObject will have ["type"] that describes the event type, ["path"]
+   * \return FirebaseObject will have ["type"] that describes the event type,
+   * ["path"]
    * that describes the effected path and ["data"] that was updated.
    */
   FirebaseObject readEvent();
@@ -224,8 +229,9 @@ class FirebaseArduino {
   /**
    * \return Error message from last command if failed() is true.
    */
-  const String& error();
- private:
+  const String &error();
+
+private:
   std::string host_;
   std::string auth_;
   FirebaseError error_;
