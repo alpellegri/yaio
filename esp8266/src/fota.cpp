@@ -25,8 +25,6 @@ typedef enum {
   FOTA_Sm_GET_MD5,
   FOTA_Sm_CHECK,
   FOTA_Sm_GET_BLOCK,
-  FOTA_Sm_UPDATE_BLOCK,
-  FOTA_Sm_UPDATE,
   FOTA_Sm_COMPLETE,
   FOTA_Sm_ERROR,
 } FOTA_StateMachine_t;
@@ -40,15 +38,18 @@ static uint16_t num_blocks;
 static uint8_t *buffer;
 
 static FOTA_StateMachine_t state = FOTA_Sm_IDLE;
+static FOTA_StateMachine_t state_last = FOTA_Sm_IDLE;
 
 static String addr;
 static char digest_MD5[32];
+static uint8_t http_fail_cnt;
 
 bool FOTA_UpdateReq(void) {
   Serial.println(F("FOTA_UpdateReq"));
   bool ret = false;
   if (state == FOTA_Sm_IDLE) {
     state = FOTA_Sm_GET_MD5;
+    http_fail_cnt = 0;
     ret = true;
   }
   return ret;
@@ -56,18 +57,16 @@ bool FOTA_UpdateReq(void) {
 
 bool FOTAService(void) {
 
+  FOTA_StateMachine_t state_current;
+
   String storage_bucket = String(EE_GetFirebaseStorageBucket());
   // String storage_bucket = "project-7110587599444694745.appspot.com";
+
+  state_current = state;
 
   switch (state) {
   case FOTA_Sm_IDLE:
     break;
-
-  case FOTA_Sm_COMPLETE: {
-    Serial.println(F("closing connection"));
-    free(buffer);
-    state = FOTA_Sm_IDLE;
-  } break;
 
   case FOTA_Sm_GET_MD5: {
     String md5file_url =
@@ -155,15 +154,6 @@ bool FOTAService(void) {
       String range = "bytes=" + String(block * block_size) + "-" +
                      String(((block + 1) * block_size) - 1);
       http.addHeader("Range", range);
-      state = FOTA_Sm_UPDATE_BLOCK;
-    } else {
-      Serial.printf_P(PSTR("begin error @ %d\n"), block);
-      Serial.println(F("retry..."));
-      state = FOTA_Sm_GET_BLOCK;
-    }
-  } break;
-
-  case FOTA_Sm_UPDATE_BLOCK: {
     int httpCode = http.GET();
     // httpCode will be negative on error
     if (httpCode > 0) {
@@ -206,30 +196,50 @@ bool FOTAService(void) {
           /* move to next block */
           state = FOTA_Sm_GET_BLOCK;
         } else {
-          if (Update.end()) {
-            ESP.restart();
+          if (!Update.end()) {
+            Serial.println(F("Update Error"));
           }
-          Serial.println(F("Update Error"));
           state = FOTA_Sm_COMPLETE;
         }
       } else {
-        Serial.println(F("retry..."));
-        state = FOTA_Sm_GET_BLOCK;
+          state = FOTA_Sm_ERROR;
       }
     } else {
       Serial.printf_P(PSTR("[HTTP] GET... failed, error: %s\n"),
                       http.errorToString(httpCode).c_str());
-      Serial.println(F("retry..."));
-      state = FOTA_Sm_GET_BLOCK;
+        state = FOTA_Sm_ERROR;
+      }
+    } else {
+      Serial.printf_P(PSTR("begin error @ %d\n"), block);
+      state = FOTA_Sm_ERROR;
     }
   } break;
 
   case FOTA_Sm_ERROR: {
-    Serial.println(F("connection error"));
+    if (http_fail_cnt++ < 10) {
+      Serial.print(F("retry "));
+      Serial.println(http_fail_cnt);
+      state = state_last;
+    } else {
+      /* give-up */
+      Serial.println(F("retry give-up"));
+      Serial.flush();
+      ESP.restart();
+    }
+  } break;
+
+  case FOTA_Sm_COMPLETE: {
+    Serial.println(F("closing connection"));
+    Serial.flush();
     free(buffer);
+    /* restar node anycase */
+    ESP.restart();
     state = FOTA_Sm_IDLE;
   } break;
   }
+
+  state_last = state_current;
+  Serial.printf("\n%d, %d\n", state, state_last);
 
   return (state != FOTA_Sm_IDLE);
 }

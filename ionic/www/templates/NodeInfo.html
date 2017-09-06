@@ -1,9 +1,9 @@
 <ion-view title="Node Info" id="page7">
   <ion-content class="custom" padding="true" scroll="true" class="has-header">
     <ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+    <ion-checkbox class="item-checkbox-right" ng-model="system.status">System Status Up</ion-checkbox>
     <a class="item">Last Startup time<span class="item-note">{{StartupTime}}</span></a>
     <a class="item">Last Hearth time<span class="item-note">{{HeartTime}}</span></a>
-    <ion-checkbox class="item-checkbox-right" ng-model="system.status">System Status Up</ion-checkbox>
     <ion-toggle toggle-class="toggle-positive" ng-model="control.wol" ng-change="pushCtrl1Change()">
       Wake Up On LAN
     </ion-toggle>
@@ -12,5 +12,6 @@
     <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
       Update Firmware
     </ion-toggle>
+    <a class="item">SW Version<span class="item-note">{{startup.version}}</span></a>
   </ion-content>
 </ion-view>

@@ -436,7 +436,6 @@ bool FbmService(void) {
 
               bool control_reboot = object["reboot"];
               if (control_reboot == true) {
-                // ESP.restart();
                 boot_sm = 4;
               }
             } else {
