@@ -22,9 +22,9 @@
 
 // Adafruit_SSD1306 display(OLED_RESET);
 
-uint8_t mode;
-uint32_t current_time;
-uint32_t schedule_time;
+static uint8_t mode;
+static uint32_t current_time;
+static uint32_t schedule_time;
 
 void setup() {
   bool ret;

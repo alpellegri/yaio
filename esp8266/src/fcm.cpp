@@ -17,18 +17,18 @@ typedef enum {
   Fcm_Sm_CLOSE,
 } Fbm_StateMachine_t;
 
-const char FcmServer[25] = "fcm.googleapis.com";
+static const char FcmServer[25] = "fcm.googleapis.com";
 
-WiFiClient fcm_client;
-uint16_t fcm_sts = Fcm_Sm_IDLE;
-uint32_t FcmServiceStamp;
-bool FcmServiceRxRun;
-bool FcmServiceRxStop;
+static WiFiClient fcm_client;
+static uint16_t fcm_sts = Fcm_Sm_IDLE;
+static uint32_t FcmServiceStamp;
+static bool FcmServiceRxRun;
+static bool FcmServiceRxStop;
 
 // up-to 5 devices
-String RegIDs[FCM_NUM_REGIDS_MAX];
-uint8_t RegIDsLen;
-String FcmMessage;
+static String RegIDs[FCM_NUM_REGIDS_MAX];
+static uint8_t RegIDsLen;
+static String FcmMessage;
 
 void FcmResetRegIDsDB(void) { RegIDsLen = 0; }
 

@@ -10,12 +10,12 @@
 
 #define EE_SIZE 512
 
-char sta_ssid[25] = "";
-char sta_password[25] = "";
-char sta_firebase_url[40] = "";
-char sta_firebase_secret[40] = "";
-char sta_firebase_server_key[40] = "";
-char sta_firebase_storage_bucket[40] = "";
+static char sta_ssid[25] = "";
+static char sta_password[25] = "";
+static char sta_firebase_url[40] = "";
+static char sta_firebase_secret[40] = "";
+static char sta_firebase_server_key[40] = "";
+static char sta_firebase_storage_bucket[40] = "";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 

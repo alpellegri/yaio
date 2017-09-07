@@ -18,8 +18,8 @@
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-uint8_t sta_button = 0x55;
-bool fota_mode = false;
+static uint8_t sta_button = 0x55;
+static bool fota_mode = false;
 
 bool STA_Setup(void) {
   bool ret = true;

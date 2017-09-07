@@ -15,17 +15,17 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-const char *ap_ssid = "esp8266";
-const char *ap_password = "123456789";
+static const char *ap_ssid = "esp8266";
+static const char *ap_password = "123456789";
 
-uint16_t ap_task_cnt;
-bool enable_WiFi_Scan = false;
-uint16_t ap_button = 0x55;
+static uint16_t ap_task_cnt;
+static bool enable_WiFi_Scan = false;
+static uint16_t ap_button = 0x55;
 
 // create sebsocket server
-WebSocketsServer webSocket = WebSocketsServer(81);
+static WebSocketsServer webSocket = WebSocketsServer(81);
+static uint8_t port_id;
 
-uint8_t port_id;
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t lenght) {
   uint16_t len;

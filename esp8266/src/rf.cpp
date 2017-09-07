@@ -41,33 +41,34 @@ typedef struct {
   uint32_t timer;
 } Function_t;
 
-Ticker FunctionTimer;
-Ticker RFRcvTimer;
+static Ticker FunctionTimer;
+static Ticker RFRcvTimer;
 
-RCSwitch mySwitch = RCSwitch();
-uint32_t RadioCode;
-uint32_t RadioCodeLast;
-bool RF_StatusEnable = false;
+static RCSwitch mySwitch = RCSwitch();
+static uint32_t RadioCode;
+static uint32_t RadioCodeLast;
+static bool RF_StatusEnable = false;
 
-RF_RadioCodeSts_t *RadioCodes;
-uint8_t RadioCodesLen = 0;
-uint32_t *RadioCodesTx;
-uint8_t RadioCodesTxLen = 0;
-Timer_t *Timers;
-uint8_t TimersLen = 0;
-uint16_t *Dout;
-uint8_t DoutLen = 0;
-uint16_t *Lout;
-uint8_t LoutLen = 0;
-Function_t *Function;
-uint8_t FunctionLen = 0;
+static RF_RadioCodeSts_t *RadioCodes;
+static uint8_t RadioCodesLen = 0;
+static uint32_t *RadioCodesTx;
+static uint8_t RadioCodesTxLen = 0;
+static Timer_t *Timers;
+static uint8_t TimersLen = 0;
+static uint16_t *Dout;
+static uint8_t DoutLen = 0;
+static uint16_t *Lout;
+static uint8_t LoutLen = 0;
+static Function_t *Function;
+static uint8_t FunctionLen = 0;
 
-uint32_t t247_last = 0;
+static uint32_t t247_last = 0;
+
+static char FunctionReqName[25];
+static uint8_t FunctionReqPending;
+static uint8_t FunctionReqIdx = 0xFF;
 
 void FunctionSrv(void);
-char FunctionReqName[25];
-uint8_t FunctionReqPending;
-uint8_t FunctionReqIdx = 0xFF;
 
 void RF_Init(void) {
   RadioCodes = (RF_RadioCodeSts_t *)malloc(NUM_RADIO_CODE_RX_MAX *

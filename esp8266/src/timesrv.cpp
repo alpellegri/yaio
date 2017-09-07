@@ -163,8 +163,18 @@ void time_set(uint32_t _time) {
 }
 
 uint32_t getTime(void) {
-  uint32_t _time = (millis() - ntp_update_time) / 1000 + ntp_time;
-  return (_time);
+  uint32_t _millis = millis();
+
+  /* manage millis overflow:
+   * 2^32/1000 = 4294967,296
+   * s correction -> 4294967
+   * ms correttion -> 296
+   */
+  bool ovrf = (_millis < ntp_update_time);
+  uint32_t now_ms = (_millis - ntp_update_time) + (ovrf * 296);
+  uint32_t now_s = (now_ms / 1000) + (ovrf * 4294967) + ntp_time;
+
+  return (now_s);
 }
 
 bool TimeService(void) {

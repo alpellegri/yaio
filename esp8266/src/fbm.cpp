@@ -21,36 +21,36 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-uint8_t boot_sm = 0;
-bool boot_first = false;
-bool status_alarm = false;
-bool status_alarm_last = false;
-bool control_alarm = false;
-bool control_radio_learn = false;
-bool control_radio_update = false;
-uint32_t control_time;
-uint32_t control_time_last;
+static uint8_t boot_sm = 0;
+static bool boot_first = false;
+static bool status_alarm = false;
+static bool status_alarm_last = false;
+static bool control_alarm = false;
+static bool control_radio_learn = false;
+static bool control_radio_update = false;
+static uint32_t control_time;
+static uint32_t control_time_last;
 
-uint16_t bootcnt = 0;
-uint32_t fbm_update_last = 0;
-uint32_t fbm_time_th_last = 0;
-uint32_t fbm_monitor_last = 0;
-bool fbm_monitor_run = false;
+static uint16_t bootcnt = 0;
+static uint32_t fbm_update_last = 0;
+static uint32_t fbm_time_th_last = 0;
+static uint32_t fbm_monitor_last = 0;
+static bool fbm_monitor_run = false;
 
-uint32_t humidity_data;
-uint32_t temperature_data;
+static uint32_t humidity_data;
+static uint32_t temperature_data;
 
-uint32_t fbm_update_timer_last;
+static uint32_t fbm_update_timer_last;
 
 /**
  * The target IP address to send the magic packet to.
  */
-IPAddress computer_ip(192, 168, 1, 255);
+static IPAddress computer_ip(192, 168, 1, 255);
 
 /**
  * The targets MAC address to send the packet to
  */
-byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
+static byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
 
 void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   const byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -77,9 +77,9 @@ typedef struct {
   uint8_t src_idx;
 } FbmFuncSrvQueque_t;
 
-uint8_t FbmLogicQuequeWrPos = 0;
-uint8_t FbmLogicQuequeRdPos = 0;
-FbmFuncSrvQueque_t FbmLogicQueque[FBM_LOGIC_QUEUE_LEN];
+static uint8_t FbmLogicQuequeWrPos = 0;
+static uint8_t FbmLogicQuequeRdPos = 0;
+static FbmFuncSrvQueque_t FbmLogicQueque[FBM_LOGIC_QUEUE_LEN];
 
 void FbmLogicReq(uint8_t src_type, uint8_t src_idx, uint8_t lin, bool value) {
   FbmLogicQueque[FbmLogicQuequeWrPos].src_type = src_type;
