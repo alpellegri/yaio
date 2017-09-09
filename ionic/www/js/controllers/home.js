@@ -40,12 +40,12 @@ angular.module('app.controllers.home', [])
           } else {
             setTimeout(function() {
               $scope.doRefresh();
-            }, 500);
+            }, 1000);
           }
         } else {
           setTimeout(function() {
             $scope.doRefresh();
-          }, 500);
+          }, 1000);
         }
       };
       $scope.doRefresh();

@@ -69,7 +69,7 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   yield();
 }
 
-#define FBM_LOGIC_QUEUE_LEN 5
+#define FBM_LOGIC_QUEUE_LEN 3
 typedef struct {
   uint8_t func;
   uint8_t value;
@@ -167,9 +167,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_ResetRadioCodeDB();
+      RF_DeInitRadioCodeDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
+      uint8_t num = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        num++;
+      }
+      RF_InitRadioCodeDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
@@ -191,9 +196,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_ResetRadioCodeTxDB();
+      RF_DeInitRadioCodeTxDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
+      uint8_t num = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        num++;
+      }
+      RF_InitRadioCodeTxDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
@@ -213,9 +223,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_ResetTimerDB();
+      RF_DeInitTimerDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
+      uint8_t num = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        num++;
+      }
+      RF_InitTimerDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
@@ -238,9 +253,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_ResetDoutDB();
+      RF_DeInitDoutDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
+      uint8_t num = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        num++;
+      }
+      RF_InitDoutDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
@@ -260,9 +280,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_ResetLoutDB();
+      RF_DeInitLoutDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
+      uint8_t num = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        num++;
+      }
+      RF_InitLoutDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);
@@ -282,9 +307,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_ResetFunctionsDB();
+      RF_DeInitFunctionsDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
+      uint8_t num = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        num++;
+      }
+      RF_InitFunctionsDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         // Serial.println(i->key);

@@ -44,6 +44,10 @@ static String addr;
 static char digest_MD5[32];
 static uint8_t http_fail_cnt;
 
+void FOTA_Init(void) {
+  //
+}
+
 bool FOTA_UpdateReq(void) {
   Serial.println(F("FOTA_UpdateReq"));
   bool ret = false;
@@ -60,7 +64,6 @@ bool FOTAService(void) {
   FOTA_StateMachine_t state_current;
 
   String storage_bucket = String(EE_GetFirebaseStorageBucket());
-  // String storage_bucket = "project-7110587599444694745.appspot.com";
 
   state_current = state;
 
@@ -154,59 +157,59 @@ bool FOTAService(void) {
       String range = "bytes=" + String(block * block_size) + "-" +
                      String(((block + 1) * block_size) - 1);
       http.addHeader("Range", range);
-    int httpCode = http.GET();
-    // httpCode will be negative on error
-    if (httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      // Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+      int httpCode = http.GET();
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        // Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
-      int len = http.getSize();
+        int len = http.getSize();
 
-      // get tcp stream
-      WiFiClient *stream = http.getStreamPtr();
-      uint32_t pos = 0;
-      bool run = true;
-      bool fail = false;
+        // get tcp stream
+        WiFiClient *stream = http.getStreamPtr();
+        uint32_t pos = 0;
+        bool run = true;
+        bool fail = false;
 
-      while (run == true) {
-        delay(1);
-        if (pos < len) {
-          size_t size = stream->available();
-          if (size) {
-            uint16_t c = stream->readBytes(&buffer[pos], size);
-            pos += c;
-          }
-          if (!http.connected() && (pos < len)) {
+        while (run == true) {
+          delay(1);
+          if (pos < len) {
+            size_t size = stream->available();
+            if (size) {
+              uint16_t c = stream->readBytes(&buffer[pos], size);
+              pos += c;
+            }
+            if (!http.connected() && (pos < len)) {
+              run = false;
+              fail = true;
+            }
+          } else {
             run = false;
-            fail = true;
           }
-        } else {
-          run = false;
         }
-      }
 
-      if (fail == false) {
-        Update.write(buffer, pos);
+        if (fail == false) {
+          Update.write(buffer, pos);
 
-        Serial.printf_P(PSTR("[%03d]: %02d%% -- %d\r"), block,
-                        100 * block / num_blocks, ESP.getFreeHeap());
+          Serial.printf_P(PSTR("[%03d]: %02d%% -- %d\r"), block,
+                          100 * block / num_blocks, ESP.getFreeHeap());
 
-        block++;
-        if (block < num_blocks) {
-          /* move to next block */
-          state = FOTA_Sm_GET_BLOCK;
-        } else {
-          if (!Update.end()) {
-            Serial.println(F("Update Error"));
+          block++;
+          if (block < num_blocks) {
+            /* move to next block */
+            state = FOTA_Sm_GET_BLOCK;
+          } else {
+            if (!Update.end()) {
+              Serial.println(F("Update Error"));
+            }
+            state = FOTA_Sm_COMPLETE;
           }
-          state = FOTA_Sm_COMPLETE;
+        } else {
+          state = FOTA_Sm_ERROR;
         }
       } else {
-          state = FOTA_Sm_ERROR;
-      }
-    } else {
-      Serial.printf_P(PSTR("[HTTP] GET... failed, error: %s\n"),
-                      http.errorToString(httpCode).c_str());
+        Serial.printf_P(PSTR("[HTTP] GET... failed, error: %s\n"),
+                        http.errorToString(httpCode).c_str());
         state = FOTA_Sm_ERROR;
       }
     } else {
@@ -216,7 +219,7 @@ bool FOTAService(void) {
   } break;
 
   case FOTA_Sm_ERROR: {
-    if (http_fail_cnt++ < 10) {
+    if (http_fail_cnt++ < 20) {
       Serial.print(F("retry "));
       Serial.println(http_fail_cnt);
       state = state_last;
@@ -239,7 +242,6 @@ bool FOTAService(void) {
   }
 
   state_last = state_current;
-  Serial.printf("\n%d, %d\n", state, state_last);
 
   return (state != FOTA_Sm_IDLE);
 }

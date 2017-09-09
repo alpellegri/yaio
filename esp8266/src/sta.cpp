@@ -65,7 +65,6 @@ bool STA_Setup(void) {
       File f = SPIFFS.open("/fota.req", "r+");
       if (!f) {
         fota_mode = false;
-        RF_Init();
       } else {
         fota_mode = true;
         Serial.println("file open ");
@@ -125,7 +124,6 @@ void STA_Loop() {
     if (in == false) {
       // EE_EraseData();
       // Serial.printf("EEPROM erased\n");
-      FOTA_UpdateReq();
     }
   }
 }

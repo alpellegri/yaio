@@ -36,6 +36,7 @@ void setup() {
   EE_Setup();
 
   Serial.println();
+  Serial.print(F("SW version: "));
   Serial.println(VERS_getVersion());
   Serial.println(F("Node starting..."));
 

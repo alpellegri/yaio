@@ -49,17 +49,17 @@ static uint32_t RadioCode;
 static uint32_t RadioCodeLast;
 static bool RF_StatusEnable = false;
 
-static RF_RadioCodeSts_t *RadioCodes;
+static RF_RadioCodeSts_t *RadioCodes = NULL;
 static uint8_t RadioCodesLen = 0;
-static uint32_t *RadioCodesTx;
+static uint32_t *RadioCodesTx = NULL;
 static uint8_t RadioCodesTxLen = 0;
-static Timer_t *Timers;
+static Timer_t *Timers = NULL;
 static uint8_t TimersLen = 0;
-static uint16_t *Dout;
+static uint16_t *Dout = NULL;
 static uint8_t DoutLen = 0;
-static uint16_t *Lout;
+static uint16_t *Lout = NULL;
 static uint8_t LoutLen = 0;
-static Function_t *Function;
+static Function_t *Function = NULL;
 static uint8_t FunctionLen = 0;
 
 static uint32_t t247_last = 0;
@@ -70,35 +70,97 @@ static uint8_t FunctionReqIdx = 0xFF;
 
 void FunctionSrv(void);
 
-void RF_Init(void) {
-  RadioCodes = (RF_RadioCodeSts_t *)malloc(NUM_RADIO_CODE_RX_MAX *
-                                           sizeof(RF_RadioCodeSts_t));
-  RadioCodesTx = (uint32_t *)malloc(NUM_RADIO_CODE_TX_MAX * sizeof(uint32_t));
-  Timers = (Timer_t *)malloc(NUM_TIMER_MAX * sizeof(Timer_t));
-  Dout = (uint16_t *)malloc(NUM_DOUT_MAX * sizeof(uint16_t));
-  Lout = (uint16_t *)malloc(NUM_LOUT_MAX * sizeof(uint16_t));
-  Function = (Function_t *)malloc(NUM_FUNCTION_MAX * sizeof(Function_t));
-}
-
-void RF_ResetRadioCodeDB(void) {
+void RF_DeInitRadioCodeDB(void) {
+  if (RadioCodes != NULL) {
+    free(RadioCodes);
+  }
+  RadioCodes = NULL;
   RadioCodesLen = 0;
   RadioCode = 0;
 }
 
-void RF_ResetRadioCodeTxDB(void) {
+void RF_DeInitRadioCodeTxDB(void) {
+  if (RadioCodesTx != NULL) {
+    free(RadioCodesTx);
+  }
+  RadioCodesTx = NULL;
   RadioCodesTxLen = 0;
   RadioCode = 0;
 }
 
-void RF_ResetTimerDB(void) {
-  uint32_t mytime = getTime();
-  t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
+void RF_DeInitTimerDB(void) {
+  if (Timers != NULL) {
+    free(Timers);
+  }
+  Timers = NULL;
   TimersLen = 0;
 }
 
-void RF_ResetDoutDB(void) { DoutLen = 0; }
-void RF_ResetLoutDB(void) { LoutLen = 0; }
-void RF_ResetFunctionsDB(void) { FunctionLen = 0; }
+void RF_DeInitDoutDB(void) {
+  if (Dout != NULL) {
+    free(Dout);
+  }
+  Dout = NULL;
+  DoutLen = 0;
+}
+void RF_DeInitLoutDB(void) {
+  if (Lout != NULL) {
+    free(Lout);
+  }
+  Lout = NULL;
+  LoutLen = 0;
+}
+void RF_DeInitFunctionsDB(void) {
+  if (Function != NULL) {
+    free(Function);
+  }
+  Function = NULL;
+  FunctionLen = 0;
+}
+
+void RF_InitRadioCodeDB(uint8_t num) {
+  RadioCodesLen = 0;
+  RadioCode = 0;
+  if (num > 0) {
+    RadioCodes = (RF_RadioCodeSts_t *)malloc(num * sizeof(RF_RadioCodeSts_t));
+  }
+}
+
+void RF_InitRadioCodeTxDB(uint8_t num) {
+  RadioCodesTxLen = 0;
+  RadioCode = 0;
+  if (num > 0) {
+    RadioCodesTx = (uint32_t *)malloc(num * sizeof(uint32_t));
+  }
+}
+
+void RF_InitTimerDB(uint8_t num) {
+  uint32_t mytime = getTime();
+  t247_last = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
+  TimersLen = 0;
+  if (num > 0) {
+    Timers = (Timer_t *)malloc(num * sizeof(Timer_t));
+  }
+}
+
+void RF_InitDoutDB(uint8_t num) {
+  DoutLen = 0;
+  if (num > 0) {
+    Dout = (uint16_t *)malloc(num * sizeof(uint16_t));
+  }
+}
+void RF_InitLoutDB(uint8_t num) {
+  LoutLen = 0;
+  if (num > 0) {
+    Lout = (uint16_t *)malloc(num * sizeof(uint16_t));
+  }
+}
+void RF_InitFunctionsDB(uint8_t num) {
+  FunctionLen = 0;
+  if (num > 0) {
+    Function = (Function_t *)malloc(num * sizeof(Function_t));
+  }
+}
 
 void RF_AddRadioCodeDB(String id, String name, String func) {
   if (RadioCodesLen < NUM_RADIO_CODE_RX_MAX) {
