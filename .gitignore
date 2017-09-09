@@ -1,2 +1,4 @@
 *.bak
+*.bin
+*.md5
 google-services.json
