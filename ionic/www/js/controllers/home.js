@@ -35,13 +35,11 @@ angular.module('app.controllers.home', [])
             console.log("firebase failed: " + errorObject.code);
           });
           if (($scope.control.time - $scope.status.time) < 10) {
-            $scope.$broadcast('scroll.refreshComplete');
             $scope.loading = false;
           } else {
-            setTimeout(function() {
-              $scope.doRefresh();
-            }, 1000);
+            // setTimeout(function() { $scope.doRefresh(); }, 1000);
           }
+          $scope.$broadcast('scroll.refreshComplete');
         } else {
           setTimeout(function() {
             $scope.doRefresh();

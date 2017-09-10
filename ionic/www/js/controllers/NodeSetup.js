@@ -3,7 +3,7 @@ angular.module('app.controllers.NodeSetup', [])
   .controller('NodeSetupCtrl', function($scope, FirebaseService, WebSocketService, $ionicPopup, $timeout) {
     console.log('NodeSetupCtrl');
 
-    var fb_init = 'true'; // localStorage.getItem('firebase_init');
+    var fb_init = localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
 
       $scope.settings = {};
@@ -11,6 +11,8 @@ angular.module('app.controllers.NodeSetup', [])
       if (node_init == 'true') {
         $scope.settings.ssid = localStorage.getItem('ssid');
         $scope.settings.password = localStorage.getItem('password');
+        $scope.settings.firebase_url = FirebaseService.Getfirebase_url();
+        $scope.settings.storage_bucket = FirebaseService.Getstorage_bucket();
         $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
         $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
       }
@@ -21,22 +23,6 @@ angular.module('app.controllers.NodeSetup', [])
       $scope.Text = '';
       $scope.NodeSettingMsg = '';
       $scope.StsTxt = 'Disconnected';
-
-      $scope.settings.ComposeText = function() {
-        $scope.settings.ssid = localStorage.getItem('ssid');
-        $scope.settings.password = localStorage.getItem('password');
-        $scope.settings.firebase_url = FirebaseService.Getfirebase_url();
-        $scope.settings.storage_bucket = FirebaseService.Getstorage_bucket();
-        $scope.settings.secret = localStorage.getItem('firebase_secret');
-        $scope.settings.server_key = localStorage.getItem('firebase_server_key');
-        $scope.NodeSettings =
-          'Node WiFi SSID: ' + $scope.settings.ssid + '\n' +
-          'Node WiFi PASSWORD: ' + $scope.settings.password + '\n' +
-          'Firebase URL: ' + $scope.settings.firebase_url + '\n' +
-          'Firebase Storage: ' + $scope.settings.storage_bucket + '\n' +
-          'Firebase Secret: ' + $scope.settings.secret + '\n' +
-          'Firebase Server Key: ' + $scope.settings.server_key + '\n';
-      }
 
       WebSocketService.subscribe(
         // open
@@ -146,7 +132,6 @@ angular.module('app.controllers.NodeSetup', [])
                 localStorage.setItem('password', $scope.settings.password);
                 localStorage.setItem('firebase_secret', $scope.settings.firebase_secret);
                 localStorage.setItem('firebase_server_key', $scope.settings.firebase_server_key);
-                $scope.settings.ComposeText();
                 return $scope.settings;
               }
             }
