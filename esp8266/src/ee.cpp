@@ -10,24 +10,24 @@
 
 #define EE_SIZE 512
 
-static char sta_ssid[25] = "";
-static char sta_password[25] = "";
-static char sta_firebase_url[40] = "";
-static char sta_firebase_secret[40] = "";
-static char sta_firebase_server_key[40] = "";
-static char sta_firebase_storage_bucket[40] = "";
+static char ee_ssid[30] = "";
+static char ee_password[30] = "";
+static char ee_firebase_url[50] = "";
+static char ee_firebase_secret[50] = "";
+static char ee_firebase_server_key[50] = "";
+static char ee_firebase_storage_bucket[50] = "";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
-char *EE_GetSSID() { return sta_ssid; }
-char *EE_GetPassword() { return sta_password; }
+char *EE_GetSSID() { return ee_ssid; }
+char *EE_GetPassword() { return ee_password; }
 char *EE_GetFirebaseUrl() {
   /* skip: https:// */
-  return &sta_firebase_url[8];
+  return &ee_firebase_url[8];
 }
-char *EE_GetFirebaseSecret() { return sta_firebase_secret; }
-char *EE_GetFirebaseServerKey() { return sta_firebase_server_key; }
-char *EE_GetFirebaseStorageBucket() { return sta_firebase_storage_bucket; }
+char *EE_GetFirebaseSecret() { return ee_firebase_secret; }
+char *EE_GetFirebaseServerKey() { return ee_firebase_server_key; }
+char *EE_GetFirebaseStorageBucket() { return ee_firebase_storage_bucket; }
 
 void EE_EraseData() {
   int i;
@@ -45,10 +45,8 @@ void EE_StoreData(uint8_t *data, uint16_t len) {
   Serial.println(F("EE_StoreData"));
   for (i = 0; i < len; i++) {
     yield();
-    // Serial.printf("%c", data[i]);
     EEPROM.write(i, data[i]);
   }
-  // Serial.printf("\n");
   EEPROM.commit();
 }
 
@@ -91,12 +89,12 @@ bool EE_LoadData(void) {
     if ((ssid != NULL) && (password != NULL) && (firebase_url != NULL) &&
         (firebase_secret != NULL) && (firebase_server_key != NULL) &&
         (storage_bucket != NULL)) {
-      strcpy(sta_ssid, ssid);
-      strcpy(sta_password, password);
-      strcpy(sta_firebase_url, firebase_url);
-      strcpy(sta_firebase_secret, firebase_secret);
-      strcpy(sta_firebase_server_key, firebase_server_key);
-      strcpy(sta_firebase_storage_bucket, storage_bucket);
+      strcpy(ee_ssid, ssid);
+      strcpy(ee_password, password);
+      strcpy(ee_firebase_url, firebase_url);
+      strcpy(ee_firebase_secret, firebase_secret);
+      strcpy(ee_firebase_server_key, firebase_server_key);
+      strcpy(ee_firebase_storage_bucket, storage_bucket);
       Serial.println(F("EEPROM ok"));
       ret = true;
     } else {
