@@ -38,7 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
   StreamSubscription<Event> _controlSubscription;
   StreamSubscription<Event> _statusSubscription;
   StreamSubscription<Event> _startupSubscription;
-  bool _anchorToBottom = false;
+  bool _alarmButton = false;
+  bool _firmwareButton = false;
 
   Map<String, Object> _control = {
     'alarm': false,
@@ -91,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
     _statusSubscription.cancel();
     _controlSubscription.cancel();
+    _startupSubscription.cancel();
   }
 
   Future<Null> _increment() async {
@@ -101,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _control = snapshot.value;
       bool _alarm = _control['alarm'];
       _alarm = !_alarm;
-      _control['alarm'] = _alarm;
+      _alarmButton = _control['alarm'] = _alarm;
       final DateTime _now = new DateTime.now();
       // update current time to notify change
       _control['time'] = (_now.millisecondsSinceEpoch/1000).round();
@@ -166,12 +168,23 @@ class _MyHomePageState extends State<MyHomePage> {
             leading: new Checkbox(
               onChanged: (bool value) {
                 setState(() {
-                  _anchorToBottom = value;
+                  _alarmButton = value;
                 });
               },
-              value: _anchorToBottom,
+              value: _alarmButton,
             ),
-            title: const Text('Anchor to bottom'),
+            title: const Text('Acivate Alarm'),
+          ),
+          new ListTile(
+            leading: new Checkbox(
+              onChanged: (bool value) {
+                setState(() {
+                  _firmwareButton = value;
+                });
+              },
+              value: _firmwareButton,
+            ),
+            title: const Text('SW update'),
           ),
         ],
       ),
