@@ -111,7 +111,7 @@ class _DigitalIOState extends State<DigitalIO> {
         itemCount: doutSaves.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              // onTap: () => _openEditEntryDialog(doutSaves[index]),
+              onTap: () => _openRemoveEntryDialog(doutSaves[index]),
               child: new DoutListItem(doutSaves[index]));
         },
       ),
@@ -199,5 +199,25 @@ class _DigitalIOState extends State<DigitalIO> {
                 })
           ]),
     );
+  }
+
+  void _openRemoveEntryDialog(DoutEntry entry) {
+    showDialog(
+        context: context,
+        child: new AlertDialog(
+            title: new Text('Create a Digital Output'),
+            actions: <Widget>[
+              new FlatButton(
+                  child: const Text('REMOVE'),
+                  onPressed: () {
+                    _doutReference.child(entry.key).remove();
+                    Navigator.pop(context, null);
+                  }),
+              new FlatButton(
+                  child: const Text('DISCARD'),
+                  onPressed: () {
+                    Navigator.pop(context, null);
+                  })
+            ]));
   }
 }
