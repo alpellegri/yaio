@@ -1,5 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
+
+class LoutEntry {
+  String key;
+  int id;
+  String name;
+
+  LoutEntry(this.id, this.name);
+
+  LoutEntry.fromSnapshot(DataSnapshot snapshot)
+      : key = snapshot.key,
+        id = snapshot.value["id"],
+        name = snapshot.value["name"];
+
+  toJson() {
+    return {
+      "id": id,
+      "name": name,
+    };
+  }
+}
+
+class LoutListItem extends StatelessWidget {
+  final LoutEntry loutEntry;
+
+  LoutListItem(this.loutEntry);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+      child: new Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          new Expanded(
+            child: new Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Column(
+                  children: [
+                    new Text(
+                      loutEntry.name,
+                      textScaleFactor: 1.3,
+                      textAlign: TextAlign.left,
+                    ),
+                    new Text(
+                      'PIN: ${loutEntry.id}',
+                      textScaleFactor: 0.8,
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class LogicalIO extends StatefulWidget {
   LogicalIO({Key key, this.title}) : super(key: key);
@@ -9,20 +72,32 @@ class LogicalIO extends StatefulWidget {
   final String title;
 
   @override
-  LogicalIOState createState() => new LogicalIOState();
+  _LogicalIOState createState() => new _LogicalIOState();
 }
 
-class LogicalIOState extends State<LogicalIO> {
+class _LogicalIOState extends State<LogicalIO> {
+  List<LoutEntry> loutSaves = new List();
+  DatabaseReference _loutReference;
+
+  _LogicalIOState() {
+    _loutReference =
+        FirebaseDatabase.instance.reference().child("LIO").child("Lout");
+    _loutReference.onChildAdded.listen(_onEntryAdded);
+    _loutReference.onChildChanged.listen(_onEntryEdited);
+    _loutReference.onChildRemoved.listen(_onEntryRemoved);
+  }
+
   @override
   void initState() {
     super.initState();
-    print('LogicalIOState');
+    print('_LogicalIOState');
   }
 
   @override
   void dispose() {
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -30,14 +105,111 @@ class LogicalIOState extends State<LogicalIO> {
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
-      body: new Container(),
+      body: new ListView.builder(
+        shrinkWrap: true,
+        reverse: true,
+        itemCount: loutSaves.length,
+        itemBuilder: (buildContext, index) {
+          return new InkWell(
+              onTap: () => _openRemoveEntryDialog(loutSaves[index]),
+              child: new LoutListItem(loutSaves[index]));
+        },
+      ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _onFloatingActionButtonPressed,
+        onPressed: _openAddEntryDialog,
         tooltip: 'add',
         child: new Icon(Icons.add),
       ),
     );
   }
 
-  void _onFloatingActionButtonPressed() {}
+  _onEntryAdded(Event event) {
+    print('_onEntryAdded');
+    setState(() {
+      loutSaves.add(new LoutEntry.fromSnapshot(event.snapshot));
+    });
+  }
+
+  _onEntryEdited(Event event) {
+    print('_onEntryEdited');
+    var oldValue =
+        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      loutSaves[loutSaves.indexOf(oldValue)] =
+          new LoutEntry.fromSnapshot(event.snapshot);
+    });
+  }
+
+  _onEntryRemoved(Event event) {
+    print('_onEntryRemoved');
+    var oldValue =
+        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      loutSaves.remove(oldValue);
+    });
+  }
+
+  void _openAddEntryDialog() {
+    final TextEditingController _controllerName = new TextEditingController();
+    final TextEditingController _controllerId = new TextEditingController();
+
+    showDialog(
+      context: context,
+      child: new AlertDialog(
+          title: new Text('Create a Logical Output'),
+          content: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new TextField(
+                  controller: _controllerName,
+                  decoration: new InputDecoration(
+                    hintText: 'Name',
+                  ),
+                ),
+                new TextField(
+                  controller: _controllerId,
+                  decoration: new InputDecoration(
+                    hintText: 'PIN',
+                  ),
+                ),
+              ]),
+          actions: <Widget>[
+            new FlatButton(
+                child: const Text('SAVE'),
+                onPressed: () {
+                  _loutReference.push().set({
+                    'id': int.parse(_controllerId.text),
+                    'name': _controllerName.text,
+                  });
+                  Navigator.pop(context, null);
+                }),
+            new FlatButton(
+                child: const Text('DISCARD'),
+                onPressed: () {
+                  Navigator.pop(context, null);
+                })
+          ]),
+    );
+  }
+
+  void _openRemoveEntryDialog(LoutEntry entry) {
+    showDialog(
+        context: context,
+        child: new AlertDialog(
+            title: new Text('Remove this Logital Output'),
+            actions: <Widget>[
+              new FlatButton(
+                  child: const Text('REMOVE'),
+                  onPressed: () {
+                    _loutReference.child(entry.key).remove();
+                    Navigator.pop(context, null);
+                  }),
+              new FlatButton(
+                  child: const Text('DISCARD'),
+                  onPressed: () {
+                    Navigator.pop(context, null);
+                  })
+            ]));
+  }
 }

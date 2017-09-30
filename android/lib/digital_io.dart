@@ -39,7 +39,7 @@ class DoutListItem extends StatelessWidget {
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                new Row(
+                new Column(
                   children: [
                     new Text(
                       doutEntry.name,
@@ -47,8 +47,13 @@ class DoutListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      doutEntry.id.toString(),
-                      textScaleFactor: 1.3,
+                      'PIN: ${doutEntry.id >> 1}',
+                      textScaleFactor: 0.8,
+                      textAlign: TextAlign.left,
+                    ),
+                    new Text(
+                      'Value: ${doutEntry.id & 0x1}',
+                      textScaleFactor: 0.8,
                       textAlign: TextAlign.left,
                     ),
                   ],
@@ -157,7 +162,7 @@ class _DigitalIOState extends State<DigitalIO> {
     showDialog(
       context: context,
       child: new AlertDialog(
-          title: new Text('Create a Digital Output'),
+          title: new Text('Create a Digical Output'),
           content: new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -165,7 +170,7 @@ class _DigitalIOState extends State<DigitalIO> {
                 new TextField(
                   controller: _controllerName,
                   decoration: new InputDecoration(
-                    hintText: 'name',
+                    hintText: 'Name',
                   ),
                 ),
                 new TextField(
@@ -205,7 +210,7 @@ class _DigitalIOState extends State<DigitalIO> {
     showDialog(
         context: context,
         child: new AlertDialog(
-            title: new Text('Create a Digital Output'),
+            title: new Text('Remove this Digital Output'),
             actions: <Widget>[
               new FlatButton(
                   child: const Text('REMOVE'),
