@@ -82,14 +82,14 @@ class DigitalIO extends StatefulWidget {
 
 class _DigitalIOState extends State<DigitalIO> {
   List<DoutEntry> doutSaves = new List();
-  DatabaseReference _doutReference;
+  DatabaseReference _doutRef;
 
   _DigitalIOState() {
-    _doutReference =
+    _doutRef =
         FirebaseDatabase.instance.reference().child("DIO").child("Dout");
-    _doutReference.onChildAdded.listen(_onEntryAdded);
-    _doutReference.onChildChanged.listen(_onEntryEdited);
-    _doutReference.onChildRemoved.listen(_onEntryRemoved);
+    _doutRef.onChildAdded.listen(_onEntryAdded);
+    _doutRef.onChildChanged.listen(_onEntryEdited);
+    _doutRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -190,7 +190,7 @@ class _DigitalIOState extends State<DigitalIO> {
             new FlatButton(
                 child: const Text('SAVE'),
                 onPressed: () {
-                  _doutReference.push().set({
+                  _doutRef.push().set({
                     'id': int.parse(_controllerPin.text) * 2 +
                         int.parse(_controllerValue.text),
                     'name': _controllerName.text,
@@ -215,7 +215,7 @@ class _DigitalIOState extends State<DigitalIO> {
               new FlatButton(
                   child: const Text('REMOVE'),
                   onPressed: () {
-                    _doutReference.child(entry.key).remove();
+                    _doutRef.child(entry.key).remove();
                     Navigator.pop(context, null);
                   }),
               new FlatButton(

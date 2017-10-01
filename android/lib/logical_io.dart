@@ -77,14 +77,14 @@ class LogicalIO extends StatefulWidget {
 
 class _LogicalIOState extends State<LogicalIO> {
   List<LoutEntry> loutSaves = new List();
-  DatabaseReference _loutReference;
+  DatabaseReference _loutRef;
 
   _LogicalIOState() {
-    _loutReference =
+    _loutRef =
         FirebaseDatabase.instance.reference().child("LIO").child("Lout");
-    _loutReference.onChildAdded.listen(_onEntryAdded);
-    _loutReference.onChildChanged.listen(_onEntryEdited);
-    _loutReference.onChildRemoved.listen(_onEntryRemoved);
+    _loutRef.onChildAdded.listen(_onEntryAdded);
+    _loutRef.onChildChanged.listen(_onEntryEdited);
+    _loutRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -170,7 +170,7 @@ class _LogicalIOState extends State<LogicalIO> {
                 new TextField(
                   controller: _controllerId,
                   decoration: new InputDecoration(
-                    hintText: 'PIN',
+                    hintText: 'ID',
                   ),
                 ),
               ]),
@@ -178,7 +178,7 @@ class _LogicalIOState extends State<LogicalIO> {
             new FlatButton(
                 child: const Text('SAVE'),
                 onPressed: () {
-                  _loutReference.push().set({
+                  _loutRef.push().set({
                     'id': int.parse(_controllerId.text),
                     'name': _controllerName.text,
                   });
@@ -202,7 +202,7 @@ class _LogicalIOState extends State<LogicalIO> {
               new FlatButton(
                   child: const Text('REMOVE'),
                   onPressed: () {
-                    _loutReference.child(entry.key).remove();
+                    _loutRef.child(entry.key).remove();
                     Navigator.pop(context, null);
                   }),
               new FlatButton(
