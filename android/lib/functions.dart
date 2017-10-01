@@ -213,7 +213,7 @@ class _FunctionsState extends State<Functions> {
     showDialog(
         context: context,
         child: new AlertDialog(
-            title: new Text('Remove this Function'),
+            title: new Text('Remove ${entry.name} Function'),
             actions: <Widget>[
               new FlatButton(
                   child: const Text('REMOVE'),

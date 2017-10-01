@@ -210,7 +210,7 @@ class _DigitalIOState extends State<DigitalIO> {
     showDialog(
         context: context,
         child: new AlertDialog(
-            title: new Text('Remove this Digital Output'),
+            title: new Text('Remove ${entry.name} Digital Output'),
             actions: <Widget>[
               new FlatButton(
                   child: const Text('REMOVE'),

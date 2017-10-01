@@ -197,7 +197,7 @@ class _LogicalIOState extends State<LogicalIO> {
     showDialog(
         context: context,
         child: new AlertDialog(
-            title: new Text('Remove this Logital Output'),
+            title: new Text('Remove ${entry.name} Logital Output'),
             actions: <Widget>[
               new FlatButton(
                   child: const Text('REMOVE'),
