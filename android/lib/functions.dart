@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
+import 'digital_io.dart';
+import 'logical_io.dart';
 
 class FunctionEntry {
   String key;
@@ -106,12 +108,24 @@ class Functions extends StatefulWidget {
 class _FunctionsState extends State<Functions> {
   List<FunctionEntry> functionSaves = new List();
   DatabaseReference _functionRef;
+  List<DoutEntry> doutSaves = new List();
+  DatabaseReference _doutRef;
+  List<LoutEntry> loutSaves = new List();
+  DatabaseReference _loutRef;
 
   _FunctionsState() {
     _functionRef = FirebaseDatabase.instance.reference().child('Functions');
-    _functionRef.onChildAdded.listen(_onEntryAdded);
-    _functionRef.onChildChanged.listen(_onEntryEdited);
-    _functionRef.onChildRemoved.listen(_onEntryRemoved);
+    _functionRef.onChildAdded.listen(_onFuncEntryAdded);
+    _functionRef.onChildChanged.listen(_onFuncEntryEdited);
+    _functionRef.onChildRemoved.listen(_onFuncEntryRemoved);
+    _doutRef = FirebaseDatabase.instance.reference().child('DIO').child('Dout');
+    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
+    _doutRef.onChildChanged.listen(_onDoutEntryEdited);
+    _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
+    _loutRef = FirebaseDatabase.instance.reference().child('LIO').child('Lout');
+    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
+    _loutRef.onChildChanged.listen(_onLoutEntryEdited);
+    _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
   }
 
   @override
@@ -150,15 +164,15 @@ class _FunctionsState extends State<Functions> {
     );
   }
 
-  _onEntryAdded(Event event) {
-    print('_onEntryAdded');
+  _onFuncEntryAdded(Event event) {
+    print('_onFuncEntryAdded');
     setState(() {
       functionSaves.add(new FunctionEntry.fromSnapshot(event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
-    print('_onEntryEdited');
+  _onFuncEntryEdited(Event event) {
+    print('_onFuncEntryEdited');
     var oldValue =
         functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
@@ -167,12 +181,64 @@ class _FunctionsState extends State<Functions> {
     });
   }
 
-  _onEntryRemoved(Event event) {
-    print('_onEntryRemoved');
+  _onFuncEntryRemoved(Event event) {
+    print('_onFuncEntryRemoved');
     var oldValue =
         functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       functionSaves.remove(oldValue);
+    });
+  }
+
+  _onDoutEntryAdded(Event event) {
+    print('_onDoutEntryAdded');
+    setState(() {
+      doutSaves.add(new DoutEntry.fromSnapshot(event.snapshot));
+    });
+  }
+
+  _onDoutEntryEdited(Event event) {
+    print('_onDoutEntryEdited');
+    var oldValue =
+        doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      doutSaves[doutSaves.indexOf(oldValue)] =
+          new DoutEntry.fromSnapshot(event.snapshot);
+    });
+  }
+
+  _onDoutEntryRemoved(Event event) {
+    print('_onDoutEntryRemoved');
+    var oldValue =
+        doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      doutSaves.remove(oldValue);
+    });
+  }
+
+  _onLoutEntryAdded(Event event) {
+    print('_onLoutEntryAdded');
+    setState(() {
+      loutSaves.add(new LoutEntry.fromSnapshot(event.snapshot));
+    });
+  }
+
+  _onLoutEntryEdited(Event event) {
+    print('_onLoutEntryEdited');
+    var oldValue =
+        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      loutSaves[loutSaves.indexOf(oldValue)] =
+          new LoutEntry.fromSnapshot(event.snapshot);
+    });
+  }
+
+  _onLoutEntryRemoved(Event event) {
+    print('_onLoutEntryRemoved');
+    var oldValue =
+        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      loutSaves.remove(oldValue);
     });
   }
 

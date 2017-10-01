@@ -87,9 +87,9 @@ class _DigitalIOState extends State<DigitalIO> {
   _DigitalIOState() {
     _doutRef =
         FirebaseDatabase.instance.reference().child('DIO').child('Dout');
-    _doutRef.onChildAdded.listen(_onEntryAdded);
-    _doutRef.onChildChanged.listen(_onEntryEdited);
-    _doutRef.onChildRemoved.listen(_onEntryRemoved);
+    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
+    _doutRef.onChildChanged.listen(_onDoutEntryEdited);
+    _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
   }
 
   @override
@@ -128,15 +128,15 @@ class _DigitalIOState extends State<DigitalIO> {
     );
   }
 
-  _onEntryAdded(Event event) {
-    print('_onEntryAdded');
+  _onDoutEntryAdded(Event event) {
+    print('_onDoutEntryAdded');
     setState(() {
       doutSaves.add(new DoutEntry.fromSnapshot(event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
-    print('_onEntryEdited');
+  _onDoutEntryEdited(Event event) {
+    print('_onDoutEntryEdited');
     var oldValue =
         doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
@@ -145,8 +145,8 @@ class _DigitalIOState extends State<DigitalIO> {
     });
   }
 
-  _onEntryRemoved(Event event) {
-    print('_onEntryRemoved');
+  _onDoutEntryRemoved(Event event) {
+    print('_onDoutEntryRemoved');
     var oldValue =
         doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {

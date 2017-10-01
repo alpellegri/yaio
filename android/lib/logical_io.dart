@@ -82,9 +82,9 @@ class _LogicalIOState extends State<LogicalIO> {
   _LogicalIOState() {
     _loutRef =
         FirebaseDatabase.instance.reference().child('LIO').child('Lout');
-    _loutRef.onChildAdded.listen(_onEntryAdded);
-    _loutRef.onChildChanged.listen(_onEntryEdited);
-    _loutRef.onChildRemoved.listen(_onEntryRemoved);
+    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
+    _loutRef.onChildChanged.listen(_onLoutEntryEdited);
+    _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
   }
 
   @override
@@ -123,15 +123,15 @@ class _LogicalIOState extends State<LogicalIO> {
     );
   }
 
-  _onEntryAdded(Event event) {
-    print('_onEntryAdded');
+  _onLoutEntryAdded(Event event) {
+    print('_onLoutEntryAdded');
     setState(() {
       loutSaves.add(new LoutEntry.fromSnapshot(event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
-    print('_onEntryEdited');
+  _onLoutEntryEdited(Event event) {
+    print('_onLoutEntryEdited');
     var oldValue =
         loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
@@ -140,8 +140,8 @@ class _LogicalIOState extends State<LogicalIO> {
     });
   }
 
-  _onEntryRemoved(Event event) {
-    print('_onEntryRemoved');
+  _onLoutEntryRemoved(Event event) {
+    print('_onLoutEntryRemoved');
     var oldValue =
         loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
