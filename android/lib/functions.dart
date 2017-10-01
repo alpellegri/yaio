@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'digital_io.dart';
-import 'logical_io.dart';
+import 'io_entry.dart';
 
 class FunctionEntry {
   String key;
@@ -108,12 +107,15 @@ class Functions extends StatefulWidget {
 class _FunctionsState extends State<Functions> {
   List<FunctionEntry> functionSaves = new List();
   DatabaseReference _functionRef;
-  List<DoutEntry> doutSaves = new List();
+  List<IoEntry> doutSaves = new List();
   DatabaseReference _doutRef;
-  List<LoutEntry> loutSaves = new List();
+  List<IoEntry> loutSaves = new List();
   DatabaseReference _loutRef;
+  List<IoEntry> ioMenu;
+  String selection;
 
   _FunctionsState() {
+    ioMenu = loutSaves;
     _functionRef = FirebaseDatabase.instance.reference().child('Functions');
     _functionRef.onChildAdded.listen(_onFuncEntryAdded);
     _functionRef.onChildChanged.listen(_onFuncEntryEdited);
@@ -193,7 +195,7 @@ class _FunctionsState extends State<Functions> {
   _onDoutEntryAdded(Event event) {
     print('_onDoutEntryAdded');
     setState(() {
-      doutSaves.add(new DoutEntry.fromSnapshot(event.snapshot));
+      doutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
     });
   }
 
@@ -203,7 +205,7 @@ class _FunctionsState extends State<Functions> {
         doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       doutSaves[doutSaves.indexOf(oldValue)] =
-          new DoutEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(event.snapshot);
     });
   }
 
@@ -219,7 +221,7 @@ class _FunctionsState extends State<Functions> {
   _onLoutEntryAdded(Event event) {
     print('_onLoutEntryAdded');
     setState(() {
-      loutSaves.add(new LoutEntry.fromSnapshot(event.snapshot));
+      loutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
     });
   }
 
@@ -229,7 +231,7 @@ class _FunctionsState extends State<Functions> {
         loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       loutSaves[loutSaves.indexOf(oldValue)] =
-          new LoutEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(event.snapshot);
     });
   }
 
@@ -244,7 +246,6 @@ class _FunctionsState extends State<Functions> {
 
   void _openAddEntryDialog() {
     final TextEditingController _controllerName = new TextEditingController();
-    String selection;
 
     showDialog(
       context: context,
@@ -263,11 +264,17 @@ class _FunctionsState extends State<Functions> {
                 new ListTile(
                   title: const Text('Action Type'),
                   trailing: new DropdownButton<String>(
-                    hint: new Text('Select Type'),
+                    hint: const Text('Select Type'),
                     value: selection,
                     onChanged: (String newValue) {
+                      print(newValue);
                       setState(() {
                         selection = newValue;
+                        if (selection == 'Digital IO') {
+                          ioMenu = doutSaves;
+                        } else if (selection == 'Logical IO') {
+                          ioMenu = loutSaves;
+                        }
                       });
                     },
                     items: <String>['Digital IO', 'Logical IO']
@@ -285,14 +292,14 @@ class _FunctionsState extends State<Functions> {
                 new ListTile(
                   title: const Text('Action'),
                   trailing: new DropdownButton<String>(
-                    hint: new Text('Select Action'),
+                    hint: const Text('Select Action'),
                     value: selection,
                     onChanged: (String newValue) {
+                      print(newValue);
                       setState(() {
-                        selection = newValue;
                       });
                     },
-                    items: functionSaves.map((FunctionEntry entry) {
+                    items: ioMenu.map((IoEntry entry) {
                       return new DropdownMenuItem<String>(
                         value: entry.name,
                         child: new Text(
@@ -306,9 +313,10 @@ class _FunctionsState extends State<Functions> {
                 new ListTile(
                   title: const Text('Delay'),
                   trailing: new DropdownButton<String>(
-                    hint: new Text('Select a Delay'),
+                    hint: const Text('Select a Delay'),
                     value: selection,
                     onChanged: (String newValue) {
+                      print(newValue);
                       setState(() {
                         selection = newValue;
                       });
@@ -327,9 +335,10 @@ class _FunctionsState extends State<Functions> {
                 new ListTile(
                   title: const Text('Next Function'),
                   trailing: new DropdownButton<String>(
-                    hint: new Text('Select a Function'),
+                    hint: const Text('Select a Function'),
                     value: selection,
                     onChanged: (String newValue) {
+                      print(newValue);
                       setState(() {
                         selection = newValue;
                       });

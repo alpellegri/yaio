@@ -1,29 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-
-class LoutEntry {
-  String key;
-  int id;
-  String name;
-
-  LoutEntry(this.id, this.name);
-
-  LoutEntry.fromSnapshot(DataSnapshot snapshot)
-      : key = snapshot.key,
-        id = snapshot.value['id'],
-        name = snapshot.value['name'];
-
-  toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
-  }
-}
+import 'io_entry.dart';
 
 class LoutListItem extends StatelessWidget {
-  final LoutEntry loutEntry;
+  final IoEntry loutEntry;
 
   LoutListItem(this.loutEntry);
 
@@ -76,7 +57,7 @@ class LogicalIO extends StatefulWidget {
 }
 
 class _LogicalIOState extends State<LogicalIO> {
-  List<LoutEntry> loutSaves = new List();
+  List<IoEntry> loutSaves = new List();
   DatabaseReference _loutRef;
 
   _LogicalIOState() {
@@ -126,7 +107,7 @@ class _LogicalIOState extends State<LogicalIO> {
   _onLoutEntryAdded(Event event) {
     print('_onLoutEntryAdded');
     setState(() {
-      loutSaves.add(new LoutEntry.fromSnapshot(event.snapshot));
+      loutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
     });
   }
 
@@ -136,7 +117,7 @@ class _LogicalIOState extends State<LogicalIO> {
         loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       loutSaves[loutSaves.indexOf(oldValue)] =
-          new LoutEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(event.snapshot);
     });
   }
 
@@ -193,7 +174,7 @@ class _LogicalIOState extends State<LogicalIO> {
     );
   }
 
-  void _openRemoveEntryDialog(LoutEntry entry) {
+  void _openRemoveEntryDialog(IoEntry entry) {
     showDialog(
         context: context,
         child: new AlertDialog(

@@ -1,29 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-
-class DoutEntry {
-  String key;
-  int id;
-  String name;
-
-  DoutEntry(this.id, this.name);
-
-  DoutEntry.fromSnapshot(DataSnapshot snapshot)
-      : key = snapshot.key,
-        id = snapshot.value['id'],
-        name = snapshot.value['name'];
-
-  toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
-  }
-}
+import 'io_entry.dart';
 
 class DoutListItem extends StatelessWidget {
-  final DoutEntry doutEntry;
+  final IoEntry doutEntry;
 
   DoutListItem(this.doutEntry);
 
@@ -81,7 +62,7 @@ class DigitalIO extends StatefulWidget {
 }
 
 class _DigitalIOState extends State<DigitalIO> {
-  List<DoutEntry> doutSaves = new List();
+  List<IoEntry> doutSaves = new List();
   DatabaseReference _doutRef;
 
   _DigitalIOState() {
@@ -130,7 +111,7 @@ class _DigitalIOState extends State<DigitalIO> {
   _onDoutEntryAdded(Event event) {
     print('_onDoutEntryAdded');
     setState(() {
-      doutSaves.add(new DoutEntry.fromSnapshot(event.snapshot));
+      doutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
     });
   }
 
@@ -140,7 +121,7 @@ class _DigitalIOState extends State<DigitalIO> {
         doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       doutSaves[doutSaves.indexOf(oldValue)] =
-          new DoutEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(event.snapshot);
     });
   }
 
@@ -205,7 +186,7 @@ class _DigitalIOState extends State<DigitalIO> {
     );
   }
 
-  void _openRemoveEntryDialog(DoutEntry entry) {
+  void _openRemoveEntryDialog(IoEntry entry) {
     showDialog(
         context: context,
         child: new AlertDialog(
