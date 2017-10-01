@@ -118,11 +118,11 @@ class _FunctionsState extends State<Functions> {
     _functionRef.onChildAdded.listen(_onFuncEntryAdded);
     _functionRef.onChildChanged.listen(_onFuncEntryEdited);
     _functionRef.onChildRemoved.listen(_onFuncEntryRemoved);
-    _doutRef = FirebaseDatabase.instance.reference().child('DIO').child('Dout');
+    _doutRef = FirebaseDatabase.instance.reference().child('DIO/Dout');
     _doutRef.onChildAdded.listen(_onDoutEntryAdded);
     _doutRef.onChildChanged.listen(_onDoutEntryEdited);
     _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
-    _loutRef = FirebaseDatabase.instance.reference().child('LIO').child('Lout');
+    _loutRef = FirebaseDatabase.instance.reference().child('LIO/Lout');
     _loutRef.onChildAdded.listen(_onLoutEntryAdded);
     _loutRef.onChildChanged.listen(_onLoutEntryEdited);
     _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
@@ -258,6 +258,70 @@ class _FunctionsState extends State<Functions> {
                   controller: _controllerName,
                   decoration: new InputDecoration(
                     hintText: 'Name',
+                  ),
+                ),
+                new ListTile(
+                  title: const Text('Action Type'),
+                  trailing: new DropdownButton<String>(
+                    hint: new Text('Select Type'),
+                    value: selection,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        selection = newValue;
+                      });
+                    },
+                    items: <String>['Digital IO', 'Logical IO']
+                        .map((String entry) {
+                      return new DropdownMenuItem<String>(
+                        value: entry,
+                        child: new Text(
+                          entry,
+                          style: new TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                new ListTile(
+                  title: const Text('Action'),
+                  trailing: new DropdownButton<String>(
+                    hint: new Text('Select Action'),
+                    value: selection,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        selection = newValue;
+                      });
+                    },
+                    items: functionSaves.map((FunctionEntry entry) {
+                      return new DropdownMenuItem<String>(
+                        value: entry.name,
+                        child: new Text(
+                          entry.name,
+                          style: new TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                new ListTile(
+                  title: const Text('Delay'),
+                  trailing: new DropdownButton<String>(
+                    hint: new Text('Select a Delay'),
+                    value: selection,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        selection = newValue;
+                      });
+                    },
+                    items: functionSaves.map((FunctionEntry entry) {
+                      return new DropdownMenuItem<String>(
+                        value: entry.name,
+                        child: new Text(
+                          entry.name,
+                          style: new TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
                 new ListTile(

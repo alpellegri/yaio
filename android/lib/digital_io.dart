@@ -85,8 +85,7 @@ class _DigitalIOState extends State<DigitalIO> {
   DatabaseReference _doutRef;
 
   _DigitalIOState() {
-    _doutRef =
-        FirebaseDatabase.instance.reference().child('DIO').child('Dout');
+    _doutRef = FirebaseDatabase.instance.reference().child('DIO/Dout');
     _doutRef.onChildAdded.listen(_onDoutEntryAdded);
     _doutRef.onChildChanged.listen(_onDoutEntryEdited);
     _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);

@@ -81,7 +81,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   _LogicalIOState() {
     _loutRef =
-        FirebaseDatabase.instance.reference().child('LIO').child('Lout');
+        FirebaseDatabase.instance.reference().child('LIO/Lout');
     _loutRef.onChildAdded.listen(_onLoutEntryAdded);
     _loutRef.onChildChanged.listen(_onLoutEntryEdited);
     _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
