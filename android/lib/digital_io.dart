@@ -11,13 +11,13 @@ class DoutEntry {
 
   DoutEntry.fromSnapshot(DataSnapshot snapshot)
       : key = snapshot.key,
-        id = snapshot.value["id"],
-        name = snapshot.value["name"];
+        id = snapshot.value['id'],
+        name = snapshot.value['name'];
 
   toJson() {
     return {
-      "id": id,
-      "name": name,
+      'id': id,
+      'name': name,
     };
   }
 }
@@ -43,17 +43,17 @@ class DoutListItem extends StatelessWidget {
                   children: [
                     new Text(
                       doutEntry.name,
-                      textScaleFactor: 1.3,
+                      textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       'PIN: ${doutEntry.id >> 1}',
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       'Value: ${doutEntry.id & 0x1}',
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                   ],
@@ -86,7 +86,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   _DigitalIOState() {
     _doutRef =
-        FirebaseDatabase.instance.reference().child("DIO").child("Dout");
+        FirebaseDatabase.instance.reference().child('DIO').child('Dout');
     _doutRef.onChildAdded.listen(_onEntryAdded);
     _doutRef.onChildChanged.listen(_onEntryEdited);
     _doutRef.onChildRemoved.listen(_onEntryRemoved);

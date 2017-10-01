@@ -17,25 +17,25 @@ class FunctionEntry {
 
   FunctionEntry.fromSnapshot(DataSnapshot snapshot)
       : key = snapshot.key,
-        action = snapshot.value["action"],
-        action_name = snapshot.value["action_name"],
-        delay = snapshot.value["delay"],
-        id = snapshot.value["id"],
-        name = snapshot.value["name"],
-        next = snapshot.value["next"],
-        type = snapshot.value["type"],
-        type_name = snapshot.value["type_name"];
+        action = snapshot.value['action'],
+        action_name = snapshot.value['action_name'],
+        delay = snapshot.value['delay'],
+        id = snapshot.value['id'],
+        name = snapshot.value['name'],
+        next = snapshot.value['next'],
+        type = snapshot.value['type'],
+        type_name = snapshot.value['type_name'];
 
   toJson() {
     return {
-      "action": action,
-      "action_name": action_name,
-      "delay": delay,
-      "id": id,
-      "name": name,
-      "next": next,
-      "type": type,
-      "type_name": type_name,
+      'action': action,
+      'action_name': action_name,
+      'delay': delay,
+      'id': id,
+      'name': name,
+      'next': next,
+      'type': type,
+      'type_name': type_name,
     };
   }
 }
@@ -61,22 +61,22 @@ class FunctionListItem extends StatelessWidget {
                   children: [
                     new Text(
                       functionEntry.name,
-                      textScaleFactor: 1.3,
+                      textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       functionEntry.action_name,
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       functionEntry.type_name,
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       functionEntry.next,
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                   ],
@@ -108,7 +108,7 @@ class _FunctionsState extends State<Functions> {
   DatabaseReference _functionRef;
 
   _FunctionsState() {
-    _functionRef = FirebaseDatabase.instance.reference().child("Functions");
+    _functionRef = FirebaseDatabase.instance.reference().child('Functions');
     _functionRef.onChildAdded.listen(_onEntryAdded);
     _functionRef.onChildChanged.listen(_onEntryEdited);
     _functionRef.onChildRemoved.listen(_onEntryRemoved);
@@ -178,6 +178,7 @@ class _FunctionsState extends State<Functions> {
 
   void _openAddEntryDialog() {
     final TextEditingController _controllerName = new TextEditingController();
+    String selection;
 
     showDialog(
       context: context,
@@ -191,6 +192,27 @@ class _FunctionsState extends State<Functions> {
                   controller: _controllerName,
                   decoration: new InputDecoration(
                     hintText: 'Name',
+                  ),
+                ),
+                new ListTile(
+                  title: const Text('Next Function'),
+                  trailing: new DropdownButton<String>(
+                    hint: new Text('Select a Function'),
+                    value: selection,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        selection = newValue;
+                      });
+                    },
+                    items: functionSaves.map((FunctionEntry entry) {
+                      return new DropdownMenuItem<String>(
+                        value: entry.name,
+                        child: new Text(
+                          entry.name,
+                          style: new TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ]),

@@ -11,13 +11,13 @@ class LoutEntry {
 
   LoutEntry.fromSnapshot(DataSnapshot snapshot)
       : key = snapshot.key,
-        id = snapshot.value["id"],
-        name = snapshot.value["name"];
+        id = snapshot.value['id'],
+        name = snapshot.value['name'];
 
   toJson() {
     return {
-      "id": id,
-      "name": name,
+      'id': id,
+      'name': name,
     };
   }
 }
@@ -43,12 +43,12 @@ class LoutListItem extends StatelessWidget {
                   children: [
                     new Text(
                       loutEntry.name,
-                      textScaleFactor: 1.3,
+                      textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       'PIN: ${loutEntry.id}',
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                   ],
@@ -81,7 +81,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   _LogicalIOState() {
     _loutRef =
-        FirebaseDatabase.instance.reference().child("LIO").child("Lout");
+        FirebaseDatabase.instance.reference().child('LIO').child('Lout');
     _loutRef.onChildAdded.listen(_onEntryAdded);
     _loutRef.onChildChanged.listen(_onEntryEdited);
     _loutRef.onChildRemoved.listen(_onEntryRemoved);
