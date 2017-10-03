@@ -245,16 +245,72 @@ class _FunctionsState extends State<Functions> {
   }
 
   void _openAddEntryDialog() {
-    final TextEditingController _controllerName = new TextEditingController();
+    showDialog(
+      context: context,
+      child: new EntryDialog(
+          functionSaves: functionSaves,
+          doutSaves: doutSaves,
+          loutSaves: loutSaves),
+    );
+  }
 
+  void _openRemoveEntryDialog(FunctionEntry entry) {
     showDialog(
       context: context,
       child: new AlertDialog(
+            title: new Text('Remove ${entry.name} Function'),
+            actions: <Widget>[
+              new FlatButton(
+                  child: const Text('REMOVE'),
+                  onPressed: () {
+                    _functionRef.child(entry.key).remove();
+                    Navigator.pop(context, null);
+                  }),
+              new FlatButton(
+                  child: const Text('DISCARD'),
+                  onPressed: () {
+                    Navigator.pop(context, null);
+                  })
+            ]));
+  }
+}
+
+class EntryDialog extends StatefulWidget {
+  final List<FunctionEntry> functionSaves;
+  final List<IoEntry> doutSaves;
+  final List<IoEntry> loutSaves;
+
+  EntryDialog({this.functionSaves, this.doutSaves, this.loutSaves});
+
+  @override
+  EntryDialogState createState() => new EntryDialogState(
+      functionSaves: functionSaves, doutSaves: doutSaves, loutSaves: loutSaves);
+}
+
+class EntryDialogState extends State<EntryDialog> {
+  final TextEditingController _controllerName = new TextEditingController();
+  List<FunctionEntry> functionSaves;
+  List<IoEntry> doutSaves;
+  List<IoEntry> loutSaves;
+  List<IoEntry> ioMenu;
+  String selectType;
+  String selectAction;
+  String selectDelay;
+  String selectNext;
+
+  EntryDialogState({this.functionSaves, this.doutSaves, this.loutSaves}) {
+    print('EntryDialogState');
+    ioMenu = doutSaves;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
           title: new Text('Create a Function'),
           content: new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+            children: [
                 new TextField(
                   controller: _controllerName,
                   decoration: new InputDecoration(
@@ -265,20 +321,21 @@ class _FunctionsState extends State<Functions> {
                   title: const Text('Action Type'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select Type'),
-                    value: selection,
+                  value: selectType,
                     onChanged: (String newValue) {
                       print(newValue);
                       setState(() {
-                        selection = newValue;
-                        if (selection == 'Digital IO') {
+                      selectType = newValue;
+                      if (newValue == 'Digital IO') {
                           ioMenu = doutSaves;
-                        } else if (selection == 'Logical IO') {
+                      } else
+                      /* if (newValue == 'Logical IO') */ {
                           ioMenu = loutSaves;
                         }
                       });
                     },
-                    items: <String>['Digital IO', 'Logical IO']
-                        .map((String entry) {
+                  items:
+                      <String>['Digital IO', 'Logical IO'].map((String entry) {
                       return new DropdownMenuItem<String>(
                         value: entry,
                         child: new Text(
@@ -293,10 +350,10 @@ class _FunctionsState extends State<Functions> {
                   title: const Text('Action'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select Action'),
-                    value: selection,
+                  value: selectAction,
                     onChanged: (String newValue) {
-                      print(newValue);
                       setState(() {
+                      selectAction = newValue;
                       });
                     },
                     items: ioMenu.map((IoEntry entry) {
@@ -314,11 +371,11 @@ class _FunctionsState extends State<Functions> {
                   title: const Text('Delay'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select a Delay'),
-                    value: selection,
+                  value: selectDelay,
                     onChanged: (String newValue) {
                       print(newValue);
                       setState(() {
-                        selection = newValue;
+                      selectDelay = newValue;
                       });
                     },
                     items: functionSaves.map((FunctionEntry entry) {
@@ -336,11 +393,11 @@ class _FunctionsState extends State<Functions> {
                   title: const Text('Next Function'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select a Function'),
-                    value: selection,
+                  value: selectNext,
                     onChanged: (String newValue) {
                       print(newValue);
                       setState(() {
-                        selection = newValue;
+                      selectNext = newValue;
                       });
                     },
                     items: functionSaves.map((FunctionEntry entry) {
@@ -366,27 +423,6 @@ class _FunctionsState extends State<Functions> {
                 onPressed: () {
                   Navigator.pop(context, null);
                 })
-          ]),
-    );
-  }
-
-  void _openRemoveEntryDialog(FunctionEntry entry) {
-    showDialog(
-        context: context,
-        child: new AlertDialog(
-            title: new Text('Remove ${entry.name} Function'),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('REMOVE'),
-                  onPressed: () {
-                    _functionRef.child(entry.key).remove();
-                    Navigator.pop(context, null);
-                  }),
-              new FlatButton(
-                  child: const Text('DISCARD'),
-                  onPressed: () {
-                    Navigator.pop(context, null);
-                  })
-            ]));
+        ]);
   }
 }
