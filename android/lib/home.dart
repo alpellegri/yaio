@@ -34,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
       FirebaseDatabase.instance.reference().child('status');
   final DatabaseReference _startupReference =
       FirebaseDatabase.instance.reference().child('startup');
+  Icon iconLockstatus;
 
   Map<String, Object> _control = {
     'alarm': false,
@@ -65,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _controlReference.onValue.listen(_onValueControl);
     _statusReference.onValue.listen(_onValueStatus);
     _startupReference.onValue.listen(_onValueStartup);
+    iconLockstatus = const Icon(Icons.lock_open);
     print('_MyHomePageState');
   }
 
@@ -109,9 +111,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   subtitle: new Text('?'),
                 ),
                 new ListTile(
-                  leading: const Icon(Icons.album),
+                  leading: iconLockstatus,
                   title: const Text('Alarm Status'),
-                  subtitle: new Text('${_status["alarm"] ? "ON" : "OFF"}'),
+                  subtitle:
+                      new Text('${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
                 ),
                 new ButtonTheme.bar(
                   // make buttons use the appropriate styles for cards
@@ -122,8 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: () {
                           _control['alarm'] = !_control['alarm'];
                           DateTime now = new DateTime.now();
-                          _control['time'] =
-                              (now.millisecondsSinceEpoch / 1000).toInt();
+                          _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
                           _controlReference.set(_control);
                         },
                       ),
@@ -209,6 +211,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onValueStatus(Event event) {
     setState(() {
       _status = event.snapshot.value;
+      if (_status['alarm'] == true) {
+        iconLockstatus = const Icon(Icons.lock, color: Colors.red);
+      } else {
+        iconLockstatus = const Icon(Icons.lock_open, color: Colors.green);
+      }
     });
   }
 
