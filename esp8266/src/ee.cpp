@@ -59,9 +59,9 @@ bool EE_LoadData(void) {
   for (i = 0; i < EE_SIZE; i++) {
     yield();
     data[i] = EEPROM.read(i);
-    Serial.printf("%c", data[i]);
+    Serial.printf_P(PSTR("%c"), data[i]);
   }
-  Serial.printf("\n");
+  Serial.println();
 
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);

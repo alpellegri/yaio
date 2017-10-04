@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
@@ -74,12 +75,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    String alarmButton;
+    if (_status["alarm"] == true) {
+      if (_control["alarm"] == true) {
+        alarmButton = "DEACTIVATE";
+      } else {
+        alarmButton = "DISARMING";
+      }
+    } else {
+      if (_control["alarm"] == false) {
+        alarmButton = "ACTIVATE";
+      } else {
+        alarmButton = "ARMING";
+      }
+    }
     DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-        int.parse(_startup['time'].toString())*1000
-    );
+        int.parse(_startup['time'].toString()) * 1000);
     DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
-        int.parse(_status['time'].toString())*1000
-    );
+        int.parse(_status['time'].toString()) * 1000);
     return new Scaffold(
         drawer: drawer,
         appBar: new AppBar(
@@ -98,23 +111,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 new ListTile(
                   leading: const Icon(Icons.album),
                   title: const Text('Alarm Status'),
-                  subtitle: new Text('${_status["alarm"]?"ON":"OFF"}'),
+                  subtitle: new Text('${_status["alarm"] ? "ON" : "OFF"}'),
                 ),
                 new ButtonTheme.bar(
                   // make buttons use the appropriate styles for cards
                   child: new ButtonBar(
                     children: <Widget>[
                       new FlatButton(
-                        child: const Text('ALARM ON'),
+                        child: new Text(alarmButton),
                         onPressed: () {
-                          _control['alarm'] = true;
-                          _controlReference.set(_control);
-                        },
-                      ),
-                      new FlatButton(
-                        child: const Text('ALARM OFF'),
-                        onPressed: () {
-                          _control['alarm'] = false;
+                          _control['alarm'] = !_control['alarm'];
+                          DateTime now = new DateTime.now();
+                          _control['time'] =
+                              (now.millisecondsSinceEpoch / 1000).toInt();
                           _controlReference.set(_control);
                         },
                       ),
@@ -196,11 +205,13 @@ class _MyHomePageState extends State<MyHomePage> {
       _control = event.snapshot.value;
     });
   }
+
   void _onValueStatus(Event event) {
     setState(() {
       _status = event.snapshot.value;
     });
   }
+
   void _onValueStartup(Event event) {
     setState(() {
       _startup = event.snapshot.value;

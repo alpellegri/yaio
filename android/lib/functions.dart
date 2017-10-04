@@ -283,22 +283,22 @@ class EntryDialog extends StatefulWidget {
   EntryDialog({this.functionSaves, this.doutSaves, this.loutSaves});
 
   @override
-  EntryDialogState createState() => new EntryDialogState(
+  _EntryDialogState createState() => new _EntryDialogState(
       functionSaves: functionSaves, doutSaves: doutSaves, loutSaves: loutSaves);
 }
 
-class EntryDialogState extends State<EntryDialog> {
+class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   List<FunctionEntry> functionSaves;
   List<IoEntry> doutSaves;
   List<IoEntry> loutSaves;
   List<IoEntry> ioMenu;
-  String selectType;
-  String selectAction;
-  String selectDelay;
+  String _selectType;
+  String _selectAction;
+  String _selectDelay;
   String selectNext;
 
-  EntryDialogState({this.functionSaves, this.doutSaves, this.loutSaves}) {
+  _EntryDialogState({this.functionSaves, this.doutSaves, this.loutSaves}) {
     print('EntryDialogState');
     ioMenu = doutSaves;
   }
@@ -321,11 +321,11 @@ class EntryDialogState extends State<EntryDialog> {
                   title: const Text('Action Type'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select Type'),
-                  value: selectType,
+                  value: _selectType,
                     onChanged: (String newValue) {
                       print(newValue);
                       setState(() {
-                      selectType = newValue;
+                      _selectType = newValue;
                       if (newValue == 'Digital IO') {
                           ioMenu = doutSaves;
                       } else
@@ -350,10 +350,10 @@ class EntryDialogState extends State<EntryDialog> {
                   title: const Text('Action'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select Action'),
-                  value: selectAction,
+                  value: _selectAction,
                     onChanged: (String newValue) {
                       setState(() {
-                      selectAction = newValue;
+                      _selectAction = newValue;
                       });
                     },
                     items: ioMenu.map((IoEntry entry) {
@@ -371,11 +371,11 @@ class EntryDialogState extends State<EntryDialog> {
                   title: const Text('Delay'),
                   trailing: new DropdownButton<String>(
                     hint: const Text('Select a Delay'),
-                  value: selectDelay,
+                  value: _selectDelay,
                     onChanged: (String newValue) {
                       print(newValue);
                       setState(() {
-                      selectDelay = newValue;
+                      _selectDelay = newValue;
                       });
                     },
                     items: functionSaves.map((FunctionEntry entry) {

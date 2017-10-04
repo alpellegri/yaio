@@ -67,7 +67,7 @@ bool STA_Setup(void) {
         fota_mode = false;
       } else {
         fota_mode = true;
-        Serial.println("file open ");
+        Serial.println(F("file open "));
         SPIFFS.remove("/fota.req");
         FOTA_UpdateReq();
       }

@@ -44,14 +44,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     /* disable wifi scan when locally connected */
     enable_WiFi_Scan = false;
     IPAddress ip = webSocket.remoteIP(num);
-    Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0],
-                  ip[1], ip[2], ip[3], payload);
+    Serial.printf_P(PSTR("[%u] Connected from %d.%d.%d.%d url: %s\n"), num,
+                    ip[0], ip[1], ip[2], ip[3], payload);
     port_id = num;
   } break;
 
   case WStype_TEXT:
     len = strlen((char *)payload);
-    Serial.printf("[%u] get Text (%d): %s\n", num, len, payload);
+    Serial.printf_P(PSTR("[%u] get Text (%d): %s\n"), num, len, payload);
 
     if (len != 0) {
       // save to epprom
@@ -99,7 +99,7 @@ bool AP_Setup(void) {
 
   IPAddress myIP = WiFi.softAPIP();
   Serial.println(F("AP mode enabled"));
-  Serial.print("IP address: ");
+  Serial.print(F("IP address: "));
   Serial.println(myIP);
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
