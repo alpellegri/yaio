@@ -1,22 +1,7 @@
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'login.dart';
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'uHome',
-      theme: new ThemeData(
-        primarySwatch: Colors.indigo,
-      ),
-      home: new MyHomePage(title: 'uHome'),
-      routes: menuRoutes,
-    );
-  }
-}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
