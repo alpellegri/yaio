@@ -20,6 +20,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final DatabaseReference _startupReference =
       FirebaseDatabase.instance.reference().child('startup');
   Icon iconLockstatus;
+  Map _configMap;
+  String _infoConfig = "";
 
   Map<String, Object> _control = {
     'alarm': false,
@@ -45,6 +47,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    configFirefase().then((value) {
+      _configMap = value;
+      _infoConfig =
+          'project_number ${_configMap["project_info"]['project_number']}\n'
+          'firebase_url ${_configMap["project_info"]['firebase_url']}\n'
+          'project_id ${_configMap["project_info"]['project_id']}\n'
+          'storage_bucket ${_configMap["project_info"]['storage_bucket']}\n';
+    });
     FirebaseDatabase.instance.setPersistenceEnabled(true);
     FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
     signInWithGoogle();
@@ -88,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
         body: new ListView(children: <Widget>[
           new Card(
             child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 new ListTile(
@@ -100,21 +111,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: const Text('Alarm Status'),
                   subtitle:
                       new Text('${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
-                ),
-                new ButtonTheme.bar(
-                  // make buttons use the appropriate styles for cards
-                  child: new ButtonBar(
-                    children: <Widget>[
-                      new FlatButton(
-                        child: new Text(alarmButton),
-                        onPressed: () {
-                          _control['alarm'] = !_control['alarm'];
-                          DateTime now = new DateTime.now();
-                          _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-                          _controlReference.set(_control);
-                        },
-                      ),
-                    ],
+                  trailing: new ButtonTheme.bar(
+                    // make buttons use the appropriate styles for cards
+                    child: new ButtonBar(
+                      children: <Widget>[
+                        new FlatButton(
+                          child: new Text(alarmButton),
+                          onPressed: () {
+                            _control['alarm'] = !_control['alarm'];
+                            DateTime now = new DateTime.now();
+                            _control['time'] =
+                                now.millisecondsSinceEpoch ~/ 1000;
+                            _controlReference.set(_control);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -122,6 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           new Card(
             child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 new ListTile(
@@ -166,21 +179,29 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: const Icon(Icons.cloud_download),
                   title: const Text('Firmware Version'),
                   subtitle: new Text('${_startup["version"]}'),
-                ),
-                new ButtonTheme.bar(
-                  // make buttons use the appropriate styles for cards
-                  child: new ButtonBar(
-                    children: <Widget>[
-                      new FlatButton(
-                        child: const Text('FIRMWARE UPDATE'),
-                        onPressed: () {
-                          _control['reboot'] = true;
-                          _controlReference.set(_control);
-                        },
-                      ),
-                    ],
+                  trailing: new ButtonTheme.bar(
+                    child: new ButtonBar(
+                      children: <Widget>[
+                        new FlatButton(
+                          child: const Text('UPDATE'),
+                          onPressed: () {
+                            _control['reboot'] = true;
+                            _controlReference.set(_control);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ),
+          new Card(
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Text('Firebase info'),
+                new Text(_infoConfig),
               ],
             ),
           ),

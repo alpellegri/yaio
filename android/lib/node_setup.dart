@@ -1,5 +1,21 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'drawer.dart';
+
+Future<Null> initWebSocket() async {
+  final String fbConfig = await rootBundle.loadString('android/app/google-services.json');
+  print('mystring - ${fbConfig}');
+
+  print('initWebSocket');
+  WebSocket socket = await WebSocket.connect('ws://echo.websocket.org');
+  socket.listen((value) {
+    print("Received: $value");
+  });
+  print('initWebSocket - connected');
+  socket.add('Hello, World!');
+}
 
 class NodeSetup extends StatefulWidget {
   NodeSetup({Key key, this.title}) : super(key: key);
@@ -17,6 +33,7 @@ class _NodeSetupState extends State<NodeSetup> {
   void initState() {
     super.initState();
     print('_NodeSetupState');
+    initWebSocket();
   }
 
   @override
