@@ -104,7 +104,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 new ListTile(
                   leading: const Icon(Icons.album),
                   title: const Text('Device Status'),
-                  subtitle: new Text('?'),
                 ),
                 new ListTile(
                   leading: iconLockstatus,
@@ -139,13 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 new ListTile(
                   leading: const Icon(Icons.show_chart),
-                  title: const Text('Temperature'),
-                  subtitle: new Text('${_status["temperature"]}'),
-                ),
-                new ListTile(
-                  leading: const Icon(Icons.show_chart),
-                  title: const Text('Humidity'),
-                  subtitle: new Text('${_status["humidity"]}'),
+                  title: const Text('Temperature/Humidity'),
+                  subtitle: new Text(
+                      '${_status["temperature"]}°C / ${_status["temperature"]}%'),
                 ),
               ],
             ),
@@ -187,6 +182,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPressed: () {
                             _control['reboot'] = true;
                             _controlReference.set(_control);
+                            DateTime now = new DateTime.now();
+                            _control['time'] =
+                                now.millisecondsSinceEpoch ~/ 1000;
+                            _controlReference.set(_control);
                           },
                         ),
                       ],
@@ -215,6 +214,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onValueStatus(Event event) {
+    // update control time to keep up node
+    DateTime now = new DateTime.now();
+    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
+    _controlReference.set(_control);
     setState(() {
       _status = event.snapshot.value;
       if (_status['alarm'] == true) {
