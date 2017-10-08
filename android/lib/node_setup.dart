@@ -3,13 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
 
+typedef void CallVoid();
+typedef void CallString(String data);
+
 class ServiceWebSocket {
   // static const String wsUri = 'ws://192.168.2.1:81';
   String _WsUri;
-  Function _onOpen;
-  Function _onData;
-  Function _onError;
-  Function _onClose;
+  CallVoid _onOpen;
+  CallString _onData;
+  CallString _onError;
+  CallVoid _onClose;
 
   WebSocket _socket;
 
@@ -26,18 +29,18 @@ class ServiceWebSocket {
   Future<Null> open() async {
     print('connWebSocket');
     _socket = await WebSocket.connect(_WsUri);
-    print('connWebSocket');
-    _socket.listen((value) => _onData,
-        onError: (e) => _onError, onDone: () => _onClose, cancelOnError: true);
+    _onOpen();
+    _socket.listen((value) => _onData(value),
+        onError: (e) => _onError(e),
+        onDone: () => _onClose(),
+        cancelOnError: true);
   }
 
   send() {
-    print('send');
     _socket.add('ciao');
   }
 
   close() {
-    print('close');
     _socket.close();
   }
 }
@@ -58,15 +61,19 @@ class _NodeSetupState extends State<NodeSetup> {
   String response = "";
   static const String kWsUri = 'ws://echo.websocket.org';
   ServiceWebSocket ws;
+  Icon iconConnStatus;
+  bool connStatus;
 
   _NodeSetupState() {
-    ws = new ServiceWebSocket(kWsUri, _open_cb, _data_cb, _error_cb, _close_cb);
+    ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
   }
 
   @override
   void initState() {
     super.initState();
     print('_NodeSetupState');
+    connStatus = false;
+    iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
   }
 
   @override
@@ -99,53 +106,51 @@ class _NodeSetupState extends State<NodeSetup> {
                   child: new Text('SEND'),
                   onPressed: ws.send,
                 ),
+                new FlatButton(
+                  child: new Text('CLOSE'),
+                  onPressed: ws.close,
+                ),
               ]))
             ],
           ),
         ),
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: ws.open,
+        onPressed: (connStatus == false) ? ws.open : ws.close,
         tooltip: 'add',
-        child: new Icon(Icons.add),
+        child: iconConnStatus,
       ),
     );
   }
 
-  void _open_cb() {
-    print('_open_cb');
+  void _openCb() {
+    print('_openCb');
+    setState(() {
+      connStatus = true;
+      iconConnStatus = const Icon(Icons.settings_remote, color: Colors.red);
+    });
   }
 
-  void _data_cb(String data) {
-    print('_data_cb');
+  void _dataCb(String data) {
+    print('_dataCb: $data');
+    setState(() {
+      response = data;
+    });
   }
 
-  void _error_cb() {
-    print('_error_cb');
+  void _errorCb(String data) {
+    print('_errorCb');
+    setState(() {
+      connStatus = false;
+      iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
+    });
   }
 
-  void _close_cb() {
-    print('_close_cb');
-  }
-
-  Future<Null> connWebSocket() async {
-    // const String wsUri = 'ws://192.168.2.1:81';
-    const String kWsUri = 'ws://echo.websocket.org';
-    print('connWebSocket');
-    WebSocket socket = await WebSocket.connect(kWsUri);
-
-    socket.listen((value) {
-      print('onData: $value');
-      setState(() {
-        response = value;
-        cnt++;
-      });
-    }, onError: (e) {
-      print('onError: $e');
-    }, onDone: () {
-      print('onDone:');
-    }, cancelOnError: true);
-    print('connWebSocket - connected');
-    socket.add('[$cnt] Hello, World!');
+  void _closeCb() {
+    print('_closeCb');
+    setState(() {
+      connStatus = false;
+      iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
+    });
   }
 }

@@ -171,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   subtitle: new Text('${_status["heap"]}'),
                 ),
                 new ListTile(
-                  leading: const Icon(Icons.cloud_download),
+                  leading: const Icon(Icons.flash_on),
                   title: const Text('Firmware Version'),
                   subtitle: new Text('${_startup["version"]}'),
                   trailing: new ButtonTheme.bar(
