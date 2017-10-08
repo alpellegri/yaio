@@ -68,14 +68,22 @@ class _NodeSetupState extends State<NodeSetup> {
   final TextEditingController _ctrlPassword = new TextEditingController();
   final TextEditingController _ctrlFbSecretKey = new TextEditingController();
   final TextEditingController _ctrlFbMsgKey = new TextEditingController();
+  SharedPreferences _prefs;
+  String _json;
 
   _NodeSetupState() {
     ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
   }
 
+  Future<Null> initSharedPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    _json = _prefs.getString('node_config_json');
+  }
+
   @override
   void initState() {
     super.initState();
+    initSharedPreferences();
     configFirefase().then((value) {
       _fbJsonMap = value;
       _nodeConfigMap['firebase_url'] =
@@ -85,7 +93,7 @@ class _NodeSetupState extends State<NodeSetup> {
       print(JSON.encode(_nodeConfigMap));
     });
     connStatus = false;
-    iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
+    iconConnStatus = const Icon(Icons.settings_remote);
   }
 
   @override
@@ -100,8 +108,8 @@ class _NodeSetupState extends State<NodeSetup> {
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
-      body: new Container(
-        child: new Card(
+      body: new ListView(children: <Widget>[
+        new Card(
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -129,29 +137,55 @@ class _NodeSetupState extends State<NodeSetup> {
                   hintText: 'Messaging Key',
                 ),
               ),
-              new ListTile(
-                leading: const Icon(Icons.show_chart),
-                title: const Text('Response'),
-                subtitle: new Text('${response}'),
-              ),
               new ButtonTheme.bar(
-                  // make buttons use the appropriate styles for cards
                   child: new ButtonBar(children: <Widget>[
                 new FlatButton(
-                  child: new Text('SEND'),
-                  onPressed: ws.send,
+                  child: new Text('SAVE'),
+                  onPressed: _savePreferences,
                 ),
-              ]))
+              ])),
             ],
           ),
         ),
-      ),
+        new Card(
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new ListTile(
+                leading: const Icon(Icons.show_chart),
+                title: const Text('Current Configration'),
+                trailing: new ButtonTheme.bar(
+                    child: new ButtonBar(children: <Widget>[
+                      new FlatButton(
+                        child: new Text('SEND TO NODE'),
+                        onPressed: ws.send,
+                      ),
+                    ])),
+              ),
+              new Text('${_json}'),
+            ],
+          ),
+        ),
+      ]),
       floatingActionButton: new FloatingActionButton(
         onPressed: (connStatus == false) ? ws.open : ws.close,
-        tooltip: 'add',
+        tooltip: 'Connect or Disconnect to Node',
         child: iconConnStatus,
       ),
     );
+  }
+
+  void _savePreferences() {
+    if (_prefs != null) {
+      _nodeConfigMap['ssid'] = _ctrlSSID.text;
+      _nodeConfigMap['password'] = _ctrlPassword.text;
+      _nodeConfigMap['firebase_secret'] = _ctrlFbSecretKey.text;
+      _nodeConfigMap['firebase_server_key'] = _ctrlFbMsgKey.text;
+      setState(() {
+        _json = JSON.encode(_nodeConfigMap);
+      });
+      _prefs.setString('node_config_json', _json);
+    }
   }
 
   void _openCb() {
@@ -173,7 +207,7 @@ class _NodeSetupState extends State<NodeSetup> {
     print('_errorCb');
     setState(() {
       connStatus = false;
-      iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
+      iconConnStatus = const Icon(Icons.settings_remote);
     });
   }
 
@@ -181,7 +215,7 @@ class _NodeSetupState extends State<NodeSetup> {
     print('_closeCb');
     setState(() {
       connStatus = false;
-      iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
+      iconConnStatus = const Icon(Icons.settings_remote);
     });
   }
 }
