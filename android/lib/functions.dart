@@ -256,8 +256,8 @@ class _FunctionsState extends State<Functions> {
 
   void _openRemoveEntryDialog(FunctionEntry entry) {
     showDialog(
-      context: context,
-      child: new AlertDialog(
+        context: context,
+        child: new AlertDialog(
             title: new Text('Remove ${entry.name} Function'),
             actions: <Widget>[
               new FlatButton(
@@ -306,123 +306,123 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-          title: new Text('Create a Function'),
-          content: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+        title: new Text('Create a Function'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-                new TextField(
-                  controller: _controllerName,
-                  decoration: new InputDecoration(
-                    hintText: 'Name',
-                  ),
+              new TextField(
+                controller: _controllerName,
+                decoration: new InputDecoration(
+                  hintText: 'Name',
                 ),
-                new ListTile(
-                  title: const Text('Action Type'),
-                  trailing: new DropdownButton<String>(
-                    hint: const Text('Select Type'),
+              ),
+              new ListTile(
+                title: const Text('Action Type'),
+                trailing: new DropdownButton<String>(
+                  hint: const Text('Select Type'),
                   value: _selectType,
-                    onChanged: (String newValue) {
-                      print(newValue);
-                      setState(() {
+                  onChanged: (String newValue) {
+                    print(newValue);
+                    setState(() {
                       _selectType = newValue;
                       if (newValue == 'Digital IO') {
-                          ioMenu = doutSaves;
+                        ioMenu = doutSaves;
                       } else
                       /* if (newValue == 'Logical IO') */ {
-                          ioMenu = loutSaves;
-                        }
-                      });
-                    },
+                        ioMenu = loutSaves;
+                      }
+                    });
+                  },
                   items:
                       <String>['Digital IO', 'Logical IO'].map((String entry) {
-                      return new DropdownMenuItem<String>(
-                        value: entry,
-                        child: new Text(
-                          entry,
-                          style: new TextStyle(color: Colors.black),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                    return new DropdownMenuItem<String>(
+                      value: entry,
+                      child: new Text(
+                        entry,
+                        style: new TextStyle(color: Colors.black),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                new ListTile(
-                  title: const Text('Action'),
-                  trailing: new DropdownButton<String>(
-                    hint: const Text('Select Action'),
+              ),
+              new ListTile(
+                title: const Text('Action'),
+                trailing: new DropdownButton<String>(
+                  hint: const Text('Select Action'),
                   value: _selectAction,
-                    onChanged: (String newValue) {
-                      setState(() {
+                  onChanged: (String newValue) {
+                    setState(() {
                       _selectAction = newValue;
-                      });
-                    },
-                    items: ioMenu.map((IoEntry entry) {
-                      return new DropdownMenuItem<String>(
-                        value: entry.name,
-                        child: new Text(
-                          entry.name,
-                          style: new TextStyle(color: Colors.black),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                    });
+                  },
+                  items: ioMenu.map((IoEntry entry) {
+                    return new DropdownMenuItem<String>(
+                      value: entry.name,
+                      child: new Text(
+                        entry.name,
+                        style: new TextStyle(color: Colors.black),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                new ListTile(
-                  title: const Text('Delay'),
-                  trailing: new DropdownButton<String>(
-                    hint: const Text('Select a Delay'),
+              ),
+              new ListTile(
+                title: const Text('Delay'),
+                trailing: new DropdownButton<String>(
+                  hint: const Text('Select a Delay'),
                   value: _selectDelay,
-                    onChanged: (String newValue) {
-                      print(newValue);
-                      setState(() {
+                  onChanged: (String newValue) {
+                    print(newValue);
+                    setState(() {
                       _selectDelay = newValue;
-                      });
-                    },
-                    items: functionSaves.map((FunctionEntry entry) {
-                      return new DropdownMenuItem<String>(
-                        value: entry.name,
-                        child: new Text(
-                          entry.name,
-                          style: new TextStyle(color: Colors.black),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                    });
+                  },
+                  items: functionSaves.map((FunctionEntry entry) {
+                    return new DropdownMenuItem<String>(
+                      value: entry.name,
+                      child: new Text(
+                        entry.name,
+                        style: new TextStyle(color: Colors.black),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                new ListTile(
-                  title: const Text('Next Function'),
-                  trailing: new DropdownButton<String>(
-                    hint: const Text('Select a Function'),
+              ),
+              new ListTile(
+                title: const Text('Next Function'),
+                trailing: new DropdownButton<String>(
+                  hint: const Text('Select a Function'),
                   value: selectNext,
-                    onChanged: (String newValue) {
-                      print(newValue);
-                      setState(() {
+                  onChanged: (String newValue) {
+                    print(newValue);
+                    setState(() {
                       selectNext = newValue;
-                      });
-                    },
-                    items: functionSaves.map((FunctionEntry entry) {
-                      return new DropdownMenuItem<String>(
-                        value: entry.name,
-                        child: new Text(
-                          entry.name,
-                          style: new TextStyle(color: Colors.black),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                    });
+                  },
+                  items: functionSaves.map((FunctionEntry entry) {
+                    return new DropdownMenuItem<String>(
+                      value: entry.name,
+                      child: new Text(
+                        entry.name,
+                        style: new TextStyle(color: Colors.black),
+                      ),
+                    );
+                  }).toList(),
                 ),
-              ]),
-          actions: <Widget>[
-            new FlatButton(
-                child: const Text('SAVE'),
-                onPressed: () {
-                  Navigator.pop(context, null);
-                }),
-            new FlatButton(
-                child: const Text('DISCARD'),
-                onPressed: () {
-                  Navigator.pop(context, null);
-                })
+              ),
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              })
         ]);
   }
 }
