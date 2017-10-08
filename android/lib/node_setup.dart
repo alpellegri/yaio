@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
+import 'firebase_utils.dart';
 
 typedef void CallVoid();
 typedef void CallString(String data);
-
 class ServiceWebSocket {
-  // static const String wsUri = 'ws://192.168.2.1:81';
-  String _WsUri;
+  String _wsUri;
   CallVoid _onOpen;
   CallString _onData;
   CallString _onError;
@@ -18,17 +18,15 @@ class ServiceWebSocket {
 
   ServiceWebSocket(String wsUri, Function onOpen, Function onData,
       Function onError, Function onClose) {
-    _WsUri = wsUri;
+    _wsUri = wsUri;
     _onOpen = onOpen;
     _onData = onData;
     _onError = onError;
     _onClose = onClose;
-    print('ServiceWebSocket c');
   }
 
   Future<Null> open() async {
-    print('connWebSocket');
-    _socket = await WebSocket.connect(_WsUri);
+    _socket = await WebSocket.connect(_wsUri);
     _onOpen();
     _socket.listen((value) => _onData(value),
         onError: (e) => _onError(e),
@@ -59,10 +57,13 @@ class NodeSetup extends StatefulWidget {
 class _NodeSetupState extends State<NodeSetup> {
   int cnt = 0;
   String response = "";
-  static const String kWsUri = 'ws://echo.websocket.org';
+  static const String kWsUri = 'ws://192.168.2.1:81'; // kWsUri = 'ws://echo.websocket.org';
   ServiceWebSocket ws;
   Icon iconConnStatus;
   bool connStatus;
+  Map _fbJsonMap;
+  Map _nodeConfigMap = new Map();
+  String _nodeConfig = "";
 
   _NodeSetupState() {
     ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
@@ -71,7 +72,12 @@ class _NodeSetupState extends State<NodeSetup> {
   @override
   void initState() {
     super.initState();
-    print('_NodeSetupState');
+    configFirefase().then((value) {
+      _fbJsonMap = value;
+      _nodeConfigMap['firebase_url'] = _fbJsonMap['project_info']['firebase_url'];
+      _nodeConfigMap['storage_bucket'] = _fbJsonMap['project_info']['storage_bucket'];
+      print(JSON.encode(_nodeConfigMap));
+    });
     connStatus = false;
     iconConnStatus = const Icon(Icons.settings_remote, color: Colors.grey);
   }

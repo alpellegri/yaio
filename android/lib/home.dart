@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'login.dart';
+import 'firebase_utils.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -20,7 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final DatabaseReference _startupReference =
       FirebaseDatabase.instance.reference().child('startup');
   Icon iconLockstatus;
-  Map _configMap;
+  Map _fbJsonMap;
   String _infoConfig = "";
 
   Map<String, Object> _control = {
@@ -48,12 +48,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     configFirefase().then((value) {
-      _configMap = value;
+      _fbJsonMap = value;
       _infoConfig =
-          'project_number ${_configMap["project_info"]['project_number']}\n'
-          'firebase_url ${_configMap["project_info"]['firebase_url']}\n'
-          'project_id ${_configMap["project_info"]['project_id']}\n'
-          'storage_bucket ${_configMap["project_info"]['storage_bucket']}\n';
+          'project_number ${_fbJsonMap["project_info"]['project_number']}\n'
+          'firebase_url ${_fbJsonMap["project_info"]['firebase_url']}\n'
+          'project_id ${_fbJsonMap["project_info"]['project_id']}\n'
+          'storage_bucket ${_fbJsonMap["project_info"]['storage_bucket']}\n';
     });
     FirebaseDatabase.instance.setPersistenceEnabled(true);
     FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
