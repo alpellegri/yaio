@@ -63,13 +63,12 @@ class _NodeSetupState extends State<NodeSetup> {
   bool connStatus;
   Map _fbJsonMap;
   Map _nodeConfigMap = new Map();
-  String _nodeConfig = "";
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
   final TextEditingController _ctrlFbSecretKey = new TextEditingController();
   final TextEditingController _ctrlFbMsgKey = new TextEditingController();
   SharedPreferences _prefs;
-  String _json;
+  String _nodeConfigJson;
 
   _NodeSetupState() {
     ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
@@ -77,7 +76,7 @@ class _NodeSetupState extends State<NodeSetup> {
 
   Future<Null> initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
-    _json = _prefs.getString('node_config_json');
+    _nodeConfigJson = _prefs.getString('node_config_json');
   }
 
   @override
@@ -162,7 +161,7 @@ class _NodeSetupState extends State<NodeSetup> {
                       ),
                     ])),
               ),
-              new Text('${_json}'),
+              new Text('${_nodeConfigJson}'),
             ],
           ),
         ),
@@ -182,9 +181,9 @@ class _NodeSetupState extends State<NodeSetup> {
       _nodeConfigMap['firebase_secret'] = _ctrlFbSecretKey.text;
       _nodeConfigMap['firebase_server_key'] = _ctrlFbMsgKey.text;
       setState(() {
-        _json = JSON.encode(_nodeConfigMap);
+        _nodeConfigJson = JSON.encode(_nodeConfigMap);
       });
-      _prefs.setString('node_config_json', _json);
+      _prefs.setString('node_config_json', _nodeConfigJson);
     }
   }
 
