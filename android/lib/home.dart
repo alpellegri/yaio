@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
 
@@ -13,15 +14,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final DatabaseReference _controlReference =
+  final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child('control');
-  final DatabaseReference _statusReference =
+  final DatabaseReference _statusRef =
       FirebaseDatabase.instance.reference().child('status');
-  final DatabaseReference _startupReference =
+  final DatabaseReference _startupRef =
       FirebaseDatabase.instance.reference().child('startup');
+  final DatabaseReference _fcmRef =
+      FirebaseDatabase.instance.reference().child('FCM_Registration_IDs');
+  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+
   Icon iconLockstatus;
   Map _fbJsonMap;
   String _infoConfig = "";
+  String _homeScreenText = "Waiting for token...";
 
   Map<String, Object> _control = {
     'alarm': false,
@@ -57,10 +63,40 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     FirebaseDatabase.instance.setPersistenceEnabled(true);
     FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
-    signInWithGoogle();
-    _controlReference.onValue.listen(_onValueControl);
-    _statusReference.onValue.listen(_onValueStatus);
-    _startupReference.onValue.listen(_onValueStartup);
+    signInWithGoogle().then((onValue) {
+      _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) {
+          print("onMessage: $message");
+          // _showItemDialog(message);
+        },
+        onLaunch: (Map<String, dynamic> message) {
+          print("onLaunch: $message");
+          // _navigateToItemDetail(message);
+        },
+        onResume: (Map<String, dynamic> message) {
+          print("onResume: $message");
+          // _navigateToItemDetail(message);
+        },
+      );
+      _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(sound: true, badge: true, alert: true));
+      _firebaseMessaging.onIosSettingsRegistered
+          .listen((IosNotificationSettings settings) {
+        print("Settings registered: $settings");
+      });
+      _firebaseMessaging.getToken().then((String token) {
+        assert(token != null);
+        setState(() {
+          _homeScreenText = "Push Messaging token: $token";
+        });
+        _fcmRef.push().set(token);
+        print(_homeScreenText);
+      });
+
+      _controlRef.onValue.listen(_onValueControl);
+      _statusRef.onValue.listen(_onValueStatus);
+      _startupRef.onValue.listen(_onValueStartup);
+    });
     iconLockstatus = const Icon(Icons.lock_open);
     print('_MyHomePageState');
   }
@@ -121,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             DateTime now = new DateTime.now();
                             _control['time'] =
                                 now.millisecondsSinceEpoch ~/ 1000;
-                            _controlReference.set(_control);
+                            _controlRef.set(_control);
                           },
                         ),
                       ],
@@ -181,11 +217,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: const Text('UPDATE'),
                           onPressed: () {
                             _control['reboot'] = true;
-                            _controlReference.set(_control);
+                            _controlRef.set(_control);
                             DateTime now = new DateTime.now();
                             _control['time'] =
                                 now.millisecondsSinceEpoch ~/ 1000;
-                            _controlReference.set(_control);
+                            _controlRef.set(_control);
                           },
                         ),
                       ],
@@ -201,6 +237,8 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 new Text('Firebase info'),
                 new Text(_infoConfig),
+                new Text('Firebase Messaging info'),
+                new Text(_homeScreenText),
               ],
             ),
           ),
@@ -217,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // update control time to keep up node
     DateTime now = new DateTime.now();
     _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-    _controlReference.set(_control);
+    _controlRef.set(_control);
     setState(() {
       _status = event.snapshot.value;
       if (_status['alarm'] == true) {
