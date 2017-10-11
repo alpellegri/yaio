@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -89,7 +90,20 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           _homeScreenText = "Push Messaging token: $token";
         });
-        _fcmRef.push().set(token);
+        _fcmRef.once().then((onValue) {
+          Map map = onValue.value;
+          bool tokenFound = false;
+          map.forEach((key, value) {
+            if (value != token) {
+              print("token found: $token");
+              tokenFound = true;
+            }
+          });
+          if (tokenFound == false) {
+            _fcmRef.push().set(token);
+            print("token saved: $token");
+          }
+        });
         print(_homeScreenText);
       });
 
