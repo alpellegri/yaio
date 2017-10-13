@@ -35,8 +35,8 @@ class ServiceWebSocket {
         cancelOnError: true);
   }
 
-  void send() {
-    (_socket != null) ? _socket.add('ciao') : {};
+  void send(String value) {
+    (_socket != null) ? _socket.add(value) : {};
   }
 
   void close() {
@@ -57,7 +57,7 @@ class NodeSetup extends StatefulWidget {
 
 class _NodeSetupState extends State<NodeSetup> {
   String response = "";
-  static const String kWsUri = 'ws://192.168.2.1:81';
+  static const String kWsUri = 'ws://192.168.2.1';
   ServiceWebSocket ws;
   Icon iconConnStatus;
   bool connStatus;
@@ -77,6 +77,11 @@ class _NodeSetupState extends State<NodeSetup> {
   Future<Null> initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _nodeConfigJson = _prefs.getString('node_config_json');
+    _nodeConfigMap = JSON.decode(_nodeConfigJson);
+    _ctrlSSID.text = _nodeConfigMap['ssid'];
+    _ctrlPassword.text = _nodeConfigMap['password'];
+    _ctrlFbSecretKey.text = _nodeConfigMap['firebase_secret'];
+    _ctrlFbMsgKey.text = _nodeConfigMap['firebase_server_key'];
   }
 
   @override
@@ -116,6 +121,7 @@ class _NodeSetupState extends State<NodeSetup> {
                 controller: _ctrlSSID,
                 decoration: new InputDecoration(
                   hintText: 'SSID',
+
                 ),
               ),
               new TextField(
@@ -157,7 +163,7 @@ class _NodeSetupState extends State<NodeSetup> {
                     child: new ButtonBar(children: <Widget>[
                       new FlatButton(
                         child: new Text('SEND TO NODE'),
-                        onPressed: ws.send,
+                        onPressed: _sendParameters,
                       ),
                     ])),
               ),
@@ -174,6 +180,9 @@ class _NodeSetupState extends State<NodeSetup> {
     );
   }
 
+  void _sendParameters() {
+    ws.send(_nodeConfigJson);
+  }
   void _savePreferences() {
     if (_prefs != null) {
       _nodeConfigMap['ssid'] = _ctrlSSID.text;

@@ -23,7 +23,7 @@ static bool enable_WiFi_Scan = false;
 static uint16_t ap_button = 0x55;
 
 // create sebsocket server
-static WebSocketsServer webSocket = WebSocketsServer(81);
+static WebSocketsServer webSocket = WebSocketsServer(80);
 static uint8_t port_id;
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
@@ -110,7 +110,7 @@ bool AP_Setup(void) {
 bool AP_Loop(void) {
   uint8_t in = digitalRead(BUTTON);
 
-#if 0
+#if 1
   if (in != ap_button) {
     ap_button = in;
     if (in == false) {

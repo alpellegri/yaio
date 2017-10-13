@@ -14,7 +14,7 @@ static char ee_ssid[30] = "";
 static char ee_password[30] = "";
 static char ee_firebase_url[50] = "";
 static char ee_firebase_secret[50] = "";
-static char ee_firebase_server_key[50] = "";
+static char ee_firebase_server_key[200] = "";
 static char ee_firebase_storage_bucket[50] = "";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
