@@ -51,13 +51,12 @@ static String FcmPostMsg(void) {
   String fcm_host = String(FcmServer);
   String fcm_server_key = String(EE_GetFirebaseServerKey());
 
-  // json data: the notification message multiple devices
+  /* json data: the notification message multiple devices */
   String json = "";
   json += "{";
-  json += "\"data\":{";
-  json += "\"title\":\"";
-  json += "ESP8266 Alert";
-  json += "\",";
+  json += "\"notification\":{";
+  json += "\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",";
+  json += "\"title\":\"ESP8266 Alert\",";
   json += "\"body\":\"";
   json += FcmMessage;
   json += "\",";
