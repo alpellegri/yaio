@@ -214,6 +214,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: const Icon(Icons.loop),
                   title: const Text('Reboot Counter'),
                   subtitle: new Text('${_startup["bootcnt"]}'),
+                  trailing: new ButtonTheme.bar(
+                    child: new ButtonBar(
+                      children: <Widget>[
+                        new FlatButton(
+                          child: const Text('RESTART'),
+                          onPressed: () {
+                            _control['reboot'] = 1;
+                            _controlRef.set(_control);
+                            DateTime now = new DateTime.now();
+                            _control['time'] =
+                                now.millisecondsSinceEpoch ~/ 1000;
+                            _controlRef.set(_control);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 new ListTile(
                   leading: const Icon(Icons.memory),
@@ -230,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         new FlatButton(
                           child: const Text('UPDATE'),
                           onPressed: () {
-                            _control['reboot'] = true;
+                            _control['reboot'] = 2;
                             _controlRef.set(_control);
                             DateTime now = new DateTime.now();
                             _control['time'] =

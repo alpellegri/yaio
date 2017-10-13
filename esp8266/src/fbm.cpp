@@ -96,8 +96,8 @@ void FbmLogicReq(uint8_t src_type, uint8_t src_idx, uint8_t lin, bool value) {
 }
 
 /* function mapping requests
-* lin=0: value=1 -> arm alarm / value=0 -> disarm alarm
-*/
+ * lin=0: value=1 -> arm alarm / value=0 -> disarm alarm
+ */
 static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t lin,
                            bool value) {
   bool ret = false;
@@ -348,7 +348,7 @@ bool FbmService(void) {
     firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
     yield();
-    Firebase.setBool(F("control/reboot"), false);
+    Firebase.setInt(F("control/reboot"), 0);
     if (Firebase.failed()) {
       Serial.print(F("set failed: control/reboot"));
       Serial.println(Firebase.error());
@@ -464,9 +464,11 @@ bool FbmService(void) {
                 sendWOL(computer_ip, mac, sizeof mac);
               }
 
-              bool control_reboot = object["reboot"];
-              if (control_reboot == true) {
+              int control_reboot = object["reboot"];
+              if (control_reboot == 2) {
                 boot_sm = 4;
+              } else if (control_reboot == 1) {
+                ESP.restart();
               }
             } else {
               Serial.println(F("parseObject() failed"));
