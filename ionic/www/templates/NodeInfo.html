@@ -9,7 +9,7 @@
     </ion-toggle>
     <a class="item">startup.bootcnt<span class="item-note">{{startup.bootcnt}}</span></a>
     <a class="item">status.heap<span class="item-note">{{status.heap}}</span></a>
-    <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change()">
+    <ion-toggle toggle-class="toggle-positive" ng-model="control.reboot" ng-change="pushCtrl2Change(2)">
       Update Firmware
     </ion-toggle>
     <a class="item">SW Version<span class="item-note">{{startup.version}}</span></a>

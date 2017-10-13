@@ -14,8 +14,8 @@ angular.module('app.controllers.NodeInfo', [])
         firebase.database().ref("control/wol").set($scope.control.wol == true);
       };
 
-      $scope.pushCtrl2Change = function() {
-        firebase.database().ref("control/reboot").set($scope.control.reboot == true);
+      $scope.pushCtrl2Change = function(val) {
+        firebase.database().ref("control/reboot").set($scope.control.reboot == val);
       };
 
       $scope.doRefresh = function() {
