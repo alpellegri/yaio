@@ -8,7 +8,8 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'uHome',
       theme: new ThemeData(
-        primarySwatch: Colors.indigo,
+        brightness: Brightness.dark,
+        accentColor: Colors.amber[200],
       ),
       home: new MyHomePage(title: 'uHome'),
       routes: menuRoutes,

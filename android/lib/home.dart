@@ -62,8 +62,8 @@ class _MyHomePageState extends State<MyHomePage> {
           'project_id ${_fbJsonMap["project_info"]['project_id']}\n'
           'storage_bucket ${_fbJsonMap["project_info"]['storage_bucket']}\n';
     });
-    FirebaseDatabase.instance.setPersistenceEnabled(true);
-    FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
+    // FirebaseDatabase.instance.setPersistenceEnabled(true);
+    // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
     signInWithGoogle().then((onValue) {
       _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) {
@@ -90,15 +90,19 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           _homeScreenText = "Push Messaging token: $token";
         });
-        _fcmRef.once().then((onValue) {
+        _fcmRef.once().then((DataSnapshot onValue) {
+          print("once: ${onValue.value}");
           Map map = onValue.value;
           bool tokenFound = false;
-          map.forEach((key, value) {
-            if (value != token) {
-              print("token found: $token");
-              tokenFound = true;
-            }
-          });
+          if (map != null) {
+            map.forEach((key, value) {
+              if (value == token) {
+                print("key test: $key");
+                tokenFound = true;
+              }
+            });
+          }
+          print("test token found: $token");
           if (tokenFound == false) {
             _fcmRef.push().set(token);
             print("token saved: $token");
