@@ -10,6 +10,15 @@ angular.module('app.controllers.home', [])
 
     var fb_init = 'true'; // localStorage.getItem('firebase_init');
     if (fb_init == 'true') {
+
+      $scope.pushCtrl0Change = function() {
+        var ref = firebase.database().ref("control").update({
+          alarm: $scope.control.alarm
+        });
+        var current_date = new Date();
+        firebase.database().ref("control/time").set(Math.floor(current_date.getTime() / 1000));
+      };
+
       $scope.doRefresh = function() {
         console.log('doRefresh-HomeCtrl');
         if (FirebaseService.up() == true) {
