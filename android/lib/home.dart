@@ -62,8 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
           'project_id ${_fbJsonMap["project_info"]['project_id']}\n'
           'storage_bucket ${_fbJsonMap["project_info"]['storage_bucket']}\n';
     });
-    // FirebaseDatabase.instance.setPersistenceEnabled(true);
-    // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
     signInWithGoogle().then((onValue) {
       _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) {
@@ -102,11 +100,13 @@ class _MyHomePageState extends State<MyHomePage> {
               }
             });
           }
-          print("test token found: $token");
           if (tokenFound == false) {
             _fcmRef.push().set(token);
             print("token saved: $token");
           }
+          // at the end, not before
+          FirebaseDatabase.instance.setPersistenceEnabled(true);
+          FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
         });
         print(_homeScreenText);
       });
