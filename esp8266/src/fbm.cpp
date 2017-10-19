@@ -37,8 +37,8 @@ static uint32_t fbm_time_th_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
-static uint32_t humidity_data;
-static uint32_t temperature_data;
+static float humidity_data;
+static float temperature_data;
 
 static uint32_t fbm_update_timer_last;
 
@@ -425,8 +425,8 @@ bool FbmService(void) {
       if (isnan(h) || isnan(t)) {
         // Serial.println(F("Failed to read from DHT sensor!"));
       } else {
-        humidity_data = 10 * h;
-        temperature_data = 10 * t;
+        humidity_data = h;
+        temperature_data = t;
       }
       yield();
 

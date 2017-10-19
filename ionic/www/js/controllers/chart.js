@@ -72,18 +72,18 @@ angular.module('app.controllers.chart', [])
 
       $scope.JsonT.data = [];
       $scope.JsonH.data = [];
-      // 7 days: 7 * (24 * 2) -> 96
-      var steps = 7 * (24 * 2);
+      // 3 days: 3 * (24 * 2)
+      var steps = 3 * (24 * 2);
       var ref = firebase.database().ref('logs/TH').limitToLast(steps);
       ref.once('value', function(snapshot) {
         snapshot.forEach(function(el) {
           $scope.JsonT.data.push({
             x: el.val().time * 1000,
-            y: el.val().t / 10
+            y: el.val().t
           });
           $scope.JsonH.data.push({
             x: el.val().time * 1000,
-            y: el.val().h / 10
+            y: el.val().h
           });
         });
       });

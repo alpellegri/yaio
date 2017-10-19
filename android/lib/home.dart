@@ -194,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: const Icon(Icons.show_chart),
                   title: const Text('Temperature/Humidity'),
                   subtitle: new Text(
-                      '${_status["temperature"]}°C / ${_status["temperature"]}%'),
+                      '${_status["temperature"]}°C / ${_status["humidity"]}%'),
                 ),
               ],
             ),
