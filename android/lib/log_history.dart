@@ -51,7 +51,7 @@ class LogListItem extends StatelessWidget {
                     new Text(
                       new TimeOfDay.fromDateTime(logEntry.dateTime).toString(),
                       textScaleFactor: 0.8,
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
@@ -93,6 +93,7 @@ class _LogHistoryState extends State<LogHistory> {
     _logReference =
         FirebaseDatabase.instance.reference().child("logs").child("Reports");
     _logReference.onChildAdded.listen(_onEntryAdded);
+    _logReference.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -115,8 +116,8 @@ class _LogHistoryState extends State<LogHistory> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
-        tooltip: 'add',
-        child: new Icon(Icons.delete_forever),
+        tooltip: 'remove all',
+        child: new Icon(Icons.delete),
       ),
     );
   }
@@ -129,5 +130,18 @@ class _LogHistoryState extends State<LogHistory> {
     });
   }
 
-  void _onFloatingActionButtonPressed() {}
+  _onEntryRemoved(Event event) {
+    print('_onEntryRemoved');
+    var oldValue =
+    logSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+
+    setState(() {
+      logSaves.remove(oldValue);
+      logSaves.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
+    });
+  }
+
+  void _onFloatingActionButtonPressed() {
+    _logReference.remove();
+  }
 }
