@@ -441,7 +441,7 @@ bool FbmService(void) {
           fbm_monitor_run = true;
         }
         if (fbm_monitor_run == true) {
-          if ((time_now - fbm_monitor_last) > 10) {
+          if ((time_now - fbm_monitor_last) > 5) {
             fbm_monitor_run = false;
           }
 

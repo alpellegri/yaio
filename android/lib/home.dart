@@ -1,9 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
+import 'const.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -16,13 +16,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final DatabaseReference _controlRef =
-      FirebaseDatabase.instance.reference().child('control');
+      FirebaseDatabase.instance.reference().child(kControlRef);
   final DatabaseReference _statusRef =
-      FirebaseDatabase.instance.reference().child('status');
+      FirebaseDatabase.instance.reference().child(kStatusRef);
   final DatabaseReference _startupRef =
-      FirebaseDatabase.instance.reference().child('startup');
+      FirebaseDatabase.instance.reference().child(kStartupRef);
   final DatabaseReference _fcmRef =
-      FirebaseDatabase.instance.reference().child('FCM_Registration_IDs');
+      FirebaseDatabase.instance.reference().child(kTokenIDsRef);
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   Icon iconLockstatus;

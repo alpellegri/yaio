@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
+import 'const.dart';
 
 class LogEntry {
   String key;
@@ -91,7 +92,7 @@ class _LogHistoryState extends State<LogHistory> {
 
   _LogHistoryState() {
     _logReference =
-        FirebaseDatabase.instance.reference().child("logs").child("Reports");
+        FirebaseDatabase.instance.reference().child(kLogsRef).child("Reports");
     _logReference.onChildAdded.listen(_onEntryAdded);
     _logReference.onChildRemoved.listen(_onEntryRemoved);
   }

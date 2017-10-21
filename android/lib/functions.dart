@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'io_entry.dart';
+import 'const.dart';
 
 class FunctionEntry {
   String key;
@@ -116,15 +117,15 @@ class _FunctionsState extends State<Functions> {
 
   _FunctionsState() {
     ioMenu = loutSaves;
-    _functionRef = FirebaseDatabase.instance.reference().child('Functions');
+    _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
     _functionRef.onChildAdded.listen(_onFuncEntryAdded);
     _functionRef.onChildChanged.listen(_onFuncEntryEdited);
     _functionRef.onChildRemoved.listen(_onFuncEntryRemoved);
-    _doutRef = FirebaseDatabase.instance.reference().child('DIO/Dout');
+    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
     _doutRef.onChildAdded.listen(_onDoutEntryAdded);
     _doutRef.onChildChanged.listen(_onDoutEntryEdited);
     _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
-    _loutRef = FirebaseDatabase.instance.reference().child('LIO/Lout');
+    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
     _loutRef.onChildAdded.listen(_onLoutEntryAdded);
     _loutRef.onChildChanged.listen(_onLoutEntryEdited);
     _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
