@@ -22,30 +22,19 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
+const controlRef = admin.database().ref('/control');
+const statusRef = admin.database().ref('/status');
+
 // API.AI Intent names
-const PLAY_INTENT = 'play';
-const NO_INTENT = 'discriminate-no';
-const YES_INTENT = 'discriminate-yes';
-const GIVEUP_INTENT = 'give-up';
-const LEARN_THING_INTENT = 'learn-thing';
-const LEARN_DISCRIM_INTENT = 'learn-discrimination';
+const SET_RESOURCE_INTENT = 'setResource';
+const GET_RESOURCE_INTENT = 'getResource';
 
 // Contexts
-const WELCOME_CONTEXT = 'welcome';
-const QUESTION_CONTEXT = 'question';
-const GUESS_CONTEXT = 'guess';
-const LEARN_THING_CONTEXT = 'learn-thing';
-const LEARN_DISCRIM_CONTEXT = 'learn-discrimination';
-const ANSWER_CONTEXT = 'answer';
+const RESOURCE_CONTEXT = 'resource';
 
 // Context Parameters
 const VALUE_PARAM = 'digital_value';
 const RESOURCE_PARAM = 'resource';
-const LEARN_THING_PARAM = 'learn-thing';
-const GUESSABLE_THING_PARAM = 'guessable-thing';
-const LEARN_DISCRIMINATION_PARAM = 'learn-discrimination';
-const ANSWER_PARAM = 'answer';
-const QUESTION_PARAM = 'question';
 
 exports.assistantcodelab = functions.https.onRequest((request, response) => {
   console.log('headers: ' + JSON.stringify(request.headers));
@@ -54,13 +43,14 @@ exports.assistantcodelab = functions.https.onRequest((request, response) => {
   const assistant = new Assistant({request: request, response: response});
 
   let actionMap = new Map();
-  actionMap.set(PLAY_INTENT, play);
+  actionMap.set(SET_RESOURCE_INTENT, setResource);
+  actionMap.set(GET_RESOURCE_INTENT, getResource);
   assistant.handleRequest(actionMap);
 
-  function play(assistant) {
-	const resource = assistant.getContextArgument(WELCOME_CONTEXT, RESOURCE_PARAM).value;
-	const value = assistant.getContextArgument(WELCOME_CONTEXT, VALUE_PARAM).value;
-    console.log('play');
+  function setResource(assistant) {
+	const resource = assistant.getContextArgument(RESOURCE_CONTEXT, RESOURCE_PARAM).value;
+	const value = assistant.getContextArgument(RESOURCE_CONTEXT, VALUE_PARAM).value;
+    console.log('setResource');
     console.log(resource);
     console.log(value);
 	var speech;
@@ -68,13 +58,13 @@ exports.assistantcodelab = functions.https.onRequest((request, response) => {
 	  if (value == 'off') {
 		speech = `ok I will set ${resource} ${value}`;
         var current_date = new Date();
-        admin.database().ref('control/time').set(Math.floor(current_date.getTime() / 1000));
-		admin.database().ref('/control/alarm').set(false);
+        controlRef.child('time').set(Math.floor(current_date.getTime() / 1000));
+		controlRef.child('alarm').set(false);
 	  } else if (value == 'on') {
 		speech = `ok I will set ${resource} ${value}`; 
         var current_date = new Date();
-        admin.database().ref('control/time').set(Math.floor(current_date.getTime() / 1000));
-		admin.database().ref('/control/alarm').set(true);
+        controlRef.child('time').set(Math.floor(current_date.getTime() / 1000));
+		controlRef.child('alarm').set(true);
 	  } else {
 		   speech = `sorry this action is not available`;
 	  }
@@ -82,6 +72,19 @@ exports.assistantcodelab = functions.https.onRequest((request, response) => {
 	  speech = `sorry this action is not available`;
     }
 
-	   assistant.ask(speech);
+	assistant.ask(speech);
+  }
+
+  function getResource(assistant) {
+	const resource = assistant.getContextArgument(RESOURCE_CONTEXT, RESOURCE_PARAM).value;
+	console.log('getResource');
+    console.log(resource);
+	
+	const resource_ref = statusRef.child(resource);
+    resource_ref.once('value', snap => {
+	  console.log(`snap.val.q: ${snap.val()}`);
+      const speech = `ok ${resource} is ${snap.val()}`; 
+      assistant.ask(speech);
+    });
    }
 });
