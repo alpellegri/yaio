@@ -341,7 +341,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       value: entry,
                       child: new Text(
                         entry,
-                        style: new TextStyle(color: Colors.black),
                       ),
                     );
                   }).toList(),
@@ -362,7 +361,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       value: entry.name,
                       child: new Text(
                         entry.name,
-                        style: new TextStyle(color: Colors.black),
                       ),
                     );
                   }).toList(),
@@ -384,7 +382,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       value: entry.name,
                       child: new Text(
                         entry.name,
-                        style: new TextStyle(color: Colors.black),
                       ),
                     );
                   }).toList(),
@@ -406,7 +403,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       value: entry.name,
                       child: new Text(
                         entry.name,
-                        style: new TextStyle(color: Colors.black),
                       ),
                     );
                   }).toList(),

@@ -572,22 +572,20 @@ bool FbmService(void) {
         RF_ExecuteRadioCodeDB(idx);
       }
 
-      if (control_radio_learn == true) {
-        // acquire Active Radio Codes from FB
-        if (idx == 0xFF) {
-          fbm_monitor_last = time_now;
-          fbm_monitor_run = true;
-          uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
-          if (idxTx == 0xFF) {
-            Serial.print(F("RadioCodes/Inactive: "));
-            Serial.println(code);
-            yield();
-            Firebase.setInt(F("RadioCodes/Inactive/last"), code);
-            if (Firebase.failed()) {
-              Serial.print(F("set failed: RadioCodes/Inactive"));
-              Serial.println(Firebase.error());
-            } else {
-            }
+      // acquire Active Radio Codes from FB
+      if (idx == 0xFF) {
+        fbm_monitor_last = time_now;
+        fbm_monitor_run = true;
+        uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
+        if (idxTx == 0xFF) {
+          Serial.print(F("RadioCodes/Inactive: "));
+          Serial.println(code);
+          yield();
+          Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
+          if (Firebase.failed()) {
+            Serial.print(F("set failed: RadioCodes/Inactive"));
+            Serial.println(Firebase.error());
+          } else {
           }
         }
       }

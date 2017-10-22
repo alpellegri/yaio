@@ -45,13 +45,13 @@ class LogListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      new DateFormat.MMMEd().format(logEntry.dateTime),
-                      textScaleFactor: 0.9,
+                      new DateFormat('yyyy-MM-dd').format(logEntry.dateTime),
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      new TimeOfDay.fromDateTime(logEntry.dateTime).toString(),
-                      textScaleFactor: 0.8,
+                      new DateFormat('Hm').format(logEntry.dateTime),
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -134,7 +134,7 @@ class _LogHistoryState extends State<LogHistory> {
   _onEntryRemoved(Event event) {
     print('_onEntryRemoved');
     var oldValue =
-    logSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        logSaves.singleWhere((entry) => entry.key == event.snapshot.key);
 
     setState(() {
       logSaves.remove(oldValue);
