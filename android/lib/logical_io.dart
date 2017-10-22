@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'io_entry.dart';
+import 'const.dart';
 
 class LoutListItem extends StatelessWidget {
   final IoEntry loutEntry;
@@ -61,7 +62,7 @@ class _LogicalIOState extends State<LogicalIO> {
   DatabaseReference _loutRef;
 
   _LogicalIOState() {
-    _loutRef = FirebaseDatabase.instance.reference().child('LIO/Lout');
+    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
     _loutRef.onChildAdded.listen(_onLoutEntryAdded);
     _loutRef.onChildChanged.listen(_onLoutEntryEdited);
     _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
@@ -106,7 +107,7 @@ class _LogicalIOState extends State<LogicalIO> {
   _onLoutEntryAdded(Event event) {
     print('_onLoutEntryAdded');
     setState(() {
-      loutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
+      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
     });
   }
 
@@ -116,7 +117,7 @@ class _LogicalIOState extends State<LogicalIO> {
         loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       loutSaves[loutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(_loutRef, event.snapshot);
     });
   }
 

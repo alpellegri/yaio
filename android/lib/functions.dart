@@ -4,44 +4,6 @@ import 'drawer.dart';
 import 'io_entry.dart';
 import 'const.dart';
 
-class FunctionEntry {
-  String key;
-  int action;
-  String action_name;
-  int delay;
-  int id;
-  String name;
-  String next;
-  int type;
-  String type_name;
-
-  FunctionEntry(this.id, this.name);
-
-  FunctionEntry.fromSnapshot(DataSnapshot snapshot)
-      : key = snapshot.key,
-        action = snapshot.value['action'],
-        action_name = snapshot.value['action_name'],
-        delay = snapshot.value['delay'],
-        id = snapshot.value['id'],
-        name = snapshot.value['name'],
-        next = snapshot.value['next'],
-        type = snapshot.value['type'],
-        type_name = snapshot.value['type_name'];
-
-  toJson() {
-    return {
-      'action': action,
-      'action_name': action_name,
-      'delay': delay,
-      'id': id,
-      'name': name,
-      'next': next,
-      'type': type,
-      'type_name': type_name,
-    };
-  }
-}
-
 class FunctionListItem extends StatelessWidget {
   final FunctionEntry functionEntry;
 
@@ -108,6 +70,8 @@ class Functions extends StatefulWidget {
 class _FunctionsState extends State<Functions> {
   List<FunctionEntry> functionSaves = new List();
   DatabaseReference _functionRef;
+  List<RadioCodeEntry> radioSaves = new List();
+  DatabaseReference _radioRef;
   List<IoEntry> doutSaves = new List();
   DatabaseReference _doutRef;
   List<IoEntry> loutSaves = new List();
@@ -121,6 +85,13 @@ class _FunctionsState extends State<Functions> {
     _functionRef.onChildAdded.listen(_onFuncEntryAdded);
     _functionRef.onChildChanged.listen(_onFuncEntryEdited);
     _functionRef.onChildRemoved.listen(_onFuncEntryRemoved);
+    _radioRef = FirebaseDatabase.instance
+        .reference()
+        .child(kRadioCodesRef)
+        .child('Active');
+    _radioRef.onChildAdded.listen(_onRadioEntryAdded);
+    _radioRef.onChildChanged.listen(_onRadioEntryEdited);
+    _radioRef.onChildRemoved.listen(_onRadioEntryRemoved);
     _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
     _doutRef.onChildAdded.listen(_onDoutEntryAdded);
     _doutRef.onChildChanged.listen(_onDoutEntryEdited);
@@ -177,26 +148,52 @@ class _FunctionsState extends State<Functions> {
   _onFuncEntryEdited(Event event) {
     print('_onFuncEntryEdited');
     var oldValue =
-        functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       functionSaves[functionSaves.indexOf(oldValue)] =
-          new FunctionEntry.fromSnapshot(event.snapshot);
+      new FunctionEntry.fromSnapshot(event.snapshot);
     });
   }
 
   _onFuncEntryRemoved(Event event) {
     print('_onFuncEntryRemoved');
     var oldValue =
-        functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       functionSaves.remove(oldValue);
+    });
+  }
+
+  _onRadioEntryAdded(Event event) {
+    print('_onRadioEntryAdded');
+    setState(() {
+      radioSaves.add(new RadioCodeEntry.fromSnapshot(_radioRef, event.snapshot));
+    });
+  }
+
+  _onRadioEntryEdited(Event event) {
+    print('_onRadioEntryEdited');
+    var oldValue =
+    radioSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      radioSaves[radioSaves.indexOf(oldValue)] =
+      new RadioCodeEntry.fromSnapshot(_radioRef, event.snapshot);
+    });
+  }
+
+  _onRadioEntryRemoved(Event event) {
+    print('_onRadioEntryRemoved');
+    var oldValue =
+    radioSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      radioSaves.remove(oldValue);
     });
   }
 
   _onDoutEntryAdded(Event event) {
     print('_onDoutEntryAdded');
     setState(() {
-      doutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
+      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
     });
   }
 
@@ -206,7 +203,7 @@ class _FunctionsState extends State<Functions> {
         doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       doutSaves[doutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(_doutRef, event.snapshot);
     });
   }
 
@@ -222,7 +219,7 @@ class _FunctionsState extends State<Functions> {
   _onLoutEntryAdded(Event event) {
     print('_onLoutEntryAdded');
     setState(() {
-      loutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
+      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
     });
   }
 
@@ -232,7 +229,7 @@ class _FunctionsState extends State<Functions> {
         loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       loutSaves[loutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(_loutRef, event.snapshot);
     });
   }
 

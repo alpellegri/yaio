@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'io_entry.dart';
+import 'const.dart';
 
 class DoutListItem extends StatelessWidget {
   final IoEntry doutEntry;
@@ -66,7 +67,7 @@ class _DigitalIOState extends State<DigitalIO> {
   DatabaseReference _doutRef;
 
   _DigitalIOState() {
-    _doutRef = FirebaseDatabase.instance.reference().child('DIO/Dout');
+    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
     _doutRef.onChildAdded.listen(_onDoutEntryAdded);
     _doutRef.onChildChanged.listen(_onDoutEntryEdited);
     _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
@@ -111,7 +112,7 @@ class _DigitalIOState extends State<DigitalIO> {
   _onDoutEntryAdded(Event event) {
     print('_onDoutEntryAdded');
     setState(() {
-      doutSaves.add(new IoEntry.fromSnapshot(event.snapshot));
+      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
     });
   }
 
@@ -121,7 +122,7 @@ class _DigitalIOState extends State<DigitalIO> {
         doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       doutSaves[doutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(event.snapshot);
+          new IoEntry.fromSnapshot(_doutRef, event.snapshot);
     });
   }
 

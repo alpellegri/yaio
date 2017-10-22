@@ -1,33 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
+import 'io_entry.dart';
 import 'const.dart';
-
-class RadioCodeEntry {
-  DatabaseReference reference;
-  String key;
-  String func;
-  int id;
-  String name;
-
-  RadioCodeEntry(this.id, this.name);
-
-  RadioCodeEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    reference = ref;
-    key = snapshot.key;
-    func = snapshot.value['func'] ?? '';
-    id = snapshot.value['id'] ?? 0;
-    name = snapshot.value['name'] ?? '';
-  }
-
-  toJson() {
-    return {
-      'func': func,
-      'id': id,
-      'name': name,
-    };
-  }
-}
 
 class RadioCodeListItem extends StatelessWidget {
   final RadioCodeEntry codeEntry;
@@ -88,6 +63,9 @@ class RadioCode extends StatefulWidget {
 }
 
 class _RadioCodeState extends State<RadioCode> {
+  final DatabaseReference _controlRef =
+  FirebaseDatabase.instance.reference().child(kControlRef);
+
   List<RadioCodeEntry> codeInactiveSaves = new List();
   DatabaseReference _codeInactiveRef;
   List<RadioCodeEntry> codeActiveRxSaves = new List();
@@ -293,7 +271,12 @@ class _RadioCodeState extends State<RadioCode> {
     );
   }
 
-  void _onFloatingActionButtonPressed() {}
+  void _onFloatingActionButtonPressed() {
+    // request update to node
+    _controlRef.child('radio_update').set(true);
+    DateTime now = new DateTime.now();
+    _controlRef.child('time').set(now.millisecondsSinceEpoch ~/ 1000);
+  }
 }
 
 class EntryDialog extends StatefulWidget {
