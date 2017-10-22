@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 
 class FunctionEntry {
+  DatabaseReference reference;
   String key;
   int action;
   String action_name;
@@ -13,7 +14,7 @@ class FunctionEntry {
 
   FunctionEntry(this.id, this.name);
 
-  FunctionEntry.fromSnapshot(DataSnapshot snapshot)
+  FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : key = snapshot.key,
         action = snapshot.value['action'],
         action_name = snapshot.value['action_name'],

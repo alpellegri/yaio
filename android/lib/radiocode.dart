@@ -303,12 +303,12 @@ class EntryDialog extends StatefulWidget {
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
+  final RadioCodeEntry entry;
   DatabaseReference codeInactiveRef;
   DatabaseReference codeActiveRxRef;
   DatabaseReference codeActiveTxRef;
 
   String _selectType;
-  final RadioCodeEntry entry;
   List<String> radioMenu = new List();
   Map<String, DatabaseReference> _menuRef = new Map();
 
@@ -319,10 +319,10 @@ class _EntryDialogState extends State<EntryDialog> {
     this.codeActiveTxRef,
   }) {
     print('EntryDialogState');
+    _controllerName.text = entry.name;
     _menuRef['Inactive'] = codeInactiveRef;
     _menuRef['Active Rx'] = codeActiveRxRef;
     _menuRef['Active Tx'] = codeActiveTxRef;
-    _controllerName.text = entry.name;
     _menuRef.forEach((String key, DatabaseReference value) {
       radioMenu.add(key);
     });
