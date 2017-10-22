@@ -293,13 +293,7 @@ class _RadioCodeState extends State<RadioCode> {
     );
   }
 
-  void _onFloatingActionButtonPressed() {
-    _control['alarm'] = !_control['alarm'];
-    DateTime now = new DateTime.now();
-    _control['time'] =
-        now.millisecondsSinceEpoch ~/ 1000;
-    _controlRef.set(_control);
-  }
+  void _onFloatingActionButtonPressed() {}
 }
 
 class EntryDialog extends StatefulWidget {
