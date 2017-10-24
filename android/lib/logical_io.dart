@@ -165,9 +165,9 @@ class EntryDialog extends StatefulWidget {
 class _EntryDialogState extends State<EntryDialog> {
   final IoEntry entry;
 
-    final TextEditingController _controllerName = new TextEditingController();
-    final TextEditingController _controllerPort = new TextEditingController();
-    final TextEditingController _controllerValue = new TextEditingController();
+  final TextEditingController _controllerName = new TextEditingController();
+  final TextEditingController _controllerPort = new TextEditingController();
+  final TextEditingController _controllerValue = new TextEditingController();
 
   _EntryDialogState(this.entry) {
     _controllerName.text = entry.getName();
@@ -178,58 +178,56 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-          title: new Text('Edit Entry'),
-          content: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new TextField(
-                  controller: _controllerName,
-                  decoration: new InputDecoration(
-                    hintText: 'name',
-                  ),
+        title: new Text('Edit Entry'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: _controllerName,
+                decoration: new InputDecoration(
+                  hintText: 'name',
                 ),
-                new TextField(
-                  controller: _controllerPort,
-                  decoration: new InputDecoration(
-                    hintText: 'port',
-                  ),
+              ),
+              new TextField(
+                controller: _controllerPort,
+                decoration: new InputDecoration(
+                  hintText: 'port',
                 ),
-                new TextField(
-                  controller: _controllerValue,
-                  decoration: new InputDecoration(
-                    hintText: 'value',
-                  ),
+              ),
+              new TextField(
+                controller: _controllerValue,
+                decoration: new InputDecoration(
+                  hintText: 'value',
                 ),
-              ]),
-          actions: <Widget>[
-            new FlatButton(
-                child: const Text('REMOVE'),
-                onPressed: () {
-                  if (entry.key != null) {
-                    entry.reference.child(entry.key).remove();
-                  }
-                  Navigator.pop(context, null);
-                }),
-            new FlatButton(
-                child: const Text('SAVE'),
-                onPressed: () {
-                  entry.setName(_controllerName.text);
-                  entry.setPort(int.parse(_controllerPort.text));
-                  entry.setValue(int.parse(_controllerValue.text));
-                  print(entry.toJson());
-                  if (entry.key != null) {
-                    entry.reference.child(entry.key).remove();
-  }
-
-                  entry.reference.push().set(entry.toJson());
-                    Navigator.pop(context, null);
-                  }),
-              new FlatButton(
-                  child: const Text('DISCARD'),
-                  onPressed: () {
-                    Navigator.pop(context, null);
-                }),
+              ),
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('REMOVE'),
+              onPressed: () {
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).remove();
+                }
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                entry.setName(_controllerName.text);
+                entry.setPort(int.parse(_controllerPort.text));
+                entry.setValue(int.parse(_controllerValue.text));
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).remove();
+                }
+                entry.reference.push().set(entry.toJson());
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
         ]);
   }
 }

@@ -217,7 +217,6 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.setName(_controllerName.text);
                 entry.setPort(int.parse(_controllerPort.text));
                 entry.setValue(int.parse(_controllerValue.text));
-                print(entry.toJson());
                 if (entry.key != null) {
                   entry.reference.child(entry.key).remove();
                 }
