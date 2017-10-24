@@ -364,7 +364,7 @@ class _EntryDialogState extends State<EntryDialog> {
             ]),
         actions: <Widget>[
           new FlatButton(
-              child: const Text('DELETE'),
+              child: const Text('REMOVE'),
               onPressed: () {
                 entry.reference.child(entry.key).remove();
                 Navigator.pop(context, null);

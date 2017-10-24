@@ -4,10 +4,10 @@ import 'drawer.dart';
 import 'io_entry.dart';
 import 'const.dart';
 
-class DoutListItem extends StatelessWidget {
-  final IoEntry doutEntry;
+class ListItem extends StatelessWidget {
+  final IoEntry entry;
 
-  DoutListItem(this.doutEntry);
+  ListItem(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +24,22 @@ class DoutListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      doutEntry.name,
+                      entry.name,
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'PIN: ${doutEntry.id >> 1}',
+                      'ID: ${entry.id}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'Value: ${doutEntry.id & 0x1}',
+                      'PORT: ${entry.getPort()}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                    ),
+                    new Text(
+                      'VALUE: ${entry.getValue()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
@@ -63,14 +68,14 @@ class DigitalIO extends StatefulWidget {
 }
 
 class _DigitalIOState extends State<DigitalIO> {
-  List<IoEntry> doutSaves = new List();
-  DatabaseReference _doutRef;
+  List<IoEntry> entrySaves = new List();
+  DatabaseReference _entryRef;
 
   _DigitalIOState() {
-    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
-    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
-    _doutRef.onChildChanged.listen(_onDoutEntryEdited);
-    _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
+    _entryRef = FirebaseDatabase.instance.reference().child(kDoutRef);
+    _entryRef.onChildAdded.listen(_onEntryAdded);
+    _entryRef.onChildChanged.listen(_onEntryEdited);
+    _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -94,116 +99,136 @@ class _DigitalIOState extends State<DigitalIO> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: doutSaves.length,
+        itemCount: entrySaves.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openRemoveEntryDialog(doutSaves[index]),
-              child: new DoutListItem(doutSaves[index]));
+              onTap: () => _openEntryDialog(entrySaves[index]),
+              child: new ListItem(entrySaves[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _openAddEntryDialog,
+        onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
         child: new Icon(Icons.add),
       ),
     );
   }
 
-  _onDoutEntryAdded(Event event) {
-    print('_onDoutEntryAdded');
+  _onEntryAdded(Event event) {
+    print('_onEntryAdded');
     setState(() {
-      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
+      entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onDoutEntryEdited(Event event) {
-    print('_onDoutEntryEdited');
+  _onEntryEdited(Event event) {
+    print('_onEntryEdited');
     var oldValue =
-        doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      doutSaves[doutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_doutRef, event.snapshot);
+      entrySaves[entrySaves.indexOf(oldValue)] =
+          new IoEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
-  _onDoutEntryRemoved(Event event) {
-    print('_onDoutEntryRemoved');
+  _onEntryRemoved(Event event) {
+    print('_onEntryRemoved');
     var oldValue =
-        doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      doutSaves.remove(oldValue);
+      entrySaves.remove(oldValue);
     });
   }
 
-  void _openAddEntryDialog() {
-    final TextEditingController _controllerName = new TextEditingController();
-    final TextEditingController _controllerPin = new TextEditingController();
-    final TextEditingController _controllerValue = new TextEditingController();
-
+  void _openEntryDialog(IoEntry entry) {
     showDialog(
       context: context,
-      child: new AlertDialog(
-          title: new Text('Create a Digical Output'),
-          content: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new TextField(
-                  controller: _controllerName,
-                  decoration: new InputDecoration(
-                    hintText: 'Name',
-                  ),
-                ),
-                new TextField(
-                  controller: _controllerPin,
-                  decoration: new InputDecoration(
-                    hintText: 'PIN',
-                  ),
-                ),
-                new TextField(
-                  controller: _controllerValue,
-                  decoration: new InputDecoration(
-                    hintText: 'Value',
-                  ),
-                ),
-              ]),
-          actions: <Widget>[
-            new FlatButton(
-                child: const Text('SAVE'),
-                onPressed: () {
-                  _doutRef.push().set({
-                    'id': int.parse(_controllerPin.text) * 2 +
-                        int.parse(_controllerValue.text),
-                    'name': _controllerName.text,
-                  });
-                  Navigator.pop(context, null);
-                }),
-            new FlatButton(
-                child: const Text('DISCARD'),
-                onPressed: () {
-                  Navigator.pop(context, null);
-                })
-          ]),
+      child: new EntryDialog(entry),
     );
   }
 
-  void _openRemoveEntryDialog(IoEntry entry) {
-    showDialog(
-        context: context,
-        child: new AlertDialog(
-            title: new Text('Remove ${entry.name} Digital Output'),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('REMOVE'),
-                  onPressed: () {
-                    _doutRef.child(entry.key).remove();
-                    Navigator.pop(context, null);
-                  }),
-              new FlatButton(
-                  child: const Text('DISCARD'),
-                  onPressed: () {
-                    Navigator.pop(context, null);
-                  })
-            ]));
+  void _onFloatingActionButtonPressed() {
+    final IoEntry entry = new IoEntry(_entryRef);
+    _openEntryDialog(entry);
+  }
+}
+
+class EntryDialog extends StatefulWidget {
+  final IoEntry entry;
+
+  EntryDialog(this.entry);
+
+  @override
+  _EntryDialogState createState() => new _EntryDialogState(entry);
+}
+
+class _EntryDialogState extends State<EntryDialog> {
+  final IoEntry entry;
+
+  final TextEditingController _controllerName = new TextEditingController();
+  final TextEditingController _controllerPort = new TextEditingController();
+  final TextEditingController _controllerValue = new TextEditingController();
+
+  _EntryDialogState(this.entry) {
+    _controllerName.text = entry.getName();
+    _controllerPort.text = entry.getPort().toString();
+    _controllerValue.text = entry.getValue().toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+        title: new Text('Edit Entry'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: _controllerName,
+                decoration: new InputDecoration(
+                  hintText: 'name',
+                ),
+              ),
+              new TextField(
+                controller: _controllerPort,
+                decoration: new InputDecoration(
+                  hintText: 'port',
+                ),
+              ),
+              new TextField(
+                controller: _controllerValue,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('REMOVE'),
+              onPressed: () {
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).remove();
+                }
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                entry.setName(_controllerName.text);
+                entry.setPort(int.parse(_controllerPort.text));
+                entry.setValue(int.parse(_controllerValue.text));
+                print(entry.toJson());
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).remove();
+                }
+                entry.reference.push().set(entry.toJson());
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
+        ]);
   }
 }

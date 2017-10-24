@@ -4,10 +4,10 @@ import 'drawer.dart';
 import 'io_entry.dart';
 import 'const.dart';
 
-class LoutListItem extends StatelessWidget {
-  final IoEntry loutEntry;
+class ListItem extends StatelessWidget {
+  final IoEntry entry;
 
-  LoutListItem(this.loutEntry);
+  ListItem(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +24,22 @@ class LoutListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      loutEntry.name,
+                      entry.name,
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'PIN: ${loutEntry.id}',
+                      'ID: ${entry.id}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                    ),
+                    new Text(
+                      'PORT: ${entry.getPort()}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                    ),
+                    new Text(
+                      'VALUE: ${entry.getValue()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
@@ -58,14 +68,14 @@ class LogicalIO extends StatefulWidget {
 }
 
 class _LogicalIOState extends State<LogicalIO> {
-  List<IoEntry> loutSaves = new List();
-  DatabaseReference _loutRef;
+  List<IoEntry> entrySaves = new List();
+  DatabaseReference _entryRef;
 
   _LogicalIOState() {
-    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
-    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
-    _loutRef.onChildChanged.listen(_onLoutEntryEdited);
-    _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
+    _entryRef = FirebaseDatabase.instance.reference().child(kLoutRef);
+    _entryRef.onChildAdded.listen(_onEntryAdded);
+    _entryRef.onChildChanged.listen(_onEntryEdited);
+    _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -89,55 +99,86 @@ class _LogicalIOState extends State<LogicalIO> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: loutSaves.length,
+        itemCount: entrySaves.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openRemoveEntryDialog(loutSaves[index]),
-              child: new LoutListItem(loutSaves[index]));
+              onTap: () => _openEntryDialog(entrySaves[index]),
+              child: new ListItem(entrySaves[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _openAddEntryDialog,
+        onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
         child: new Icon(Icons.add),
       ),
     );
   }
 
-  _onLoutEntryAdded(Event event) {
-    print('_onLoutEntryAdded');
+  _onEntryAdded(Event event) {
+    print('_onEntryAdded');
     setState(() {
-      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
+      entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onLoutEntryEdited(Event event) {
-    print('_onLoutEntryEdited');
+  _onEntryEdited(Event event) {
+    print('_onEntryEdited');
     var oldValue =
-        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      loutSaves[loutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_loutRef, event.snapshot);
+      entrySaves[entrySaves.indexOf(oldValue)] =
+          new IoEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
-  _onLoutEntryRemoved(Event event) {
-    print('_onLoutEntryRemoved');
+  _onEntryRemoved(Event event) {
+    print('_onEntryRemoved');
     var oldValue =
-        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      loutSaves.remove(oldValue);
+      entrySaves.remove(oldValue);
     });
   }
 
-  void _openAddEntryDialog() {
-    final TextEditingController _controllerName = new TextEditingController();
-    final TextEditingController _controllerId = new TextEditingController();
-
+  void _openEntryDialog(IoEntry entry) {
     showDialog(
       context: context,
-      child: new AlertDialog(
-          title: new Text('Create a Logical Output'),
+      child: new EntryDialog(entry),
+    );
+  }
+
+  void _onFloatingActionButtonPressed() {
+    final IoEntry entry = new IoEntry(_entryRef);
+    _openEntryDialog(entry);
+  }
+}
+
+class EntryDialog extends StatefulWidget {
+  final IoEntry entry;
+
+  EntryDialog(this.entry);
+
+  @override
+  _EntryDialogState createState() => new _EntryDialogState(entry);
+}
+
+class _EntryDialogState extends State<EntryDialog> {
+  final IoEntry entry;
+
+    final TextEditingController _controllerName = new TextEditingController();
+    final TextEditingController _controllerPort = new TextEditingController();
+    final TextEditingController _controllerValue = new TextEditingController();
+
+  _EntryDialogState(this.entry) {
+    _controllerName.text = entry.getName();
+    _controllerPort.text = entry.getPort().toString();
+    _controllerValue.text = entry.getValue().toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+          title: new Text('Edit Entry'),
           content: new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -145,52 +186,50 @@ class _LogicalIOState extends State<LogicalIO> {
                 new TextField(
                   controller: _controllerName,
                   decoration: new InputDecoration(
-                    hintText: 'Name',
+                    hintText: 'name',
                   ),
                 ),
                 new TextField(
-                  controller: _controllerId,
+                  controller: _controllerPort,
                   decoration: new InputDecoration(
-                    hintText: 'ID',
+                    hintText: 'port',
+                  ),
+                ),
+                new TextField(
+                  controller: _controllerValue,
+                  decoration: new InputDecoration(
+                    hintText: 'value',
                   ),
                 ),
               ]),
           actions: <Widget>[
             new FlatButton(
-                child: const Text('SAVE'),
+                child: const Text('REMOVE'),
                 onPressed: () {
-                  _loutRef.push().set({
-                    'id': int.parse(_controllerId.text),
-                    'name': _controllerName.text,
-                  });
+                  if (entry.key != null) {
+                    entry.reference.child(entry.key).remove();
+                  }
                   Navigator.pop(context, null);
                 }),
             new FlatButton(
-                child: const Text('DISCARD'),
+                child: const Text('SAVE'),
                 onPressed: () {
-                  Navigator.pop(context, null);
-                })
-          ]),
-    );
+                  entry.setName(_controllerName.text);
+                  entry.setPort(int.parse(_controllerPort.text));
+                  entry.setValue(int.parse(_controllerValue.text));
+                  print(entry.toJson());
+                  if (entry.key != null) {
+                    entry.reference.child(entry.key).remove();
   }
 
-  void _openRemoveEntryDialog(IoEntry entry) {
-    showDialog(
-        context: context,
-        child: new AlertDialog(
-            title: new Text('Remove ${entry.name} Logital Output'),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('REMOVE'),
-                  onPressed: () {
-                    _loutRef.child(entry.key).remove();
+                  entry.reference.push().set(entry.toJson());
                     Navigator.pop(context, null);
                   }),
               new FlatButton(
                   child: const Text('DISCARD'),
                   onPressed: () {
                     Navigator.pop(context, null);
-                  })
-            ]));
+                }),
+        ]);
   }
 }

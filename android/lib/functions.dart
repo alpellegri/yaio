@@ -71,38 +71,14 @@ class _FunctionsState extends State<Functions> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<FunctionEntry> functionSaves = new List();
-  DatabaseReference _functionRef;
-  List<RadioCodeEntry> radioTxSaves = new List();
-  DatabaseReference _radioTxRef;
-  List<IoEntry> doutSaves = new List();
-  DatabaseReference _doutRef;
-  List<IoEntry> loutSaves = new List();
-  DatabaseReference _loutRef;
-  List<IoEntry> ioMenu;
-  String selection;
+  List<FunctionEntry> entrySaves = new List();
+  DatabaseReference _entryRef;
 
   _FunctionsState() {
-    ioMenu = loutSaves;
-    _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
-    _functionRef.onChildAdded.listen(_onFuncEntryAdded);
-    _functionRef.onChildChanged.listen(_onFuncEntryEdited);
-    _functionRef.onChildRemoved.listen(_onFuncEntryRemoved);
-    _radioTxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('ActiveTx');
-    _radioTxRef.onChildAdded.listen(_onRadioEntryAdded);
-    _radioTxRef.onChildChanged.listen(_onRadioEntryEdited);
-    _radioTxRef.onChildRemoved.listen(_onRadioEntryRemoved);
-    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
-    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
-    _doutRef.onChildChanged.listen(_onDoutEntryEdited);
-    _doutRef.onChildRemoved.listen(_onDoutEntryRemoved);
-    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
-    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
-    _loutRef.onChildChanged.listen(_onLoutEntryEdited);
-    _loutRef.onChildRemoved.listen(_onLoutEntryRemoved);
+    _entryRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
+    _entryRef.onChildAdded.listen(_onEntryAdded);
+    _entryRef.onChildChanged.listen(_onEntryEdited);
+    _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -126,11 +102,11 @@ class _FunctionsState extends State<Functions> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: functionSaves.length,
+        itemCount: entrySaves.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(functionSaves[index]),
-              child: new FunctionListItem(functionSaves[index]));
+              onTap: () => _openEntryDialog(entrySaves[index]),
+              child: new FunctionListItem(entrySaves[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -141,169 +117,60 @@ class _FunctionsState extends State<Functions> {
     );
   }
 
-  _onFuncEntryAdded(Event event) {
-    print('_onFuncEntryAdded');
+  _onEntryAdded(Event event) {
+    print('_onEntryAdded');
     setState(() {
-      functionSaves.add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));
+      entrySaves.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onFuncEntryEdited(Event event) {
-    print('_onFuncEntryEdited');
+  _onEntryEdited(Event event) {
+    print('_onEntryEdited');
     var oldValue =
-        functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      functionSaves[functionSaves.indexOf(oldValue)] =
-          new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
+      entrySaves[entrySaves.indexOf(oldValue)] =
+          new FunctionEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
-  _onFuncEntryRemoved(Event event) {
-    print('_onFuncEntryRemoved');
+  _onEntryRemoved(Event event) {
+    print('_onEntryRemoved');
     var oldValue =
-        functionSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      functionSaves.remove(oldValue);
-    });
-  }
-
-  _onRadioEntryAdded(Event event) {
-    print('_onRadioEntryAdded');
-    setState(() {
-      radioTxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_radioTxRef, event.snapshot));
-    });
-  }
-
-  _onRadioEntryEdited(Event event) {
-    print('_onRadioEntryEdited');
-    var oldValue =
-        radioTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      radioTxSaves[radioTxSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_radioTxRef, event.snapshot);
-    });
-  }
-
-  _onRadioEntryRemoved(Event event) {
-    print('_onRadioEntryRemoved');
-    var oldValue =
-        radioTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      radioTxSaves.remove(oldValue);
-    });
-  }
-
-  _onDoutEntryAdded(Event event) {
-    print('_onDoutEntryAdded');
-    setState(() {
-      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
-    });
-  }
-
-  _onDoutEntryEdited(Event event) {
-    print('_onDoutEntryEdited');
-    var oldValue =
-        doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      doutSaves[doutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_doutRef, event.snapshot);
-    });
-  }
-
-  _onDoutEntryRemoved(Event event) {
-    print('_onDoutEntryRemoved');
-    var oldValue =
-        doutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      doutSaves.remove(oldValue);
-    });
-  }
-
-  _onLoutEntryAdded(Event event) {
-    print('_onLoutEntryAdded');
-    setState(() {
-      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
-    });
-  }
-
-  _onLoutEntryEdited(Event event) {
-    print('_onLoutEntryEdited');
-    var oldValue =
-        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      loutSaves[loutSaves.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_loutRef, event.snapshot);
-    });
-  }
-
-  _onLoutEntryRemoved(Event event) {
-    print('_onLoutEntryRemoved');
-    var oldValue =
-        loutSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      loutSaves.remove(oldValue);
+      entrySaves.remove(oldValue);
     });
   }
 
   void _openEntryDialog(FunctionEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(
-        entry: entry,
-        functionRef: _functionRef,
-        functionSaves: functionSaves,
-        radioTxSaves: radioTxSaves,
-        doutSaves: doutSaves,
-        loutSaves: loutSaves,
-      ),
+      child: new EntryDialog(entry, entrySaves),
     );
   }
 
   void _onFloatingActionButtonPressed() {
-    // request update to node
-    _controlRef.child('radioTx_update').set(true);
-    DateTime now = new DateTime.now();
-    _controlRef.child('time').set(now.millisecondsSinceEpoch ~/ 1000);
+    FunctionEntry entry = new FunctionEntry(_entryRef);
+    _openEntryDialog(entry);
   }
 }
 
 class EntryDialog extends StatefulWidget {
   final FunctionEntry entry;
-  final DatabaseReference functionRef;
   final List<FunctionEntry> functionSaves;
-  final List<RadioCodeEntry> radioTxSaves;
-  final List<IoEntry> doutSaves;
-  final List<IoEntry> loutSaves;
 
-  EntryDialog({
-    this.entry,
-    this.functionRef,
-    this.functionSaves,
-    this.radioTxSaves,
-    this.doutSaves,
-    this.loutSaves,
-  });
+  EntryDialog(this.entry, this.functionSaves);
 
   @override
-  _EntryDialogState createState() => new _EntryDialogState(
-        entry: entry,
-        functionRef: functionRef,
-        functionSaves: functionSaves,
-        radioTxSaves: radioTxSaves,
-        doutSaves: doutSaves,
-        loutSaves: loutSaves,
-      );
+  _EntryDialogState createState() =>
+      new _EntryDialogState(entry, functionSaves);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final FunctionEntry entry;
-  final DatabaseReference functionRef;
   final List<FunctionEntry> functionSaves;
-  final List<RadioCodeEntry> radioTxSaves;
-  final List<IoEntry> doutSaves;
-  final List<IoEntry> loutSaves;
   String _selectType;
   String _selectAction;
   String _selectDelay;
@@ -312,21 +179,31 @@ class _EntryDialogState extends State<EntryDialog> {
   Map<String, List> _menuRef = new Map();
   List ioMenu;
 
-  _EntryDialogState({
-    this.entry,
-    this.functionRef,
-    this.functionSaves,
-    this.radioTxSaves,
-    this.doutSaves,
-    this.loutSaves,
-  }) {
+  List<RadioCodeEntry> radioTxSaves = new List();
+  DatabaseReference _radioTxRef;
+  List<IoEntry> doutSaves = new List();
+  DatabaseReference _doutRef;
+  List<IoEntry> loutSaves = new List();
+  DatabaseReference _loutRef;
+
+  _EntryDialogState(this.entry, this.functionSaves) {
     print('EntryDialogState');
+    _radioTxRef = FirebaseDatabase.instance
+        .reference()
+        .child(kRadioCodesRef)
+        .child('ActiveTx');
+    _radioTxRef.onChildAdded.listen(_onRadioEntryAdded);
+    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
+    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
+    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
+    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
     _controllerName.text = entry.name;
     _menuRef['DOUT'] = doutSaves;
     _menuRef['LOUT'] = loutSaves;
     _menuRef['Radio Tx'] = radioTxSaves;
     _menuRef.forEach((String key, List value) {
       selectTypeMenu.add(key);
+      ioMenu = loutSaves;
     });
     _selectType = 'DOUT';
     ioMenu = _menuRef[_selectType];
@@ -434,7 +311,7 @@ class _EntryDialogState extends State<EntryDialog> {
             ]),
         actions: <Widget>[
           new FlatButton(
-              child: const Text('DELETE'),
+              child: const Text('REMOVE'),
               onPressed: () {
                 entry.reference.child(entry.key).remove();
                 Navigator.pop(context, null);
@@ -442,15 +319,8 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                print(entry.reference);
                 // entry.reference.child(entry.key).remove();
-                entry.reference.push().set({
-                  'id': entry.id,
-                  'name': _controllerName.text,
-                  'action_name': _selectAction,
-                  'delay': _selectDelay,
-                  'func': _selectNext,
-                });
+                entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),
           new FlatButton(
@@ -459,5 +329,27 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
+  }
+
+  _onRadioEntryAdded(Event event) {
+    print('_onRadioEntryAdded');
+    setState(() {
+      radioTxSaves
+          .add(new RadioCodeEntry.fromSnapshot(_radioTxRef, event.snapshot));
+    });
+  }
+
+  _onDoutEntryAdded(Event event) {
+    print('_onDoutEntryAdded');
+    setState(() {
+      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
+    });
+  }
+
+  _onLoutEntryAdded(Event event) {
+    print('_onLoutEntryAdded');
+    setState(() {
+      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
+    });
   }
 }

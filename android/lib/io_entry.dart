@@ -3,27 +3,28 @@ import 'package:firebase_database/firebase_database.dart';
 class FunctionEntry {
   DatabaseReference reference;
   String key;
+  String name;
+  int id;
   int action;
   String action_name;
   int delay;
-  int id;
-  String name;
   String next;
   int type;
   String type_name;
 
-  FunctionEntry(this.id, this.name);
+  FunctionEntry(DatabaseReference ref) : reference = ref;
 
   FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
-      : key = snapshot.key,
-        action = snapshot.value['action'],
-        action_name = snapshot.value['action_name'],
-        delay = snapshot.value['delay'],
-        id = snapshot.value['id'],
-        name = snapshot.value['name'],
-        next = snapshot.value['next'],
-        type = snapshot.value['type'],
-        type_name = snapshot.value['type_name'];
+      : reference = ref,
+        key = snapshot.key,
+        action = snapshot.value['action'] ?? 0,
+        action_name = snapshot.value['action_name'] ?? '',
+        delay = snapshot.value['delay'] ?? 0,
+        id = snapshot.value['id'] ?? 0,
+        name = snapshot.value['name'] ?? '',
+        next = snapshot.value['next'] ?? '',
+        type = snapshot.value['type'] ?? 0,
+        type_name = snapshot.value['type_name'] ?? '';
 
   toJson() {
     return {
@@ -42,11 +43,11 @@ class FunctionEntry {
 class RadioCodeEntry {
   DatabaseReference reference;
   String key;
-  String func;
-  int id;
   String name;
+  int id;
+  String func;
 
-  RadioCodeEntry(this.id, this.name);
+  RadioCodeEntry(DatabaseReference ref) : reference = ref;
 
   RadioCodeEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
     reference = ref;
@@ -58,9 +59,9 @@ class RadioCodeEntry {
 
   toJson() {
     return {
-      'func': func,
-      'id': id,
       'name': name,
+      'id': id,
+      'func': func,
     };
   }
 }
@@ -68,15 +69,42 @@ class RadioCodeEntry {
 class IoEntry {
   DatabaseReference reference;
   String key;
-  int id;
   String name;
+  int id;
 
-  IoEntry(this.id, this.name);
+  IoEntry(DatabaseReference ref) : reference = ref;
 
   IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
-      : key = snapshot.key,
+      : reference = ref,
+        key = snapshot.key,
         id = snapshot.value['id'],
         name = snapshot.value['name'];
+
+  setName(String name) {
+    this.name = name;
+  }
+
+  getName() {
+    return name;
+  }
+
+  setPort(int port) {
+    int _value = id & 0x01;
+    id = port << 1 | _value;
+  }
+
+  setValue(int value) {
+    int _port = id >> 1;
+    id = (_port << 1) | (value & 0x01);
+  }
+
+  int getPort() {
+    return id >> 1;
+  }
+
+  int getValue() {
+    return id & 0x01;
+  }
 
   toJson() {
     return {
