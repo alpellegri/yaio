@@ -32,16 +32,25 @@ class FunctionListItem extends StatelessWidget {
                       functionEntry.action_name,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                     new Text(
                       functionEntry.type_name,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                     new Text(
                       functionEntry.next,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,

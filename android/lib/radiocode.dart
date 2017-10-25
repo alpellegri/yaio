@@ -32,11 +32,17 @@ class RadioCodeListItem extends StatelessWidget {
                       codeEntry.id.toRadixString(16).toUpperCase(),
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                     new Text(
                       codeEntry.func,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,8 +178,8 @@ class _RadioCodeState extends State<RadioCode> {
       ]),
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
-        tooltip: 'Update',
-        child: new Icon(Icons.cloud_upload),
+        tooltip: 'add',
+        child: new Icon(Icons.add),
       ),
     );
   }
@@ -273,9 +279,9 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onFloatingActionButtonPressed() {
     // request update to node
-    _controlRef.child('radio_update').set(true);
-    DateTime now = new DateTime.now();
-    _controlRef.child('time').set(now.millisecondsSinceEpoch ~/ 1000);
+    // _controlRef.child('radio_update').set(true);
+    // DateTime now = new DateTime.now();
+    // _controlRef.child('time').set(now.millisecondsSinceEpoch ~/ 1000);
   }
 }
 
@@ -399,6 +405,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.reference.child(entry.key).remove();
                 entry.reference = _menuRef[_selectType];
                 entry.name = _controllerName.text;
+                entry.func = _selectFunction;
                 entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),

@@ -32,11 +32,17 @@ class ListItem extends StatelessWidget {
                       'PORT: ${entry.getPort()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                     new Text(
                       'VALUE: ${entry.getValue()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -66,7 +66,7 @@ class LogListItem extends StatelessWidget {
           ),
           new Text(
             logEntry.message.toString(),
-            textScaleFactor: 1.3,
+            textScaleFactor: 1.5,
             textAlign: TextAlign.left,
           ),
         ],
