@@ -304,11 +304,14 @@ class EntryDialog extends StatefulWidget {
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final RadioCodeEntry entry;
-  DatabaseReference codeInactiveRef;
-  DatabaseReference codeActiveRxRef;
-  DatabaseReference codeActiveTxRef;
+  final DatabaseReference codeInactiveRef;
+  final DatabaseReference codeActiveRxRef;
+  final DatabaseReference codeActiveTxRef;
+  DatabaseReference _functionRef;
+  List<FunctionEntry> _functionSaves = new List();
 
   String _selectType;
+  String _selectFunction;
   List<String> radioMenu = new List();
   Map<String, DatabaseReference> _menuRef = new Map();
 
@@ -319,6 +322,8 @@ class _EntryDialogState extends State<EntryDialog> {
     this.codeActiveTxRef,
   }) {
     print('EntryDialogState');
+    _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
+    _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
     _menuRef['Inactive'] = codeInactiveRef;
     _menuRef['Active Rx'] = codeActiveRxRef;
@@ -361,6 +366,25 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
+              new ListTile(
+                title: const Text('Function Call'),
+                trailing: new DropdownButton<String>(
+                  hint: const Text('select function'),
+                  value: _selectFunction,
+                  onChanged: (String newValue) {
+                    print(newValue);
+                    setState(() {
+                      _selectFunction = newValue;
+                    });
+                  },
+                  items: _functionSaves.map((FunctionEntry entry) {
+                    return new DropdownMenuItem<String>(
+                      value: entry.name,
+                      child: new Text(entry.name),
+                    );
+                  }).toList(),
+                ),
+              ),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -373,11 +397,9 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 entry.reference.child(entry.key).remove();
-                _menuRef[_selectType].push().set({
-                  'id': entry.id,
-                  'name': _controllerName.text,
-                  'func': entry.func,
-                });
+                entry.reference = _menuRef[_selectType];
+                entry.name = _controllerName.text;
+                entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),
           new FlatButton(
@@ -386,5 +408,12 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
+  }
+
+  _onFunctionAdded(Event event) {
+    print('_onFunctionAdded');
+    setState(() {
+      _functionSaves.add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));
+    });
   }
 }

@@ -4,12 +4,11 @@ class FunctionEntry {
   DatabaseReference reference;
   String key;
   String name;
-  int id;
-  int action;
+  int id_action;
   String action_name;
   int delay;
   String next;
-  int type;
+  int id_type;
   String type_name;
 
   FunctionEntry(DatabaseReference ref) : reference = ref;
@@ -17,24 +16,22 @@ class FunctionEntry {
   FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
-        action = snapshot.value['action'] ?? 0,
+        id_action = snapshot.value['action'] ?? 0,
         action_name = snapshot.value['action_name'] ?? '',
         delay = snapshot.value['delay'] ?? 0,
-        id = snapshot.value['id'] ?? 0,
         name = snapshot.value['name'] ?? '',
         next = snapshot.value['next'] ?? '',
-        type = snapshot.value['type'] ?? 0,
+        id_type = snapshot.value['type'] ?? 0,
         type_name = snapshot.value['type_name'] ?? '';
 
   toJson() {
     return {
-      'action': action,
+      'action': id_action,
       'action_name': action_name,
       'delay': delay,
-      'id': id,
       'name': name,
       'next': next,
-      'type': type,
+      'type': id_type,
       'type_name': type_name,
     };
   }
@@ -70,45 +67,37 @@ class IoEntry {
   DatabaseReference reference;
   String key;
   String name;
-  int id;
+  int _id;
 
   IoEntry(DatabaseReference ref) : reference = ref;
 
   IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
-        id = snapshot.value['id'],
+        _id = snapshot.value['id'],
         name = snapshot.value['name'];
 
-  setName(String name) {
-    this.name = name;
-  }
-
-  getName() {
-    return name;
+  int getPort() {
+    return _id >> 1;
   }
 
   setPort(int port) {
-    int _value = id & 0x01;
-    id = port << 1 | _value;
-  }
-
-  setValue(int value) {
-    int _port = id >> 1;
-    id = (_port << 1) | (value & 0x01);
-  }
-
-  int getPort() {
-    return id >> 1;
+    int _value = _id & 0x01;
+    _id = port << 1 | _value;
   }
 
   int getValue() {
-    return id & 0x01;
+    return _id & 0x01;
+  }
+
+  setValue(int value) {
+    int _port = _id >> 1;
+    _id = (_port << 1) | (value & 0x01);
   }
 
   toJson() {
     return {
-      'id': id,
+      'id': _id,
       'name': name,
     };
   }

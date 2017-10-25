@@ -29,11 +29,6 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'ID: ${entry.id}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                    ),
-                    new Text(
                       'PORT: ${entry.getPort()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
@@ -170,7 +165,7 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerValue = new TextEditingController();
 
   _EntryDialogState(this.entry) {
-    _controllerName.text = entry.getName();
+    _controllerName.text = entry.name;
     _controllerPort.text = entry.getPort().toString();
     _controllerValue.text = entry.getValue().toString();
   }
@@ -214,7 +209,7 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                entry.setName(_controllerName.text);
+                entry.name = _controllerName.text;
                 entry.setPort(int.parse(_controllerPort.text));
                 entry.setValue(int.parse(_controllerValue.text));
                 if (entry.key != null) {

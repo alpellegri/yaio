@@ -256,7 +256,7 @@ class _EntryDialogState extends State<EntryDialog> {
                       _selectAction = newValue;
                     });
                   },
-                  items: ioMenu.map((entry) {
+                  items: ioMenu.map((dynamic entry) {
                     return new DropdownMenuItem<String>(
                       value: entry.name,
                       child: new Text(
