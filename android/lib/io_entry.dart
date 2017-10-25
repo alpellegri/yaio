@@ -32,7 +32,7 @@ class FunctionEntry {
       'name': name,
       'next': next,
       'type': idType,
-      'typeName': typeName,
+      'type_name': typeName,
     };
   }
 }

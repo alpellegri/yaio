@@ -29,6 +29,14 @@ class FunctionListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
+                      entry.typeName,
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    new Text(
                       entry.actionName,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
@@ -37,7 +45,7 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      entry.typeName,
+                      entry.delay.toString(),
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -206,7 +214,9 @@ class _EntryDialogState extends State<EntryDialog> {
     _doutRef.onChildAdded.listen(_onDoutEntryAdded);
     _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
     _loutRef.onChildAdded.listen(_onLoutEntryAdded);
+
     _controllerName.text = entry.name;
+
     _menuRef['DOUT'] = doutSaves;
     _menuRef['LOUT'] = loutSaves;
     _menuRef['Radio Tx'] = radioTxSaves;
