@@ -5,9 +5,9 @@ import 'io_entry.dart';
 import 'const.dart';
 
 class FunctionListItem extends StatelessWidget {
-  final FunctionEntry functionEntry;
+  final FunctionEntry entry;
 
-  FunctionListItem(this.functionEntry);
+  FunctionListItem(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +24,12 @@ class FunctionListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      functionEntry.name,
+                      entry.name,
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      functionEntry.action_name,
+                      entry.actionName,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -37,7 +37,7 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      functionEntry.type_name,
+                      entry.typeName,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -45,7 +45,7 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      functionEntry.next,
+                      entry.next,
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -329,6 +329,9 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 entry.reference.child(entry.key).remove();
+                entry.next = _selectNext;
+                entry.idType = 0; // _selectType;
+                entry.idAction = 0; // _selectAction;
                 entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),

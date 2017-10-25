@@ -5,9 +5,9 @@ import 'io_entry.dart';
 import 'const.dart';
 
 class RadioCodeListItem extends StatelessWidget {
-  final RadioCodeEntry codeEntry;
+  final RadioCodeEntry entry;
 
-  RadioCodeListItem(this.codeEntry);
+  RadioCodeListItem(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +24,12 @@ class RadioCodeListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      codeEntry.name,
+                      entry.name,
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      codeEntry.id.toRadixString(16).toUpperCase(),
+                      'ID: ${entry.id.toRadixString(16).toUpperCase()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -37,7 +37,7 @@ class RadioCodeListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      codeEntry.func,
+                      'Function: ${entry.func}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(

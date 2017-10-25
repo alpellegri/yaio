@@ -4,35 +4,35 @@ class FunctionEntry {
   DatabaseReference reference;
   String key;
   String name;
-  int id_action;
-  String action_name;
+  int idAction;
+  String actionName;
   int delay;
   String next;
-  int id_type;
-  String type_name;
+  int idType;
+  String typeName;
 
   FunctionEntry(DatabaseReference ref) : reference = ref;
 
   FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
-        id_action = snapshot.value['action'] ?? 0,
-        action_name = snapshot.value['action_name'] ?? '',
+        idAction = snapshot.value['action'] ?? 0,
+        actionName = snapshot.value['actionName'] ?? '',
         delay = snapshot.value['delay'] ?? 0,
         name = snapshot.value['name'] ?? '',
         next = snapshot.value['next'] ?? '',
-        id_type = snapshot.value['type'] ?? 0,
-        type_name = snapshot.value['type_name'] ?? '';
+        idType = snapshot.value['type'] ?? 0,
+        typeName = snapshot.value['typeName'] ?? '';
 
   toJson() {
     return {
-      'action': id_action,
-      'action_name': action_name,
+      'action': idAction,
+      'action_name': actionName,
       'delay': delay,
       'name': name,
       'next': next,
-      'type': id_type,
-      'type_name': type_name,
+      'type': idType,
+      'typeName': typeName,
     };
   }
 }
