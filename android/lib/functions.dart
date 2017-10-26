@@ -37,7 +37,15 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      'name: ${entry.actionName}',
+                      'action name: ${entry.actionName}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    new Text(
+                      'action ID: ${entry.idAction}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -135,15 +143,13 @@ class _FunctionsState extends State<Functions> {
   }
 
   _onEntryAdded(Event event) {
-    print('_onEntryAdded');
     setState(() {
       entrySaves.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
   _onEntryEdited(Event event) {
-    print('_onEntryEdited');
-    var oldValue =
+    FunctionEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       entrySaves[entrySaves.indexOf(oldValue)] =
@@ -152,8 +158,7 @@ class _FunctionsState extends State<Functions> {
   }
 
   _onEntryRemoved(Event event) {
-    print('_onEntryRemoved');
-    var oldValue =
+    FunctionEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       entrySaves.remove(oldValue);
@@ -362,8 +367,9 @@ class _EntryDialogState extends State<EntryDialog> {
                   entry.name = _controllerName.text;
                   entry.next = _selectNext;
                   entry.typeName = _selectType;
+                  // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
                   entry.idType = 0; // _selectType;
-                  entry.idAction = 0; // _selectAction;
+                  // entry.idAction = element.idAction; // _selectAction;
                   entry.actionName = _selectAction;
                   entry.delay = _delaysMap[_selectDelay];
                 });
@@ -379,7 +385,6 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 
   _onRadioEntryAdded(Event event) {
-    print('_onRadioEntryAdded');
     setState(() {
       radioTxSaves
           .add(new RadioCodeEntry.fromSnapshot(_radioTxRef, event.snapshot));
@@ -387,14 +392,12 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 
   _onDoutEntryAdded(Event event) {
-    print('_onDoutEntryAdded');
     setState(() {
       doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
     });
   }
 
   _onLoutEntryAdded(Event event) {
-    print('_onLoutEntryAdded');
     setState(() {
       loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
     });

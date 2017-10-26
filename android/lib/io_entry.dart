@@ -3,13 +3,13 @@ import 'package:firebase_database/firebase_database.dart';
 class FunctionEntry {
   DatabaseReference reference;
   String key;
-  String name = '';
-  int idAction = 0;
-  String actionName = '';
-  int delay = 0;
-  String next = '';
-  int idType = 0;
-  String typeName = '';
+  String name;
+  int idAction;
+  String actionName;
+  int delay;
+  String next;
+  int idType;
+  String typeName;
 
   FunctionEntry(DatabaseReference ref) : reference = ref;
 
