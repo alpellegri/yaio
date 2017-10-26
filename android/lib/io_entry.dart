@@ -17,12 +17,12 @@ class FunctionEntry {
       : reference = ref,
         key = snapshot.key,
         idAction = snapshot.value['action'] ?? 0,
-        actionName = snapshot.value['actionName'] ?? '',
+        actionName = snapshot.value['action_name'] ?? '',
         delay = snapshot.value['delay'] ?? 0,
         name = snapshot.value['name'] ?? '',
         next = snapshot.value['next'] ?? '',
         idType = snapshot.value['type'] ?? 0,
-        typeName = snapshot.value['typeName'] ?? '';
+        typeName = snapshot.value['type_name'] ?? '';
 
   toJson() {
     return {

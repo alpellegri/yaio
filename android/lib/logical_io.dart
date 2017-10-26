@@ -116,15 +116,13 @@ class _LogicalIOState extends State<LogicalIO> {
   }
 
   _onEntryAdded(Event event) {
-    print('_onEntryAdded');
     setState(() {
       entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
   _onEntryEdited(Event event) {
-    print('_onEntryEdited');
-    var oldValue =
+    IoEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       entrySaves[entrySaves.indexOf(oldValue)] =
@@ -133,8 +131,7 @@ class _LogicalIOState extends State<LogicalIO> {
   }
 
   _onEntryRemoved(Event event) {
-    print('_onEntryRemoved');
-    var oldValue =
+    IoEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       entrySaves.remove(oldValue);

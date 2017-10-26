@@ -24,12 +24,12 @@ class FunctionListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      entry.name,
+                      '${entry.name}',
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      entry.typeName,
+                      'type: ${entry.typeName}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -37,7 +37,7 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      entry.actionName,
+                      'name: ${entry.actionName}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -45,7 +45,7 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      entry.delay.toString(),
+                      'delay: ${entry.delay.toString()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -53,7 +53,7 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      entry.next,
+                      'next: ${entry.next}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -192,21 +192,21 @@ class _EntryDialogState extends State<EntryDialog> {
     '0 s': 0,
     '300 s': 300,
     '1 s': 1000,
-    '3 s': 3*1000,
-    '10 s': 10*1000,
-    '30 s': 30*1000,
-    '1 m': 1*60*1000,
-    '3 m': 3*60*1000,
+    '3 s': 3 * 1000,
+    '10 s': 10 * 1000,
+    '30 s': 30 * 1000,
+    '1 m': 1 * 60 * 1000,
+    '3 m': 3 * 60 * 1000,
   };
   List<String> _delayList = [
-  '0 s',
-  '300 s',
-  '1 s',
-  '3 s',
-  '10 s',
-  '30 s',
-  '1 m',
-  '3 m',
+    '0 s',
+    '300 s',
+    '1 s',
+    '3 s',
+    '10 s',
+    '30 s',
+    '1 m',
+    '3 m',
   ];
   String _selectType;
   String _selectAction;
@@ -268,7 +268,6 @@ class _EntryDialogState extends State<EntryDialog> {
                   hint: const Text('Select Type'),
                   value: _selectType,
                   onChanged: (String newValue) {
-                    print(newValue);
                     setState(() {
                       _selectType = newValue;
                       ioMenu = _menuRef[_selectType];
@@ -311,7 +310,6 @@ class _EntryDialogState extends State<EntryDialog> {
                   hint: const Text('Select a Delay'),
                   value: _selectDelay,
                   onChanged: (String newValue) {
-                    print(newValue);
                     setState(() {
                       _selectDelay = newValue;
                     });
@@ -332,7 +330,6 @@ class _EntryDialogState extends State<EntryDialog> {
                   hint: const Text('Select a Function'),
                   value: _selectNext,
                   onChanged: (String newValue) {
-                    print(newValue);
                     setState(() {
                       _selectNext = newValue;
                     });
@@ -358,11 +355,18 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                // entry.reference.child(entry.key).remove();
-                entry.next = _selectNext;
-                entry.idType = 0; // _selectType;
-                entry.idAction = 0; // _selectAction;
-                entry.delay = _delaysMap[_selectDelay];
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).remove();
+                }
+                setState(() {
+                  entry.name = _controllerName.text;
+                  entry.next = _selectNext;
+                  entry.typeName = _selectType;
+                  entry.idType = 0; // _selectType;
+                  entry.idAction = 0; // _selectAction;
+                  entry.actionName = _selectAction;
+                  entry.delay = _delaysMap[_selectDelay];
+                });
                 entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),

@@ -185,7 +185,6 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onInactiveEntryAdded(Event event) {
-    print('_onInactiveEntryAdded');
     setState(() {
       codeInactiveSaves.add(
           new RadioCodeEntry.fromSnapshot(_codeInactiveRef, event.snapshot));
@@ -193,8 +192,7 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onInactiveEntryEdited(Event event) {
-    print('_onInactiveEntryEdited');
-    var oldValue = codeInactiveSaves
+    RadioCodeEntry oldValue = codeInactiveSaves
         .singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       codeInactiveSaves[codeInactiveSaves.indexOf(oldValue)] =
@@ -203,8 +201,7 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onInactiveEntryRemoved(Event event) {
-    print('_onInactiveEntryRemoved');
-    var oldValue = codeInactiveSaves
+    RadioCodeEntry oldValue = codeInactiveSaves
         .singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       codeInactiveSaves.remove(oldValue);
@@ -212,7 +209,6 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveRxEntryAdded(Event event) {
-    print('_onActiveRxEntryAdded');
     setState(() {
       codeActiveRxSaves.add(
           new RadioCodeEntry.fromSnapshot(_codeActiveRxRef, event.snapshot));
@@ -220,8 +216,7 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveRxEntryEdited(Event event) {
-    print('_onActiveRxEntryEdited');
-    var oldValue = codeActiveRxSaves
+    RadioCodeEntry oldValue = codeActiveRxSaves
         .singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       codeActiveRxSaves[codeActiveRxSaves.indexOf(oldValue)] =
@@ -230,8 +225,7 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveRxEntryRemoved(Event event) {
-    print('_onActiveRxEntryRemoved');
-    var oldValue = codeActiveRxSaves
+    RadioCodeEntry oldValue = codeActiveRxSaves
         .singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       codeActiveRxSaves.remove(oldValue);
@@ -239,7 +233,6 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveTxEntryAdded(Event event) {
-    print('_onActiveTxEntryAdded');
     setState(() {
       codeActiveTxSaves.add(
           new RadioCodeEntry.fromSnapshot(_codeActiveTxRef, event.snapshot));
@@ -247,8 +240,7 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveTxEntryEdited(Event event) {
-    print('_onActiveTxEntryEdited');
-    var oldValue = codeActiveTxSaves
+    RadioCodeEntry oldValue = codeActiveTxSaves
         .singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       codeActiveTxSaves[codeActiveTxSaves.indexOf(oldValue)] =
@@ -257,8 +249,7 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveTxEntryRemoved(Event event) {
-    print('_onActiveRxEntryRemoved');
-    var oldValue = codeActiveTxSaves
+    RadioCodeEntry oldValue = codeActiveTxSaves
         .singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       codeActiveTxSaves.remove(oldValue);
@@ -402,7 +393,9 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                entry.reference.child(entry.key).remove();
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).remove();
+                }
                 entry.reference = _menuRef[_selectType];
                 entry.name = _controllerName.text;
                 entry.func = _selectFunction;
