@@ -3,13 +3,13 @@ import 'package:firebase_database/firebase_database.dart';
 class FunctionEntry {
   DatabaseReference reference;
   String key;
-  String name;
-  int idAction;
-  String actionName;
-  int delay;
-  String next;
-  int idType;
-  String typeName;
+  String name = '';
+  int idAction = 0;
+  String actionName = '';
+  int delay = 0;
+  String next = '';
+  int idType = 0;
+  String typeName = '';
 
   FunctionEntry(DatabaseReference ref) : reference = ref;
 
@@ -26,13 +26,13 @@ class FunctionEntry {
 
   toJson() {
     return {
-      'action': idAction,
-      'action_name': actionName,
-      'delay': delay,
-      'name': name,
-      'next': next,
-      'type': idType,
-      'type_name': typeName,
+      'action': idAction ?? 0,
+      'action_name': actionName ?? '',
+      'delay': delay ?? 0,
+      'name': name ?? '',
+      'next': next ?? '',
+      'type': idType ?? 0,
+      'type_name': typeName ?? '',
     };
   }
 }

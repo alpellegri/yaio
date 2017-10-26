@@ -188,6 +188,26 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final FunctionEntry entry;
   final List<FunctionEntry> functionSaves;
+  Map<String, int> _delaysMap = {
+    '0 s': 0,
+    '300 s': 300,
+    '1 s': 1000,
+    '3 s': 3*1000,
+    '10 s': 10*1000,
+    '30 s': 30*1000,
+    '1 m': 1*60*1000,
+    '3 m': 3*60*1000,
+  };
+  List<String> _delayList = [
+  '0 s',
+  '300 s',
+  '1 s',
+  '3 s',
+  '10 s',
+  '30 s',
+  '1 m',
+  '3 m',
+  ];
   String _selectType;
   String _selectAction;
   String _selectDelay;
@@ -296,11 +316,11 @@ class _EntryDialogState extends State<EntryDialog> {
                       _selectDelay = newValue;
                     });
                   },
-                  items: functionSaves.map((FunctionEntry entry) {
+                  items: _delayList.map((String entry) {
                     return new DropdownMenuItem<String>(
-                      value: entry.name,
+                      value: entry,
                       child: new Text(
-                        entry.name,
+                        entry,
                       ),
                     );
                   }).toList(),
@@ -338,10 +358,11 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                entry.reference.child(entry.key).remove();
+                // entry.reference.child(entry.key).remove();
                 entry.next = _selectNext;
                 entry.idType = 0; // _selectType;
                 entry.idAction = 0; // _selectAction;
+                entry.delay = _delaysMap[_selectDelay];
                 entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),
