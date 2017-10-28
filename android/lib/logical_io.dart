@@ -168,9 +168,11 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerValue = new TextEditingController();
 
   _EntryDialogState(this.entry) {
-    _controllerName.text = entry.name;
-    _controllerPort.text = entry.getPort().toString();
-    _controllerValue.text = entry.getValue().toString();
+    if (entry.id != null) {
+      _controllerName.text = entry.name;
+      _controllerPort.text = entry.getPort().toString();
+      _controllerValue.text = entry.getValue().toString();
+    }
   }
 
   @override
@@ -213,12 +215,14 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 entry.name = _controllerName.text;
-                entry.setPort(int.parse(_controllerPort.text));
-                entry.setValue(int.parse(_controllerValue.text));
-                if (entry.key != null) {
-                  entry.reference.child(entry.key).remove();
-                }
-                entry.reference.push().set(entry.toJson());
+                try {
+                  entry.setPort(int.parse(_controllerPort.text));
+                  entry.setValue(int.parse(_controllerValue.text));
+                  if (entry.key != null) {
+                    entry.reference.child(entry.key).remove();
+                  }
+                  entry.reference.push().set(entry.toJson());
+                } catch (exception, stackTrace) {}
                 Navigator.pop(context, null);
               }),
           new FlatButton(

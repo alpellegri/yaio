@@ -67,37 +67,41 @@ class IoEntry {
   DatabaseReference reference;
   String key;
   String name;
-  int _id;
+  int id;
 
   IoEntry(DatabaseReference ref) : reference = ref;
 
   IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
-        _id = snapshot.value['id'],
+        id = snapshot.value['id'],
         name = snapshot.value['name'];
 
   int getPort() {
-    return _id >> 1;
+    id ??= 0;
+    return id >> 1;
   }
 
   setPort(int port) {
-    int _value = _id & 0x01;
-    _id = port << 1 | _value;
+    id ??= 0;
+    int value = id & 0x01;
+    id = port << 1 | value;
   }
 
   int getValue() {
-    return _id & 0x01;
+    id ??= 0;
+    return id & 0x01;
   }
 
   setValue(int value) {
-    int _port = _id >> 1;
-    _id = (_port << 1) | (value & 0x01);
+    id ??= 0;
+    int port = id >> 1;
+    id = (port << 1) | (value & 0x01);
   }
 
   toJson() {
     return {
-      'id': _id,
+      'id': id,
       'name': name,
     };
   }
