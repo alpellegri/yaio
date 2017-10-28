@@ -70,7 +70,7 @@ class RadioCode extends StatefulWidget {
 
 class _RadioCodeState extends State<RadioCode> {
   final DatabaseReference _controlRef =
-  FirebaseDatabase.instance.reference().child(kControlRef);
+      FirebaseDatabase.instance.reference().child(kControlRef);
 
   List<RadioCodeEntry> inactiveSaves = new List();
   DatabaseReference _inactiveRef;
@@ -186,14 +186,14 @@ class _RadioCodeState extends State<RadioCode> {
 
   _onInactiveEntryAdded(Event event) {
     setState(() {
-      inactiveSaves.add(
-          new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot));
+      inactiveSaves
+          .add(new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot));
     });
   }
 
   _onInactiveEntryEdited(Event event) {
-    RadioCodeEntry oldValue = inactiveSaves
-        .singleWhere((entry) => entry.key == event.snapshot.key);
+    RadioCodeEntry oldValue =
+        inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       inactiveSaves[inactiveSaves.indexOf(oldValue)] =
           new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot);
@@ -201,8 +201,8 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onInactiveEntryRemoved(Event event) {
-    RadioCodeEntry oldValue = inactiveSaves
-        .singleWhere((entry) => entry.key == event.snapshot.key);
+    RadioCodeEntry oldValue =
+        inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       inactiveSaves.remove(oldValue);
     });
@@ -210,14 +210,14 @@ class _RadioCodeState extends State<RadioCode> {
 
   _onActiveRxEntryAdded(Event event) {
     setState(() {
-      activeRxSaves.add(
-          new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot));
+      activeRxSaves
+          .add(new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot));
     });
   }
 
   _onActiveRxEntryEdited(Event event) {
-    RadioCodeEntry oldValue = activeRxSaves
-        .singleWhere((entry) => entry.key == event.snapshot.key);
+    RadioCodeEntry oldValue =
+        activeRxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       activeRxSaves[activeRxSaves.indexOf(oldValue)] =
           new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot);
@@ -225,8 +225,8 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveRxEntryRemoved(Event event) {
-    RadioCodeEntry oldValue = activeRxSaves
-        .singleWhere((entry) => entry.key == event.snapshot.key);
+    RadioCodeEntry oldValue =
+        activeRxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       activeRxSaves.remove(oldValue);
     });
@@ -234,14 +234,14 @@ class _RadioCodeState extends State<RadioCode> {
 
   _onActiveTxEntryAdded(Event event) {
     setState(() {
-      activeTxSaves.add(
-          new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot));
+      activeTxSaves
+          .add(new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot));
     });
   }
 
   _onActiveTxEntryEdited(Event event) {
-    RadioCodeEntry oldValue = activeTxSaves
-        .singleWhere((entry) => entry.key == event.snapshot.key);
+    RadioCodeEntry oldValue =
+        activeTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       activeTxSaves[activeTxSaves.indexOf(oldValue)] =
           new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot);
@@ -249,8 +249,8 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   _onActiveTxEntryRemoved(Event event) {
-    RadioCodeEntry oldValue = activeTxSaves
-        .singleWhere((entry) => entry.key == event.snapshot.key);
+    RadioCodeEntry oldValue =
+        activeTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       activeTxSaves.remove(oldValue);
     });
@@ -330,6 +330,8 @@ class _EntryDialogState extends State<EntryDialog> {
     });
   }
 
+  bool notNull(Object o) => o != null;
+
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
@@ -347,7 +349,7 @@ class _EntryDialogState extends State<EntryDialog> {
               new ListTile(
                 title: const Text('Radio Type'),
                 trailing: new DropdownButton<String>(
-                  hint: const Text('select type'),
+                  hint: const Text('select a type'),
                   value: _selectType,
                   onChanged: (String newValue) {
                     print(newValue);
@@ -363,25 +365,27 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new ListTile(
-                title: const Text('Function Call'),
-                trailing: new DropdownButton<String>(
-                  hint: const Text('select function'),
-                  value: _selectFunction,
-                  onChanged: (String newValue) {
-                    print(newValue);
-                    setState(() {
-                      _selectFunction = newValue;
-                    });
-                  },
-                  items: _functionSaves.map((FunctionEntry entry) {
-                    return new DropdownMenuItem<String>(
-                      value: entry.name,
-                      child: new Text(entry.name),
-                    );
-                  }).toList(),
-                ),
-              ),
+              (_functionSaves.length > 0)
+                  ? new ListTile(
+                      title: const Text('Function Call'),
+                      trailing: new DropdownButton<String>(
+                        hint: const Text('select a function'),
+                        value: _selectFunction,
+                        onChanged: (String newValue) {
+                          print(newValue);
+                          setState(() {
+                            _selectFunction = newValue;
+                          });
+                        },
+                        items: _functionSaves.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<String>(
+                            value: entry.name,
+                            child: new Text(entry.name),
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  : new Text('Functions not declared yet'),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -411,9 +415,9 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 
   _onFunctionAdded(Event event) {
-    print('_onFunctionAdded');
     setState(() {
-      _functionSaves.add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));
+      _functionSaves
+          .add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));
     });
   }
 }

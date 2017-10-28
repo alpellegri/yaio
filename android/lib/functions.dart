@@ -249,8 +249,6 @@ class _EntryDialogState extends State<EntryDialog> {
       selectTypeMenu.add(key);
       ioMenu = loutSaves;
     });
-    _selectType = 'DOUT';
-    ioMenu = _menuRef[_selectType];
   }
 
   @override
@@ -270,7 +268,7 @@ class _EntryDialogState extends State<EntryDialog> {
               new ListTile(
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
-                  hint: const Text('Select Type'),
+                  hint: const Text('select a type'),
                   value: _selectType,
                   onChanged: (String newValue) {
                     setState(() {
@@ -289,30 +287,32 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new ListTile(
-                title: const Text('Action'),
-                trailing: new DropdownButton<String>(
-                  hint: const Text('Select Action'),
-                  value: _selectAction,
-                  onChanged: (String newValue) {
-                    setState(() {
-                      _selectAction = newValue;
-                    });
-                  },
-                  items: ioMenu.map((dynamic entry) {
-                    return new DropdownMenuItem<String>(
-                      value: entry.name,
-                      child: new Text(
-                        entry.name,
+              (ioMenu.length > 0)
+                  ? new ListTile(
+                      title: const Text('Action'),
+                      trailing: new DropdownButton<String>(
+                        hint: const Text('select an action'),
+                        value: _selectAction,
+                        onChanged: (String newValue) {
+                          setState(() {
+                            _selectAction = newValue;
+                          });
+                        },
+                        items: ioMenu.map((dynamic entry) {
+                          return new DropdownMenuItem<String>(
+                            value: entry.name,
+                            child: new Text(
+                              entry.name,
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
+                    )
+                  : new Text('Actions not declared yet'),
               new ListTile(
                 title: const Text('Delay'),
                 trailing: new DropdownButton<String>(
-                  hint: const Text('Select a Delay'),
+                  hint: const Text('select a delay'),
                   value: _selectDelay,
                   onChanged: (String newValue) {
                     setState(() {
@@ -329,26 +329,28 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new ListTile(
-                title: const Text('Next Function'),
-                trailing: new DropdownButton<String>(
-                  hint: const Text('Select a Function'),
-                  value: _selectNext,
-                  onChanged: (String newValue) {
-                    setState(() {
-                      _selectNext = newValue;
-                    });
-                  },
-                  items: functionSaves.map((FunctionEntry entry) {
-                    return new DropdownMenuItem<String>(
-                      value: entry.name,
-                      child: new Text(
-                        entry.name,
+              (functionSaves.length > 0)
+                  ? new ListTile(
+                      title: const Text('Next Function'),
+                      trailing: new DropdownButton<String>(
+                        hint: const Text('Select a Function'),
+                        value: _selectNext,
+                        onChanged: (String newValue) {
+                          setState(() {
+                            _selectNext = newValue;
+                          });
+                        },
+                        items: functionSaves.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<String>(
+                            value: entry.name,
+                            child: new Text(
+                              entry.name,
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
+                    )
+                  : new Text('Functions not declared yet'),
             ]),
         actions: <Widget>[
           new FlatButton(
