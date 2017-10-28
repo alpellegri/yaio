@@ -29,7 +29,7 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'PORT: ${entry.getPort()}',
+                      'PORT: ${entry.getPort().toRadixString(16)}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -37,7 +37,7 @@ class ListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      'VALUE: ${entry.getValue()}',
+                      'VALUE: ${entry.getValue().toRadixString(16)}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(

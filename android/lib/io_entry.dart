@@ -16,23 +16,23 @@ class FunctionEntry {
   FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
-        idAction = snapshot.value['action'] ?? 0,
-        actionName = snapshot.value['action_name'] ?? '',
-        delay = snapshot.value['delay'] ?? 0,
-        name = snapshot.value['name'] ?? '',
-        next = snapshot.value['next'] ?? '',
-        idType = snapshot.value['type'] ?? 0,
-        typeName = snapshot.value['type_name'] ?? '';
+        idAction = snapshot.value['action'],
+        actionName = snapshot.value['action_name'],
+        delay = snapshot.value['delay'],
+        name = snapshot.value['name'],
+        next = snapshot.value['next'],
+        idType = snapshot.value['type'],
+        typeName = snapshot.value['type_name'];
 
   toJson() {
     return {
-      'action': idAction ?? 0,
-      'action_name': actionName ?? '',
-      'delay': delay ?? 0,
-      'name': name ?? '',
-      'next': next ?? '',
-      'type': idType ?? 0,
-      'type_name': typeName ?? '',
+      'action': idAction,
+      'action_name': actionName,
+      'delay': delay,
+      'name': name,
+      'next': next,
+      'type': idType,
+      'type_name': typeName,
     };
   }
 }
@@ -79,24 +79,24 @@ class IoEntry {
 
   int getPort() {
     id ??= 0;
-    return id >> 1;
+    return id >> 8;
   }
 
   setPort(int port) {
     id ??= 0;
-    int value = id & 0x01;
-    id = port << 1 | value;
+    int value = id & 0xFF;
+    id = port << 8 | value;
   }
 
   int getValue() {
     id ??= 0;
-    return id & 0x01;
+    return id & 0xFF;
   }
 
   setValue(int value) {
     id ??= 0;
-    int port = id >> 1;
-    id = (port << 1) | (value & 0x01);
+    int port = id >> 8;
+    id = (port << 8) | (value & 0xFF);
   }
 
   toJson() {

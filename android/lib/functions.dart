@@ -191,35 +191,18 @@ class EntryDialog extends StatefulWidget {
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
+  final TextEditingController _controllerDelay = new TextEditingController();
   final FunctionEntry entry;
   final List<FunctionEntry> functionSaves;
-  Map<String, int> _delaysMap = {
-    '0 s': 0,
-    '300 s': 300,
-    '1 s': 1000,
-    '3 s': 3 * 1000,
-    '10 s': 10 * 1000,
-    '30 s': 30 * 1000,
-    '1 m': 1 * 60 * 1000,
-    '3 m': 3 * 60 * 1000,
-  };
-  List<String> _delayList = [
-    '0 s',
-    '300 s',
-    '1 s',
-    '3 s',
-    '10 s',
-    '30 s',
-    '1 m',
-    '3 m',
-  ];
+
   String _selectType;
   String _selectAction;
   String _selectDelay;
   String _selectNext;
   List<String> selectTypeMenu = new List();
-  Map<String, List> _menuRef = new Map();
+  Map<String, List> _selectedSaves = new Map();
   List ioMenu;
+  dynamic _selectedElem;
 
   List<RadioCodeEntry> radioTxSaves = new List();
   DatabaseReference _radioTxRef;
@@ -240,15 +223,19 @@ class _EntryDialogState extends State<EntryDialog> {
     _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
     _loutRef.onChildAdded.listen(_onLoutEntryAdded);
 
-    _controllerName.text = entry.name;
-
-    _menuRef['DOUT'] = doutSaves;
-    _menuRef['LOUT'] = loutSaves;
-    _menuRef['Radio Tx'] = radioTxSaves;
-    _menuRef.forEach((String key, List value) {
+    _selectedSaves['DOUT'] = doutSaves;
+    _selectedSaves['LOUT'] = loutSaves;
+    _selectedSaves['Radio Tx'] = radioTxSaves;
+    _selectedSaves.forEach((String key, List value) {
       selectTypeMenu.add(key);
-      ioMenu = loutSaves;
     });
+
+    _controllerName.text = entry.name;
+    _controllerDelay.text = entry.delay.toString();
+    _selectType = entry.typeName;
+    ioMenu = _selectedSaves[_selectType];
+    _selectAction = entry.actionName;
+    _selectNext = entry.next;
   }
 
   @override
@@ -273,7 +260,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   onChanged: (String newValue) {
                     setState(() {
                       _selectType = newValue;
-                      ioMenu = _menuRef[_selectType];
+                      ioMenu = _selectedSaves[_selectType];
                       _selectAction = null;
                     });
                   },
@@ -309,24 +296,10 @@ class _EntryDialogState extends State<EntryDialog> {
                       ),
                     )
                   : new Text('Actions not declared yet'),
-              new ListTile(
-                title: const Text('Delay'),
-                trailing: new DropdownButton<String>(
-                  hint: const Text('select a delay'),
-                  value: _selectDelay,
-                  onChanged: (String newValue) {
-                    setState(() {
-                      _selectDelay = newValue;
-                    });
-                  },
-                  items: _delayList.map((String entry) {
-                    return new DropdownMenuItem<String>(
-                      value: entry,
-                      child: new Text(
-                        entry,
-                      ),
-                    );
-                  }).toList(),
+              new TextField(
+                controller: _controllerDelay,
+                decoration: new InputDecoration(
+                  hintText: 'delay',
                 ),
               ),
               (functionSaves.length > 0)
@@ -362,20 +335,24 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                if (entry.key != null) {
-                  entry.reference.child(entry.key).remove();
-                }
-                setState(() {
-                  entry.name = _controllerName.text;
-                  entry.next = _selectNext;
-                  entry.typeName = _selectType;
-                  // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                  entry.idType = 0; // _selectType;
-                  // entry.idAction = element.idAction; // _selectAction;
-                  entry.actionName = _selectAction;
-                  entry.delay = _delaysMap[_selectDelay];
-                });
-                entry.reference.push().set(entry.toJson());
+                try {
+                  int delay = int.parse(_controllerDelay.text);
+                  setState(() {
+                    entry.delay = delay;
+                    entry.name = _controllerName.text;
+                    entry.next = _selectNext;
+                    entry.typeName = _selectType;
+                    // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
+                    entry.idType = 0; // _selectType;
+                    // entry.idAction = _selectedSaves[_selectType].id;
+                    entry.actionName = _selectAction;
+                    if (entry.key != null) {
+                      entry.reference.child(entry.key).remove();
+                    }
+                    entry.reference.push().set(entry.toJson());
+                  });
+                } catch (exception, stackTrace) {}
+
                 Navigator.pop(context, null);
               }),
           new FlatButton(
