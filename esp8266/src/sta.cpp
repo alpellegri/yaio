@@ -71,7 +71,6 @@ bool STA_Setup(void) {
         SPIFFS.remove("/fota.req");
         FOTA_UpdateReq();
       }
-
     } else {
       sts = false;
     }

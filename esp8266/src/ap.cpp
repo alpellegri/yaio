@@ -144,10 +144,12 @@ bool AP_Task(void) {
         for (int i = 0; i < n; ++i) {
           yield();
           int test = WiFi.SSID(i).compareTo(String(sta_ssid));
+          Serial.println(WiFi.SSID(i));
           if (test == 0) {
             Serial.print(F("network found: "));
             Serial.println(WiFi.SSID(i));
             ret = false;
+            i = n; // exit for
           }
         }
       }
