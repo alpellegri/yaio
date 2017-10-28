@@ -414,10 +414,8 @@ bool FbmService(void) {
     uint32_t time_now = getTime();
     if ((time_now - fbm_update_last) >=
         ((fbm_monitor_run == true) ? (1) : (5))) {
-      Serial.print(F("boot_sm "));
-      Serial.print(boot_sm);
-      Serial.print(F(": heap "));
-      Serial.println(ESP.getFreeHeap());
+      Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
+                      ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       float h = dht.readHumidity();
@@ -474,8 +472,6 @@ bool FbmService(void) {
               Serial.println(F("parseObject() failed"));
             }
           }
-
-          Serial.printf("control_monitor %d, %d\n", time_now, fbm_monitor_last);
 
           DynamicJsonBuffer jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
