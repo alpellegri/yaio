@@ -292,14 +292,11 @@ uint8_t RF_CheckRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
 
-  Serial.print(F("RF_CheckRadioCodeDB: code "));
-  Serial.println(code);
+  Serial.printf_P(PSTR("RF_CheckRadioCodeDB: code %06X\n"), code);
   while ((i < RadioCodesLen) && (idx == 0xFF)) {
-    Serial.print(F("radio table: "));
-    Serial.println(RadioCodes[i].id);
     if (code == RadioCodes[i].id) {
-      Serial.print(F("radio code found in table "));
-      Serial.println(RadioCodes[i].id);
+      Serial.printf_P(PSTR("radio code found in table %06X\n"),
+                      RadioCodes[i].id);
       idx = i;
     }
     i++;
@@ -342,24 +339,24 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
 
 void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t action,
                char *name) {
-  Serial.print(F("RF_Action type "));
-  Serial.println(type);
+  Serial.printf_P(PSTR("RF_Action type: %d\n"), type);
 
   if (type == 1) {
     // dout
-    uint8_t pin = action >> 8;
+    uint8_t port = action >> 8;
     uint8_t value = action & 0xFF;
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, !!value);
+    Serial.printf_P(PSTR("digital: %06X, %d, %d\n"), action, port, value);
+    pinMode(port, OUTPUT);
+    digitalWrite(port, !!value);
   } else if (type == 2) {
     // rf
     mySwitch.send(action, 24);
   } else if (type == 3) {
     // lout
-    uint8_t lin = action >> 8;
+    uint8_t port = action >> 8;
     uint8_t value = action & 0xFF;
     /* logical actions req */
-    FbmLogicReq(src_type, src_idx, lin, !!value);
+    FbmLogicReq(src_type, src_idx, port, !!value);
   } else {
   }
 }
@@ -444,8 +441,7 @@ void RF_Loop() {
       // Serial.print("Protocol: ");
       // Serial.println(mySwitch.getReceivedProtocol());
       if (value != RadioCodeLast) {
-        Serial.print(F("radio code: "));
-        Serial.println(value);
+        Serial.printf_P(PSTR("radio code: %06X\n"), value);
         RadioCode = value;
         RFRcvTimer.attach(2.0, RF_Unmask);
       } else {
