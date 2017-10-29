@@ -355,6 +355,7 @@ void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t action,
     // lout
     uint8_t port = action >> 8;
     uint8_t value = action & 0xFF;
+    Serial.printf_P(PSTR("logical: %06X, %d, %d\n"), action, port, value);
     /* logical actions req */
     FbmLogicReq(src_type, src_idx, port, !!value);
   } else {
