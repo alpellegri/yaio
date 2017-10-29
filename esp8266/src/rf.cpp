@@ -347,19 +347,19 @@ void RF_Action(uint8_t src_type, uint8_t src_idx, uint8_t type, uint32_t action,
 
   if (type == 1) {
     // dout
-    uint8_t pin = action >> 1;
-    uint8_t value = action & 0x00000001;
+    uint8_t pin = action >> 8;
+    uint8_t value = action & 0xFF;
     pinMode(pin, OUTPUT);
-    digitalWrite(pin, value);
+    digitalWrite(pin, !!value);
   } else if (type == 2) {
     // rf
     mySwitch.send(action, 24);
   } else if (type == 3) {
     // lout
-    uint8_t lin = action >> 1;
-    uint8_t value = action & 0x00000001;
+    uint8_t lin = action >> 8;
+    uint8_t value = action & 0xFF;
     /* logical actions req */
-    FbmLogicReq(src_type, src_idx, lin, value);
+    FbmLogicReq(src_type, src_idx, lin, !!value);
   } else {
   }
 }

@@ -45,6 +45,14 @@ class FunctionListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
+                      'type ID: ${entry.idType}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    new Text(
                       'action ID: ${entry.idAction}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
@@ -197,12 +205,18 @@ class _EntryDialogState extends State<EntryDialog> {
 
   String _selectType;
   String _selectAction;
+  int _selectIdAction;
   String _selectDelay;
   String _selectNext;
   List<String> selectTypeMenu = new List();
   Map<String, List> _selectedSaves = new Map();
   List ioMenu;
   dynamic _selectedElem;
+  Map<String, int> _mapType = {
+    'DOUT': 1,
+    'Radio Tx': 2,
+    'LOUT': 3,
+  };
 
   List<RadioCodeEntry> radioTxSaves = new List();
   DatabaseReference _radioTxRef;
@@ -277,17 +291,18 @@ class _EntryDialogState extends State<EntryDialog> {
               (ioMenu.length > 0)
                   ? new ListTile(
                       title: const Text('Action'),
-                      trailing: new DropdownButton<String>(
+                      trailing: new DropdownButton<dynamic>(
                         hint: const Text('select an action'),
-                        value: _selectAction,
-                        onChanged: (String newValue) {
+                        value: _selectedElem,
+                        onChanged: (dynamic newValue) {
                           setState(() {
-                            _selectAction = newValue;
+                            _selectedElem = newValue;
+                            _selectIdAction = newValue.id;
                           });
                         },
                         items: ioMenu.map((dynamic entry) {
-                          return new DropdownMenuItem<String>(
-                            value: entry.name,
+                          return new DropdownMenuItem<dynamic>(
+                            value: entry,
                             child: new Text(
                               entry.name,
                             ),
@@ -343,8 +358,8 @@ class _EntryDialogState extends State<EntryDialog> {
                     entry.next = _selectNext;
                     entry.typeName = _selectType;
                     // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                    entry.idType = 0; // _selectType;
-                    // entry.idAction = _selectedSaves[_selectType].id;
+                    entry.idType = _mapType[_selectType];
+                    entry.idAction = _selectIdAction;
                     entry.actionName = _selectAction;
                     if (entry.key != null) {
                       entry.reference.child(entry.key).remove();
