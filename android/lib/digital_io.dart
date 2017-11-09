@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'io_entry.dart';
+import 'entries.dart';
 import 'const.dart';
 
 class ListItem extends StatelessWidget {
@@ -81,7 +81,7 @@ class _DigitalIOState extends State<DigitalIO> {
   DatabaseReference _entryRef;
 
   _DigitalIOState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(kDoutRef);
+    _entryRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _entryRef.onChildAdded.listen(_onEntryAdded);
     _entryRef.onChildChanged.listen(_onEntryEdited);
     _entryRef.onChildRemoved.listen(_onEntryRemoved);
@@ -123,13 +123,13 @@ class _DigitalIOState extends State<DigitalIO> {
     );
   }
 
-  _onEntryAdded(Event event) {
+  void _onEntryAdded(Event event) {
     setState(() {
       entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
+  void _onEntryEdited(Event event) {
     IoEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
@@ -138,7 +138,7 @@ class _DigitalIOState extends State<DigitalIO> {
     });
   }
 
-  _onEntryRemoved(Event event) {
+  void _onEntryRemoved(Event event) {
     IoEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'io_entry.dart';
+import 'entries.dart';
 import 'const.dart';
 
 class RadioCodeListItem extends StatelessWidget {
-  final RadioCodeEntry entry;
+  final IoEntry entry;
 
   RadioCodeListItem(this.entry);
 
@@ -72,37 +72,18 @@ class _RadioCodeState extends State<RadioCode> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<RadioCodeEntry> inactiveSaves = new List();
-  DatabaseReference _inactiveRef;
-  List<RadioCodeEntry> activeRxSaves = new List();
-  DatabaseReference _activeRxRef;
-  List<RadioCodeEntry> activeTxSaves = new List();
-  DatabaseReference _activeTxRef;
-  List<RadioCodeEntry> destinationSaves;
+  List<IoEntry> inactiveSaves = new List();
+  List<IoEntry> activeRxSaves = new List();
+  List<IoEntry> activeTxSaves = new List();
+  DatabaseReference _graphRef;
+  List<IoEntry> destinationSaves;
   String selection;
 
   _RadioCodeState() {
-    _inactiveRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('Inactive');
-    _inactiveRef.onChildAdded.listen(_onInactiveEntryAdded);
-    _inactiveRef.onChildChanged.listen(_onInactiveEntryEdited);
-    _inactiveRef.onChildRemoved.listen(_onInactiveEntryRemoved);
-    _activeRxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('Active');
-    _activeRxRef.onChildAdded.listen(_onActiveRxEntryAdded);
-    _activeRxRef.onChildChanged.listen(_onActiveRxEntryEdited);
-    _activeRxRef.onChildRemoved.listen(_onActiveRxEntryRemoved);
-    _activeTxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('ActiveTx');
-    _activeTxRef.onChildAdded.listen(_onActiveTxEntryAdded);
-    _activeTxRef.onChildChanged.listen(_onActiveTxEntryEdited);
-    _activeTxRef.onChildRemoved.listen(_onActiveTxEntryRemoved);
+    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _graphRef.onChildAdded.listen(_onEntryAdded);
+    _graphRef.onChildChanged.listen(_onEntryEdited);
+    _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -184,86 +165,34 @@ class _RadioCodeState extends State<RadioCode> {
     );
   }
 
-  _onInactiveEntryAdded(Event event) {
+  void _onEntryAdded(Event event) {
     setState(() {
-      inactiveSaves
-          .add(new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot));
+      inactiveSaves.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
 
-  _onInactiveEntryEdited(Event event) {
-    RadioCodeEntry oldValue =
+  void _onEntryEdited(Event event) {
+    IoEntry oldValue =
         inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       inactiveSaves[inactiveSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot);
+          new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
-  _onInactiveEntryRemoved(Event event) {
-    RadioCodeEntry oldValue =
+  void _onEntryRemoved(Event event) {
+    IoEntry oldValue =
         inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
       inactiveSaves.remove(oldValue);
     });
   }
 
-  _onActiveRxEntryAdded(Event event) {
-    setState(() {
-      activeRxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot));
-    });
-  }
-
-  _onActiveRxEntryEdited(Event event) {
-    RadioCodeEntry oldValue =
-        activeRxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeRxSaves[activeRxSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot);
-    });
-  }
-
-  _onActiveRxEntryRemoved(Event event) {
-    RadioCodeEntry oldValue =
-        activeRxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeRxSaves.remove(oldValue);
-    });
-  }
-
-  _onActiveTxEntryAdded(Event event) {
-    setState(() {
-      activeTxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot));
-    });
-  }
-
-  _onActiveTxEntryEdited(Event event) {
-    RadioCodeEntry oldValue =
-        activeTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeTxSaves[activeTxSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot);
-    });
-  }
-
-  _onActiveTxEntryRemoved(Event event) {
-    RadioCodeEntry oldValue =
-        activeTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeTxSaves.remove(oldValue);
-    });
-  }
-
-  void _openEntryDialog(RadioCodeEntry entry) {
+  void _openEntryDialog(IoEntry entry) {
     showDialog(
       context: context,
       child: new EntryDialog(
         entry: entry,
-        inactiveRef: _inactiveRef,
-        activeRxRef: _activeRxRef,
-        activeTxRef: _activeTxRef,
       ),
     );
   }
@@ -277,33 +206,22 @@ class _RadioCodeState extends State<RadioCode> {
 }
 
 class EntryDialog extends StatefulWidget {
-  final RadioCodeEntry entry;
-  final DatabaseReference inactiveRef;
-  final DatabaseReference activeRxRef;
-  final DatabaseReference activeTxRef;
+  final IoEntry entry;
 
   EntryDialog({
     this.entry,
-    this.inactiveRef,
-    this.activeRxRef,
-    this.activeTxRef,
   });
 
   @override
   _EntryDialogState createState() => new _EntryDialogState(
         entry: entry,
-        inactiveRef: inactiveRef,
-        activeRxRef: activeRxRef,
-        activeTxRef: activeTxRef,
       );
 }
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
-  final RadioCodeEntry entry;
-  final DatabaseReference inactiveRef;
-  final DatabaseReference activeRxRef;
-  final DatabaseReference activeTxRef;
+  final IoEntry entry;
+  DatabaseReference _graphRef;
   DatabaseReference _functionRef;
   List<FunctionEntry> _functionSaves = new List();
 
@@ -314,20 +232,15 @@ class _EntryDialogState extends State<EntryDialog> {
 
   _EntryDialogState({
     this.entry,
-    this.inactiveRef,
-    this.activeRxRef,
-    this.activeTxRef,
   }) {
     print('EntryDialogState');
+    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
     _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
-    _menuRef['Inactive'] = inactiveRef;
-    _menuRef['Active Rx'] = activeRxRef;
-    _menuRef['Active Tx'] = activeTxRef;
-    _menuRef.forEach((String key, DatabaseReference value) {
-      radioMenu.add(key);
-    });
+    // _menuRef.forEach((String key, DatabaseReference value) {
+    //   radioMenu.add(key);
+    // });
   }
 
   bool notNull(Object o) => o != null;
@@ -400,7 +313,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 if (entry.key != null) {
                   entry.reference.child(entry.key).remove();
                 }
-                entry.reference = _menuRef[_selectType];
+                entry.reference = _graphRef;
                 entry.name = _controllerName.text;
                 entry.func = _selectFunction;
                 entry.reference.push().set(entry.toJson());
@@ -414,7 +327,7 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 
-  _onFunctionAdded(Event event) {
+  void _onFunctionAdded(Event event) {
     setState(() {
       _functionSaves
           .add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));

@@ -37,72 +37,55 @@ class FunctionEntry {
   }
 }
 
-class RadioCodeEntry {
+class IoEntry {
+  static const int shift = 24;
+  static const int mask = (1 << shift) - 1;
   DatabaseReference reference;
   String key;
+  int type;
   String name;
   int id;
   String func;
 
-  RadioCodeEntry(DatabaseReference ref) : reference = ref;
-
-  RadioCodeEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    reference = ref;
-    key = snapshot.key;
-    func = snapshot.value['func'] ?? '';
-    id = snapshot.value['id'] ?? 0;
-    name = snapshot.value['name'] ?? '';
-  }
-
-  toJson() {
-    return {
-      'name': name,
-      'id': id,
-      'func': func,
-    };
-  }
-}
-
-class IoEntry {
-  DatabaseReference reference;
-  String key;
-  String name;
-  int id;
-
   IoEntry(DatabaseReference ref) : reference = ref;
 
-  IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
-      : reference = ref,
-        key = snapshot.key,
-        id = snapshot.value['id'],
-        name = snapshot.value['name'];
+  IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
+    reference = ref;
+    key = snapshot.key;
+    type = snapshot.value['type'];
+    name = snapshot.value['name'];
+    id = snapshot.value['id'];
+    func = snapshot.value['func'];
+  }
 
   int getPort() {
     id ??= 0;
-    return id >> 8;
+    return id >> shift;
   }
 
   setPort(int port) {
     id ??= 0;
-    int value = id & 0xFF;
-    id = port << 8 | value;
+    int value = id & mask;
+    id = port << shift | value;
   }
 
   int getValue() {
     id ??= 0;
-    return id & 0xFF;
+    return id & mask;
   }
 
   setValue(int value) {
     id ??= 0;
-    int port = id >> 8;
-    id = (port << 8) | (value & 0xFF);
+    int port = id >> shift;
+    id = (port << shift) | (value & mask);
   }
 
   toJson() {
     return {
+      'type': type,
       'id': id,
       'name': name,
+      'func': func,
     };
   }
 }

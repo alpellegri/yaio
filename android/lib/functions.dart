@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'io_entry.dart';
+import 'entries.dart';
 import 'const.dart';
 
 class FunctionListItem extends StatelessWidget {
@@ -150,13 +150,13 @@ class _FunctionsState extends State<Functions> {
     );
   }
 
-  _onEntryAdded(Event event) {
+  void _onEntryAdded(Event event) {
     setState(() {
       entrySaves.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
+  void _onEntryEdited(Event event) {
     FunctionEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
@@ -165,7 +165,7 @@ class _FunctionsState extends State<Functions> {
     });
   }
 
-  _onEntryRemoved(Event event) {
+  void _onEntryRemoved(Event event) {
     FunctionEntry oldValue =
         entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
@@ -218,24 +218,15 @@ class _EntryDialogState extends State<EntryDialog> {
     'LOUT': 3,
   };
 
-  List<RadioCodeEntry> radioTxSaves = new List();
-  DatabaseReference _radioTxRef;
+  List<IoEntry> radioTxSaves = new List();
   List<IoEntry> doutSaves = new List();
-  DatabaseReference _doutRef;
   List<IoEntry> loutSaves = new List();
-  DatabaseReference _loutRef;
+  DatabaseReference _graphRef;
 
   _EntryDialogState(this.entry, this.functionSaves) {
     print('EntryDialogState');
-    _radioTxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('ActiveTx');
-    _radioTxRef.onChildAdded.listen(_onRadioEntryAdded);
-    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
-    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
-    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
-    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
+    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
     _selectedSaves['DOUT'] = doutSaves;
     _selectedSaves['LOUT'] = loutSaves;
@@ -378,13 +369,13 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 
-  _onRadioEntryAdded(Event event) {
+  void _onGraphEntryAdded(Event event) {
     setState(() {
       radioTxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_radioTxRef, event.snapshot));
+          .add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
-
+/*
   _onDoutEntryAdded(Event event) {
     setState(() {
       doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
@@ -396,4 +387,5 @@ class _EntryDialogState extends State<EntryDialog> {
       loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
     });
   }
+  */
 }
