@@ -72,7 +72,7 @@ class _RadioCodeState extends State<RadioCode> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<IoEntry> entrySaves = new List();
+  List<IoEntry> entryList = new List();
   DatabaseReference _graphRef;
   List<IoEntry> destinationSaves;
   String selection;
@@ -97,9 +97,9 @@ class _RadioCodeState extends State<RadioCode> {
 
   @override
   Widget build(BuildContext context) {
-    var inactiveSaves = entrySaves.where((entry) => (entry.id == kRadioElem)).toList();
-    var activeRxSaves = entrySaves.where((entry) => (entry.id == kRadioIn)).toList();
-    var activeTxSaves = entrySaves.where((entry) => (entry.id == kRadioOut)).toList();
+    var inactiveSaves = entryList.where((entry) => (entry.id == kRadioElem)).toList();
+    var activeRxSaves = entryList.where((entry) => (entry.id == kRadioIn)).toList();
+    var activeTxSaves = entryList.where((entry) => (entry.id == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -168,24 +168,24 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onEntryAdded(Event event) {
     setState(() {
-      entrySaves.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
+      entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
 
   void _onEntryEdited(Event event) {
     IoEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      entrySaves[entrySaves.indexOf(oldValue)] =
+      entryList[entryList.indexOf(oldValue)] =
           new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
   void _onEntryRemoved(Event event) {
     IoEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      entrySaves.remove(oldValue);
+      entryList.remove(oldValue);
     });
   }
 
