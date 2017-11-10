@@ -100,6 +100,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   @override
   Widget build(BuildContext context) {
+    var query = entrySaves.where((entry) => (entry.id == kDOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -108,11 +109,11 @@ class _DigitalIOState extends State<DigitalIO> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: entrySaves.length,
+        itemCount: query.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entrySaves[index]),
-              child: new ListItem(entrySaves[index]));
+              onTap: () => _openEntryDialog(query[index]),
+              child: new ListItem(query[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -224,6 +225,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
+                  entry.type = kDOut;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {

@@ -100,6 +100,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   @override
   Widget build(BuildContext context) {
+    var query = entrySaves.where((entry) => (entry.id == kLOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -108,11 +109,11 @@ class _LogicalIOState extends State<LogicalIO> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: entrySaves.length,
+        itemCount: query.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entrySaves[index]),
-              child: new ListItem(entrySaves[index]));
+              onTap: () => _openEntryDialog(query[index]),
+              child: new ListItem(query[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -124,10 +125,10 @@ class _LogicalIOState extends State<LogicalIO> {
   }
 
   void _onEntryAdded(Event event) {
-    setState(() {
-      entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
-    });
-  }
+      setState(() {
+        entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
+      });
+    }
 
   void _onEntryEdited(Event event) {
     IoEntry oldValue =
@@ -224,6 +225,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
+                  entry.type = kDOut;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
