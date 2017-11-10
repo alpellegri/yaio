@@ -72,9 +72,7 @@ class _RadioCodeState extends State<RadioCode> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<IoEntry> inactiveSaves = new List();
-  List<IoEntry> activeRxSaves = new List();
-  List<IoEntry> activeTxSaves = new List();
+  List<IoEntry> entrySaves = new List();
   DatabaseReference _graphRef;
   List<IoEntry> destinationSaves;
   String selection;
@@ -99,6 +97,9 @@ class _RadioCodeState extends State<RadioCode> {
 
   @override
   Widget build(BuildContext context) {
+    var inactiveSaves = entrySaves.where((entry) => (entry.id == kRadioElem)).toList();
+    var activeRxSaves = entrySaves.where((entry) => (entry.id == kRadioIn)).toList();
+    var activeTxSaves = entrySaves.where((entry) => (entry.id == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -167,24 +168,24 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onEntryAdded(Event event) {
     setState(() {
-      inactiveSaves.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
+      entrySaves.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
 
   void _onEntryEdited(Event event) {
     IoEntry oldValue =
-        inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      inactiveSaves[inactiveSaves.indexOf(oldValue)] =
+      entrySaves[entrySaves.indexOf(oldValue)] =
           new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
   void _onEntryRemoved(Event event) {
     IoEntry oldValue =
-        inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      inactiveSaves.remove(oldValue);
+      entrySaves.remove(oldValue);
     });
   }
 

@@ -5,7 +5,8 @@ const int kRadioIn = 1;
 const int kLOut = 2;
 const int kDIn = 3;
 const int kRadioOut = 4;
-List<String> kEntryId2Name = ['DOut', 'RadioIn', 'LOut', 'DIn', 'RadioOut'];
+const int kRadioElem = 5;
+List<String> kEntryId2Name = ['DOut', 'RadioIn', 'LOut', 'DIn', 'RadioOut', 'RadioElem'];
 
 class IoEntry {
   static const int shift = 24;
