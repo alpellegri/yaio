@@ -77,7 +77,7 @@ class LogicalIO extends StatefulWidget {
 }
 
 class _LogicalIOState extends State<LogicalIO> {
-  List<IoEntry> entrySaves = new List();
+  List<IoEntry> entryList = new List();
   DatabaseReference _entryRef;
 
   _LogicalIOState() {
@@ -100,7 +100,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entrySaves.where((entry) => (entry.id == kLOut)).toList();
+    var query = entryList.where((entry) => (entry.id == kLOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -126,24 +126,24 @@ class _LogicalIOState extends State<LogicalIO> {
 
   void _onEntryAdded(Event event) {
       setState(() {
-        entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
+        entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
       });
     }
 
   void _onEntryEdited(Event event) {
     IoEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      entrySaves[entrySaves.indexOf(oldValue)] =
+      entryList[entryList.indexOf(oldValue)] =
           new IoEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
   void _onEntryRemoved(Event event) {
     IoEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
     setState(() {
-      entrySaves.remove(oldValue);
+      entryList.remove(oldValue);
     });
   }
 
