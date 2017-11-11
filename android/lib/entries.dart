@@ -6,7 +6,31 @@ const int kLOut = 2;
 const int kDIn = 3;
 const int kRadioOut = 4;
 const int kRadioElem = 5;
-List<String> kEntryId2Name = ['DOut', 'RadioIn', 'LOut', 'DIn', 'RadioOut', 'RadioElem'];
+
+const String kStringDOut = 'DOut';
+const String kStringRadioIn = 'RadioIn';
+const String kStringLOut = 'LOut';
+const String kStringDIn = 'DIn';
+const String kStringRadioOut = 'RadioOut';
+const String kStringRadioElem = 'RadioElem';
+
+const List<String> kEntryId2Name = const [
+  kStringDOut,
+  kStringRadioIn,
+  kStringLOut,
+  kStringDIn,
+  kStringRadioOut,
+  kStringRadioElem,
+];
+
+const Map<String, int> kEntryName2Id = const {
+  kStringDOut: kDOut,
+  kStringRadioIn: kRadioIn,
+  kStringLOut: kLOut,
+  kStringDIn: kDIn,
+  kStringRadioOut: kRadioOut,
+  kStringRadioElem: kRadioElem,
+};
 
 class IoEntry {
   static const int shift = 24;
@@ -49,10 +73,6 @@ class IoEntry {
     id ??= 0;
     int port = id >> shift;
     id = (port << shift) | (value & mask);
-  }
-
-  String getName(int type) {
-    return kEntryId2Name[type];
   }
 
   toJson() {

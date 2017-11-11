@@ -203,11 +203,11 @@ class _EntryDialogState extends State<EntryDialog> {
   final FunctionEntry entry;
   final List<FunctionEntry> functionSaves;
 
-  String _selectType;
+  String _selectedType;
   String _selectAction;
-  int _selectIdAction;
+  int _selectedIdAction;
   String _selectDelay;
-  String _selectNext;
+  String _selectedNext;
   List<String> selectTypeMenu = new List();
   Map<String, List> _selectedSaves = new Map();
   List ioMenu;
@@ -237,10 +237,10 @@ class _EntryDialogState extends State<EntryDialog> {
 
     _controllerName.text = entry.name;
     _controllerDelay.text = entry.delay.toString();
-    _selectType = entry.typeName;
-    ioMenu = _selectedSaves[_selectType];
+    _selectedType = entry.typeName;
+    ioMenu = _selectedSaves[_selectedType];
     _selectAction = entry.actionName;
-    _selectNext = entry.next;
+    _selectedNext = entry.next;
   }
 
   @override
@@ -261,11 +261,11 @@ class _EntryDialogState extends State<EntryDialog> {
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
                   hint: const Text('select a type'),
-                  value: _selectType,
+                  value: _selectedType,
                   onChanged: (String newValue) {
                     setState(() {
-                      _selectType = newValue;
-                      ioMenu = _selectedSaves[_selectType];
+                      _selectedType = newValue;
+                      ioMenu = _selectedSaves[_selectedType];
                       _selectAction = null;
                     });
                   },
@@ -288,7 +288,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         onChanged: (dynamic newValue) {
                           setState(() {
                             _selectedElem = newValue;
-                            _selectIdAction = newValue.id;
+                            _selectedIdAction = newValue.id;
                           });
                         },
                         items: ioMenu.map((dynamic entry) {
@@ -313,10 +313,10 @@ class _EntryDialogState extends State<EntryDialog> {
                       title: const Text('Next Function'),
                       trailing: new DropdownButton<String>(
                         hint: const Text('Select a Function'),
-                        value: _selectNext,
+                        value: _selectedNext,
                         onChanged: (String newValue) {
                           setState(() {
-                            _selectNext = newValue;
+                            _selectedNext = newValue;
                           });
                         },
                         items: functionSaves.map((FunctionEntry entry) {
@@ -346,11 +346,11 @@ class _EntryDialogState extends State<EntryDialog> {
                   setState(() {
                     entry.delay = delay;
                     entry.name = _controllerName.text;
-                    entry.next = _selectNext;
-                    entry.typeName = _selectType;
+                    entry.next = _selectedNext;
+                    entry.typeName = _selectedType;
                     // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                    entry.idType = _mapType[_selectType];
-                    entry.idAction = _selectIdAction;
+                    entry.idType = _mapType[_selectedType];
+                    entry.idAction = _selectedIdAction;
                     entry.actionName = _selectAction;
                     if (entry.key != null) {
                       entry.reference.child(entry.key).remove();
@@ -371,8 +371,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   void _onGraphEntryAdded(Event event) {
     setState(() {
-      radioTxSaves
-          .add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
+      radioTxSaves.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
 /*

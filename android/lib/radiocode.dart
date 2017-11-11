@@ -97,9 +97,12 @@ class _RadioCodeState extends State<RadioCode> {
 
   @override
   Widget build(BuildContext context) {
-    var inactiveSaves = entryList.where((entry) => (entry.id == kRadioElem)).toList();
-    var activeRxSaves = entryList.where((entry) => (entry.id == kRadioIn)).toList();
-    var activeTxSaves = entryList.where((entry) => (entry.id == kRadioOut)).toList();
+    var inactiveSaves =
+        entryList.where((entry) => (entry.id == kRadioElem)).toList();
+    var activeRxSaves =
+        entryList.where((entry) => (entry.id == kRadioIn)).toList();
+    var activeTxSaves =
+        entryList.where((entry) => (entry.id == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -226,10 +229,9 @@ class _EntryDialogState extends State<EntryDialog> {
   DatabaseReference _functionRef;
   List<FunctionEntry> _functionSaves = new List();
 
-  String _selectType;
-  String _selectFunction;
+  String _selectedType;
+  String _selectedFunction;
   List<String> radioMenu = new List();
-  Map<String, DatabaseReference> _menuRef = new Map();
 
   _EntryDialogState({
     this.entry,
@@ -239,12 +241,7 @@ class _EntryDialogState extends State<EntryDialog> {
     _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
     _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
-    // _menuRef.forEach((String key, DatabaseReference value) {
-    //   radioMenu.add(key);
-    // });
   }
-
-  bool notNull(Object o) => o != null;
 
   @override
   Widget build(BuildContext context) {
@@ -264,14 +261,18 @@ class _EntryDialogState extends State<EntryDialog> {
                 title: const Text('Radio Type'),
                 trailing: new DropdownButton<String>(
                   hint: const Text('select a type'),
-                  value: _selectType,
+                  value: _selectedType,
                   onChanged: (String newValue) {
                     print(newValue);
                     setState(() {
-                      _selectType = newValue;
+                      _selectedType = newValue;
                     });
                   },
-                  items: radioMenu.map((String entry) {
+                  items: <String>[
+                    kEntryId2Name[kRadioIn],
+                    kEntryId2Name[kRadioOut],
+                    kEntryId2Name[kRadioElem]
+                  ].map((String entry) {
                     return new DropdownMenuItem<String>(
                       value: entry,
                       child: new Text(entry),
@@ -284,11 +285,11 @@ class _EntryDialogState extends State<EntryDialog> {
                       title: const Text('Function Call'),
                       trailing: new DropdownButton<String>(
                         hint: const Text('select a function'),
-                        value: _selectFunction,
+                        value: _selectedFunction,
                         onChanged: (String newValue) {
                           print(newValue);
                           setState(() {
-                            _selectFunction = newValue;
+                            _selectedFunction = newValue;
                           });
                         },
                         items: _functionSaves.map((FunctionEntry entry) {
@@ -316,7 +317,8 @@ class _EntryDialogState extends State<EntryDialog> {
                 }
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
-                entry.func = _selectFunction;
+                entry.type = kEntryName2Id[_selectedType];
+                entry.func = _selectedFunction;
                 entry.reference.push().set(entry.toJson());
                 Navigator.pop(context, null);
               }),
