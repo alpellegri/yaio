@@ -213,9 +213,9 @@ class _EntryDialogState extends State<EntryDialog> {
   dynamic _selectedElem;
 
   List<IoEntry> entryList = new List();
-  List<IoEntry> radioTxSaves = new List();
-  List<IoEntry> doutSaves = new List();
-  List<IoEntry> loutSaves = new List();
+  List<IoEntry> radioTxList = new List();
+  List<IoEntry> doutList = new List();
+  List<IoEntry> loutList = new List();
   DatabaseReference _graphRef;
 
   _EntryDialogState(this.entry, this.functionList) {
@@ -223,12 +223,12 @@ class _EntryDialogState extends State<EntryDialog> {
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    _selectedSaves[kDOut] = doutSaves;
-    _selectedSaves[kLOut] = loutSaves;
-    _selectedSaves[kRadioOut] = radioTxSaves;
-    // _selectedSaves.forEach((String key, List value) {
-    //   selectTypeMenu.add(key);
-    // });
+    _selectedSaves[kDOut] = doutList;
+    _selectedSaves[kLOut] = loutList;
+    _selectedSaves[kRadioOut] = radioTxList;
+    _selectedSaves.forEach((int key, List value) {
+      selectTypeMenu.add(kEntryId2Name[key]);
+    });
 
     _controllerName.text = entry.name;
     _controllerDelay.text = entry.delay.toString();
@@ -239,9 +239,9 @@ class _EntryDialogState extends State<EntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    doutSaves = entryList.where((entry) => (entry.type == kDOut)).toList();
-    loutSaves = entryList.where((entry) => (entry.type == kLOut)).toList();
-    radioTxSaves =
+    doutList = entryList.where((entry) => (entry.type == kDOut)).toList();
+    loutList = entryList.where((entry) => (entry.type == kLOut)).toList();
+    radioTxList =
         entryList.where((entry) => (entry.type == kRadioOut)).toList();
 
     return new AlertDialog(
@@ -256,14 +256,14 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'Name',
                 ),
               ),
-              /*new ListTile(
+              new ListTile(
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
                   hint: const Text('select a type'),
-                  value: _selectedType,
+                  value: kEntryId2Name[_selectedType],
                   onChanged: (String newValue) {
                     setState(() {
-                      _selectedType = newValue;
+                      _selectedType = kEntryName2Id[newValue];
                       ioMenu = _selectedSaves[_selectedType];
                       _selectAction = null;
                     });
@@ -276,7 +276,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              (ioMenu.length > 0)
+              /*(ioMenu.length > 0)
                   ? new ListTile(
                       title: const Text('Action'),
                       trailing: new DropdownButton<dynamic>(
@@ -302,7 +302,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 decoration: new InputDecoration(
                   hintText: 'delay',
                 ),
-              ),*/
+              ),
               (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
@@ -324,7 +324,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         }).toList(),
                       ),
                     )
-                  : new Text('Functions not declared yet'),
+                  : new Text('Functions not declared yet'),*/
             ]),
         actions: <Widget>[
           new FlatButton(
