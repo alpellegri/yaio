@@ -158,7 +158,7 @@ class _FunctionsState extends State<Functions> {
 
   void _onEntryEdited(Event event) {
     FunctionEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entrySaves[entrySaves.indexOf(oldValue)] =
           new FunctionEntry.fromSnapshot(_entryRef, event.snapshot);
@@ -167,7 +167,7 @@ class _FunctionsState extends State<Functions> {
 
   void _onEntryRemoved(Event event) {
     FunctionEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entrySaves.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entrySaves.remove(oldValue);
     });
@@ -232,15 +232,17 @@ class _EntryDialogState extends State<EntryDialog> {
 
     _controllerName.text = entry.name;
     _controllerDelay.text = entry.delay.toString();
-    // _selectedType = entry.idType;
-    // ioMenu = _selectedSaves[_selectedType];
+    IoEntry ioEntry =
+    entryList.singleWhere((el) => el.key == entry.action);
+    _selectedType = ioEntry.type;
+    ioMenu = _selectedSaves[_selectedType];
     _selectedNext = entry.next;
   }
 
   @override
   Widget build(BuildContext context) {
-    doutList = entryList.where((entry) => (entry.type == kDOut)).toList();
-    loutList = entryList.where((entry) => (entry.type == kLOut)).toList();
+    doutList = entryList.where((el) => (el.type == kDOut)).toList();
+    loutList = entryList.where((el) => (el.type == kLOut)).toList();
     radioTxList =
         entryList.where((entry) => (entry.type == kRadioOut)).toList();
 
@@ -276,7 +278,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              /*(ioMenu.length > 0)
+              (ioMenu.length > 0)
                   ? new ListTile(
                       title: const Text('Action'),
                       trailing: new DropdownButton<dynamic>(
@@ -303,7 +305,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'delay',
                 ),
               ),
-              (functionList.length > 0)
+              /*(functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
                       trailing: new DropdownButton<String>(
@@ -345,9 +347,10 @@ class _EntryDialogState extends State<EntryDialog> {
                     // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
                     // entry.action = _selectedIdAction;
                     if (entry.key != null) {
-                      entry.reference.child(entry.key).remove();
+                      entry.reference.child(entry.key).update(entry.toJson());
+                    } else {
+                      entry.reference.push().set(entry.toJson());
                     }
-                    entry.reference.push().set(entry.toJson());
                   });
                 } catch (exception, stackTrace) {}
 

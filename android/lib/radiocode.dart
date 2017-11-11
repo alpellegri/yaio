@@ -98,11 +98,11 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   Widget build(BuildContext context) {
     var inactiveList =
-        entryList.where((entry) => (entry.type == kRadioElem)).toList();
+        entryList.where((el) => (el.type == kRadioElem)).toList();
     var activeRxList =
-        entryList.where((entry) => (entry.type == kRadioIn)).toList();
+        entryList.where((el) => (el.type == kRadioIn)).toList();
     var activeTxList =
-        entryList.where((entry) => (entry.type == kRadioOut)).toList();
+        entryList.where((el) => (el.type == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -177,7 +177,7 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onEntryEdited(Event event) {
     IoEntry oldValue =
-        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList[entryList.indexOf(oldValue)] =
           new IoEntry.fromSnapshot(_graphRef, event.snapshot);
@@ -186,7 +186,7 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onEntryRemoved(Event event) {
     IoEntry oldValue =
-        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList.remove(oldValue);
     });

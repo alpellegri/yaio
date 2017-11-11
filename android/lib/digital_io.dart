@@ -100,7 +100,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList.where((entry) => (entry.type == kDOut)).toList();
+    var query = entryList.where((el) => (el.type == kDOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -132,7 +132,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   void _onEntryEdited(Event event) {
     IoEntry oldValue =
-        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList[entryList.indexOf(oldValue)] =
           new IoEntry.fromSnapshot(_entryRef, event.snapshot);
@@ -141,7 +141,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   void _onEntryRemoved(Event event) {
     IoEntry oldValue =
-        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList.remove(oldValue);
     });
