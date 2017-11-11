@@ -221,11 +221,13 @@ class EntryDialog extends StatefulWidget {
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final IoEntry entry;
-  DatabaseReference _graphRef;
-  DatabaseReference _functionRef;
+  final DatabaseReference _graphRef =
+      FirebaseDatabase.instance.reference().child(kGraphRef);
+  final DatabaseReference _functionRef =
+      FirebaseDatabase.instance.reference().child(kFunctionsRef);
   List<FunctionEntry> _functionSaves = new List();
 
-  String _selectedType;
+  int _selectedType;
   String _selectedFunction;
   List<String> radioMenu = new List();
 
@@ -233,10 +235,9 @@ class _EntryDialogState extends State<EntryDialog> {
     this.entry,
   }) {
     print('EntryDialogState');
-    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
-    _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
     _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
+    _selectedType = entry.type;
   }
 
   @override
@@ -257,11 +258,11 @@ class _EntryDialogState extends State<EntryDialog> {
                 title: const Text('Radio Type'),
                 trailing: new DropdownButton<String>(
                   hint: const Text('select a type'),
-                  value: _selectedType,
+                  value: kEntryId2Name[_selectedType],
                   onChanged: (String newValue) {
                     print(newValue);
                     setState(() {
-                      _selectedType = newValue;
+                      _selectedType = kEntryName2Id[newValue];
                     });
                   },
                   items: <String>[
@@ -310,7 +311,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
-                entry.type = kEntryName2Id[_selectedType];
+                entry.type = _selectedType;
                 entry.func = _selectedFunction;
                 if (entry.key != null) {
                   entry.reference.child(entry.key).update(entry.toJson());
