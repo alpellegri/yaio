@@ -14,14 +14,14 @@ const String kStringDIn = 'DIn';
 const String kStringRadioOut = 'RadioOut';
 const String kStringRadioElem = 'RadioElem';
 
-const List<String> kEntryId2Name = const [
-  kStringDOut,
-  kStringRadioIn,
-  kStringLOut,
-  kStringDIn,
-  kStringRadioOut,
-  kStringRadioElem,
-];
+const Map<int, String> kEntryId2Name = const {
+  kDOut: kStringDOut,
+  kRadioIn: kStringRadioIn,
+  kLOut: kStringLOut,
+  kDIn: kStringDIn,
+  kRadioOut: kStringRadioOut,
+  kRadioElem: kStringRadioElem,
+};
 
 const Map<String, int> kEntryName2Id = const {
   kStringDOut: kDOut,

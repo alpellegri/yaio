@@ -97,12 +97,18 @@ class _RadioCodeState extends State<RadioCode> {
 
   @override
   Widget build(BuildContext context) {
-    var inactiveSaves =
+    var inactiveList =
         entryList.where((entry) => (entry.id == kRadioElem)).toList();
-    var activeRxSaves =
+    var activeRxList =
         entryList.where((entry) => (entry.id == kRadioIn)).toList();
-    var activeTxSaves =
+    var activeTxList =
         entryList.where((entry) => (entry.id == kRadioOut)).toList();
+    print('inactiveList:');
+    inactiveList.forEach((e) => print(e.name));
+    print('activeRxList:');
+    activeRxList.forEach((e) => print(e.name));
+    print('activeTxList:');
+    activeTxList.forEach((e) => print(e.name));
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -118,11 +124,11 @@ class _RadioCodeState extends State<RadioCode> {
               new ListView.builder(
                 shrinkWrap: true,
                 reverse: true,
-                itemCount: inactiveSaves.length,
+                itemCount: inactiveList.length,
                 itemBuilder: (buildContext, index) {
                   return new InkWell(
-                      onTap: () => _openEntryDialog(inactiveSaves[index]),
-                      child: new RadioCodeListItem(inactiveSaves[index]));
+                      onTap: () => _openEntryDialog(inactiveList[index]),
+                      child: new RadioCodeListItem(inactiveList[index]));
                 },
               ),
             ])),
@@ -135,11 +141,11 @@ class _RadioCodeState extends State<RadioCode> {
               new ListView.builder(
                 shrinkWrap: true,
                 reverse: true,
-                itemCount: activeRxSaves.length,
+                itemCount: activeRxList.length,
                 itemBuilder: (buildContext, index) {
                   return new InkWell(
-                      onTap: () => _openEntryDialog(activeRxSaves[index]),
-                      child: new RadioCodeListItem(activeRxSaves[index]));
+                      onTap: () => _openEntryDialog(activeRxList[index]),
+                      child: new RadioCodeListItem(activeRxList[index]));
                 },
               ),
             ])),
@@ -152,11 +158,11 @@ class _RadioCodeState extends State<RadioCode> {
               new ListView.builder(
                 shrinkWrap: true,
                 reverse: true,
-                itemCount: activeTxSaves.length,
+                itemCount: activeTxList.length,
                 itemBuilder: (buildContext, index) {
                   return new InkWell(
-                      onTap: () => _openEntryDialog(activeTxSaves[index]),
-                      child: new RadioCodeListItem(activeTxSaves[index]));
+                      onTap: () => _openEntryDialog(activeTxList[index]),
+                      child: new RadioCodeListItem(activeTxList[index]));
                 },
               ),
             ])),
@@ -195,9 +201,7 @@ class _RadioCodeState extends State<RadioCode> {
   void _openEntryDialog(IoEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(
-        entry: entry,
-      ),
+      child: new EntryDialog(entry),
     );
   }
 
@@ -212,9 +216,7 @@ class _RadioCodeState extends State<RadioCode> {
 class EntryDialog extends StatefulWidget {
   final IoEntry entry;
 
-  EntryDialog({
-    this.entry,
-  });
+  EntryDialog(this.entry);
 
   @override
   _EntryDialogState createState() => new _EntryDialogState(
