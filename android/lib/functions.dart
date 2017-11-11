@@ -188,20 +188,19 @@ class _FunctionsState extends State<Functions> {
 
 class EntryDialog extends StatefulWidget {
   final FunctionEntry entry;
-  final List<FunctionEntry> functionSaves;
+  final List<FunctionEntry> functionList;
 
-  EntryDialog(this.entry, this.functionSaves);
+  EntryDialog(this.entry, this.functionList);
 
   @override
-  _EntryDialogState createState() =>
-      new _EntryDialogState(entry, functionSaves);
+  _EntryDialogState createState() => new _EntryDialogState(entry, functionList);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerDelay = new TextEditingController();
   final FunctionEntry entry;
-  final List<FunctionEntry> functionSaves;
+  final List<FunctionEntry> functionList;
 
   String _selectedType;
   String _selectAction;
@@ -212,25 +211,21 @@ class _EntryDialogState extends State<EntryDialog> {
   Map<String, List> _selectedSaves = new Map();
   List ioMenu;
   dynamic _selectedElem;
-  Map<String, int> _mapType = {
-    'DOUT': 1,
-    'Radio Tx': 2,
-    'LOUT': 3,
-  };
 
+  List<IoEntry> entryList = new List();
   List<IoEntry> radioTxSaves = new List();
   List<IoEntry> doutSaves = new List();
   List<IoEntry> loutSaves = new List();
   DatabaseReference _graphRef;
 
-  _EntryDialogState(this.entry, this.functionSaves) {
+  _EntryDialogState(this.entry, this.functionList) {
     print('EntryDialogState');
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    _selectedSaves['DOUT'] = doutSaves;
-    _selectedSaves['LOUT'] = loutSaves;
-    _selectedSaves['Radio Tx'] = radioTxSaves;
+    _selectedSaves[kStringDOut] = doutSaves;
+    _selectedSaves[kStringLOut] = loutSaves;
+    _selectedSaves[kStringRadioOut] = radioTxSaves;
     _selectedSaves.forEach((String key, List value) {
       selectTypeMenu.add(key);
     });
@@ -245,6 +240,11 @@ class _EntryDialogState extends State<EntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    doutSaves = entryList.where((entry) => (entry.type == kDOut)).toList();
+    loutSaves = entryList.where((entry) => (entry.type == kLOut)).toList();
+    radioTxSaves =
+        entryList.where((entry) => (entry.type == kRadioOut)).toList();
+
     return new AlertDialog(
         title: new Text('Edit a Function'),
         content: new Column(
@@ -308,7 +308,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'delay',
                 ),
               ),
-              (functionSaves.length > 0)
+              (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
                       trailing: new DropdownButton<String>(
@@ -319,7 +319,7 @@ class _EntryDialogState extends State<EntryDialog> {
                             _selectedNext = newValue;
                           });
                         },
-                        items: functionSaves.map((FunctionEntry entry) {
+                        items: functionList.map((FunctionEntry entry) {
                           return new DropdownMenuItem<String>(
                             value: entry.name,
                             child: new Text(
@@ -349,7 +349,7 @@ class _EntryDialogState extends State<EntryDialog> {
                     entry.next = _selectedNext;
                     entry.typeName = _selectedType;
                     // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                    entry.idType = _mapType[_selectedType];
+                    entry.idType = kEntryName2Id[_selectedType];
                     entry.idAction = _selectedIdAction;
                     entry.actionName = _selectAction;
                     if (entry.key != null) {
@@ -371,20 +371,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   void _onGraphEntryAdded(Event event) {
     setState(() {
-      radioTxSaves.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
+      entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
-/*
-  _onDoutEntryAdded(Event event) {
-    setState(() {
-      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
-    });
-  }
-
-  _onLoutEntryAdded(Event event) {
-    setState(() {
-      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
-    });
-  }
-  */
 }

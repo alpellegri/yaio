@@ -98,17 +98,11 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   Widget build(BuildContext context) {
     var inactiveList =
-        entryList.where((entry) => (entry.id == kRadioElem)).toList();
+        entryList.where((entry) => (entry.type == kRadioElem)).toList();
     var activeRxList =
-        entryList.where((entry) => (entry.id == kRadioIn)).toList();
+        entryList.where((entry) => (entry.type == kRadioIn)).toList();
     var activeTxList =
-        entryList.where((entry) => (entry.id == kRadioOut)).toList();
-    print('inactiveList:');
-    inactiveList.forEach((e) => print(e.name));
-    print('activeRxList:');
-    activeRxList.forEach((e) => print(e.name));
-    print('activeTxList:');
-    activeTxList.forEach((e) => print(e.name));
+        entryList.where((entry) => (entry.type == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(

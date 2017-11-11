@@ -100,7 +100,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList.where((entry) => (entry.id == kDOut)).toList();
+    var query = entryList.where((entry) => (entry.type == kDOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(

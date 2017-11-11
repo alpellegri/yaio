@@ -100,7 +100,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList.where((entry) => (entry.id == kLOut)).toList();
+    var query = entryList.where((entry) => (entry.type == kLOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
