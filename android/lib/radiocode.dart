@@ -308,14 +308,15 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                if (entry.key != null) {
-                  entry.reference.child(entry.key).remove();
-                }
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
                 entry.type = kEntryName2Id[_selectedType];
                 entry.func = _selectedFunction;
-                entry.reference.push().set(entry.toJson());
+                if (entry.key != null) {
+                  entry.reference.child(entry.key).update(entry.toJson());
+                } else {
+                  entry.reference.push().set(entry.toJson());
+                }
                 Navigator.pop(context, null);
               }),
           new FlatButton(

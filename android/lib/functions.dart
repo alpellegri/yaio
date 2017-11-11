@@ -28,7 +28,7 @@ class FunctionListItem extends StatelessWidget {
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
-                    new Text(
+                    /*new Text(
                       'type: ${entry.typeName}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
@@ -75,7 +75,7 @@ class FunctionListItem extends StatelessWidget {
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),
+                    ),*/
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -202,13 +202,13 @@ class _EntryDialogState extends State<EntryDialog> {
   final FunctionEntry entry;
   final List<FunctionEntry> functionList;
 
-  String _selectedType;
+  int _selectedType;
   String _selectAction;
   int _selectedIdAction;
   String _selectDelay;
   String _selectedNext;
   List<String> selectTypeMenu = new List();
-  Map<String, List> _selectedSaves = new Map();
+  Map<int, List> _selectedSaves = new Map();
   List ioMenu;
   dynamic _selectedElem;
 
@@ -223,18 +223,17 @@ class _EntryDialogState extends State<EntryDialog> {
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    _selectedSaves[kStringDOut] = doutSaves;
-    _selectedSaves[kStringLOut] = loutSaves;
-    _selectedSaves[kStringRadioOut] = radioTxSaves;
-    _selectedSaves.forEach((String key, List value) {
-      selectTypeMenu.add(key);
-    });
+    _selectedSaves[kDOut] = doutSaves;
+    _selectedSaves[kLOut] = loutSaves;
+    _selectedSaves[kRadioOut] = radioTxSaves;
+    // _selectedSaves.forEach((String key, List value) {
+    //   selectTypeMenu.add(key);
+    // });
 
     _controllerName.text = entry.name;
     _controllerDelay.text = entry.delay.toString();
-    _selectedType = entry.typeName;
-    ioMenu = _selectedSaves[_selectedType];
-    _selectAction = entry.actionName;
+    // _selectedType = entry.idType;
+    // ioMenu = _selectedSaves[_selectedType];
     _selectedNext = entry.next;
   }
 
@@ -257,7 +256,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'Name',
                 ),
               ),
-              new ListTile(
+              /*new ListTile(
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
                   hint: const Text('select a type'),
@@ -272,9 +271,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   items: selectTypeMenu.map((String entry) {
                     return new DropdownMenuItem<String>(
                       value: entry,
-                      child: new Text(
-                        entry,
-                      ),
+                      child: new Text(entry),
                     );
                   }).toList(),
                 ),
@@ -294,9 +291,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         items: ioMenu.map((dynamic entry) {
                           return new DropdownMenuItem<dynamic>(
                             value: entry,
-                            child: new Text(
-                              entry.name,
-                            ),
+                            child: new Text(entry.name),
                           );
                         }).toList(),
                       ),
@@ -307,7 +302,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 decoration: new InputDecoration(
                   hintText: 'delay',
                 ),
-              ),
+              ),*/
               (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
@@ -347,11 +342,8 @@ class _EntryDialogState extends State<EntryDialog> {
                     entry.delay = delay;
                     entry.name = _controllerName.text;
                     entry.next = _selectedNext;
-                    entry.typeName = _selectedType;
                     // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                    entry.idType = kEntryName2Id[_selectedType];
-                    entry.idAction = _selectedIdAction;
-                    entry.actionName = _selectAction;
+                    // entry.action = _selectedIdAction;
                     if (entry.key != null) {
                       entry.reference.child(entry.key).remove();
                     }

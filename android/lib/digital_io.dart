@@ -229,9 +229,10 @@ class _EntryDialogState extends State<EntryDialog> {
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
-                    entry.reference.child(entry.key).remove();
+                    entry.reference.child(entry.key).update(entry.toJson());
+                  } else {
+                    entry.reference.push().set(entry.toJson());
                   }
-                  entry.reference.push().set(entry.toJson());
                 } catch (exception, stackTrace) {}
                 Navigator.pop(context, null);
               }),
