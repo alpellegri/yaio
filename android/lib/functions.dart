@@ -246,8 +246,6 @@ class _EntryDialogState extends State<EntryDialog> {
       _controllerDelay.text = entry.delay.toString();
       if (entryList.length > 0) {
         IoEntry ioEntry = entryList.singleWhere((el) => el.key == entry.action);
-        print(ioEntry.type);
-        print(ioEntry.name);
         _selectedType = ioEntry.type;
         _selectedEntry = ioEntry;
         ioMenu = _selectedList[_selectedType];
