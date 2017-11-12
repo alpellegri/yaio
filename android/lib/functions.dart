@@ -208,7 +208,7 @@ class _EntryDialogState extends State<EntryDialog> {
   List<String> selectTypeMenu = new List();
   Map<int, List> _selectedList = new Map();
   List ioMenu;
-  dynamic _selectedElem;
+  dynamic _selectedEntry;
 
   List<IoEntry> entryList = new List();
   List<IoEntry> radioTxList = new List();
@@ -228,15 +228,7 @@ class _EntryDialogState extends State<EntryDialog> {
       selectTypeMenu.add(kEntryId2Name[key]);
     });
 
-    if (entry.action != null) {
-      _controllerName.text = entry.name;
-      _controllerDelay.text = entry.delay.toString();
-      IoEntry ioEntry = entryList.singleWhere((el) => el.key == entry.action);
-      _selectedType = ioEntry.type;
-      ioMenu = _selectedList[_selectedType];
-    } else {
-      _controllerDelay.text = '0';
-    }
+    _controllerDelay.text = '0';
     _selectedNext = entry.next;
   }
 
@@ -249,7 +241,18 @@ class _EntryDialogState extends State<EntryDialog> {
     _selectedList[kDOut] = doutList;
     _selectedList[kLOut] = loutList;
     _selectedList[kRadioOut] = radioTxList;
-
+    if (entry.action != null) {
+      _controllerName.text = entry.name;
+      _controllerDelay.text = entry.delay.toString();
+      if (entryList.length > 0) {
+        IoEntry ioEntry = entryList.singleWhere((el) => el.key == entry.action);
+        print(ioEntry.type);
+        print(ioEntry.name);
+        _selectedType = ioEntry.type;
+        _selectedEntry = ioEntry;
+        ioMenu = _selectedList[_selectedType];
+      }
+    }
     return new AlertDialog(
         title: new Text('Edit a Function'),
         content: new Column(
@@ -287,10 +290,10 @@ class _EntryDialogState extends State<EntryDialog> {
                       title: const Text('Action'),
                       trailing: new DropdownButton<dynamic>(
                         hint: const Text('select an action'),
-                        value: _selectedElem,
+                        value: _selectedEntry,
                         onChanged: (dynamic newValue) {
                           setState(() {
-                            _selectedElem = newValue;
+                            _selectedEntry = newValue;
                             _selectedAction = newValue.key;
                           });
                         },
