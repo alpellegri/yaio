@@ -204,7 +204,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   int _selectedType;
   String _selectedAction;
-  String _selectedNext;
+  FunctionEntry _selectedNext;
   List<String> selectTypeMenu = new List();
   Map<int, List> _selectedList = new Map();
   List ioMenu;
@@ -229,7 +229,6 @@ class _EntryDialogState extends State<EntryDialog> {
     });
 
     _controllerDelay.text = '0';
-    _selectedNext = entry.next;
   }
 
   @override
@@ -250,6 +249,9 @@ class _EntryDialogState extends State<EntryDialog> {
         _selectedEntry = ioEntry;
         ioMenu = _selectedList[_selectedType];
       }
+    }
+    if (entry.next != null) {
+      _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
     }
     return new AlertDialog(
         title: new Text('Edit a Function'),
@@ -313,17 +315,17 @@ class _EntryDialogState extends State<EntryDialog> {
               (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
-                      trailing: new DropdownButton<String>(
+                      trailing: new DropdownButton<FunctionEntry>(
                         hint: const Text('Select a Function'),
                         value: _selectedNext,
-                        onChanged: (String newValue) {
+                        onChanged: (FunctionEntry newValue) {
                           setState(() {
                             _selectedNext = newValue;
                           });
                         },
                         items: functionList.map((FunctionEntry entry) {
-                          return new DropdownMenuItem<String>(
-                            value: entry.name,
+                          return new DropdownMenuItem<FunctionEntry>(
+                            value: entry,
                             child: new Text(entry.name),
                           );
                         }).toList(),
@@ -345,7 +347,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   setState(() {
                     entry.delay = int.parse(_controllerDelay.text);
                     entry.name = _controllerName.text;
-                    entry.next = _selectedNext;
+                    entry.next = _selectedNext.key;
                     entry.action = _selectedAction;
                     if (entry.key != null) {
                       entry.reference.child(entry.key).update(entry.toJson());
