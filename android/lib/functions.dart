@@ -203,12 +203,10 @@ class _EntryDialogState extends State<EntryDialog> {
   final List<FunctionEntry> functionList;
 
   int _selectedType;
-  String _selectAction;
-  int _selectedIdAction;
-  String _selectDelay;
+  String _selectedAction;
   String _selectedNext;
   List<String> selectTypeMenu = new List();
-  Map<int, List> _selectedSaves = new Map();
+  Map<int, List> _selectedList = new Map();
   List ioMenu;
   dynamic _selectedElem;
 
@@ -223,19 +221,22 @@ class _EntryDialogState extends State<EntryDialog> {
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    _selectedSaves[kDOut] = doutList;
-    _selectedSaves[kLOut] = loutList;
-    _selectedSaves[kRadioOut] = radioTxList;
-    _selectedSaves.forEach((int key, List value) {
+    _selectedList[kDOut] = doutList;
+    _selectedList[kLOut] = loutList;
+    _selectedList[kRadioOut] = radioTxList;
+    _selectedList.forEach((int key, List value) {
       selectTypeMenu.add(kEntryId2Name[key]);
     });
 
-    _controllerName.text = entry.name;
-    _controllerDelay.text = entry.delay.toString();
-    IoEntry ioEntry =
-    entryList.singleWhere((el) => el.key == entry.action);
-    _selectedType = ioEntry.type;
-    ioMenu = _selectedSaves[_selectedType];
+    if (entry.action != null) {
+      _controllerName.text = entry.name;
+      _controllerDelay.text = entry.delay.toString();
+      IoEntry ioEntry = entryList.singleWhere((el) => el.key == entry.action);
+      _selectedType = ioEntry.type;
+      ioMenu = _selectedList[_selectedType];
+    } else {
+      _controllerDelay.text = '0';
+    }
     _selectedNext = entry.next;
   }
 
@@ -245,6 +246,9 @@ class _EntryDialogState extends State<EntryDialog> {
     loutList = entryList.where((el) => (el.type == kLOut)).toList();
     radioTxList =
         entryList.where((entry) => (entry.type == kRadioOut)).toList();
+    _selectedList[kDOut] = doutList;
+    _selectedList[kLOut] = loutList;
+    _selectedList[kRadioOut] = radioTxList;
 
     return new AlertDialog(
         title: new Text('Edit a Function'),
@@ -266,8 +270,8 @@ class _EntryDialogState extends State<EntryDialog> {
                   onChanged: (String newValue) {
                     setState(() {
                       _selectedType = kEntryName2Id[newValue];
-                      ioMenu = _selectedSaves[_selectedType];
-                      _selectAction = null;
+                      ioMenu = _selectedList[_selectedType];
+                      _selectedAction = null;
                     });
                   },
                   items: selectTypeMenu.map((String entry) {
@@ -278,7 +282,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              (ioMenu.length > 0)
+              ((ioMenu != null) && (ioMenu.length > 0))
                   ? new ListTile(
                       title: const Text('Action'),
                       trailing: new DropdownButton<dynamic>(
@@ -287,7 +291,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         onChanged: (dynamic newValue) {
                           setState(() {
                             _selectedElem = newValue;
-                            _selectedIdAction = newValue.id;
+                            _selectedAction = newValue.key;
                           });
                         },
                         items: ioMenu.map((dynamic entry) {
@@ -305,7 +309,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'delay',
                 ),
               ),
-              /*(functionList.length > 0)
+              (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
                       trailing: new DropdownButton<String>(
@@ -319,14 +323,12 @@ class _EntryDialogState extends State<EntryDialog> {
                         items: functionList.map((FunctionEntry entry) {
                           return new DropdownMenuItem<String>(
                             value: entry.name,
-                            child: new Text(
-                              entry.name,
-                            ),
+                            child: new Text(entry.name),
                           );
                         }).toList(),
                       ),
                     )
-                  : new Text('Functions not declared yet'),*/
+                  : new Text('Functions not declared yet'),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -338,22 +340,18 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                try {
-                  int delay = int.parse(_controllerDelay.text);
+                print(_controllerDelay.text);
                   setState(() {
-                    entry.delay = delay;
+                    entry.delay = int.parse(_controllerDelay.text);
                     entry.name = _controllerName.text;
                     entry.next = _selectedNext;
-                    // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                    // entry.action = _selectedIdAction;
+                    entry.action = _selectedAction;
                     if (entry.key != null) {
                       entry.reference.child(entry.key).update(entry.toJson());
                     } else {
                       entry.reference.push().set(entry.toJson());
                     }
                   });
-                } catch (exception, stackTrace) {}
-
                 Navigator.pop(context, null);
               }),
           new FlatButton(
