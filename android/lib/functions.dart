@@ -200,7 +200,7 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerDelay = new TextEditingController();
   final FunctionEntry entry;
-  final List<FunctionEntry> functionList;
+  List<FunctionEntry> functionList;
 
   int _selectedType;
   String _selectedAction;
@@ -208,7 +208,7 @@ class _EntryDialogState extends State<EntryDialog> {
   List<String> selectTypeMenu = new List();
   Map<int, List> _selectedList = new Map();
   List ioMenu;
-  dynamic _selectedEntry;
+  IoEntry _selectedEntry;
 
   List<IoEntry> entryList = new List();
   List<IoEntry> radioTxList = new List();
@@ -288,17 +288,17 @@ class _EntryDialogState extends State<EntryDialog> {
               ((ioMenu != null) && (ioMenu.length > 0))
                   ? new ListTile(
                       title: const Text('Action'),
-                      trailing: new DropdownButton<dynamic>(
+                      trailing: new DropdownButton<IoEntry>(
                         hint: const Text('select an action'),
                         value: _selectedEntry,
-                        onChanged: (dynamic newValue) {
+                        onChanged: (IoEntry newValue) {
                           setState(() {
                             _selectedEntry = newValue;
                             _selectedAction = newValue.key;
                           });
                         },
-                        items: ioMenu.map((dynamic entry) {
-                          return new DropdownMenuItem<dynamic>(
+                        items: ioMenu.map((IoEntry entry) {
+                          return new DropdownMenuItem<IoEntry>(
                             value: entry,
                             child: new Text(entry.name),
                           );
@@ -343,18 +343,17 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                print(_controllerDelay.text);
-                  setState(() {
-                    entry.delay = int.parse(_controllerDelay.text);
-                    entry.name = _controllerName.text;
-                    entry.next = _selectedNext.key;
-                    entry.action = _selectedAction;
-                    if (entry.key != null) {
-                      entry.reference.child(entry.key).update(entry.toJson());
-                    } else {
-                      entry.reference.push().set(entry.toJson());
-                    }
-                  });
+                setState(() {
+                  entry.delay = int.parse(_controllerDelay.text);
+                  entry.name = _controllerName.text;
+                  entry.next = _selectedNext.key;
+                  entry.action = _selectedEntry.key;
+                  if (entry.key != null) {
+                    entry.reference.child(entry.key).update(entry.toJson());
+                  } else {
+                    entry.reference.push().set(entry.toJson());
+                  }
+                });
                 Navigator.pop(context, null);
               }),
           new FlatButton(

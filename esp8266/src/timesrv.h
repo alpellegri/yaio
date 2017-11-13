@@ -2,7 +2,6 @@
 #define TIMESRV_H
 
 #include <Arduino.h>
-#include <time.h>
 
 typedef struct {
   uint8_t Second;
