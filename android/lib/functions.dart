@@ -221,8 +221,8 @@ class _EntryDialogState extends State<EntryDialog> {
     selectTypeMenu.add(kEntryId2Name[kLOut]);
     selectTypeMenu.add(kEntryId2Name[kRadioOut]);
 
-    _controllerName.text = entry.name;
-    _controllerDelay.text = entry.delay.toString();
+    _controllerName.text = entry?.name;
+    _controllerDelay.text = entry?.delay.toString();
     if (entry.next != null) {
       _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
     }
@@ -326,8 +326,8 @@ class _EntryDialogState extends State<EntryDialog> {
                 setState(() {
                   entry.delay = int.parse(_controllerDelay.text);
                   entry.name = _controllerName.text;
-                  entry.next = _selectedNext.key;
-                  entry.action = _selectedEntry.key;
+                  entry.next = _selectedNext?.key;
+                  entry.action = _selectedEntry?.key;
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
                   } else {
@@ -352,7 +352,7 @@ class _EntryDialogState extends State<EntryDialog> {
         if (entryList.length > 0) {
           _selectedEntry =
               entryList.singleWhere((el) => el.key == entry.action);
-          _selectedType = _selectedEntry.type;
+          _selectedType = _selectedEntry?.type;
           ioMenu = entryList.where((el) => (el.type == _selectedType)).toList();
         }
       }
