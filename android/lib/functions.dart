@@ -203,7 +203,6 @@ class _EntryDialogState extends State<EntryDialog> {
   List<FunctionEntry> functionList;
 
   int _selectedType;
-  String _selectedAction;
   FunctionEntry _selectedNext;
   List<String> selectTypeMenu = new List();
   Map<int, List> _selectedList = new Map();
@@ -211,9 +210,6 @@ class _EntryDialogState extends State<EntryDialog> {
   IoEntry _selectedEntry;
 
   List<IoEntry> entryList = new List();
-  List<IoEntry> radioTxList = new List();
-  List<IoEntry> doutList = new List();
-  List<IoEntry> loutList = new List();
   DatabaseReference _graphRef;
 
   _EntryDialogState(this.entry, this.functionList) {
@@ -221,38 +217,19 @@ class _EntryDialogState extends State<EntryDialog> {
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
     _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    _selectedList[kDOut] = doutList;
-    _selectedList[kLOut] = loutList;
-    _selectedList[kRadioOut] = radioTxList;
-    _selectedList.forEach((int key, List value) {
-      selectTypeMenu.add(kEntryId2Name[key]);
-    });
+    selectTypeMenu.add(kEntryId2Name[kDOut]);
+    selectTypeMenu.add(kEntryId2Name[kLOut]);
+    selectTypeMenu.add(kEntryId2Name[kRadioOut]);
 
-    _controllerDelay.text = '0';
+    _controllerName.text = entry.name;
+    _controllerDelay.text = entry.delay.toString();
+    if (entry.next != null) {
+      _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    doutList = entryList.where((el) => (el.type == kDOut)).toList();
-    loutList = entryList.where((el) => (el.type == kLOut)).toList();
-    radioTxList =
-        entryList.where((entry) => (entry.type == kRadioOut)).toList();
-    _selectedList[kDOut] = doutList;
-    _selectedList[kLOut] = loutList;
-    _selectedList[kRadioOut] = radioTxList;
-    if (entry.action != null) {
-      _controllerName.text = entry.name;
-      _controllerDelay.text = entry.delay.toString();
-      if (entryList.length > 0) {
-        IoEntry ioEntry = entryList.singleWhere((el) => el.key == entry.action);
-        _selectedType = ioEntry.type;
-        _selectedEntry = ioEntry;
-        ioMenu = _selectedList[_selectedType];
-      }
-    }
-    if (entry.next != null) {
-      _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
-    }
     return new AlertDialog(
         title: new Text('Edit a Function'),
         content: new Column(
@@ -273,8 +250,12 @@ class _EntryDialogState extends State<EntryDialog> {
                   onChanged: (String newValue) {
                     setState(() {
                       _selectedType = kEntryName2Id[newValue];
-                      ioMenu = _selectedList[_selectedType];
-                      _selectedAction = null;
+                      ioMenu = entryList
+                          .where((el) => (el.type == _selectedType))
+                          .toList();
+                      print(_selectedList.toString());
+                      // clear previous on change
+                      _selectedEntry = null;
                     });
                   },
                   items: selectTypeMenu.map((String entry) {
@@ -294,7 +275,6 @@ class _EntryDialogState extends State<EntryDialog> {
                         onChanged: (IoEntry newValue) {
                           setState(() {
                             _selectedEntry = newValue;
-                            _selectedAction = newValue.key;
                           });
                         },
                         items: ioMenu.map((IoEntry entry) {
@@ -365,8 +345,17 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 
   void _onGraphEntryAdded(Event event) {
+    print('_onGraphEntryAdded');
     setState(() {
       entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
+      if (entry.action != null) {
+        if (entryList.length > 0) {
+          _selectedEntry =
+              entryList.singleWhere((el) => el.key == entry.action);
+          _selectedType = _selectedEntry.type;
+          ioMenu = entryList.where((el) => (el.type == _selectedType)).toList();
+        }
+      }
     });
   }
 }
