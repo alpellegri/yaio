@@ -253,7 +253,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       ioMenu = entryList
                           .where((el) => (el.type == _selectedType))
                           .toList();
-                      print(_selectedList.toString());
                       // clear previous on change
                       _selectedEntry = null;
                     });
