@@ -209,7 +209,7 @@ class _EntryDialogState extends State<EntryDialog> {
   List ioMenu;
   IoEntry _selectedEntry;
 
-  List<IoEntry> entryList = new List();
+  List<IoEntry> entryIoList = new List();
   DatabaseReference _graphRef;
 
   _EntryDialogState(this.entry, this.functionList) {
@@ -222,7 +222,9 @@ class _EntryDialogState extends State<EntryDialog> {
     selectTypeMenu.add(kEntryId2Name[kRadioOut]);
 
     _controllerName.text = entry?.name;
-    _controllerDelay.text = entry?.delay.toString();
+    if (entry.delay != null) {
+      _controllerDelay.text = entry?.delay.toString();
+    }
     if (entry.next != null) {
       _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
     }
@@ -242,41 +244,18 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'Name',
                 ),
               ),
-              new ListTile(
-                title: const Text('Action Type'),
-                trailing: new DropdownButton<String>(
-                  hint: const Text('select a type'),
-                  value: kEntryId2Name[_selectedType],
-                  onChanged: (String newValue) {
-                    setState(() {
-                      _selectedType = kEntryName2Id[newValue];
-                      ioMenu = entryList
-                          .where((el) => (el.type == _selectedType))
-                          .toList();
-                      // clear previous on change
-                      _selectedEntry = null;
-                    });
-                  },
-                  items: selectTypeMenu.map((String entry) {
-                    return new DropdownMenuItem<String>(
-                      value: entry,
-                      child: new Text(entry),
-                    );
-                  }).toList(),
-                ),
-              ),
-              ((ioMenu != null) && (ioMenu.length > 0))
+              ((entryIoList != null) && (entryIoList.length > 0))
                   ? new ListTile(
                       title: const Text('Action'),
                       trailing: new DropdownButton<IoEntry>(
-                        hint: const Text('select an action'),
+                        hint: const Text('...'),
                         value: _selectedEntry,
                         onChanged: (IoEntry newValue) {
                           setState(() {
                             _selectedEntry = newValue;
                           });
                         },
-                        items: ioMenu.map((IoEntry entry) {
+                        items: entryIoList.map((IoEntry entry) {
                           return new DropdownMenuItem<IoEntry>(
                             value: entry,
                             child: new Text(entry.name),
@@ -345,15 +324,12 @@ class _EntryDialogState extends State<EntryDialog> {
 
   void _onGraphEntryAdded(Event event) {
     print('_onGraphEntryAdded');
+    IoEntry ioEntry = new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
-      if (entry.action != null) {
-        if (entryList.length > 0) {
-          _selectedEntry =
-              entryList.singleWhere((el) => el.key == entry.action);
-          _selectedType = _selectedEntry?.type;
-          ioMenu = entryList.where((el) => (el.type == _selectedType)).toList();
-        }
+      entryIoList.add(ioEntry);
+      if (entry.action == ioEntry.key) {
+        _selectedEntry = ioEntry;
+        _selectedType = ioEntry.type;
       }
     });
   }
