@@ -104,7 +104,7 @@ class _FunctionsState extends State<Functions> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<FunctionEntry> entrySaves = new List();
+  List<FunctionEntry> entryList = new List();
   DatabaseReference _entryRef;
 
   _FunctionsState() {
@@ -135,11 +135,11 @@ class _FunctionsState extends State<Functions> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: entrySaves.length,
+        itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entrySaves[index]),
-              child: new FunctionListItem(entrySaves[index]));
+              onTap: () => _openEntryDialog(entryList[index]),
+              child: new FunctionListItem(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -152,31 +152,31 @@ class _FunctionsState extends State<Functions> {
 
   void _onEntryAdded(Event event) {
     setState(() {
-      entrySaves.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
+      entryList.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
   void _onEntryEdited(Event event) {
     FunctionEntry oldValue =
-        entrySaves.singleWhere((el) => el.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      entrySaves[entrySaves.indexOf(oldValue)] =
+      entryList[entryList.indexOf(oldValue)] =
           new FunctionEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
   void _onEntryRemoved(Event event) {
     FunctionEntry oldValue =
-        entrySaves.singleWhere((el) => el.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      entrySaves.remove(oldValue);
+      entryList.remove(oldValue);
     });
   }
 
   void _openEntryDialog(FunctionEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(entry, entrySaves),
+      child: new EntryDialog(entry, entryList),
     );
   }
 
@@ -206,7 +206,7 @@ class _EntryDialogState extends State<EntryDialog> {
   FunctionEntry _selectedNext;
   List<String> selectTypeMenu = new List();
   Map<int, List> _selectedList = new Map();
-  List ioMenu;
+  List<IoEntry> _ioMenu = new List();
   IoEntry _selectedEntry;
 
   List<IoEntry> entryIoList = new List();
@@ -244,18 +244,41 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'Name',
                 ),
               ),
-              ((entryIoList != null) && (entryIoList.length > 0))
+              new ListTile(
+                title: const Text('Action Type'),
+                trailing: new DropdownButton<String>(
+                  hint: const Text(''),
+                  value: kEntryId2Name[_selectedType],
+                  onChanged: (String newValue) {
+                    setState(() {
+                      _selectedType = kEntryName2Id[newValue];
+                      _ioMenu = entryIoList
+                          .where((el) => el.type == _selectedType)
+                          .toList();
+                      _ioMenu.forEach((e) => print(e.name));
+                      _selectedEntry = null;
+                    });
+                  },
+                  items: selectTypeMenu.map((String entry) {
+                    return new DropdownMenuItem<String>(
+                      value: entry,
+                      child: new Text(entry),
+                    );
+                  }).toList(),
+                ),
+              ),
+              ((_ioMenu != null) && (_ioMenu.length > 0))
                   ? new ListTile(
                       title: const Text('Action'),
                       trailing: new DropdownButton<IoEntry>(
-                        hint: const Text('...'),
+                        hint: const Text(''),
                         value: _selectedEntry,
                         onChanged: (IoEntry newValue) {
                           setState(() {
                             _selectedEntry = newValue;
                           });
                         },
-                        items: entryIoList.map((IoEntry entry) {
+                        items: _ioMenu.map((IoEntry entry) {
                           return new DropdownMenuItem<IoEntry>(
                             value: entry,
                             child: new Text(entry.name),
@@ -328,8 +351,11 @@ class _EntryDialogState extends State<EntryDialog> {
     setState(() {
       entryIoList.add(ioEntry);
       if (entry.action == ioEntry.key) {
+        print('found');
         _selectedEntry = ioEntry;
         _selectedType = ioEntry.type;
+        _ioMenu = entryIoList.where((el) => el.type == _selectedType).toList();
+        _ioMenu.forEach((e) => print(e.name));
       }
     });
   }

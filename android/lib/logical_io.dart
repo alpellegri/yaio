@@ -225,7 +225,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.type = kDOut;
+                  entry.type = kLOut;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
