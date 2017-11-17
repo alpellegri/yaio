@@ -247,7 +247,7 @@ class _EntryDialogState extends State<EntryDialog> {
               new ListTile(
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
-                  hint: const Text(''),
+                  hint: const Text('type'),
                   value: kEntryId2Name[_selectedType],
                   onChanged: (String newValue) {
                     setState(() {
@@ -271,7 +271,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   ? new ListTile(
                       title: const Text('Action'),
                       trailing: new DropdownButton<IoEntry>(
-                        hint: const Text(''),
+                        hint: const Text('action'),
                         value: _selectedEntry,
                         onChanged: (IoEntry newValue) {
                           setState(() {
@@ -351,11 +351,9 @@ class _EntryDialogState extends State<EntryDialog> {
     setState(() {
       entryIoList.add(ioEntry);
       if (entry.action == ioEntry.key) {
-        print('found');
         _selectedEntry = ioEntry;
         _selectedType = ioEntry.type;
         _ioMenu = entryIoList.where((el) => el.type == _selectedType).toList();
-        _ioMenu.forEach((e) => print(e.name));
       }
     });
   }
