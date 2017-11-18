@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
@@ -76,12 +78,15 @@ class _RadioCodeState extends State<RadioCode> {
   DatabaseReference _graphRef;
   List<IoEntry> destinationSaves;
   String selection;
+  StreamSubscription<Event> _onAddSub;
+  StreamSubscription<Event> _onEditSub;
+  StreamSubscription<Event> _onRemoveSub;
 
   _RadioCodeState() {
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
-    _graphRef.onChildAdded.listen(_onEntryAdded);
-    _graphRef.onChildChanged.listen(_onEntryEdited);
-    _graphRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSub = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSub = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSub = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -93,16 +98,17 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   void dispose() {
     super.dispose();
+    _onAddSub.cancel();
+    _onEditSub.cancel();
+    _onRemoveSub.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     var inactiveList =
         entryList.where((el) => (el.type == kRadioElem)).toList();
-    var activeRxList =
-        entryList.where((el) => (el.type == kRadioIn)).toList();
-    var activeTxList =
-        entryList.where((el) => (el.type == kRadioOut)).toList();
+    var activeRxList = entryList.where((el) => (el.type == kRadioIn)).toList();
+    var activeTxList = entryList.where((el) => (el.type == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -230,14 +236,26 @@ class _EntryDialogState extends State<EntryDialog> {
   int _selectedType;
   String _selectedFunction;
   List<String> radioMenu = new List();
+  StreamSubscription<Event> _onAddSub;
 
   _EntryDialogState({
     this.entry,
   }) {
     print('EntryDialogState');
-    _functionRef.onChildAdded.listen(_onFunctionAdded);
+    _onAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
     _selectedType = entry.type;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSub.cancel();
   }
 
   @override

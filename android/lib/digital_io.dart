@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
@@ -79,12 +81,15 @@ class DigitalIO extends StatefulWidget {
 class _DigitalIOState extends State<DigitalIO> {
   List<IoEntry> entryList = new List();
   DatabaseReference _entryRef;
+  StreamSubscription<Event> _onAddSub;
+  StreamSubscription<Event> _onEditSub;
+  StreamSubscription<Event> _onRemoveSub;
 
   _DigitalIOState() {
     _entryRef = FirebaseDatabase.instance.reference().child(kGraphRef);
-    _entryRef.onChildAdded.listen(_onEntryAdded);
-    _entryRef.onChildChanged.listen(_onEntryEdited);
-    _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSub = _entryRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -96,6 +101,9 @@ class _DigitalIOState extends State<DigitalIO> {
   @override
   void dispose() {
     super.dispose();
+    _onAddSub.cancel();
+    _onEditSub.cancel();
+    _onRemoveSub.cancel();
   }
 
   @override
