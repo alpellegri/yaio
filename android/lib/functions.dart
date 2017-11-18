@@ -108,15 +108,15 @@ class _FunctionsState extends State<Functions> {
 
   List<FunctionEntry> entryList = new List();
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSub;
-  StreamSubscription<Event> _onEditSub;
-  StreamSubscription<Event> _onRemoveSub;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _FunctionsState() {
     _entryRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
-    _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSub = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -128,9 +128,9 @@ class _FunctionsState extends State<Functions> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSub.cancel();
-    _onEditSub.cancel();
-    _onRemoveSub.cancel();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -219,12 +219,12 @@ class _EntryDialogState extends State<EntryDialog> {
 
   List<IoEntry> entryIoList = new List();
   DatabaseReference _graphRef;
-  StreamSubscription<Event> _onAddSub;
+  StreamSubscription<Event> _onAddSubscription;
 
   _EntryDialogState(this.entry, this.functionList) {
     print('EntryDialogState');
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
-    _onAddSub = _graphRef.onChildAdded.listen(_onGraphEntryAdded);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
     selectTypeMenu.add(kEntryId2Name[kDOut]);
     selectTypeMenu.add(kEntryId2Name[kLOut]);
@@ -247,7 +247,7 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSub.cancel();
+    _onAddSubscription.cancel();
   }
 
   @override

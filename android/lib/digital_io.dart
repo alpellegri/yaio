@@ -81,15 +81,15 @@ class DigitalIO extends StatefulWidget {
 class _DigitalIOState extends State<DigitalIO> {
   List<IoEntry> entryList = new List();
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSub;
-  StreamSubscription<Event> _onEditSub;
-  StreamSubscription<Event> _onRemoveSub;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _DigitalIOState() {
     _entryRef = FirebaseDatabase.instance.reference().child(kGraphRef);
-    _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSub = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -101,9 +101,9 @@ class _DigitalIOState extends State<DigitalIO> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSub.cancel();
-    _onEditSub.cancel();
-    _onRemoveSub.cancel();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override

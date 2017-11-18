@@ -38,14 +38,14 @@ class RadioCodeListItem extends StatelessWidget {
                         color: Colors.grey,
                       ),
                     ),
-                    new Text(
+                    /* new Text(
                       'Function: ${entry.func}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),
+                    ),*/
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -78,15 +78,15 @@ class _RadioCodeState extends State<RadioCode> {
   DatabaseReference _graphRef;
   List<IoEntry> destinationSaves;
   String selection;
-  StreamSubscription<Event> _onAddSub;
-  StreamSubscription<Event> _onEditSub;
-  StreamSubscription<Event> _onRemoveSub;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _RadioCodeState() {
     _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
-    _onAddSub = _graphRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSub = _graphRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSub = _graphRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -98,9 +98,9 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSub.cancel();
-    _onEditSub.cancel();
-    _onRemoveSub.cancel();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -231,18 +231,18 @@ class _EntryDialogState extends State<EntryDialog> {
       FirebaseDatabase.instance.reference().child(kGraphRef);
   final DatabaseReference _functionRef =
       FirebaseDatabase.instance.reference().child(kFunctionsRef);
-  List<FunctionEntry> _functionSaves = new List();
+  List<FunctionEntry> _functionList = new List();
 
   int _selectedType;
-  String _selectedFunction;
+  FunctionEntry _selectedFunction;
   List<String> radioMenu = new List();
-  StreamSubscription<Event> _onAddSub;
+  StreamSubscription<Event> _onAddSubscription;
 
   _EntryDialogState({
     this.entry,
   }) {
     print('EntryDialogState');
-    _onAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
+    _onAddSubscription = _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
     _selectedType = entry.type;
   }
@@ -255,7 +255,7 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSub.cancel();
+    _onAddSubscription.cancel();
   }
 
   @override
@@ -295,21 +295,21 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              (_functionSaves.length > 0)
+              (_functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Function Call'),
-                      trailing: new DropdownButton<String>(
+                      trailing: new DropdownButton<FunctionEntry>(
                         hint: const Text('select a function'),
                         value: _selectedFunction,
-                        onChanged: (String newValue) {
-                          print(newValue);
+                        onChanged: (FunctionEntry newValue) {
+                          print(newValue.name);
                           setState(() {
                             _selectedFunction = newValue;
                           });
                         },
-                        items: _functionSaves.map((FunctionEntry entry) {
-                          return new DropdownMenuItem<String>(
-                            value: entry.name,
+                        items: _functionList.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<FunctionEntry>(
+                            value: entry,
                             child: new Text(entry.name),
                           );
                         }).toList(),
@@ -330,7 +330,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
                 entry.type = _selectedType;
-                entry.func = _selectedFunction;
+                entry.func = _selectedFunction.key;
                 if (entry.key != null) {
                   entry.reference.child(entry.key).update(entry.toJson());
                 } else {
@@ -347,9 +347,13 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 
   void _onFunctionAdded(Event event) {
+    FunctionEntry funcEntry =
+        new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
     setState(() {
-      _functionSaves
-          .add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));
+      _functionList.add(funcEntry);
+      if (entry.func == funcEntry.key) {
+        _selectedFunction = funcEntry;
+      }
     });
   }
 }
