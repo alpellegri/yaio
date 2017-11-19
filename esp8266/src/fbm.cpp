@@ -110,7 +110,7 @@ static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t port,
     }
   } else if (port == 1) {
     String str = String(F("Intrusion in: ")) +
-                 String(RF_GetRadioName(src_idx)) + String(F(" !!!"));
+                 String(RF_getRadioName(src_idx)) + String(F(" !!!"));
     fblog_log(str, status_alarm);
     ret = true;
   } else {
@@ -362,7 +362,7 @@ bool FbmService(void) {
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
     if (code != 0) {
-      uint8_t idx = RF_CheckRadioCodeDB(code);
+      uint8_t idx = RF_checkRadioCodeDB(code);
       if (idx != 0xFF) {
         fbm_monitor_last = time_now;
         fbm_monitor_run = true;
@@ -374,7 +374,7 @@ bool FbmService(void) {
       if (idx == 0xFF) {
         fbm_monitor_last = time_now;
         fbm_monitor_run = true;
-        uint32_t idxTx = RF_CheckRadioCodeTxDB(code);
+        uint32_t idxTx = RF_checkRadioCodeTxDB(code);
         if (idxTx == 0xFF) {
           Serial.print(F("RadioCodes/Inactive: "));
           Serial.println(code);
