@@ -92,7 +92,7 @@ bool FbmUpdateRadioCodes(void) {
     }
   }
 
-  // RF_dumpIoEntry();
+  RF_dumpIoEntry();
 
   return ret;
 }
