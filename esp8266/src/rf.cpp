@@ -30,8 +30,8 @@ typedef struct {
 } Timer_t;
 
 typedef struct {
-  char name[25];
-  char next[25];
+  char key[25];  // firebase key
+  char next[25]; // firebase key
   uint8_t src_type;
   uint8_t src_idx;
   uint8_t type;
@@ -199,30 +199,30 @@ void RF_AddDoutDB(String action) {
 
 void RF_AddLoutDB(String action) {
   if (LoutLen < NUM_LOUT_MAX) {
-    Lout[DoutLen] = atoi(action.c_str());
+    Lout[LoutLen] = atoi(action.c_str());
     LoutLen++;
   }
 }
 
-void RF_AddFunctionsDB(String name, String type, String action, String delay,
+void RF_AddFunctionsDB(String key, String type, String action, uint32_t delay,
                        String next) {
   if (FunctionLen < NUM_FUNCTION_MAX) {
-    strcpy(Function[FunctionLen].name, name.c_str());
+    strcpy(Function[FunctionLen].key, key.c_str());
     Function[FunctionLen].type = atoi(type.c_str());
     Function[FunctionLen].action = atoi(action.c_str());
-    Function[FunctionLen].delay = atoi(delay.c_str());
+    Function[FunctionLen].delay = delay;
     strcpy(Function[FunctionLen].next, next.c_str());
     FunctionLen++;
   }
 }
 
-uint8_t FunctionGetIdx(char *name) {
+uint8_t FunctionGetIdx(char *key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
   while ((i < FunctionLen) && (idx == 0xFF)) {
-    res = strcmp(Function[i].name, name);
+    res = strcmp(Function[i].key, key);
     if (res == 0) {
       idx = i;
     }
@@ -232,12 +232,12 @@ uint8_t FunctionGetIdx(char *name) {
   return idx;
 }
 
-void FunctionReq(uint8_t src_type, uint8_t src_idx, char *name) {
+void FunctionReq(uint8_t src_type, uint8_t src_idx, char *key) {
   uint8_t idx;
 
-  idx = FunctionGetIdx(name);
+  idx = FunctionGetIdx(key);
   if (idx != 0xFF) {
-    strcpy(FunctionReqName, name);
+    strcpy(FunctionReqName, key);
     FunctionReqIdx = idx;
     FunctionReqPending = 1;
     Function[idx].src_type = src_type;

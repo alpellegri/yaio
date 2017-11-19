@@ -24,8 +24,8 @@ extern void RF_AddTimerDB(String type, String action, String hour,
                           String minute);
 extern void RF_AddDoutDB(String action);
 extern void RF_AddLoutDB(String action);
-extern void RF_AddFunctionsDB(String name, String type, String action,
-                              String delay, String next);
+extern void RF_AddFunctionsDB(String key, String type, String action,
+                              uint32_t delay, String next);
 extern uint8_t RF_CheckRadioCodeDB(uint32_t code);
 extern void RF_ExecuteRadioCodeDB(uint8_t idx);
 extern uint8_t RF_CheckRadioCodeTxDB(uint32_t code);

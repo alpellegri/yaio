@@ -8,6 +8,13 @@
 #include "fcm.h"
 #include "rf.h"
 
+#define kDOut 0
+#define kRadioIn 1
+#define kLOut 2
+#define kDIn 3
+#define kRadioOut 4
+#define kRadioElem 5
+
 bool FbmUpdateRadioCodes(void) {
   bool ret = true;
   yield();
@@ -29,62 +36,6 @@ bool FbmUpdateRadioCodes(void) {
         String id = i->value.asString();
         Serial.println(id);
         FcmAddRegIDsDB(id);
-      }
-    }
-  }
-
-  if (ret == true) {
-    Serial.println(F("FbmUpdateRadioCodes Rx"));
-    FirebaseObject ref = Firebase.get(F("RadioCodes/Active"));
-    if (Firebase.failed() == true) {
-      Serial.print(F("get failed: RadioCodes/Active"));
-      Serial.println(Firebase.error());
-      ret = false;
-    } else {
-      RF_DeInitRadioCodeDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
-      }
-      RF_InitRadioCodeDB(num);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String id = nestedObject["id"];
-        String name = nestedObject["name"];
-        String func = nestedObject["func"];
-        Serial.println(id);
-        RF_AddRadioCodeDB(id, name, func);
-      }
-    }
-  }
-
-  if (ret == true) {
-    Serial.println(F("FbmUpdateRadioCodes Tx"));
-    FirebaseObject ref = Firebase.get(F("RadioCodes/ActiveTx"));
-    if (Firebase.failed() == true) {
-      Serial.print(F("get failed: RadioCodes/ActiveTx"));
-      Serial.println(Firebase.error());
-      ret = false;
-    } else {
-      RF_DeInitRadioCodeTxDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
-      }
-      RF_InitRadioCodeTxDB(num);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String id = nestedObject["id"];
-        Serial.println(id);
-        RF_AddRadioCodeTxDB(id);
       }
     }
   }
@@ -120,60 +71,6 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.println(F("FbmUpdateDIO Dout"));
-    FirebaseObject ref = Firebase.get(F("DIO/Dout"));
-    if (Firebase.failed() == true) {
-      Serial.print(F("get failed: DIO/Dout"));
-      Serial.println(Firebase.error());
-      ret = false;
-    } else {
-      RF_DeInitDoutDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
-      }
-      RF_InitDoutDB(num);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String id = nestedObject["id"];
-        Serial.println(id);
-        RF_AddDoutDB(id);
-      }
-    }
-  }
-
-  if (ret == true) {
-    Serial.println(F("FbmUpdateLIO Lout"));
-    FirebaseObject ref = Firebase.get(F("LIO/Lout"));
-    if (Firebase.failed() == true) {
-      Serial.print(F("get failed: LIO/Lout"));
-      Serial.println(Firebase.error());
-      ret = false;
-    } else {
-      RF_DeInitLoutDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
-      }
-      RF_InitLoutDB(num);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        // Serial.println(i->key);
-        JsonObject &nestedObject = i->value;
-        String id = nestedObject["id"];
-        Serial.println(id);
-        RF_AddLoutDB(id);
-      }
-    }
-  }
-
-  if (ret == true) {
     Serial.println(F("FbmUpdateFuncions"));
     FirebaseObject ref = Firebase.get(F("Functions"));
     if (Firebase.failed() == true) {
@@ -191,15 +88,92 @@ bool FbmUpdateRadioCodes(void) {
       RF_InitFunctionsDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        // Serial.println(i->key);
         JsonObject &nestedObject = i->value;
-        String name = nestedObject["name"];
+        String key = i->key;
         String type = nestedObject["type"];
         String action = nestedObject["action"];
-        String delay = nestedObject["delay"];
+        uint32_t delay = nestedObject["delay"];
         String next = nestedObject["next"];
-        Serial.println(name);
-        RF_AddFunctionsDB(name, type, action, delay, next);
+        Serial.println(key);
+        RF_AddFunctionsDB(key, type, action, delay, next);
+      }
+    }
+  }
+
+  if (ret == true) {
+    Serial.println(F("graph"));
+    FirebaseObject ref = Firebase.get(F("graph"));
+    if (Firebase.failed() == true) {
+      Serial.print(F("get failed: graph"));
+      Serial.println(Firebase.error());
+      ret = false;
+    } else {
+      RF_DeInitRadioCodeDB();
+      RF_DeInitRadioCodeTxDB();
+      RF_DeInitDoutDB();
+      RF_DeInitLoutDB();
+      JsonVariant variant = ref.getJsonVariant();
+      JsonObject &object = variant.as<JsonObject>();
+      uint8_t numRx = 0;
+      uint8_t numTx = 0;
+      uint8_t numDout = 0;
+      uint8_t numLout = 0;
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        yield();
+        JsonObject &nestedObject = i->value;
+        String id = nestedObject["id"];
+        uint8_t type = nestedObject["type"];
+        Serial.printf("%s, %d\n", id.c_str(), type);
+        switch (type) {
+        case kDOut:
+          numDout++;
+          break;
+        case kRadioIn:
+          numRx++;
+          break;
+        case kLOut:
+          numLout++;
+          break;
+        case kRadioOut:
+          numTx++;
+          break;
+        default:
+          break;
+        }
+      }
+      Serial.printf("%d, %d, %d, %d\n", numDout, numRx, numLout, numTx);
+
+      RF_InitRadioCodeDB(numRx);
+      RF_InitRadioCodeTxDB(numTx);
+      RF_InitDoutDB(numDout);
+      RF_InitLoutDB(numLout);
+      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
+        yield();
+        JsonObject &nestedObject = i->value;
+        String name = nestedObject["name"];
+        String id = nestedObject["id"];
+        uint8_t type = nestedObject["type"];
+        String func = nestedObject["func"];
+        Serial.printf("name %s\n", name.c_str());
+        Serial.printf("id %s\n", id.c_str());
+        Serial.printf("type %d\n", type);
+        Serial.printf("func %s\n", func.c_str());
+        switch (type) {
+        case kDOut:
+          RF_AddDoutDB(id);
+          break;
+        case kRadioIn:
+          RF_AddRadioCodeDB(id, name, func);
+          break;
+        case kLOut:
+          RF_AddLoutDB(id);
+          break;
+        case kRadioOut:
+          RF_AddRadioCodeTxDB(id);
+          break;
+        default:
+          break;
+        }
       }
     }
   }
