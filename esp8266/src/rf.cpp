@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
 #include "rf.h"
@@ -95,6 +96,7 @@ void RF_addIoEntryDB(String key, uint8_t type, String id, String name,
     strcpy(IoEntry[IoEntryLen].name, name.c_str());
     strcpy(IoEntry[IoEntryLen].func, func.c_str());
     IoEntryLen++;
+    Serial.printf("%d: %s\n", IoEntryLen, name.c_str());
   }
 }
 
@@ -203,7 +205,7 @@ uint8_t RF_checkRadioCodeDB(uint32_t code) {
 
   Serial.printf_P(PSTR("RF_CheckRadioCodeDB: code %06X\n"), code);
   while ((i < IoEntryLen) && (idx == 0xFF)) {
-    if (code == IoEntry[i].id) {
+    if ((code == IoEntry[i].id) && (IoEntry[i].type == kRadioIn)) {
       Serial.printf_P(PSTR("radio code found in table %06X\n"), IoEntry[i].id);
       idx = i;
     }
@@ -213,7 +215,7 @@ uint8_t RF_checkRadioCodeDB(uint32_t code) {
   return idx;
 }
 
-void RF_ExecuteRadioCodeDB(uint8_t idx) {
+void RF_executeIoEntryDB(uint8_t idx) {
   // call
   FunctionReq(idx, IoEntry[idx].func);
 }
@@ -227,7 +229,7 @@ uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
   while ((i < IoEntryLen) && (idx == 0xFF)) {
     Serial.print(F("radio table: "));
     Serial.println(IoEntry[i].id);
-    if (code == IoEntry[i].id) {
+    if ((code == IoEntry[i].id) && (IoEntry[i].type == kRadioOut)) {
       Serial.print(F("radio Tx code found in table "));
       Serial.println(IoEntry[i].id);
       idx = i;
@@ -249,17 +251,17 @@ void RF_Action(uint8_t src_idx, char *action) {
   Serial.printf_P(PSTR("RF_Action: %s\n"), action);
 
 #if 0
-  if (type == 1) {
+  if (type == 0) {
     // dout
     uint8_t port = action >> 8;
     uint8_t value = action & 0xFF;
     Serial.printf_P(PSTR("digital: %06X, %d, %d\n"), action, port, value);
     pinMode(port, OUTPUT);
     digitalWrite(port, !!value);
-  } else if (type == 2) {
+  } else if (type == 1) {
     // rf
     mySwitch.send(action, 24);
-  } else if (type == 3) {
+  } else if (type == 2) {
     // lout
     uint8_t port = action >> 8;
     uint8_t value = action & 0xFF;
@@ -282,16 +284,18 @@ void RF_MonitorTimers(void) {
   // loop over timers
   for (uint8_t i = 0; i < IoEntryLen; i++) {
     // test in range
-    uint32_t _time = IoEntry[i].id;
-    bool res = RF_TestInRange(_time, t247_last, t247);
-    if (res == true) {
-      // action
-      Serial.printf_P(PSTR(">>> action on timer %d at time %d\n"), i, t247);
-      String log =
-          "action on timer " + String(i) + " at time " + String(t247) + "\n";
-      fblog_log(log, false);
+    if (IoEntry[i].type == kTimer) {
+      uint32_t _time = IoEntry[i].id;
+      bool res = RF_TestInRange(_time, t247_last, t247);
+      if (res == true) {
+        // action
+        Serial.printf_P(PSTR(">>> action on timer %d at time %d\n"), i, t247);
+        String log =
+            "action on timer " + String(i) + " at time " + String(t247) + "\n";
+        fblog_log(log, false);
 
-      // RF_Action(5, 0, IoEntry[i].action);
+        // RF_Action(5, 0, IoEntry[i].action);
+      }
     }
   }
   t247_last = t247;

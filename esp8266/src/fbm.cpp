@@ -367,7 +367,7 @@ bool FbmService(void) {
         fbm_monitor_last = time_now;
         fbm_monitor_run = true;
         // RF found in Rx DB, make an action
-        RF_ExecuteRadioCodeDB(idx);
+        RF_executeIoEntryDB(idx);
       }
 
       // acquire Active Radio Codes from FB

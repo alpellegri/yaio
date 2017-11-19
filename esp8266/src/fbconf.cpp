@@ -8,13 +8,6 @@
 #include "fcm.h"
 #include "rf.h"
 
-#define kDOut 0
-#define kRadioIn 1
-#define kLOut 2
-#define kDIn 3
-#define kRadioOut 4
-#define kRadioElem 5
-
 bool FbmUpdateRadioCodes(void) {
   bool ret = true;
   yield();
@@ -94,10 +87,6 @@ bool FbmUpdateRadioCodes(void) {
         String id = nestedObject["id"];
         uint8_t type = nestedObject["type"];
         String func = nestedObject["func"];
-        Serial.printf("name %s\n", name.c_str());
-        Serial.printf("id %s\n", id.c_str());
-        Serial.printf("type %d\n", type);
-        Serial.printf("func %s\n", func.c_str());
         RF_addIoEntryDB(key, type, id, name, func);
       }
     }

@@ -15,7 +15,7 @@ extern char *RF_getRadioName(uint8_t idx);
 extern void RF_addFunctionDB(String key, String type, String action,
                              uint32_t delay, String next);
 extern uint8_t RF_checkRadioCodeDB(uint32_t code);
-extern void RF_ExecuteRadioCodeDB(uint8_t idx);
+extern void RF_executeIoEntryDB(uint8_t idx);
 extern uint8_t RF_checkRadioCodeTxDB(uint32_t code);
 
 extern uint32_t RF_GetRadioCode(void);
