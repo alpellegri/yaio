@@ -281,27 +281,6 @@ void RF_Action(uint8_t src_idx, char *action) {
   default:
     break;
   }
-#if 0
-  if (type == 0) {
-    // dout
-    uint8_t port = action >> 8;
-    uint8_t value = action & 0xFF;
-    Serial.printf_P(PSTR("digital: %06X, %d, %d\n"), action, port, value);
-    pinMode(port, OUTPUT);
-    digitalWrite(port, !!value);
-  } else if (type == 1) {
-    // rf
-    mySwitch.send(action, 24);
-  } else if (type == 2) {
-    // lout
-    uint8_t port = action >> 8;
-    uint8_t value = action & 0xFF;
-    Serial.printf_P(PSTR("logical: %06X, %d, %d\n"), action, port, value);
-    /* logical actions req */
-    FbmLogicReq(src_type, src_idx, port, !!value);
-  } else {
-  }
-#endif
 }
 
 void RF_MonitorTimers(void) {
