@@ -91,12 +91,20 @@ void RF_initFunctionDB(uint8_t num) {
 void RF_addIoEntryDB(String key, uint8_t type, String id, String name,
                      String func) {
   if (IoEntryLen < NUM_IO_ENTRY_MAX) {
+    strcpy(IoEntry[IoEntryLen].key, key.c_str());
     IoEntry[IoEntryLen].id = atoi(id.c_str());
     IoEntry[IoEntryLen].type = type;
     strcpy(IoEntry[IoEntryLen].name, name.c_str());
     strcpy(IoEntry[IoEntryLen].func, func.c_str());
     IoEntryLen++;
-    Serial.printf("%d: %s\n", IoEntryLen, name.c_str());
+  }
+}
+
+void RF_dumpIoEntry(void) {
+  for (uint8_t i = 0; i < IoEntryLen; i++) {
+    Serial.printf("%d: %06X, %d, %s, %s, %s\n", i, IoEntry[i].id,
+                  IoEntry[i].type, IoEntry[i].key, IoEntry[i].name,
+                  IoEntry[i].func);
   }
 }
 
@@ -251,7 +259,7 @@ void RF_Action(uint8_t src_idx, char *action) {
 
   uint8_t idx = getIoEntryIdx(action);
 
-  Serial.printf_P(PSTR("RF_Action: %s\n"), action);
+  Serial.printf_P(PSTR("RF_Action: %d, %s\n"), idx, action);
   switch (IoEntry[idx].type) {
   case kDOut: {
     // dout

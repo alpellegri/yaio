@@ -29,4 +29,6 @@ extern void RF_MonitorTimers(void);
 extern void RF_Loop(void);
 extern bool RF_Task(void);
 
+extern void RF_dumpIoEntry(void);
+
 #endif
