@@ -31,6 +31,22 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
+                      'Hour: ${entry.getPort()}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    new Text(
+                      'Minute: ${entry.getValue()}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    new Text(
                       'ID: ${entry.id}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
@@ -192,13 +208,13 @@ class _EntryDialogState extends State<EntryDialog> {
               new TextField(
                 controller: _controllerPort,
                 decoration: new InputDecoration(
-                  hintText: 'port',
+                  hintText: 'hour',
                 ),
               ),
               new TextField(
                 controller: _controllerValue,
                 decoration: new InputDecoration(
-                  hintText: 'value',
+                  hintText: 'minute',
                 ),
               ),
             ]),
