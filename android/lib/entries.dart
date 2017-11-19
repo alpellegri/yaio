@@ -6,6 +6,7 @@ const int kLOut = 2;
 const int kDIn = 3;
 const int kRadioOut = 4;
 const int kRadioElem = 5;
+const int kTimer = 6;
 
 const String kStringDOut = 'DOut';
 const String kStringRadioIn = 'RadioIn';
