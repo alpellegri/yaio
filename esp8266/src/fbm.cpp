@@ -74,7 +74,6 @@ void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
 typedef struct {
   uint8_t func;
   uint8_t value;
-  uint8_t src_type;
   uint8_t src_idx;
 } FbmFuncSrvQueque_t;
 
@@ -82,8 +81,7 @@ static uint8_t FbmLogicQuequeWrPos = 0;
 static uint8_t FbmLogicQuequeRdPos = 0;
 static FbmFuncSrvQueque_t FbmLogicQueque[FBM_LOGIC_QUEUE_LEN];
 
-void FbmLogicReq(uint8_t src_type, uint8_t src_idx, uint8_t port, bool value) {
-  FbmLogicQueque[FbmLogicQuequeWrPos].src_type = src_type;
+void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
   FbmLogicQueque[FbmLogicQuequeWrPos].src_idx = src_idx;
   FbmLogicQueque[FbmLogicQuequeWrPos].func = port;
   FbmLogicQueque[FbmLogicQuequeWrPos].value = value;
@@ -99,8 +97,7 @@ void FbmLogicReq(uint8_t src_type, uint8_t src_idx, uint8_t port, bool value) {
 /* function mapping requests
  * port=0: value=1 -> arm alarm / value=0 -> disarm alarm
  */
-static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t port,
-                           bool value) {
+static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
   bool ret = false;
   if (port == 0) {
     Firebase.setBool(F("control/alarm"), value);
@@ -122,8 +119,7 @@ static bool FbmLogicAction(uint32_t src_type, uint32_t src_idx, uint8_t port,
 
 void FbmLogicSrv() {
   if (FbmLogicQuequeWrPos != FbmLogicQuequeRdPos) {
-    bool ret = FbmLogicAction(FbmLogicQueque[FbmLogicQuequeRdPos].src_type,
-                              FbmLogicQueque[FbmLogicQuequeRdPos].src_idx,
+    bool ret = FbmLogicAction(FbmLogicQueque[FbmLogicQuequeRdPos].src_idx,
                               FbmLogicQueque[FbmLogicQuequeRdPos].func,
                               FbmLogicQueque[FbmLogicQuequeRdPos].value);
     if (ret == true) {

@@ -248,8 +248,36 @@ bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
 }
 
 void RF_Action(uint8_t src_idx, char *action) {
-  Serial.printf_P(PSTR("RF_Action: %s\n"), action);
 
+  uint8_t idx = getIoEntryIdx(action);
+
+  Serial.printf_P(PSTR("RF_Action: %s\n"), action);
+  switch (IoEntry[idx].type) {
+  case kDOut: {
+    // dout
+    uint8_t port = IoEntry[idx].id >> 8;
+    uint8_t value = IoEntry[idx].id & 0xFF;
+    Serial.printf_P(PSTR("digital: %06X, %d, %d\n"), IoEntry[idx].id, port,
+                    value);
+    pinMode(port, OUTPUT);
+    digitalWrite(port, !!value);
+  } break;
+  case kRadioOut:
+    // rf
+    mySwitch.send(IoEntry[idx].id, 24);
+    break;
+  case kLOut: {
+    // lout
+    uint8_t port = IoEntry[idx].id >> 8;
+    uint8_t value = IoEntry[idx].id & 0xFF;
+    Serial.printf_P(PSTR("logical: %06X, %d, %d\n"), IoEntry[idx].id, port,
+                    value);
+    /* logical actions req */
+    FbmLogicReq(src_idx, port, !!value);
+  } break;
+  default:
+    break;
+  }
 #if 0
   if (type == 0) {
     // dout
