@@ -29,6 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Map _fbJsonMap;
   String _infoConfig = "";
   String _homeScreenText = "Waiting for token...";
+  Duration _timeZoneOffset;
 
   Map<String, Object> _control = {
     'alarm': false,
@@ -117,6 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     iconLockstatus = const Icon(Icons.lock_open);
     print('_MyHomePageState');
+    DateTime now = new DateTime.now();
+    _timeZoneOffset = now.timeZoneOffset;
   }
 
   @override
@@ -147,9 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
       monitorButton = "ACTIVATE";
     }
     DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-        int.parse(_startup['time'].toString()) * 1000);
+        int.parse(_startup['time'].toString()) * 1000).add(_timeZoneOffset);
     DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
-        int.parse(_status['time'].toString()) * 1000);
+        int.parse(_status['time'].toString()) * 1000).add(_timeZoneOffset);
     return new Scaffold(
         drawer: drawer,
         appBar: new AppBar(

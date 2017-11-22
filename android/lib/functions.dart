@@ -13,6 +13,8 @@ class FunctionListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FunctionEntry next;
+    IoEntry action;
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
       child: new Row(
@@ -30,14 +32,7 @@ class FunctionListItem extends StatelessWidget {
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
-                    /*new Text(
-                      'type: ${entry.typeName}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
+                    /*
                     new Text(
                       'action name: ${entry.actionName}',
                       textScaleFactor: 1.0,
@@ -53,15 +48,7 @@ class FunctionListItem extends StatelessWidget {
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),
-                    new Text(
-                      'action ID: ${entry.idAction}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
+                    ),*/
                     new Text(
                       'delay: ${entry.delay.toString()}',
                       textScaleFactor: 1.0,
@@ -77,7 +64,7 @@ class FunctionListItem extends StatelessWidget {
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),*/
+                    ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,

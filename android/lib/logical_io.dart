@@ -46,14 +46,6 @@ class ListItem extends StatelessWidget {
                         color: Colors.grey,
                       ),
                     ),
-                    new Text(
-                      'ID: ${entry.id.toRadixString(16)}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
