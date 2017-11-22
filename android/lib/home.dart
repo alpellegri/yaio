@@ -30,6 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _infoConfig = "";
   String _homeScreenText = "Waiting for token...";
   Duration _timeZoneOffset;
+  bool _connected = false;
 
   Map<String, Object> _control = {
     'alarm': false,
@@ -55,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _connected = false;
     configFirefase().then((value) {
       _fbJsonMap = value;
       _infoConfig =
@@ -110,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
           FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
         });
         print(_homeScreenText);
+        _connected = true;
       });
 
       _controlRef.onValue.listen(_onValueControl);
@@ -150,166 +153,171 @@ class _MyHomePageState extends State<MyHomePage> {
       monitorButton = "ACTIVATE";
     }
     DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-        int.parse(_startup['time'].toString()) * 1000).add(_timeZoneOffset);
+            int.parse(_startup['time'].toString()) * 1000)
+        .add(_timeZoneOffset);
     DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
-        int.parse(_status['time'].toString()) * 1000).add(_timeZoneOffset);
+            int.parse(_status['time'].toString()) * 1000)
+        .add(_timeZoneOffset);
     return new Scaffold(
         drawer: drawer,
         appBar: new AppBar(
           title: new Text(widget.title),
         ),
-        body: new ListView(children: <Widget>[
-          new Card(
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new ListTile(
-                  leading: const Icon(Icons.album),
-                  title: const Text('Device Status'),
-                ),
-                new ListTile(
-                  leading: iconLockstatus,
-                  title: const Text('Alarm Status'),
-                  subtitle:
-                      new Text('${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
-                  trailing: new ButtonTheme.bar(
-                    // make buttons use the appropriate styles for cards
-                    child: new ButtonBar(
-                      children: <Widget>[
-                        new FlatButton(
-                          child: new Text(alarmButton),
-                          onPressed: () {
-                            _control['alarm'] = !_control['alarm'];
-                            DateTime now = new DateTime.now();
-                            _control['time'] =
-                                now.millisecondsSinceEpoch ~/ 1000;
-                            _controlRef.set(_control);
-                          },
+        body: (_connected == true)
+            ? (new ListView(children: <Widget>[
+                new Card(
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new ListTile(
+                        leading: const Icon(Icons.album),
+                        title: const Text('Device Status'),
+                      ),
+                      new ListTile(
+                        leading: iconLockstatus,
+                        title: const Text('Alarm Status'),
+                        subtitle: new Text(
+                            '${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
+                        trailing: new ButtonTheme.bar(
+                          // make buttons use the appropriate styles for cards
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: new Text(alarmButton),
+                                onPressed: () {
+                                  _control['alarm'] = !_control['alarm'];
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          new Card(
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new ListTile(
-                  leading: const Icon(Icons.show_chart),
-                  title: const Text('Temperature/Humidity'),
-                  subtitle: new Text(
-                      '${_status["temperature"]}°C / ${_status["humidity"]}%'),
-                ),
-              ],
-            ),
-          ),
-          new Card(
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new ListTile(
-                  leading: const Icon(Icons.network_check),
-                  title: const Text('RF monitoring'),
-                  subtitle:
-                  new Text('${_control["radio_learn"] ? "ACTIVE" : "INACTIVE"}'),
-                  trailing: new ButtonTheme.bar(
-                    // make buttons use the appropriate styles for cards
-                    child: new ButtonBar(
-                      children: <Widget>[
-                        new FlatButton(
-                          child: new Text(monitorButton),
-                          onPressed: () {
-                            _control['radio_learn'] = !_control['radio_learn'];
-                            DateTime now = new DateTime.now();
-                            _control['time'] =
-                                now.millisecondsSinceEpoch ~/ 1000;
-                            _controlRef.set(_control);
-                          },
-                        ),
-                      ],
-                    ),
+                new Card(
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new ListTile(
+                        leading: const Icon(Icons.show_chart),
+                        title: const Text('Temperature/Humidity'),
+                        subtitle: new Text(
+                            '${_status["temperature"]}°C / ${_status["humidity"]}%'),
+                      ),
+                    ],
                   ),
                 ),
-                new ListTile(
-                  leading: const Icon(Icons.power),
-                  title: const Text('PowerUp'),
-                  subtitle: new Text('${_startupTime.toUtc()}'),
-                ),
-                new ListTile(
-                  leading: const Icon(Icons.link),
-                  title: const Text('HeartBeat'),
-                  subtitle: new Text('${_heartbeatTime.toUtc()}'),
-                ),
-                new ListTile(
-                  leading: const Icon(Icons.loop),
-                  title: const Text('Reboot Counter'),
-                  subtitle: new Text('${_startup["bootcnt"]}'),
-                  trailing: new ButtonTheme.bar(
-                    child: new ButtonBar(
-                      children: <Widget>[
-                        new FlatButton(
-                          child: const Text('RESTART'),
-                          onPressed: () {
-                            _control['reboot'] = 1;
-                            _controlRef.set(_control);
-                            DateTime now = new DateTime.now();
-                            _control['time'] =
-                                now.millisecondsSinceEpoch ~/ 1000;
-                            _controlRef.set(_control);
-                          },
+                new Card(
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new ListTile(
+                        leading: const Icon(Icons.network_check),
+                        title: const Text('RF monitoring'),
+                        subtitle: new Text(
+                            '${_control["radio_learn"] ? "ACTIVE" : "INACTIVE"}'),
+                        trailing: new ButtonTheme.bar(
+                          // make buttons use the appropriate styles for cards
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: new Text(monitorButton),
+                                onPressed: () {
+                                  _control['radio_learn'] =
+                                      !_control['radio_learn'];
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                      new ListTile(
+                        leading: const Icon(Icons.power),
+                        title: const Text('PowerUp'),
+                        subtitle: new Text('${_startupTime.toUtc()}'),
+                      ),
+                      new ListTile(
+                        leading: const Icon(Icons.link),
+                        title: const Text('HeartBeat'),
+                        subtitle: new Text('${_heartbeatTime.toUtc()}'),
+                      ),
+                      new ListTile(
+                        leading: const Icon(Icons.loop),
+                        title: const Text('Reboot Counter'),
+                        subtitle: new Text('${_startup["bootcnt"]}'),
+                        trailing: new ButtonTheme.bar(
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: const Text('RESTART'),
+                                onPressed: () {
+                                  _control['reboot'] = 1;
+                                  _controlRef.set(_control);
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      new ListTile(
+                        leading: const Icon(Icons.memory),
+                        title: const Text('Heap Memory'),
+                        subtitle: new Text('${_status["heap"]}'),
+                      ),
+                      new ListTile(
+                        leading: const Icon(Icons.flash_on),
+                        title: const Text('Firmware Version'),
+                        subtitle: new Text('${_startup["version"]}'),
+                        trailing: new ButtonTheme.bar(
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: const Text('UPDATE'),
+                                onPressed: () {
+                                  _control['reboot'] = 2;
+                                  _controlRef.set(_control);
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                new ListTile(
-                  leading: const Icon(Icons.memory),
-                  title: const Text('Heap Memory'),
-                  subtitle: new Text('${_status["heap"]}'),
-                ),
-                new ListTile(
-                  leading: const Icon(Icons.flash_on),
-                  title: const Text('Firmware Version'),
-                  subtitle: new Text('${_startup["version"]}'),
-                  trailing: new ButtonTheme.bar(
-                    child: new ButtonBar(
-                      children: <Widget>[
-                        new FlatButton(
-                          child: const Text('UPDATE'),
-                          onPressed: () {
-                            _control['reboot'] = 2;
-                            _controlRef.set(_control);
-                            DateTime now = new DateTime.now();
-                            _control['time'] =
-                                now.millisecondsSinceEpoch ~/ 1000;
-                            _controlRef.set(_control);
-                          },
-                        ),
-                      ],
-                    ),
+                new Card(
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      new Text('Firebase info'),
+                      new Text(_infoConfig),
+                      new Text('Firebase Messaging info'),
+                      new Text(_homeScreenText),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          new Card(
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Text('Firebase info'),
-                new Text(_infoConfig),
-                new Text('Firebase Messaging info'),
-                new Text(_homeScreenText),
-              ],
-            ),
-          ),
-        ]));
+              ]))
+            : (new Text('Connecting...')));
   }
 
   void _onValueControl(Event event) {
