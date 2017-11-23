@@ -327,7 +327,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ]))
-            : (new Text('Connecting...')));
+            : (new LinearProgressIndicator(
+          value: null,
+        )));
   }
 
   void _onValueControl(Event event) {
