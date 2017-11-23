@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -24,6 +26,11 @@ class _MyHomePageState extends State<MyHomePage> {
   final DatabaseReference _fcmRef =
       FirebaseDatabase.instance.reference().child(kTokenIDsRef);
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+
+  StreamSubscription<Event> _controlSub;
+  StreamSubscription<Event> _statusSub;
+  StreamSubscription<Event> _startupSub;
+  StreamSubscription<Event> _fcmSub;
 
   Icon iconLockstatus;
   Map _fbJsonMap;
@@ -115,9 +122,9 @@ class _MyHomePageState extends State<MyHomePage> {
         _connected = true;
       });
 
-      _controlRef.onValue.listen(_onValueControl);
-      _statusRef.onValue.listen(_onValueStatus);
-      _startupRef.onValue.listen(_onValueStartup);
+      _controlSub = _controlRef.onValue.listen(_onValueControl);
+      _statusSub = _statusRef.onValue.listen(_onValueStatus);
+      _startupSub = _startupRef.onValue.listen(_onValueStartup);
     });
     iconLockstatus = const Icon(Icons.lock_open);
     print('_MyHomePageState');
@@ -128,6 +135,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     super.dispose();
+    _controlSub.cancel();
+    _statusSub.cancel();
+    _startupSub.cancel();
   }
 
   @override

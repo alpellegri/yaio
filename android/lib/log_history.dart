@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -89,12 +91,27 @@ class LogHistory extends StatefulWidget {
 class _LogHistoryState extends State<LogHistory> {
   List<LogEntry> logSaves = new List();
   DatabaseReference _logReference;
+  StreamSubscription<Event> _onAddSub;
+  StreamSubscription<Event> _onRemoveSub;
 
   _LogHistoryState() {
     _logReference =
         FirebaseDatabase.instance.reference().child(kLogsRef).child("Reports");
-    _logReference.onChildAdded.listen(_onEntryAdded);
-    _logReference.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSub = _logReference.onChildAdded.listen(_onEntryAdded);
+    _onRemoveSub = _logReference.onChildRemoved.listen(_onEntryRemoved);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print('_LogHistoryState');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSub.cancel();
+    _onRemoveSub.cancel();
   }
 
   @override
