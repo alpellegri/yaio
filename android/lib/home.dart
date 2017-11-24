@@ -17,6 +17,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final time_limit = const Duration(seconds: 20);
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
   final DatabaseReference _statusRef =
@@ -32,7 +33,6 @@ class _MyHomePageState extends State<MyHomePage> {
   StreamSubscription<Event> _startupSub;
   StreamSubscription<Event> _fcmSub;
 
-  Icon iconLockstatus;
   Map _fbJsonMap;
   String _infoConfig = "";
   String _homeScreenText = "Waiting for token...";
@@ -126,7 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _statusSub = _statusRef.onValue.listen(_onValueStatus);
       _startupSub = _startupRef.onValue.listen(_onValueStartup);
     });
-    iconLockstatus = const Icon(Icons.lock_open);
     print('_MyHomePageState');
     DateTime now = new DateTime.now();
     _timeZoneOffset = now.timeZoneOffset;
@@ -162,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       monitorButton = "ACTIVATE";
     }
+    DateTime current = new DateTime.now();
     DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
             int.parse(_startup['time'].toString()) * 1000)
         .add(_timeZoneOffset);
@@ -181,11 +181,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       new ListTile(
-                        leading: const Icon(Icons.album),
+                        leading:
+                            (current.difference(_heartbeatTime) > time_limit)
+                                ? (const Icon(Icons.album, color: Colors.red))
+                                : (const Icon(Icons.album, color: Colors.green)),
                         title: const Text('Device Status'),
                       ),
                       new ListTile(
-                        leading: iconLockstatus,
+                        leading: (_status['alarm'] == true)
+                            ? (const Icon(Icons.lock, color: Colors.red))
+                            : (const Icon(Icons.lock_open,
+                                color: Colors.green)),
                         title: const Text('Alarm Status'),
                         subtitle: new Text(
                             '${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
@@ -264,7 +270,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         subtitle: new Text('${_heartbeatTime.toUtc()}'),
                       ),
                       new ListTile(
-                        leading: const Icon(Icons.loop),
+                        leading: (_control['reboot'] == 1)
+                            ? (new LinearProgressIndicator(
+                                value: null,
+                              ))
+                            : (const Icon(Icons.loop)),
                         title: const Text('Reboot Counter'),
                         subtitle: new Text('${_startup["bootcnt"]}'),
                         trailing: new ButtonTheme.bar(
@@ -286,12 +296,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       new ListTile(
-                        leading: const Icon(Icons.memory),
-                        title: const Text('Heap Memory'),
-                        subtitle: new Text('${_status["heap"]}'),
-                      ),
-                      new ListTile(
-                        leading: const Icon(Icons.flash_on),
+                        leading: (_control['reboot'] == 2)
+                            ? (new LinearProgressIndicator(
+                                value: null,
+                              ))
+                            : (const Icon(Icons.flash_on)),
                         title: const Text('Firmware Version'),
                         subtitle: new Text('${_startup["version"]}'),
                         trailing: new ButtonTheme.bar(
@@ -312,6 +321,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
+                      new ListTile(
+                        leading: const Icon(Icons.memory),
+                        title: const Text('Heap Memory'),
+                        subtitle: new Text('${_status["heap"]}'),
+                      ),
                     ],
                   ),
                 ),
@@ -328,8 +342,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ]))
             : (new LinearProgressIndicator(
-          value: null,
-        )));
+                value: null,
+              )));
   }
 
   void _onValueControl(Event event) {
@@ -345,11 +359,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _controlRef.set(_control);
     setState(() {
       _status = event.snapshot.value;
-      if (_status['alarm'] == true) {
-        iconLockstatus = const Icon(Icons.lock, color: Colors.red);
-      } else {
-        iconLockstatus = const Icon(Icons.lock_open, color: Colors.green);
-      }
     });
   }
 
