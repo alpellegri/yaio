@@ -183,15 +183,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       new ListTile(
                         leading:
                             (current.difference(_heartbeatTime) > time_limit)
-                                ? (const Icon(Icons.album, color: Colors.red))
-                                : (const Icon(Icons.album, color: Colors.green)),
+                                ? (new Icon(Icons.album, color: Colors.red[200]))
+                                : (new Icon(Icons.album, color: Colors.green[200])),
                         title: const Text('Device Status'),
                       ),
                       new ListTile(
                         leading: (_status['alarm'] == true)
-                            ? (const Icon(Icons.lock, color: Colors.red))
-                            : (const Icon(Icons.lock_open,
-                                color: Colors.green)),
+                            ? (new Icon(Icons.lock_outline, color: Colors.red[200]))
+                            : (new Icon(Icons.lock_open,
+                                color: Colors.green[200])),
                         title: const Text('Alarm Status'),
                         subtitle: new Text(
                             '${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
