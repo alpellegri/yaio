@@ -181,15 +181,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       new ListTile(
-                        leading:
-                            (current.difference(_heartbeatTime) > time_limit)
-                                ? (new Icon(Icons.album, color: Colors.red[200]))
-                                : (new Icon(Icons.album, color: Colors.green[200])),
+                        leading: (current.difference(_heartbeatTime) >
+                                time_limit)
+                            ? (new Icon(Icons.album, color: Colors.red[200]))
+                            : (new Icon(Icons.album, color: Colors.green[200])),
                         title: const Text('Device Status'),
                       ),
                       new ListTile(
                         leading: (_status['alarm'] == true)
-                            ? (new Icon(Icons.lock_outline, color: Colors.red[200]))
+                            ? (new Icon(Icons.lock_outline,
+                                color: Colors.red[200]))
                             : (new Icon(Icons.lock_open,
                                 color: Colors.green[200])),
                         title: const Text('Alarm Status'),
