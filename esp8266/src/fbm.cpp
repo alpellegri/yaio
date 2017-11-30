@@ -374,10 +374,18 @@ bool FbmService(void) {
         if (idxTx == 0xFF) {
           Serial.print(F("RadioCodes/Inactive: "));
           Serial.println(code);
+
+          DynamicJsonBuffer jsonBuffer;
+          JsonObject &inactive = jsonBuffer.createObject();
+          inactive["name"] = "inactive";
+          inactive["id"] = code;
+          inactive["type"] = 5;
           yield();
-          Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
+          Firebase.set(F("graph/inactive"), JsonVariant(inactive));
+
+          // Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
           if (Firebase.failed()) {
-            Serial.print(F("set failed: RadioCodes/Inactive"));
+            Serial.print(F("set failed: graph/inactive"));
             Serial.println(Firebase.error());
           } else {
           }

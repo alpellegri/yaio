@@ -77,12 +77,22 @@ class IoEntry {
   }
 
   toJson() {
-    return {
-      'type': type,
-      'id': id,
-      'name': name,
-      'func': func,
-    };
+    var json;
+    if (func != null) {
+      json = {
+        'type': type,
+        'id': id,
+        'name': name,
+        'func': func,
+      };
+    } else {
+      json = {
+        'type': type,
+        'id': id,
+        'name': name,
+      };
+    }
+    return json;
   }
 }
 

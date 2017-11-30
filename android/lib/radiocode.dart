@@ -329,10 +329,18 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
+                var prev_type = entry.type;
                 entry.type = _selectedType;
-                entry.func = _selectedFunction.key;
+                if (_selectedFunction != null) {
+                  entry.func = _selectedFunction.key;
+                }
                 if (entry.key != null) {
-                  entry.reference.child(entry.key).update(entry.toJson());
+                  if (prev_type == kRadioElem) {
+                    entry.reference.child(entry.key).remove();
+                    entry.reference.push().set(entry.toJson());
+                  } else {
+                    entry.reference.child(entry.key).update(entry.toJson());
+                  }
                 } else {
                   entry.reference.push().set(entry.toJson());
                 }
