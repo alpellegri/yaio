@@ -4,12 +4,13 @@ description: A new Flutter project.
 dependencies:
   flutter:
     sdk: flutter
-  google_sign_in: '1.0.1'
-  firebase: '4.1.0'
-  firebase_auth: '0.3.1'
-  firebase_database: '0.1.2'
-  firebase_messaging: '0.0.7'
-  shared_preferences: '0.2.5'
+  intl:
+  google_sign_in:
+  firebase:
+  firebase_auth:
+  firebase_database:
+  firebase_messaging:
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:
