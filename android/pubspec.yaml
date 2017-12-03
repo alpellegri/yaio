@@ -6,10 +6,13 @@ dependencies:
     sdk: flutter
   intl:
   google_sign_in:
-  firebase:
+    path: local/google_sign_in
   firebase_auth:
+    path: local/firebase_auth
   firebase_database:
+    path: local/firebase_database
   firebase_messaging:
+    path: local/firebase_messaging
   shared_preferences:
 
 dev_dependencies:

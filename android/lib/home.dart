@@ -17,7 +17,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final time_limit = const Duration(seconds: 20);
+  static const time_limit = const Duration(seconds: 20);
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
   final DatabaseReference _statusRef =
@@ -271,6 +271,32 @@ class _MyHomePageState extends State<MyHomePage> {
                         subtitle: new Text('${_heartbeatTime.toUtc()}'),
                       ),
                       new ListTile(
+                        leading: (_control['reboot'] == 3)
+                            ? (new LinearProgressIndicator(
+                          value: null,
+                        ))
+                            : (const Icon(Icons.flash_on)),
+                        title: const Text('Update Node'),
+                        subtitle: new Text('Configuration'),
+                        trailing: new ButtonTheme.bar(
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: const Text('UPDATE'),
+                                onPressed: () {
+                                  _control['reboot'] = 3;
+                                  _controlRef.set(_control);
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      new ListTile(
                         leading: (_control['reboot'] == 1)
                             ? (new LinearProgressIndicator(
                                 value: null,
@@ -299,8 +325,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       new ListTile(
                         leading: (_control['reboot'] == 2)
                             ? (new LinearProgressIndicator(
-                                value: null,
-                              ))
+                          value: null,
+                        ))
                             : (const Icon(Icons.flash_on)),
                         title: const Text('Firmware Version'),
                         subtitle: new Text('${_startup["version"]}'),
@@ -308,7 +334,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: new ButtonBar(
                             children: <Widget>[
                               new FlatButton(
-                                child: const Text('UPDATE'),
+                                child: const Text('UPGRADE'),
                                 onPressed: () {
                                   _control['reboot'] = 2;
                                   _controlRef.set(_control);
@@ -356,9 +382,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onValueStatus(Event event) {
     // update control time to keep up node
     DateTime now = new DateTime.now();
-    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-    _controlRef.set(_control);
     setState(() {
+      _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
+      _controlRef.set(_control);
       _status = event.snapshot.value;
     });
   }

@@ -28,7 +28,6 @@ static bool status_alarm = false;
 static bool status_alarm_last = false;
 static bool control_alarm = false;
 static bool control_radio_learn = false;
-static bool control_radio_update = false;
 static uint32_t control_time;
 static uint32_t control_time_last;
 
@@ -145,15 +144,7 @@ bool FbmService(void) {
     firebase_url = EE_GetFirebaseUrl();
     firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
-    yield();
-    Firebase.setInt(F("control/reboot"), 0);
-    if (Firebase.failed()) {
-      Serial.print(F("set failed: control/reboot"));
-      Serial.println(Firebase.error());
-    } else {
-      Serial.println(F("firebase: connected!"));
-      boot_sm = 1;
-    }
+    boot_sm = 1;
     yield();
   } break;
 
@@ -203,6 +194,16 @@ bool FbmService(void) {
       RF_ForceDisable();
       status_alarm = false;
       control_time_last = 0;
+      boot_sm = 21;
+    }
+  } break;
+
+  case 21: {
+    Firebase.setInt(F("control/reboot"), 0);
+    if (Firebase.failed()) {
+      Serial.print(F("set failed: control/reboot"));
+      Serial.println(Firebase.error());
+    } else {
       boot_sm = 3;
     }
   } break;
@@ -251,7 +252,6 @@ bool FbmService(void) {
             if (object.success()) {
               control_alarm = object["alarm"];
               control_radio_learn = object["radio_learn"];
-              control_radio_update = object["radio_update"];
               control_time = object["time"];
 
               bool control_wol = object["wol"];
@@ -261,10 +261,12 @@ bool FbmService(void) {
               }
 
               int control_reboot = object["reboot"];
-              if (control_reboot == 2) {
-                boot_sm = 4;
-              } else if (control_reboot == 1) {
+              if (control_reboot == 1) {
                 ESP.restart();
+              } else if (control_reboot == 2) {
+                boot_sm = 4;
+              } else if (control_reboot == 3) {
+                boot_sm = 2;
               }
             } else {
               Serial.println(F("parseObject() failed"));
@@ -333,20 +335,6 @@ bool FbmService(void) {
       fblog_log(str, false);
       yield();
     }
-
-    if (control_radio_update == true) {
-      // clear request
-      Firebase.setBool(F("control/radio_update"), false);
-      if (Firebase.failed()) {
-        Serial.print(F("set failed: control/radio_update"));
-        Serial.println(Firebase.error());
-      } else {
-        // force update DB
-        control_radio_update = false;
-        boot_sm = 2;
-      }
-    }
-    yield();
 
     // monitor timers, every 15 sec
     if ((time_now - fbm_update_timer_last) >= 15) {
