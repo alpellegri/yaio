@@ -20,6 +20,9 @@
 #define DHTPIN D6
 #define DHTTYPE DHT22
 
+// #define PSTR(x) (x)
+// #define printf_P printf
+
 DHT dht(DHTPIN, DHTTYPE);
 
 static uint8_t boot_sm = 0;

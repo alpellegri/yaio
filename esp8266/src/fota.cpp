@@ -20,6 +20,9 @@ static const char *storage_fingerprint =
 static const String file_name = "firmware.bin";
 static const String md5file_name = "firmware.md5";
 
+// #define PSTR(x) (x)
+// #define printf_P printf
+
 typedef enum {
   FOTA_Sm_IDLE = 0,
   FOTA_Sm_GET_MD5,

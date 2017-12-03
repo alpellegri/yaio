@@ -16,6 +16,9 @@
 #define NUM_IO_ENTRY_MAX 10
 #define NUM_IO_FUNCTION_MAX 10
 
+// #define PSTR(x) (x)
+// #define printf_P printf
+
 typedef struct {
   uint32_t id;
   uint8_t type;

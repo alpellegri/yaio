@@ -51,17 +51,40 @@ static String FcmPostMsg(void) {
   String fcm_host = String(FcmServer);
   String fcm_server_key = String(EE_GetFirebaseServerKey());
 
+  //  DATA='{
+  //  "notification": {
+  //    "body": "this is a body",
+  //    "title": "this is a title"
+  //  },
+  //  "priority": "high",
+  //  "data": {
+  //    "click_action": "FLUTTER_NOTIFICATION_CLICK",
+  //    "id": "1",
+  //    "status": "done"
+  //  },
+  //  "to": "<FCM TOKEN>"}'
+  //
+  //  curl https://fcm.googleapis.com/fcm/send -H
+  //  "Content-Type:application/json" -X POST -d "$DATA" -H "Authorization:
+  //  key=<FCM SERVER KEY>"
+
   /* json data: the notification message multiple devices */
   String json = "";
   json += "{";
   json += "\"notification\":{";
-  json += "\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",";
   json += "\"title\":\"ESP8266 Alert\",";
   json += "\"body\":\"";
   json += FcmMessage;
   json += "\",";
   json += "\"sound\":\"default\"";
   json += "},";
+
+  json += "\"data\":{";
+  json += "\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",";
+  json += "\"id\":\"1\",";
+  json += "\"status\":\"done\",";
+  json += "},";
+
   json += "\"registration_ids\":[";
   for (i = 0; i < RegIDsLen - 1; i++) {
     json += "\"" + RegIDs[i] + "\",";
