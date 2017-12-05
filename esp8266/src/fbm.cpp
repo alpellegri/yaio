@@ -98,6 +98,7 @@ void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
 
 /* function mapping requests
  * port=0: value=1 -> arm alarm / value=0 -> disarm alarm
+ * port=1: value=1 -> notify
  */
 static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
   bool ret = false;

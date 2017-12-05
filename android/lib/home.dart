@@ -163,11 +163,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     DateTime current = new DateTime.now();
     DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-            int.parse(_startup['time'].toString()) * 1000)
-        .add(_timeZoneOffset);
+            int.parse(_startup['time'].toString()) * 1000);
     DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
-            int.parse(_status['time'].toString()) * 1000)
-        .add(_timeZoneOffset);
+        int.parse(_status['time'].toString()) * 1000);
+    print(current.difference(_heartbeatTime));
+    print(_startupTime);
+    print(current);
+    print(_heartbeatTime);
     return new Scaffold(
         drawer: drawer,
         appBar: new AppBar(
@@ -263,12 +265,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       new ListTile(
                         leading: const Icon(Icons.power),
                         title: const Text('PowerUp'),
-                        subtitle: new Text('${_startupTime.toUtc()}'),
+                        subtitle: new Text('${_startupTime.toString()}'),
                       ),
                       new ListTile(
                         leading: const Icon(Icons.link),
                         title: const Text('HeartBeat'),
-                        subtitle: new Text('${_heartbeatTime.toUtc()}'),
+                        subtitle: new Text('${_heartbeatTime.toString()}'),
                       ),
                       new ListTile(
                         leading: (_control['reboot'] == 3)
