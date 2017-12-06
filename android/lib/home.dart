@@ -31,12 +31,10 @@ class _MyHomePageState extends State<MyHomePage> {
   StreamSubscription<Event> _controlSub;
   StreamSubscription<Event> _statusSub;
   StreamSubscription<Event> _startupSub;
-  StreamSubscription<Event> _fcmSub;
 
   Map _fbJsonMap;
   String _infoConfig = "";
   String _homeScreenText = "Waiting for token...";
-  Duration _timeZoneOffset;
   bool _connected = false;
 
   Map<String, Object> _control = {
@@ -127,8 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _startupSub = _startupRef.onValue.listen(_onValueStartup);
     });
     print('_MyHomePageState');
-    DateTime now = new DateTime.now();
-    _timeZoneOffset = now.timeZoneOffset;
   }
 
   @override
