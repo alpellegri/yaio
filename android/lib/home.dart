@@ -166,10 +166,6 @@ class _MyHomePageState extends State<MyHomePage> {
             int.parse(_startup['time'].toString()) * 1000);
     DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
         int.parse(_status['time'].toString()) * 1000);
-    print(current.difference(_heartbeatTime));
-    print(_startupTime);
-    print(current);
-    print(_heartbeatTime);
     return new Scaffold(
         drawer: drawer,
         appBar: new AppBar(
@@ -263,14 +259,40 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       new ListTile(
-                        leading: const Icon(Icons.power),
-                        title: const Text('PowerUp'),
-                        subtitle: new Text('${_startupTime.toString()}'),
+                        leading: const Icon(Icons.memory),
+                        title: const Text('Heap Memory'),
+                        subtitle: new Text('${_status["heap"]}'),
                       ),
                       new ListTile(
                         leading: const Icon(Icons.link),
                         title: const Text('HeartBeat'),
                         subtitle: new Text('${_heartbeatTime.toString()}'),
+                      ),
+                      new ListTile(
+                        leading: (_control['reboot'] == 1)
+                            ? (new LinearProgressIndicator(
+                          value: null,
+                        ))
+                            : (const Icon(Icons.power)),
+                        title: const Text('PowerUp'),
+                        subtitle: new Text('${_startupTime.toString()}'),
+                        trailing: new ButtonTheme.bar(
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: const Text('RESTART'),
+                                onPressed: () {
+                                  _control['reboot'] = 1;
+                                  _controlRef.set(_control);
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       new ListTile(
                         leading: (_control['reboot'] == 3)
@@ -287,32 +309,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                 child: const Text('UPDATE'),
                                 onPressed: () {
                                   _control['reboot'] = 3;
-                                  _controlRef.set(_control);
-                                  DateTime now = new DateTime.now();
-                                  _control['time'] =
-                                      now.millisecondsSinceEpoch ~/ 1000;
-                                  _controlRef.set(_control);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      new ListTile(
-                        leading: (_control['reboot'] == 1)
-                            ? (new LinearProgressIndicator(
-                                value: null,
-                              ))
-                            : (const Icon(Icons.loop)),
-                        title: const Text('Reboot Counter'),
-                        subtitle: new Text('${_startup["bootcnt"]}'),
-                        trailing: new ButtonTheme.bar(
-                          child: new ButtonBar(
-                            children: <Widget>[
-                              new FlatButton(
-                                child: const Text('RESTART'),
-                                onPressed: () {
-                                  _control['reboot'] = 1;
                                   _controlRef.set(_control);
                                   DateTime now = new DateTime.now();
                                   _control['time'] =
@@ -349,11 +345,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                           ),
                         ),
-                      ),
-                      new ListTile(
-                        leading: const Icon(Icons.memory),
-                        title: const Text('Heap Memory'),
-                        subtitle: new Text('${_status["heap"]}'),
                       ),
                     ],
                   ),
