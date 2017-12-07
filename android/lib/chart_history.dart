@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'drawer.dart';
 
-class StatusPage extends StatefulWidget {
-  StatusPage({Key key, this.title}) : super(key: key);
+class ChartHistory extends StatefulWidget {
+  ChartHistory({Key key, this.title}) : super(key: key);
 
   static const String routeName = '/chart_history';
 
   final String title;
 
   @override
-  _StatusPage createState() => new _StatusPage();
+  _ChartHistory createState() => new _ChartHistory();
 }
 
-class _StatusPage extends State<StatusPage> {
+class _ChartHistory extends State<ChartHistory> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(

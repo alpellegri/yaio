@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     DateTime current = new DateTime.now();
     DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-            int.parse(_startup['time'].toString()) * 1000);
+        int.parse(_startup['time'].toString()) * 1000);
     DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
         int.parse(_status['time'].toString()) * 1000);
     return new Scaffold(
@@ -255,46 +255,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       new ListTile(
-                        leading: const Icon(Icons.memory),
-                        title: const Text('Heap Memory'),
-                        subtitle: new Text('${_status["heap"]}'),
-                      ),
-                      new ListTile(
                         leading: const Icon(Icons.link),
                         title: const Text('HeartBeat'),
                         subtitle: new Text('${_heartbeatTime.toString()}'),
                       ),
                       new ListTile(
-                        leading: (_control['reboot'] == 1)
-                            ? (new LinearProgressIndicator(
-                          value: null,
-                        ))
-                            : (const Icon(Icons.power)),
-                        title: const Text('PowerUp'),
-                        subtitle: new Text('${_startupTime.toString()}'),
-                        trailing: new ButtonTheme.bar(
-                          child: new ButtonBar(
-                            children: <Widget>[
-                              new FlatButton(
-                                child: const Text('RESTART'),
-                                onPressed: () {
-                                  _control['reboot'] = 1;
-                                  _controlRef.set(_control);
-                                  DateTime now = new DateTime.now();
-                                  _control['time'] =
-                                      now.millisecondsSinceEpoch ~/ 1000;
-                                  _controlRef.set(_control);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      new ListTile(
                         leading: (_control['reboot'] == 3)
                             ? (new LinearProgressIndicator(
-                          value: null,
-                        ))
+                                value: null,
+                              ))
                             : (const Icon(Icons.flash_on)),
                         title: const Text('Update Node'),
                         subtitle: new Text('Configuration'),
@@ -317,10 +286,36 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       new ListTile(
+                        leading: (_control['reboot'] == 1)
+                            ? (new LinearProgressIndicator(
+                                value: null,
+                              ))
+                            : (const Icon(Icons.power)),
+                        title: const Text('PowerUp'),
+                        subtitle: new Text('${_startupTime.toString()}'),
+                        trailing: new ButtonTheme.bar(
+                          child: new ButtonBar(
+                            children: <Widget>[
+                              new FlatButton(
+                                child: const Text('RESTART'),
+                                onPressed: () {
+                                  _control['reboot'] = 1;
+                                  _controlRef.set(_control);
+                                  DateTime now = new DateTime.now();
+                                  _control['time'] =
+                                      now.millisecondsSinceEpoch ~/ 1000;
+                                  _controlRef.set(_control);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      new ListTile(
                         leading: (_control['reboot'] == 2)
                             ? (new LinearProgressIndicator(
-                          value: null,
-                        ))
+                                value: null,
+                              ))
                             : (const Icon(Icons.flash_on)),
                         title: const Text('Firmware Version'),
                         subtitle: new Text('${_startup["version"]}'),
@@ -349,6 +344,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: new Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      new Text('Node Heap Memory: ${_status["heap"]}'),
                       new Text('Firebase info'),
                       new Text(_infoConfig),
                       new Text('Firebase Messaging info'),

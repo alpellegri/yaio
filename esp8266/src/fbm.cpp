@@ -20,6 +20,11 @@
 #define DHTPIN D6
 #define DHTTYPE DHT22
 
+#define FBM_UPDATE_TH (30 * 60)
+#define FBM_UPDATE_MONITOR_FAST (1)
+#define FBM_UPDATE_MONITOR_SLOW (5)
+#define FBM_MONITOR_TIMERS (15)
+
 // #define PSTR(x) (x)
 // #define printf_P printf
 
@@ -215,8 +220,9 @@ bool FbmService(void) {
   // firebase monitoring
   case 3: {
     uint32_t time_now = getTime();
-    if ((time_now - fbm_update_last) >=
-        ((fbm_monitor_run == true) ? (1) : (5))) {
+    if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
+                                             ? (FBM_UPDATE_MONITOR_FAST)
+                                             : (FBM_UPDATE_MONITOR_SLOW))) {
       Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
                       ESP.getFreeHeap());
       fbm_update_last = time_now;
@@ -242,7 +248,7 @@ bool FbmService(void) {
           fbm_monitor_run = true;
         }
         if (fbm_monitor_run == true) {
-          if ((time_now - fbm_monitor_last) > 5) {
+          if ((time_now - fbm_monitor_last) > FBM_UPDATE_MONITOR_SLOW) {
             fbm_monitor_run = false;
           }
 
@@ -296,7 +302,7 @@ bool FbmService(void) {
       yield();
 
       // log every 30 minutes
-      if ((time_now - fbm_time_th_last) > (30 * 60)) {
+      if ((time_now - fbm_time_th_last) > FBM_UPDATE_TH) {
         DynamicJsonBuffer jsonBuffer;
         JsonObject &th = jsonBuffer.createObject();
         th["time"] = time_now;
@@ -341,7 +347,7 @@ bool FbmService(void) {
     }
 
     // monitor timers, every 15 sec
-    if ((time_now - fbm_update_timer_last) >= 15) {
+    if ((time_now - fbm_update_timer_last) >= FBM_MONITOR_TIMERS) {
       fbm_update_timer_last = time_now;
       RF_MonitorTimers();
     }

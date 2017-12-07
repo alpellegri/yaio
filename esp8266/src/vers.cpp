@@ -1,4 +1,4 @@
-#define VERSION "0.1.2"
+#define VERSION "0.1.3"
 
 static const char *build_str = VERSION " | " __DATE__ " " __TIME__;
 
