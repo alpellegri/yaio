@@ -91,10 +91,8 @@ class Chart extends CustomPainter {
     double hMin;
     double hMax;
 
-    final Paint paintTH = new Paint()
-      ..color = Colors.white;
-    final Paint paintLine = new Paint()
-      ..color = Colors.amber[200];
+    final Paint paintTH = new Paint()..color = Colors.white;
+    final Paint paintLine = new Paint()..color = Colors.amber[200];
 
     if (entryList.length > 0) {
       timeMin = entryList.map((entry) => entry.time).reduce(math.min);
@@ -104,29 +102,18 @@ class Chart extends CustomPainter {
       hMin = entryList.map((entry) => entry.h).reduce(math.min);
       hMax = entryList.map((entry) => entry.h).reduce(math.max);
 
-      tMin -= 0.0;
-      tMax += 0.0;
-      hMin -= 0.0;
-      hMax += 0.0;
+      tMin -= 1.0;
+      tMax += 1.0;
+      hMin -= 5.0;
+      hMax += 5.0;
       double timeRatio = 300.0 / (timeMax - timeMin).toDouble();
       double tRatio = 100.0 / (tMax - tMin).toDouble();
       double hRatio = 100.0 / (hMax - hMin).toDouble();
       double tOffset = 0.0;
       double hOffset = 200.0;
 
-      canvas.drawLine(
-          new Offset(0.0, tOffset), new Offset(300.0, tOffset), paintLine);
-      canvas.drawLine(new Offset(0.0, tOffset - 100.0),
-          new Offset(300.0, tOffset - 100.0), paintLine);
-      canvas.drawLine(
-          new Offset(0.0, hOffset), new Offset(300.0, hOffset), paintLine);
-      canvas.drawLine(new Offset(0.0, hOffset - 100.0),
-          new Offset(300.0, hOffset - 100.0), paintLine);
-
-      for (double d = tMin; d < tMax; d += 1.0) {
-        double y = 50.0 - (d - tMin) * 10;
-        // canvas.drawLine(new Offset(0.0, y), new Offset(300.0, y), paintLine);
-      }
+      _drawLines(canvas, tOffset, tMin, tMax, tRatio, 1.0);
+      _drawLines(canvas, hOffset, hMin, hMax, hRatio, 5.0);
 
       // print('$timeMax, $timeMin ${timeMax - timeMin}');
       for (int i = 0; i < entryList.length; i++) {
@@ -137,14 +124,43 @@ class Chart extends CustomPainter {
         double h = hOffset - hRatio * (entryList[i].getH() - hMin);
         // canvas.drawLine(new Offset(x, 0.0), new Offset(x, t), paint);
         // print('$x, $t, $h');
-        canvas.drawCircle(new Offset(x, t), 1.0, paintTH);
-        canvas.drawCircle(new Offset(x, h), 1.0, paintTH);
+        canvas.drawCircle(new Offset(x, t), 1.5, paintTH);
+        canvas.drawCircle(new Offset(x, h), 1.5, paintTH);
       }
     }
   }
 
   void add(THEntry entry) {
     entryList.add(entry);
+  }
+
+  ui.Paragraph _buildParagraphForLeftLabel(double d) {
+    ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+      new ui.ParagraphStyle(
+        fontSize: 10.0,
+        textAlign: TextAlign.right,
+      ),
+    )
+      ..pushStyle(new ui.TextStyle(color: Colors.amber[200]))
+      ..addText((d).toString());
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(new ui.ParagraphConstraints(width: 20.0));
+    return paragraph;
+  }
+
+  void _drawLines(ui.Canvas canvas, double offset, double min, double max,
+      double ratio, double step) {
+    final Paint paintLine = new Paint()..color = Colors.amber[200];
+
+    for (double d = min; d < max; d += step) {
+      double y = offset - ratio * (d - min);
+      canvas.drawLine(new Offset(0.0, y), new Offset(300.0, y), paintLine);
+      ui.Paragraph paragraph = _buildParagraphForLeftLabel(d);
+      canvas.drawParagraph(
+        paragraph,
+        new Offset(-30.0, y - 5),
+      );
+    }
   }
 
   @override
