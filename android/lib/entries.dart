@@ -123,3 +123,65 @@ class FunctionEntry {
     };
   }
 }
+
+class LogEntry {
+  String key;
+  DateTime dateTime;
+  String message;
+
+  LogEntry(this.dateTime, this.message);
+
+  LogEntry.fromSnapshot(DataSnapshot snapshot)
+      : key = snapshot.key,
+        dateTime = new DateTime.fromMillisecondsSinceEpoch(
+            snapshot.value["time"] * 1000),
+        message = snapshot.value["msg"];
+
+  toJson() {
+    return {
+      'message': message,
+      'date': dateTime.millisecondsSinceEpoch,
+    };
+  }
+}
+
+class THEntry {
+  DatabaseReference reference;
+  String key;
+  double t;
+  double h;
+  int time;
+
+  THEntry(DatabaseReference ref) : reference = ref;
+
+  THEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
+    reference = ref;
+    key = snapshot.key;
+    t = snapshot.value['t'];
+    h = snapshot.value['h'];
+    time = snapshot.value['time'] * 1000;
+  }
+
+  double getT() {
+    t ??= 0.0;
+    return t;
+  }
+
+  double getH() {
+    h ??= 0.0;
+    return h;
+  }
+
+  int getTime() {
+    time ??= 0;
+    return time;
+  }
+
+  toJson() {
+    return {
+      't': t,
+      'h': h,
+      'time': time,
+    };
+  }
+}

@@ -5,7 +5,8 @@ const String kTokenIDsRef = 'FCM_Registration_IDs';
 
 const String kFunctionsRef = 'Functions';
 const String kGraphRef = 'graph';
-const String kLogsRef = 'logs';
+const String kLogsReportsRef = 'logs/Reports';
+const String kTHRef = 'logs/TH';
 
 const int kNodeReboot = 1;
 const int kNodeFlash = 2;

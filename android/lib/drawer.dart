@@ -23,9 +23,9 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
       new Functions(title: 'Functions'),
   Timer.routeName: (BuildContext context) => new Timer(title: 'Timer'),
   LogHistory.routeName: (BuildContext context) =>
-      new LogHistory(title: 'LogHistory'),
+      new LogHistory(title: 'Log History'),
   ChartHistory.routeName: (BuildContext context) =>
-      new ChartHistory(title: 'LogHistory'),
+      new ChartHistory(title: 'Chart History'),
 };
 
 class MyDrawer extends StatefulWidget {
