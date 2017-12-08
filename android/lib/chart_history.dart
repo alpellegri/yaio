@@ -94,8 +94,6 @@ class Chart extends CustomPainter {
     final Paint paintTH = new Paint()..color = Colors.white;
 
     if (entryList.length > 0) {
-      // timeMin = entryList.map((entry) => entry.time).reduce(math.min);
-      // timeMax = entryList.map((entry) => entry.time).reduce(math.max);
       DateTime dtmax = new DateTime.now();
       DateTime dtmin = dtmax;
       dtmin = dtmax.subtract(new Duration(
@@ -107,13 +105,25 @@ class Chart extends CustomPainter {
       ));
       timeMin = dtmin.millisecondsSinceEpoch;
       timeMax = dtmax.millisecondsSinceEpoch;
-      tMin = entryList.map((entry) => entry.t).reduce(math.min);
-      tMax = entryList.map((entry) => entry.t).reduce(math.max);
-      hMin = entryList.map((entry) => entry.h).reduce(math.min);
-      hMax = entryList.map((entry) => entry.h).reduce(math.max);
+      tMin = entryList
+          .where((entry) => entry.time > timeMin)
+          .map((entry) => entry.t)
+          .reduce(math.min);
+      tMax = entryList
+          .where((entry) => entry.time > timeMin)
+          .map((entry) => entry.t)
+          .reduce(math.max);
+      hMin = entryList
+          .where((entry) => entry.time > timeMin)
+          .map((entry) => entry.h)
+          .reduce(math.min);
+      hMax = entryList
+          .where((entry) => entry.time > timeMin)
+          .map((entry) => entry.h)
+          .reduce(math.max);
 
       double delta;
-      delta = 0.1 * (timeMax - timeMin).toDouble();
+      delta = 0.0 * (timeMax - timeMin).toDouble();
       timeMin -= delta.toInt();
       timeMax += delta.toInt();
       delta = 0.1 * (tMax - tMin);
@@ -137,14 +147,15 @@ class Chart extends CustomPainter {
       // print('$timeMax, $timeMin ${timeMax - timeMin}');
       for (int i = 0; i < entryList.length; i++) {
         // print('$i, ${entryList[i].getTime()}');
-        double x = timeRatio * (entryList[i].getTime() - timeMin).toDouble();
-        // x = i.toDouble();
-        double t = tOffset - tRatio * (entryList[i].getT() - tMin);
-        double h = hOffset - hRatio * (entryList[i].getH() - hMin);
-        // canvas.drawLine(new Offset(x, 0.0), new Offset(x, t), paint);
-        // print('$x, $t, $h');
-        canvas.drawCircle(new Offset(x, t), 1.5, paintTH);
-        canvas.drawCircle(new Offset(x, h), 1.5, paintTH);
+        if (entryList[i].getTime() > timeMin) {
+          double x = timeRatio * (entryList[i].getTime() - timeMin).toDouble();
+          // x = i.toDouble();
+          double t = tOffset - tRatio * (entryList[i].getT() - tMin);
+          double h = hOffset - hRatio * (entryList[i].getH() - hMin);
+          // canvas.drawLine(new Offset(x, 0.0), new Offset(x, t), paint);
+          canvas.drawCircle(new Offset(x, t), 1.5, paintTH);
+          canvas.drawCircle(new Offset(x, h), 1.5, paintTH);
+        }
       }
     }
   }
@@ -201,31 +212,21 @@ class Chart extends CustomPainter {
       double ratio, int step) {
     final Paint paintLine = new Paint()..color = Colors.amber[200];
 
-    DateTime dtmin = new DateTime.fromMillisecondsSinceEpoch(min);
-    DateTime dtmax = new DateTime.now();
-    DateTime dt = dtmax;
-    dt = dtmax.subtract(new Duration(
-      days: 7,
-      hours: dt.hour,
-      minutes: dt.minute,
-      seconds: dt.second,
-      milliseconds: dt.millisecond,
-    ));
+    DateTime dtmax = new DateTime.fromMillisecondsSinceEpoch(max);
+    DateTime dt = new DateTime.fromMillisecondsSinceEpoch(min);
 
     // millisecondsSinceEpoch
     while (dt.isBefore(dtmax)) {
-      if (dt.isAfter(dtmin)) {
-        double x = ratio * (dt.millisecondsSinceEpoch - min);
-        double y = offset;
-        String str = new DateFormat('d MMM').format(dt);
-        canvas.drawLine(new Offset(x, y), new Offset(x, y - 100.0), paintLine);
+      double x = ratio * (dt.millisecondsSinceEpoch - min);
+      double y = offset;
+      String str = new DateFormat('d MMM').format(dt);
+      canvas.drawLine(new Offset(x, y + 10), new Offset(x, y - 0.0), paintLine);
 
-        ui.Paragraph paragraph = _buildDateLabel(str.toString());
-        canvas.drawParagraph(
-          paragraph,
-          new Offset(x + 0, y + 10),
-        );
-      }
+      ui.Paragraph paragraph = _buildDateLabel(str.toString());
+      canvas.drawParagraph(
+        paragraph,
+        new Offset(x + 0, y + 10),
+      );
 
       dt = dt.add(new Duration(days: 1));
     }
