@@ -92,28 +92,47 @@ class Chart extends CustomPainter {
     double hMax;
 
     final Paint paintTH = new Paint()..color = Colors.white;
-    final Paint paintLine = new Paint()..color = Colors.amber[200];
 
     if (entryList.length > 0) {
-      timeMin = entryList.map((entry) => entry.time).reduce(math.min);
-      timeMax = entryList.map((entry) => entry.time).reduce(math.max);
+      // timeMin = entryList.map((entry) => entry.time).reduce(math.min);
+      // timeMax = entryList.map((entry) => entry.time).reduce(math.max);
+      DateTime dtmax = new DateTime.now();
+      DateTime dtmin = dtmax;
+      dtmin = dtmax.subtract(new Duration(
+        days: 7,
+        hours: dtmin.hour,
+        minutes: dtmin.minute,
+        seconds: dtmin.second,
+        milliseconds: dtmin.millisecond,
+      ));
+      timeMin = dtmin.millisecondsSinceEpoch;
+      timeMax = dtmax.millisecondsSinceEpoch;
       tMin = entryList.map((entry) => entry.t).reduce(math.min);
       tMax = entryList.map((entry) => entry.t).reduce(math.max);
       hMin = entryList.map((entry) => entry.h).reduce(math.min);
       hMax = entryList.map((entry) => entry.h).reduce(math.max);
 
-      tMin -= 1.0;
-      tMax += 1.0;
-      hMin -= 5.0;
-      hMax += 5.0;
+      double delta;
+      delta = 0.1 * (timeMax - timeMin).toDouble();
+      timeMin -= delta.toInt();
+      timeMax += delta.toInt();
+      delta = 0.1 * (tMax - tMin);
+      tMin -= delta;
+      tMax += delta;
+      delta = 0.1 * (hMax - hMin);
+      hMin -= delta;
+      hMax += delta;
       double timeRatio = 300.0 / (timeMax - timeMin).toDouble();
       double tRatio = 100.0 / (tMax - tMin).toDouble();
       double hRatio = 100.0 / (hMax - hMin).toDouble();
       double tOffset = 0.0;
       double hOffset = 200.0;
 
-      _drawLines(canvas, tOffset, tMin, tMax, tRatio, 1.0);
-      _drawLines(canvas, hOffset, hMin, hMax, hRatio, 5.0);
+      // grid
+      _drawLines(canvas, tOffset, tMin, tMax, tRatio, 8);
+      _drawLabels(canvas, tOffset, timeMin, timeMax, timeRatio, 8);
+      _drawLines(canvas, hOffset, hMin, hMax, hRatio, 8);
+      _drawLabels(canvas, hOffset, timeMin, timeMax, timeRatio, 8);
 
       // print('$timeMax, $timeMin ${timeMax - timeMin}');
       for (int i = 0; i < entryList.length; i++) {
@@ -134,7 +153,7 @@ class Chart extends CustomPainter {
     entryList.add(entry);
   }
 
-  ui.Paragraph _buildParagraphForLeftLabel(double d) {
+  ui.Paragraph _buildNumberLabel(double d) {
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
       new ui.ParagraphStyle(
         fontSize: 10.0,
@@ -142,24 +161,73 @@ class Chart extends CustomPainter {
       ),
     )
       ..pushStyle(new ui.TextStyle(color: Colors.amber[200]))
-      ..addText((d).toString());
+      ..addText(d.toStringAsFixed(1));
     final ui.Paragraph paragraph = builder.build()
-      ..layout(new ui.ParagraphConstraints(width: 20.0));
+      ..layout(new ui.ParagraphConstraints(width: 30.0));
+    return paragraph;
+  }
+
+  ui.Paragraph _buildDateLabel(String str) {
+    ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+      new ui.ParagraphStyle(
+        fontSize: 10.0,
+        textAlign: TextAlign.right,
+      ),
+    )
+      ..pushStyle(new ui.TextStyle(color: Colors.amber[200]))
+      ..addText(str);
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(new ui.ParagraphConstraints(width: 30.0));
     return paragraph;
   }
 
   void _drawLines(ui.Canvas canvas, double offset, double min, double max,
-      double ratio, double step) {
+      double ratio, int step) {
     final Paint paintLine = new Paint()..color = Colors.amber[200];
 
-    for (double d = min; d < max; d += step) {
+    double delta = (max - min) / step;
+    for (double d = min; d <= max; d += delta) {
       double y = offset - ratio * (d - min);
       canvas.drawLine(new Offset(0.0, y), new Offset(300.0, y), paintLine);
-      ui.Paragraph paragraph = _buildParagraphForLeftLabel(d);
+      ui.Paragraph paragraph = _buildNumberLabel(d);
       canvas.drawParagraph(
         paragraph,
-        new Offset(-30.0, y - 5),
+        new Offset(-40.0, y - 5),
       );
+    }
+  }
+
+  void _drawLabels(ui.Canvas canvas, double offset, int min, int max,
+      double ratio, int step) {
+    final Paint paintLine = new Paint()..color = Colors.amber[200];
+
+    DateTime dtmin = new DateTime.fromMillisecondsSinceEpoch(min);
+    DateTime dtmax = new DateTime.now();
+    DateTime dt = dtmax;
+    dt = dtmax.subtract(new Duration(
+      days: 7,
+      hours: dt.hour,
+      minutes: dt.minute,
+      seconds: dt.second,
+      milliseconds: dt.millisecond,
+    ));
+
+    // millisecondsSinceEpoch
+    while (dt.isBefore(dtmax)) {
+      if (dt.isAfter(dtmin)) {
+        double x = ratio * (dt.millisecondsSinceEpoch - min);
+        double y = offset;
+        String str = new DateFormat('d MMM').format(dt);
+        canvas.drawLine(new Offset(x, y), new Offset(x, y - 100.0), paintLine);
+
+        ui.Paragraph paragraph = _buildDateLabel(str.toString());
+        canvas.drawParagraph(
+          paragraph,
+          new Offset(x + 0, y + 10),
+        );
+      }
+
+      dt = dt.add(new Duration(days: 1));
     }
   }
 
