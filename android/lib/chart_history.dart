@@ -123,7 +123,7 @@ class Chart extends CustomPainter {
           .reduce(math.max);
 
       double delta;
-      delta = 0.0 * (timeMax - timeMin).toDouble();
+      delta = 0.1 * (timeMax - timeMin).toDouble();
       timeMin -= delta.toInt();
       timeMax += delta.toInt();
       delta = 0.1 * (tMax - tMin);
