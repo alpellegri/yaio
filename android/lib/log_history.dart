@@ -18,7 +18,7 @@ class LogListItem extends StatelessWidget {
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           new Expanded(
             child: new Row(
@@ -27,14 +27,12 @@ class LogListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      new DateFormat('yMd').format(logEntry.dateTime),
+                      new DateFormat('d/M/y').format(logEntry.dateTime),
                       textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
                     ),
                     new Text(
                       new DateFormat('Hm').format(logEntry.dateTime),
                       textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
@@ -48,8 +46,7 @@ class LogListItem extends StatelessWidget {
           ),
           new Text(
             logEntry.message.toString(),
-            textScaleFactor: 1.5,
-            textAlign: TextAlign.left,
+            textScaleFactor: 1.0,
           ),
         ],
       ),
