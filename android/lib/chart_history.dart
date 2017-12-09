@@ -126,14 +126,14 @@ class Chart extends CustomPainter {
       delta = 0.1 * (timeMax - timeMin).toDouble();
       timeMin -= delta.toInt();
       timeMax += delta.toInt();
+      double timeRatio = 300.0 / (timeMax - timeMin).toDouble();
       delta = 0.1 * (tMax - tMin);
       tMin -= delta;
       tMax += delta;
+      double tRatio = 100.0 / (tMax - tMin).toDouble();
       delta = 0.1 * (hMax - hMin);
       hMin -= delta;
       hMax += delta;
-      double timeRatio = 300.0 / (timeMax - timeMin).toDouble();
-      double tRatio = 100.0 / (tMax - tMin).toDouble();
       double hRatio = 100.0 / (hMax - hMin).toDouble();
       double tOffset = 0.0;
       double hOffset = 200.0;
@@ -188,7 +188,7 @@ class Chart extends CustomPainter {
       ..pushStyle(new ui.TextStyle(color: Colors.amber[200]))
       ..addText(str);
     final ui.Paragraph paragraph = builder.build()
-      ..layout(new ui.ParagraphConstraints(width: 30.0));
+      ..layout(new ui.ParagraphConstraints(width: 25.0));
     return paragraph;
   }
 
@@ -197,7 +197,8 @@ class Chart extends CustomPainter {
     final Paint paintLine = new Paint()..color = Colors.amber[200];
 
     double delta = (max - min) / step;
-    for (double d = min; d <= max; d += delta) {
+    double d = min;
+    for (int i = 0; i <= step; i++) {
       double y = offset - ratio * (d - min);
       canvas.drawLine(new Offset(0.0, y), new Offset(300.0, y), paintLine);
       ui.Paragraph paragraph = _buildNumberLabel(d);
@@ -205,6 +206,7 @@ class Chart extends CustomPainter {
         paragraph,
         new Offset(-40.0, y - 5),
       );
+      d += delta;
     }
   }
 
@@ -216,16 +218,17 @@ class Chart extends CustomPainter {
     DateTime dt = new DateTime.fromMillisecondsSinceEpoch(min);
 
     // millisecondsSinceEpoch
-    while (dt.isBefore(dtmax)) {
+    DateTime now = new DateTime.now();
+    while (dt.isBefore(dtmax) && dt.isBefore(now)) {
       double x = ratio * (dt.millisecondsSinceEpoch - min);
       double y = offset;
-      String str = new DateFormat('d MMM').format(dt);
+      String str = new DateFormat('d/M').format(dt);
       canvas.drawLine(new Offset(x, y + 10), new Offset(x, y - 0.0), paintLine);
 
       ui.Paragraph paragraph = _buildDateLabel(str.toString());
       canvas.drawParagraph(
         paragraph,
-        new Offset(x + 0, y + 10),
+        new Offset(x - 0.0, y + 10),
       );
 
       dt = dt.add(new Duration(days: 1));
