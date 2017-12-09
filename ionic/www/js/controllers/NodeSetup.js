@@ -1,6 +1,6 @@
 angular.module('app.controllers.NodeSetup', [])
 
-  .controller('NodeSetupCtrl', function($scope, WebSocketService, $ionicPopup, $timeout) {
+  .controller('NodeSetupCtrl', function($scope, FirebaseService, WebSocketService, $ionicPopup, $timeout) {
     console.log('NodeSetupCtrl');
 
     var fb_init = 'true'; // localStorage.getItem('firebase_init');
@@ -11,7 +11,8 @@ angular.module('app.controllers.NodeSetup', [])
       if (node_init == 'true') {
         $scope.settings.ssid = localStorage.getItem('ssid');
         $scope.settings.password = localStorage.getItem('password');
-        $scope.settings.firebase_url = localStorage.getItem('firebase_url');
+        $scope.settings.firebase_url = FirebaseService.Getfirebase_url();
+        $scope.settings.storage_bucket = FirebaseService.Getstorage_bucket();
         $scope.settings.firebase_secret = localStorage.getItem('firebase_secret');
         $scope.settings.firebase_server_key = localStorage.getItem('firebase_server_key');
       }
@@ -22,20 +23,6 @@ angular.module('app.controllers.NodeSetup', [])
       $scope.Text = '';
       $scope.NodeSettingMsg = '';
       $scope.StsTxt = 'Disconnected';
-
-      $scope.settings.ComposeText = function() {
-        $scope.settings.ssid = localStorage.getItem('ssid');
-        $scope.settings.password = localStorage.getItem('password');
-        $scope.settings.firebase_url = localStorage.getItem('firebase_url');
-        $scope.settings.secret = localStorage.getItem('firebase_secret');
-        $scope.settings.server_key = localStorage.getItem('firebase_server_key');
-        $scope.NodeSettings =
-          'Node WiFi SSID: ' + $scope.settings.ssid + '\n' +
-          'Node WiFi PASSWORD: ' + $scope.settings.password + '\n' +
-          'Firebase URL: ' + $scope.settings.firebase_url + '\n' +
-          'Firebase Secret: ' + $scope.settings.secret + '\n' +
-          'Firebase Server Key: ' + $scope.settings.server_key + '\n';
-      }
 
       WebSocketService.subscribe(
         // open
@@ -145,7 +132,6 @@ angular.module('app.controllers.NodeSetup', [])
                 localStorage.setItem('password', $scope.settings.password);
                 localStorage.setItem('firebase_secret', $scope.settings.firebase_secret);
                 localStorage.setItem('firebase_server_key', $scope.settings.firebase_server_key);
-                $scope.settings.ComposeText();
                 return $scope.settings;
               }
             }
@@ -173,138 +159,4 @@ angular.module('app.controllers.NodeSetup', [])
         });
       };
     }
-  })
-
-  .controller('RadioCtrl', function($scope, $ionicPopup, $timeout) {
-    console.log('RadioCtrl');
-
-    var fb_init = localStorage.getItem('firebase_init');
-    if (fb_init == 'true') {
-
-      $scope.pushCtrl0 = {
-        checked: false
-      };
-
-      $scope.InactiveRadioCodes = [];
-      $scope.ActiveRadioCodes = [];
-
-      // remove radio code
-      $scope.RemoveInactiveRadioCode = function(i) {
-        $scope.InactiveRadioCodes.splice(i, 1);
-      };
-
-      // move radio code to active
-      $scope.ActivateRadioCode = function(i) {
-        $scope.ActiveRadioCodes.push($scope.InactiveRadioCodes[i]);
-        $scope.InactiveRadioCodes.splice(i, 1);
-      };
-
-      // remove radio code
-      $scope.RemoveActiveRadioCode = function(i) {
-        $scope.ActiveRadioCodes.splice(i, 1);
-      };
-
-      // move radio code to inactive
-      $scope.DeactivateRadioCode = function(i) {
-        $scope.InactiveRadioCodes.push($scope.ActiveRadioCodes[i]);
-        $scope.ActiveRadioCodes.splice(i, 1);
-      };
-
-      $scope.SetupRadio = function() {
-        var ref = firebase.database().ref("RadioCodes");
-        ref.child('Active').remove();
-        console.log('active');
-        $scope.ActiveRadioCodes.forEach(function(element) {
-          console.log(element.val());
-          ref.child('Active').push().set(element.val());
-        });
-        ref.child('Inactive').remove();
-        console.log('inactive');
-        $scope.InactiveRadioCodes.forEach(function(element) {
-          console.log(element.val());
-          ref.child('Inactive').push().set(element.val());
-        });
-      }
-
-      $scope.pushCtrl0Change = function() {
-        var ref = firebase.database().ref("control");
-        console.log('radio_learn control ' + $scope.pushCtrl0.checked);
-        if ($scope.pushCtrl0.checked) {
-          ref.update({
-            radio_learn: true
-          });
-        } else {
-          ref.update({
-            radio_learn: false
-          });
-        }
-      };
-
-      $scope.doRefresh = function() {
-        console.log('doRefresh');
-
-        var ref_inactive = firebase.database().ref('RadioCodes/Inactive');
-        var i = 0;
-        $scope.InactiveRadioCodes = [];
-        ref_inactive.once('value', function(snapshot) {
-          snapshot.forEach(function(childSnapshot) {
-            // console.log(childSnapshot.val());
-            $scope.InactiveRadioCodes.push(childSnapshot);
-            i++;
-          });
-        });
-
-        var ref_active = firebase.database().ref('RadioCodes/Active');
-        var i = 0;
-        $scope.ActiveRadioCodes = [];
-        ref_active.once('value', function(snapshot) {
-          snapshot.forEach(function(childSnapshot) {
-            // console.log(childSnapshot.val());
-            $scope.ActiveRadioCodes.push(childSnapshot);
-            i++;
-          });
-        });
-
-        var ref = firebase.database().ref("control/radio_learn");
-        // Attach an asynchronous callback to read the data at our posts reference
-        ref.on('value', function(snapshot) {
-          var payload = snapshot.val();
-
-          if (payload == true) {
-            $scope.pushCtrl0.checked = true;
-          } else {
-            $scope.pushCtrl0.checked = false;
-          }
-        }, function(errorObject) {
-          console.log("firebase failed: " + errorObject.code);
-        });
-
-        // $scope.$broadcast("scroll.infiniteScrollComplete");
-        $scope.$broadcast('scroll.refreshComplete');
-      };
-
-      $scope.doRefresh();
-    }
-  })
-
-  .controller('loggerCtrl', function($scope) {
-    console.log('loggerCtrl');
-    $scope.logsText = "";
-
-    $scope.doRefresh = function() {
-      console.log('doRefresh');
-      var ref = firebase.database().ref('logs/Reports').limitToLast(20);
-      $scope.logsText = "";
-      ref.once('value', function(snapshot) {
-        snapshot.forEach(function(childSnapshot) {
-          // console.log(childSnapshot.val());
-          $scope.logsText += childSnapshot.val() + '\n';
-        });
-      });
-
-      // $scope.$broadcast("scroll.infiniteScrollComplete");
-      $scope.$broadcast("scroll.refreshComplete");
-    };
-
-    $scope.doRefresh();
   })

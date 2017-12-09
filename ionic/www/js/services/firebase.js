@@ -27,6 +27,7 @@ angular.module('app.services.firebase', [])
               service.google_services = data;
               config.apiKey = service.google_services.client[0].api_key[0].current_key;
               config.databaseURL = service.google_services.project_info.firebase_url;
+              config.storageBucket = service.google_services.project_info.storage_bucket;
               config.messagingSenderId = service.google_services.project_info.project_number;
               firebase.initializeApp(config);
               var fb_username = localStorage.getItem('firebase_username');
@@ -51,6 +52,18 @@ angular.module('app.services.firebase', [])
     service.up = function() {
       console.log("service.up: " + service.status);
       return service.status;
+    }
+
+    service.Getfirebase_url = function() {
+      return service.google_services.project_info.firebase_url;
+    }
+
+    service.Getstorage_bucket = function() {
+      return service.google_services.project_info.storage_bucket;
+    }
+
+    service.Getcurrent_key = function() {
+      return service.google_services.client[0].api_key[0].current_key;
     }
 
     service.GetmessagingSenderId = function() {

@@ -15,17 +15,17 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-const char *ap_ssid = "esp8266";
-const char *ap_password = "123456789";
+static const char *ap_ssid = "esp8266";
+static const char *ap_password = "123456789";
 
-uint16_t ap_task_cnt;
-bool enable_WiFi_Scan = false;
-uint16_t ap_button = 0x55;
+static uint16_t ap_task_cnt;
+static bool enable_WiFi_Scan = false;
+static uint16_t ap_button = 0x55;
 
 // create sebsocket server
-WebSocketsServer webSocket = WebSocketsServer(81);
+static WebSocketsServer webSocket = WebSocketsServer(80);
+static uint8_t port_id;
 
-uint8_t port_id;
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t lenght) {
   uint16_t len;
@@ -44,14 +44,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     /* disable wifi scan when locally connected */
     enable_WiFi_Scan = false;
     IPAddress ip = webSocket.remoteIP(num);
-    Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0],
-                  ip[1], ip[2], ip[3], payload);
+    Serial.printf_P(PSTR("[%u] Connected from %d.%d.%d.%d url: %s\n"), num,
+                    ip[0], ip[1], ip[2], ip[3], payload);
     port_id = num;
   } break;
 
   case WStype_TEXT:
     len = strlen((char *)payload);
-    Serial.printf("[%u] get Text (%d): %s\n", num, len, payload);
+    Serial.printf_P(PSTR("[%u] get Text (%d): %s\n"), num, len, payload);
 
     if (len != 0) {
       // save to epprom
@@ -99,7 +99,7 @@ bool AP_Setup(void) {
 
   IPAddress myIP = WiFi.softAPIP();
   Serial.println(F("AP mode enabled"));
-  Serial.print("IP address: ");
+  Serial.print(F("IP address: "));
   Serial.println(myIP);
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
@@ -110,7 +110,7 @@ bool AP_Setup(void) {
 bool AP_Loop(void) {
   uint8_t in = digitalRead(BUTTON);
 
-#if 0
+#if 1
   if (in != ap_button) {
     ap_button = in;
     if (in == false) {
@@ -144,10 +144,12 @@ bool AP_Task(void) {
         for (int i = 0; i < n; ++i) {
           yield();
           int test = WiFi.SSID(i).compareTo(String(sta_ssid));
+          Serial.println(WiFi.SSID(i));
           if (test == 0) {
             Serial.print(F("network found: "));
             Serial.println(WiFi.SSID(i));
             ret = false;
+            i = n; // exit for
           }
         }
       }

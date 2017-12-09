@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
+#include <FS.h>
 #include <WiFiClient.h>
 
 #include <stdio.h>
@@ -10,13 +11,15 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fcm.h"
+#include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-uint8_t sta_button = 0x55;
+static uint8_t sta_button = 0x55;
+static bool fota_mode = false;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -57,6 +60,17 @@ bool STA_Setup(void) {
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print(F("connected: "));
       Serial.println(WiFi.localIP());
+
+      SPIFFS.begin();
+      File f = SPIFFS.open("/fota.req", "r+");
+      if (!f) {
+        fota_mode = false;
+      } else {
+        fota_mode = true;
+        Serial.println(F("file open "));
+        SPIFFS.remove("/fota.req");
+        FOTA_UpdateReq();
+      }
     } else {
       sts = false;
     }
@@ -70,17 +84,10 @@ bool STA_Setup(void) {
   return ret;
 }
 
-void STA_Loop() {
-  uint8_t in = digitalRead(BUTTON);
-
-  if (in != sta_button) {
-    sta_button = in;
-    if (in == false) {
-      // EE_EraseData();
-      // Serial.printf("EEPROM erased\n");
-      // RF_ExecuteRadioCodeDB(1);
-    }
-  }
+void STA_FotaReq(void) {
+  SPIFFS.open("/fota.req", "w");
+  delay(5000);
+  ESP.restart();
 }
 
 /* main function task */
@@ -89,18 +96,33 @@ bool STA_Task(void) {
 
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
-    if (TimeService() == true) {
-      yield();
-      RF_Task();
-      yield();
-      FbmService();
-      yield();
-      FcmService();
-      yield();
+    if (fota_mode == true) {
+      bool res = FOTAService();
+    } else {
+      if (TimeService() == true) {
+        RF_Task();
+        yield();
+        FbmService();
+        yield();
+        FcmService();
+        yield();
+      }
     }
   } else {
     Serial.println(F("WiFi.status != WL_CONNECTED"));
   }
 
   return ret;
+}
+
+void STA_Loop() {
+  uint8_t in = digitalRead(BUTTON);
+
+  if (in != sta_button) {
+    sta_button = in;
+    if (in == false) {
+      // EE_EraseData();
+      // Serial.printf("EEPROM erased\n");
+    }
+  }
 }

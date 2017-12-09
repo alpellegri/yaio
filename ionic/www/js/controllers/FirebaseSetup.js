@@ -43,7 +43,7 @@ angular.module('app.controllers.FirebaseSetup', [])
         alarm: false,
         radio_learn: false,
         radio_update: false,
-        reboot: false,
+        reboot: 0,
         time: 0
       });
 

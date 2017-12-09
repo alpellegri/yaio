@@ -5,7 +5,7 @@ angular.module('app.services.websocket', [])
 
     service.connect = function() {
 
-      var wsUri = "ws://192.168.2.1:81/";
+      var wsUri = "ws://192.168.2.1";
       var ws = new WebSocket(wsUri);
 
       ws.onopen = function() {

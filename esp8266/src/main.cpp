@@ -22,22 +22,21 @@
 
 // Adafruit_SSD1306 display(OLED_RESET);
 
-uint8_t mode;
-uint16_t count = 0;
-uint32_t current_time;
-uint32_t schedule_time;
+static uint8_t mode;
+static uint32_t current_time;
+static uint32_t schedule_time;
 
 void setup() {
   bool ret;
 
   pinMode(LED, OUTPUT);
-  pinMode(D1, OUTPUT);
   pinMode(BUTTON, INPUT);
   Serial.begin(115200);
 
   EE_Setup();
 
   Serial.println();
+  Serial.print(F("SW version: "));
   Serial.println(VERS_getVersion());
   Serial.println(F("Node starting..."));
 

@@ -90,8 +90,8 @@ angular.module('app.controllers.DioSetup', [])
       // Triggered on a button click, or some other target
       $scope.showPopupDoutEdit = function(Dout) {
         $scope.settings._name = Dout.name;
-        $scope.settings._dio = parseInt(Dout.id / 2);
-        $scope.settings._value = parseInt(Dout.id % 2);
+        $scope.settings._dio = parseInt(Dout.id / 256);
+        $scope.settings._value = parseInt(Dout.id % 256);
         var PopupTemplate =
           '<form class="list">' +
           '<h9 id="setup-heading5" style="text-align:left;">name</h9>' +
@@ -119,7 +119,7 @@ angular.module('app.controllers.DioSetup', [])
                 e.preventDefault();
               } else {
                 Dout.name = $scope.settings._name;
-                Dout.id = 2 * parseInt($scope.settings._dio) + parseInt($scope.settings._value);
+                Dout.id = 256 * parseInt($scope.settings._dio) + parseInt($scope.settings._value);
                 console.log(Dout);
                 return $scope.settings;
               }

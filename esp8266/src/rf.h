@@ -3,12 +3,19 @@
 
 #include <Arduino.h>
 
-extern void RF_ResetRadioCodeDB(void);
-extern void RF_ResetRadioCodeTxDB(void);
-extern void RF_ResetTimerDB(void);
-extern void RF_ResetDoutDB(void);
-extern void RF_ResetLoutDB(void);
-extern void RF_ResetFunctionsDB(void);
+extern void RF_DeInitRadioCodeDB(void);
+extern void RF_DeInitRadioCodeTxDB(void);
+extern void RF_DeInitTimerDB(void);
+extern void RF_DeInitDoutDB(void);
+extern void RF_DeInitLoutDB(void);
+extern void RF_DeInitFunctionsDB(void);
+extern void RF_InitRadioCodeDB(uint8_t num);
+extern void RF_InitRadioCodeTxDB(uint8_t num);
+extern void RF_InitTimerDB(uint8_t num);
+extern void RF_InitDoutDB(uint8_t num);
+extern void RF_InitLoutDB(uint8_t num);
+extern void RF_InitFunctionsDB(uint8_t num);
+
 extern void RF_AddRadioCodeDB(String id, String name, String func);
 extern char *RF_GetRadioName(uint8_t idx);
 

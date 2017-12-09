@@ -17,18 +17,18 @@ typedef enum {
   Fcm_Sm_CLOSE,
 } Fbm_StateMachine_t;
 
-const char FcmServer[50] = "fcm.googleapis.com";
+static const char FcmServer[25] = "fcm.googleapis.com";
 
-WiFiClient fcm_client;
-uint16_t fcm_sts = Fcm_Sm_IDLE;
-uint32_t FcmServiceStamp;
-bool FcmServiceRxRun;
-bool FcmServiceRxStop;
+static WiFiClient fcm_client;
+static uint16_t fcm_sts = Fcm_Sm_IDLE;
+static uint32_t FcmServiceStamp;
+static bool FcmServiceRxRun;
+static bool FcmServiceRxStop;
 
 // up-to 5 devices
-String RegIDs[FCM_NUM_REGIDS_MAX];
-uint8_t RegIDsLen;
-String FcmMessage;
+static String RegIDs[FCM_NUM_REGIDS_MAX];
+static uint8_t RegIDsLen;
+static String FcmMessage;
 
 void FcmResetRegIDsDB(void) { RegIDsLen = 0; }
 
@@ -51,13 +51,12 @@ static String FcmPostMsg(void) {
   String fcm_host = String(FcmServer);
   String fcm_server_key = String(EE_GetFirebaseServerKey());
 
-  // json data: the notification message multiple devices
+  /* json data: the notification message multiple devices */
   String json = "";
   json += "{";
-  json += "\"data\":{";
-  json += "\"title\":\"";
-  json += "ESP8266 Alert";
-  json += "\",";
+  json += "\"notification\":{";
+  json += "\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",";
+  json += "\"title\":\"ESP8266 Alert\",";
   json += "\"body\":\"";
   json += FcmMessage;
   json += "\",";
@@ -131,8 +130,8 @@ void FcmService(void) {
         /* retrig timeout on receive */
         FcmServiceStamp = curr_time;
         while (avail--) {
-          // Serial.write(fcm_client.read()); // read() gets the FIFO char
-          fcm_client.read();
+          Serial.write(fcm_client.read()); // read() gets the FIFO char
+          // fcm_client.read();
         }
       } else {
         FcmServiceRxStop = FcmServiceRxRun;

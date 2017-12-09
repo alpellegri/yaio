@@ -94,8 +94,8 @@ static void breakTime(uint32_t time, tmElements_t &tm) {
   tm.Month = month + 1; // jan is month 1
   tm.Day = time + 1;    // day of month
 
-  Serial.printf("%d-%02d-%02d %02d:%02d:%02d\n", tm.Year, tm.Month, tm.Day,
-                tm.Hour, tm.Minute, tm.Second);
+  Serial.printf_P(PSTR("%d-%02d-%02d %02d:%02d:%02d\n"), tm.Year, tm.Month,
+                  tm.Day, tm.Hour, tm.Minute, tm.Second);
 }
 
 // send an NTP request to the time server at the given address
@@ -163,8 +163,18 @@ void time_set(uint32_t _time) {
 }
 
 uint32_t getTime(void) {
-  uint32_t _time = (millis() - ntp_update_time) / 1000 + ntp_time;
-  return (_time);
+  uint32_t _millis = millis();
+
+  /* manage millis overflow:
+   * 2^32/1000 = 4294967,296
+   * s correction -> 4294967
+   * ms correttion -> 296
+   */
+  bool ovrf = (_millis < ntp_update_time);
+  uint32_t now_ms = (_millis - ntp_update_time) + (ovrf * 296);
+  uint32_t now_s = (now_ms / 1000) + (ovrf * 4294967) + ntp_time;
+
+  return (now_s);
 }
 
 bool TimeService(void) {

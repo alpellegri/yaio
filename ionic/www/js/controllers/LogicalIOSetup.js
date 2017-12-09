@@ -90,8 +90,8 @@ angular.module('app.controllers.LogicalIOSetup', [])
       // Triggered on a button click, or some other target
       $scope.showPopupLoutEdit = function(Lout) {
         $scope.settings._name = Lout.name;
-        $scope.settings._lio = parseInt(Lout.id / 2);
-        $scope.settings._value = parseInt(Lout.id % 2);
+        $scope.settings._lio = parseInt(Lout.id / 256);
+        $scope.settings._value = parseInt(Lout.id % 256);
         var PopupTemplate =
           '<form class="list">' +
           '<h9 id="setup-heading5" style="text-align:left;">name</h9>' +
@@ -119,7 +119,7 @@ angular.module('app.controllers.LogicalIOSetup', [])
                 e.preventDefault();
               } else {
                 Lout.name = $scope.settings._name;
-                Lout.id = 2 * parseInt($scope.settings._lio) + parseInt($scope.settings._value);
+                Lout.id = 256 * parseInt($scope.settings._lio) + parseInt($scope.settings._value);
                 console.log(Lout);
                 return $scope.settings;
               }
