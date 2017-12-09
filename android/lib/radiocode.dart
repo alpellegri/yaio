@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'io_entry.dart';
+import 'entries.dart';
 import 'const.dart';
 
 class RadioCodeListItem extends StatelessWidget {
-  final RadioCodeEntry entry;
+  final IoEntry entry;
 
   RadioCodeListItem(this.entry);
 
@@ -36,14 +38,14 @@ class RadioCodeListItem extends StatelessWidget {
                         color: Colors.grey,
                       ),
                     ),
-                    new Text(
+                    /* new Text(
                       'Function: ${entry.func}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),
+                    ),*/
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -72,37 +74,19 @@ class _RadioCodeState extends State<RadioCode> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<RadioCodeEntry> inactiveSaves = new List();
-  DatabaseReference _inactiveRef;
-  List<RadioCodeEntry> activeRxSaves = new List();
-  DatabaseReference _activeRxRef;
-  List<RadioCodeEntry> activeTxSaves = new List();
-  DatabaseReference _activeTxRef;
-  List<RadioCodeEntry> destinationSaves;
+  List<IoEntry> entryList = new List();
+  DatabaseReference _graphRef;
+  List<IoEntry> destinationSaves;
   String selection;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _RadioCodeState() {
-    _inactiveRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('Inactive');
-    _inactiveRef.onChildAdded.listen(_onInactiveEntryAdded);
-    _inactiveRef.onChildChanged.listen(_onInactiveEntryEdited);
-    _inactiveRef.onChildRemoved.listen(_onInactiveEntryRemoved);
-    _activeRxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('Active');
-    _activeRxRef.onChildAdded.listen(_onActiveRxEntryAdded);
-    _activeRxRef.onChildChanged.listen(_onActiveRxEntryEdited);
-    _activeRxRef.onChildRemoved.listen(_onActiveRxEntryRemoved);
-    _activeTxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('ActiveTx');
-    _activeTxRef.onChildAdded.listen(_onActiveTxEntryAdded);
-    _activeTxRef.onChildChanged.listen(_onActiveTxEntryEdited);
-    _activeTxRef.onChildRemoved.listen(_onActiveTxEntryRemoved);
+    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -114,10 +98,17 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   void dispose() {
     super.dispose();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    var inactiveList =
+        entryList.where((el) => (el.type == kRadioElem)).toList();
+    var activeRxList = entryList.where((el) => (el.type == kRadioIn)).toList();
+    var activeTxList = entryList.where((el) => (el.type == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -133,11 +124,11 @@ class _RadioCodeState extends State<RadioCode> {
               new ListView.builder(
                 shrinkWrap: true,
                 reverse: true,
-                itemCount: inactiveSaves.length,
+                itemCount: inactiveList.length,
                 itemBuilder: (buildContext, index) {
                   return new InkWell(
-                      onTap: () => _openEntryDialog(inactiveSaves[index]),
-                      child: new RadioCodeListItem(inactiveSaves[index]));
+                      onTap: () => _openEntryDialog(inactiveList[index]),
+                      child: new RadioCodeListItem(inactiveList[index]));
                 },
               ),
             ])),
@@ -150,11 +141,11 @@ class _RadioCodeState extends State<RadioCode> {
               new ListView.builder(
                 shrinkWrap: true,
                 reverse: true,
-                itemCount: activeRxSaves.length,
+                itemCount: activeRxList.length,
                 itemBuilder: (buildContext, index) {
                   return new InkWell(
-                      onTap: () => _openEntryDialog(activeRxSaves[index]),
-                      child: new RadioCodeListItem(activeRxSaves[index]));
+                      onTap: () => _openEntryDialog(activeRxList[index]),
+                      child: new RadioCodeListItem(activeRxList[index]));
                 },
               ),
             ])),
@@ -167,11 +158,11 @@ class _RadioCodeState extends State<RadioCode> {
               new ListView.builder(
                 shrinkWrap: true,
                 reverse: true,
-                itemCount: activeTxSaves.length,
+                itemCount: activeTxList.length,
                 itemBuilder: (buildContext, index) {
                   return new InkWell(
-                      onTap: () => _openEntryDialog(activeTxSaves[index]),
-                      child: new RadioCodeListItem(activeTxSaves[index]));
+                      onTap: () => _openEntryDialog(activeTxList[index]),
+                      child: new RadioCodeListItem(activeTxList[index]));
                 },
               ),
             ])),
@@ -184,87 +175,33 @@ class _RadioCodeState extends State<RadioCode> {
     );
   }
 
-  _onInactiveEntryAdded(Event event) {
+  void _onEntryAdded(Event event) {
     setState(() {
-      inactiveSaves
-          .add(new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot));
+      entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
     });
   }
 
-  _onInactiveEntryEdited(Event event) {
-    RadioCodeEntry oldValue =
-        inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+  void _onEntryEdited(Event event) {
+    IoEntry oldValue =
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      inactiveSaves[inactiveSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_inactiveRef, event.snapshot);
+      entryList[entryList.indexOf(oldValue)] =
+          new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
-  _onInactiveEntryRemoved(Event event) {
-    RadioCodeEntry oldValue =
-        inactiveSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+  void _onEntryRemoved(Event event) {
+    IoEntry oldValue =
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      inactiveSaves.remove(oldValue);
+      entryList.remove(oldValue);
     });
   }
 
-  _onActiveRxEntryAdded(Event event) {
-    setState(() {
-      activeRxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot));
-    });
-  }
-
-  _onActiveRxEntryEdited(Event event) {
-    RadioCodeEntry oldValue =
-        activeRxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeRxSaves[activeRxSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_activeRxRef, event.snapshot);
-    });
-  }
-
-  _onActiveRxEntryRemoved(Event event) {
-    RadioCodeEntry oldValue =
-        activeRxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeRxSaves.remove(oldValue);
-    });
-  }
-
-  _onActiveTxEntryAdded(Event event) {
-    setState(() {
-      activeTxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot));
-    });
-  }
-
-  _onActiveTxEntryEdited(Event event) {
-    RadioCodeEntry oldValue =
-        activeTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeTxSaves[activeTxSaves.indexOf(oldValue)] =
-          new RadioCodeEntry.fromSnapshot(_activeTxRef, event.snapshot);
-    });
-  }
-
-  _onActiveTxEntryRemoved(Event event) {
-    RadioCodeEntry oldValue =
-        activeTxSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      activeTxSaves.remove(oldValue);
-    });
-  }
-
-  void _openEntryDialog(RadioCodeEntry entry) {
+  void _openEntryDialog(IoEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(
-        entry: entry,
-        inactiveRef: _inactiveRef,
-        activeRxRef: _activeRxRef,
-        activeTxRef: _activeTxRef,
-      ),
+      child: new EntryDialog(entry),
     );
   }
 
@@ -277,60 +214,49 @@ class _RadioCodeState extends State<RadioCode> {
 }
 
 class EntryDialog extends StatefulWidget {
-  final RadioCodeEntry entry;
-  final DatabaseReference inactiveRef;
-  final DatabaseReference activeRxRef;
-  final DatabaseReference activeTxRef;
+  final IoEntry entry;
 
-  EntryDialog({
-    this.entry,
-    this.inactiveRef,
-    this.activeRxRef,
-    this.activeTxRef,
-  });
+  EntryDialog(this.entry);
 
   @override
   _EntryDialogState createState() => new _EntryDialogState(
         entry: entry,
-        inactiveRef: inactiveRef,
-        activeRxRef: activeRxRef,
-        activeTxRef: activeTxRef,
       );
 }
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
-  final RadioCodeEntry entry;
-  final DatabaseReference inactiveRef;
-  final DatabaseReference activeRxRef;
-  final DatabaseReference activeTxRef;
-  DatabaseReference _functionRef;
-  List<FunctionEntry> _functionSaves = new List();
+  final IoEntry entry;
+  final DatabaseReference _graphRef =
+      FirebaseDatabase.instance.reference().child(kGraphRef);
+  final DatabaseReference _functionRef =
+      FirebaseDatabase.instance.reference().child(kFunctionsRef);
+  List<FunctionEntry> _functionList = new List();
 
-  String _selectType;
-  String _selectFunction;
+  int _selectedType;
+  FunctionEntry _selectedFunction;
   List<String> radioMenu = new List();
-  Map<String, DatabaseReference> _menuRef = new Map();
+  StreamSubscription<Event> _onAddSubscription;
 
   _EntryDialogState({
     this.entry,
-    this.inactiveRef,
-    this.activeRxRef,
-    this.activeTxRef,
   }) {
     print('EntryDialogState');
-    _functionRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
-    _functionRef.onChildAdded.listen(_onFunctionAdded);
+    _onAddSubscription = _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
-    _menuRef['Inactive'] = inactiveRef;
-    _menuRef['Active Rx'] = activeRxRef;
-    _menuRef['Active Tx'] = activeTxRef;
-    _menuRef.forEach((String key, DatabaseReference value) {
-      radioMenu.add(key);
-    });
+    _selectedType = entry.type;
   }
 
-  bool notNull(Object o) => o != null;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSubscription.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -350,14 +276,18 @@ class _EntryDialogState extends State<EntryDialog> {
                 title: const Text('Radio Type'),
                 trailing: new DropdownButton<String>(
                   hint: const Text('select a type'),
-                  value: _selectType,
+                  value: kEntryId2Name[_selectedType],
                   onChanged: (String newValue) {
                     print(newValue);
                     setState(() {
-                      _selectType = newValue;
+                      _selectedType = kEntryName2Id[newValue];
                     });
                   },
-                  items: radioMenu.map((String entry) {
+                  items: <String>[
+                    kEntryId2Name[kRadioIn],
+                    kEntryId2Name[kRadioOut],
+                    kEntryId2Name[kRadioElem]
+                  ].map((String entry) {
                     return new DropdownMenuItem<String>(
                       value: entry,
                       child: new Text(entry),
@@ -365,21 +295,21 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              (_functionSaves.length > 0)
+              (_functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Function Call'),
-                      trailing: new DropdownButton<String>(
+                      trailing: new DropdownButton<FunctionEntry>(
                         hint: const Text('select a function'),
-                        value: _selectFunction,
-                        onChanged: (String newValue) {
-                          print(newValue);
+                        value: _selectedFunction,
+                        onChanged: (FunctionEntry newValue) {
+                          print(newValue.name);
                           setState(() {
-                            _selectFunction = newValue;
+                            _selectedFunction = newValue;
                           });
                         },
-                        items: _functionSaves.map((FunctionEntry entry) {
-                          return new DropdownMenuItem<String>(
-                            value: entry.name,
+                        items: _functionList.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<FunctionEntry>(
+                            value: entry,
                             child: new Text(entry.name),
                           );
                         }).toList(),
@@ -397,13 +327,23 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                if (entry.key != null) {
-                  entry.reference.child(entry.key).remove();
-                }
-                entry.reference = _menuRef[_selectType];
+                entry.reference = _graphRef;
                 entry.name = _controllerName.text;
-                entry.func = _selectFunction;
-                entry.reference.push().set(entry.toJson());
+                var prev_type = entry.type;
+                entry.type = _selectedType;
+                if (_selectedFunction != null) {
+                  entry.func = _selectedFunction.key;
+                }
+                if (entry.key != null) {
+                  if (prev_type == kRadioElem) {
+                    entry.reference.child(entry.key).remove();
+                    entry.reference.push().set(entry.toJson());
+                  } else {
+                    entry.reference.child(entry.key).update(entry.toJson());
+                  }
+                } else {
+                  entry.reference.push().set(entry.toJson());
+                }
                 Navigator.pop(context, null);
               }),
           new FlatButton(
@@ -414,10 +354,14 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 
-  _onFunctionAdded(Event event) {
+  void _onFunctionAdded(Event event) {
+    FunctionEntry funcEntry =
+        new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
     setState(() {
-      _functionSaves
-          .add(new FunctionEntry.fromSnapshot(_functionRef, event.snapshot));
+      _functionList.add(funcEntry);
+      if (entry.func == funcEntry.key) {
+        _selectedFunction = funcEntry;
+      }
     });
   }
 }

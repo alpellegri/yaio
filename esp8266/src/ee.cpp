@@ -10,6 +10,9 @@
 
 #define EE_SIZE 512
 
+// #define PSTR(x) (x)
+// #define printf_P printf
+
 static char ee_ssid[30] = "";
 static char ee_password[30] = "";
 static char ee_firebase_url[50] = "";

@@ -6,6 +6,7 @@ import 'digital_io.dart';
 import 'logical_io.dart';
 import 'functions.dart';
 import 'log_history.dart';
+import 'chart_history.dart';
 
 final MyDrawer drawer = new MyDrawer();
 
@@ -22,7 +23,9 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
       new Functions(title: 'Functions'),
   Timer.routeName: (BuildContext context) => new Timer(title: 'Timer'),
   LogHistory.routeName: (BuildContext context) =>
-      new LogHistory(title: 'LogHistory'),
+      new LogHistory(title: 'Log History'),
+  ChartHistory.routeName: (BuildContext context) =>
+      new ChartHistory(title: 'Chart History'),
 };
 
 class MyDrawer extends StatefulWidget {
@@ -91,6 +94,14 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.of(context)
                 ..pop()
                 ..pushNamed(LogHistory.routeName);
+            }),
+        new ListTile(
+            leading: new Icon(Icons.show_chart),
+            title: new Text('ChartHistory'),
+            onTap: () {
+              Navigator.of(context)
+                ..pop()
+                ..pushNamed(ChartHistory.routeName);
             }),
       ]),
     );

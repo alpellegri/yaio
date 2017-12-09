@@ -15,6 +15,9 @@ static tmElements_t tm;
 static uint32_t ntp_time;
 static uint32_t ntp_update_time;
 
+// #define PSTR(x) (x)
+// #define printf_P printf
+
 /*-------- NTP code ----------*/
 
 // NTP Servers:

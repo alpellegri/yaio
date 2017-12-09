@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'io_entry.dart';
+import 'entries.dart';
 import 'const.dart';
 
 class ListItem extends StatelessWidget {
@@ -44,14 +46,6 @@ class ListItem extends StatelessWidget {
                         color: Colors.grey,
                       ),
                     ),
-                    new Text(
-                      'ID: ${entry.id.toRadixString(16)}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -77,14 +71,17 @@ class DigitalIO extends StatefulWidget {
 }
 
 class _DigitalIOState extends State<DigitalIO> {
-  List<IoEntry> entrySaves = new List();
+  List<IoEntry> entryList = new List();
   DatabaseReference _entryRef;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _DigitalIOState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(kDoutRef);
-    _entryRef.onChildAdded.listen(_onEntryAdded);
-    _entryRef.onChildChanged.listen(_onEntryEdited);
-    _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _entryRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -96,10 +93,14 @@ class _DigitalIOState extends State<DigitalIO> {
   @override
   void dispose() {
     super.dispose();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    var query = entryList.where((el) => (el.type == kDOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -108,11 +109,11 @@ class _DigitalIOState extends State<DigitalIO> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: entrySaves.length,
+        itemCount: query.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entrySaves[index]),
-              child: new ListItem(entrySaves[index]));
+              onTap: () => _openEntryDialog(query[index]),
+              child: new ListItem(query[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -123,26 +124,26 @@ class _DigitalIOState extends State<DigitalIO> {
     );
   }
 
-  _onEntryAdded(Event event) {
+  void _onEntryAdded(Event event) {
     setState(() {
-      entrySaves.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
+      entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
+  void _onEntryEdited(Event event) {
     IoEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      entrySaves[entrySaves.indexOf(oldValue)] =
+      entryList[entryList.indexOf(oldValue)] =
           new IoEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
-  _onEntryRemoved(Event event) {
+  void _onEntryRemoved(Event event) {
     IoEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      entrySaves.remove(oldValue);
+      entryList.remove(oldValue);
     });
   }
 
@@ -224,12 +225,14 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
+                  entry.type = kDOut;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
-                    entry.reference.child(entry.key).remove();
+                    entry.reference.child(entry.key).update(entry.toJson());
+                  } else {
+                    entry.reference.push().set(entry.toJson());
                   }
-                  entry.reference.push().set(entry.toJson());
                 } catch (exception, stackTrace) {}
                 Navigator.pop(context, null);
               }),

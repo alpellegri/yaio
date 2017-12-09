@@ -1,29 +1,11 @@
+import 'dart:async';
+
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
+import 'entries.dart';
 import 'const.dart';
-
-class LogEntry {
-  String key;
-  DateTime dateTime;
-  String message;
-
-  LogEntry(this.dateTime, this.message);
-
-  LogEntry.fromSnapshot(DataSnapshot snapshot)
-      : key = snapshot.key,
-        dateTime = new DateTime.fromMillisecondsSinceEpoch(
-            snapshot.value["time"] * 1000),
-        message = snapshot.value["msg"];
-
-  toJson() {
-    return {
-      "message": message,
-      "date": dateTime.millisecondsSinceEpoch,
-    };
-  }
-}
 
 class LogListItem extends StatelessWidget {
   final LogEntry logEntry;
@@ -36,7 +18,7 @@ class LogListItem extends StatelessWidget {
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           new Expanded(
             child: new Row(
@@ -45,14 +27,12 @@ class LogListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      new DateFormat('yyyy-MM-dd').format(logEntry.dateTime),
+                      new DateFormat('d/M/y').format(logEntry.dateTime),
                       textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
                     ),
                     new Text(
                       new DateFormat('Hm').format(logEntry.dateTime),
                       textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
@@ -66,8 +46,7 @@ class LogListItem extends StatelessWidget {
           ),
           new Text(
             logEntry.message.toString(),
-            textScaleFactor: 1.5,
-            textAlign: TextAlign.left,
+            textScaleFactor: 1.0,
           ),
         ],
       ),
@@ -87,14 +66,28 @@ class LogHistory extends StatefulWidget {
 }
 
 class _LogHistoryState extends State<LogHistory> {
-  List<LogEntry> logSaves = new List();
-  DatabaseReference _logReference;
+  List<LogEntry> entryList = new List();
+  DatabaseReference _entryRef;
+  StreamSubscription<Event> _onAddSub;
+  StreamSubscription<Event> _onRemoveSub;
 
   _LogHistoryState() {
-    _logReference =
-        FirebaseDatabase.instance.reference().child(kLogsRef).child("Reports");
-    _logReference.onChildAdded.listen(_onEntryAdded);
-    _logReference.onChildRemoved.listen(_onEntryRemoved);
+    _entryRef = FirebaseDatabase.instance.reference().child(kLogsReportsRef);
+    _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print('_LogHistoryState');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSub.cancel();
+    _onRemoveSub.cancel();
   }
 
   @override
@@ -107,12 +100,12 @@ class _LogHistoryState extends State<LogHistory> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: logSaves.length,
+        itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           //calculating difference
           return new InkWell(
               // onTap: () => _openEditEntryDialog(logSaves[index]),
-              child: new LogListItem(logSaves[index]));
+              child: new LogListItem(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -126,23 +119,23 @@ class _LogHistoryState extends State<LogHistory> {
   _onEntryAdded(Event event) {
     print('_onEntryAdded');
     setState(() {
-      logSaves.add(new LogEntry.fromSnapshot(event.snapshot));
-      logSaves.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
+      entryList.add(new LogEntry.fromSnapshot(event.snapshot));
+      entryList.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
     });
   }
 
   _onEntryRemoved(Event event) {
     print('_onEntryRemoved');
     var oldValue =
-        logSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((entry) => entry.key == event.snapshot.key);
 
     setState(() {
-      logSaves.remove(oldValue);
-      logSaves.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
+      entryList.remove(oldValue);
+      entryList.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
     });
   }
 
   void _onFloatingActionButtonPressed() {
-    _logReference.remove();
+    _entryRef.remove();
   }
 }

@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
-import 'io_entry.dart';
+import 'entries.dart';
 import 'const.dart';
 
 class FunctionListItem extends StatelessWidget {
@@ -11,6 +13,8 @@ class FunctionListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FunctionEntry next;
+    IoEntry action;
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
       child: new Row(
@@ -28,14 +32,7 @@ class FunctionListItem extends StatelessWidget {
                       textScaleFactor: 1.5,
                       textAlign: TextAlign.left,
                     ),
-                    new Text(
-                      'type: ${entry.typeName}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
+                    /*
                     new Text(
                       'action name: ${entry.actionName}',
                       textScaleFactor: 1.0,
@@ -51,15 +48,7 @@ class FunctionListItem extends StatelessWidget {
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),
-                    new Text(
-                      'action ID: ${entry.idAction}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
+                    ),*/
                     new Text(
                       'delay: ${entry.delay.toString()}',
                       textScaleFactor: 1.0,
@@ -104,14 +93,17 @@ class _FunctionsState extends State<Functions> {
   final DatabaseReference _controlRef =
       FirebaseDatabase.instance.reference().child(kControlRef);
 
-  List<FunctionEntry> entrySaves = new List();
+  List<FunctionEntry> entryList = new List();
   DatabaseReference _entryRef;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _FunctionsState() {
     _entryRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
-    _entryRef.onChildAdded.listen(_onEntryAdded);
-    _entryRef.onChildChanged.listen(_onEntryEdited);
-    _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -123,6 +115,9 @@ class _FunctionsState extends State<Functions> {
   @override
   void dispose() {
     super.dispose();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -135,11 +130,11 @@ class _FunctionsState extends State<Functions> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: entrySaves.length,
+        itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entrySaves[index]),
-              child: new FunctionListItem(entrySaves[index]));
+              onTap: () => _openEntryDialog(entryList[index]),
+              child: new FunctionListItem(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -150,33 +145,33 @@ class _FunctionsState extends State<Functions> {
     );
   }
 
-  _onEntryAdded(Event event) {
+  void _onEntryAdded(Event event) {
     setState(() {
-      entrySaves.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
+      entryList.add(new FunctionEntry.fromSnapshot(_entryRef, event.snapshot));
     });
   }
 
-  _onEntryEdited(Event event) {
+  void _onEntryEdited(Event event) {
     FunctionEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      entrySaves[entrySaves.indexOf(oldValue)] =
+      entryList[entryList.indexOf(oldValue)] =
           new FunctionEntry.fromSnapshot(_entryRef, event.snapshot);
     });
   }
 
-  _onEntryRemoved(Event event) {
+  void _onEntryRemoved(Event event) {
     FunctionEntry oldValue =
-        entrySaves.singleWhere((entry) => entry.key == event.snapshot.key);
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
-      entrySaves.remove(oldValue);
+      entryList.remove(oldValue);
     });
   }
 
   void _openEntryDialog(FunctionEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(entry, entrySaves),
+      child: new EntryDialog(entry, entryList),
     );
   }
 
@@ -188,68 +183,58 @@ class _FunctionsState extends State<Functions> {
 
 class EntryDialog extends StatefulWidget {
   final FunctionEntry entry;
-  final List<FunctionEntry> functionSaves;
+  final List<FunctionEntry> functionList;
 
-  EntryDialog(this.entry, this.functionSaves);
+  EntryDialog(this.entry, this.functionList);
 
   @override
-  _EntryDialogState createState() =>
-      new _EntryDialogState(entry, functionSaves);
+  _EntryDialogState createState() => new _EntryDialogState(entry, functionList);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerDelay = new TextEditingController();
   final FunctionEntry entry;
-  final List<FunctionEntry> functionSaves;
+  List<FunctionEntry> functionList;
 
-  String _selectType;
-  String _selectAction;
-  int _selectIdAction;
-  String _selectDelay;
-  String _selectNext;
+  int _selectedType;
+  FunctionEntry _selectedNext;
   List<String> selectTypeMenu = new List();
-  Map<String, List> _selectedSaves = new Map();
-  List ioMenu;
-  dynamic _selectedElem;
-  Map<String, int> _mapType = {
-    'DOUT': 1,
-    'Radio Tx': 2,
-    'LOUT': 3,
-  };
+  Map<int, List> _selectedList = new Map();
+  List<IoEntry> _ioMenu = new List();
+  IoEntry _selectedEntry;
 
-  List<RadioCodeEntry> radioTxSaves = new List();
-  DatabaseReference _radioTxRef;
-  List<IoEntry> doutSaves = new List();
-  DatabaseReference _doutRef;
-  List<IoEntry> loutSaves = new List();
-  DatabaseReference _loutRef;
+  List<IoEntry> entryIoList = new List();
+  DatabaseReference _graphRef;
+  StreamSubscription<Event> _onAddSubscription;
 
-  _EntryDialogState(this.entry, this.functionSaves) {
+  _EntryDialogState(this.entry, this.functionList) {
     print('EntryDialogState');
-    _radioTxRef = FirebaseDatabase.instance
-        .reference()
-        .child(kRadioCodesRef)
-        .child('ActiveTx');
-    _radioTxRef.onChildAdded.listen(_onRadioEntryAdded);
-    _doutRef = FirebaseDatabase.instance.reference().child(kDoutRef);
-    _doutRef.onChildAdded.listen(_onDoutEntryAdded);
-    _loutRef = FirebaseDatabase.instance.reference().child(kLoutRef);
-    _loutRef.onChildAdded.listen(_onLoutEntryAdded);
+    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    _selectedSaves['DOUT'] = doutSaves;
-    _selectedSaves['LOUT'] = loutSaves;
-    _selectedSaves['Radio Tx'] = radioTxSaves;
-    _selectedSaves.forEach((String key, List value) {
-      selectTypeMenu.add(key);
-    });
+    selectTypeMenu.add(kEntryId2Name[kDOut]);
+    selectTypeMenu.add(kEntryId2Name[kLOut]);
+    selectTypeMenu.add(kEntryId2Name[kRadioOut]);
 
-    _controllerName.text = entry.name;
-    _controllerDelay.text = entry.delay.toString();
-    _selectType = entry.typeName;
-    ioMenu = _selectedSaves[_selectType];
-    _selectAction = entry.actionName;
-    _selectNext = entry.next;
+    _controllerName.text = entry?.name;
+    if (entry.delay != null) {
+      _controllerDelay.text = entry?.delay.toString();
+    }
+    if (entry.next != null) {
+      _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSubscription.cancel();
   }
 
   @override
@@ -269,43 +254,41 @@ class _EntryDialogState extends State<EntryDialog> {
               new ListTile(
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
-                  hint: const Text('select a type'),
-                  value: _selectType,
+                  hint: const Text('type'),
+                  value: kEntryId2Name[_selectedType],
                   onChanged: (String newValue) {
                     setState(() {
-                      _selectType = newValue;
-                      ioMenu = _selectedSaves[_selectType];
-                      _selectAction = null;
+                      _selectedType = kEntryName2Id[newValue];
+                      _ioMenu = entryIoList
+                          .where((el) => el.type == _selectedType)
+                          .toList();
+                      _ioMenu.forEach((e) => print(e.name));
+                      _selectedEntry = null;
                     });
                   },
                   items: selectTypeMenu.map((String entry) {
                     return new DropdownMenuItem<String>(
                       value: entry,
-                      child: new Text(
-                        entry,
-                      ),
+                      child: new Text(entry),
                     );
                   }).toList(),
                 ),
               ),
-              (ioMenu.length > 0)
+              ((_ioMenu != null) && (_ioMenu.length > 0))
                   ? new ListTile(
                       title: const Text('Action'),
-                      trailing: new DropdownButton<dynamic>(
-                        hint: const Text('select an action'),
-                        value: _selectedElem,
-                        onChanged: (dynamic newValue) {
+                      trailing: new DropdownButton<IoEntry>(
+                        hint: const Text('action'),
+                        value: _selectedEntry,
+                        onChanged: (IoEntry newValue) {
                           setState(() {
-                            _selectedElem = newValue;
-                            _selectIdAction = newValue.id;
+                            _selectedEntry = newValue;
                           });
                         },
-                        items: ioMenu.map((dynamic entry) {
-                          return new DropdownMenuItem<dynamic>(
+                        items: _ioMenu.map((IoEntry entry) {
+                          return new DropdownMenuItem<IoEntry>(
                             value: entry,
-                            child: new Text(
-                              entry.name,
-                            ),
+                            child: new Text(entry.name),
                           );
                         }).toList(),
                       ),
@@ -317,23 +300,21 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'delay',
                 ),
               ),
-              (functionSaves.length > 0)
+              (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
-                      trailing: new DropdownButton<String>(
+                      trailing: new DropdownButton<FunctionEntry>(
                         hint: const Text('Select a Function'),
-                        value: _selectNext,
-                        onChanged: (String newValue) {
+                        value: _selectedNext,
+                        onChanged: (FunctionEntry newValue) {
                           setState(() {
-                            _selectNext = newValue;
+                            _selectedNext = newValue;
                           });
                         },
-                        items: functionSaves.map((FunctionEntry entry) {
-                          return new DropdownMenuItem<String>(
-                            value: entry.name,
-                            child: new Text(
-                              entry.name,
-                            ),
+                        items: functionList.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<FunctionEntry>(
+                            value: entry,
+                            child: new Text(entry.name),
                           );
                         }).toList(),
                       ),
@@ -350,24 +331,17 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                try {
-                  int delay = int.parse(_controllerDelay.text);
-                  setState(() {
-                    entry.delay = delay;
-                    entry.name = _controllerName.text;
-                    entry.next = _selectNext;
-                    entry.typeName = _selectType;
-                    // dynamic element = ioMenu.singleWhere((entry) => entry.key == _selectAction);
-                    entry.idType = _mapType[_selectType];
-                    entry.idAction = _selectIdAction;
-                    entry.actionName = _selectAction;
-                    if (entry.key != null) {
-                      entry.reference.child(entry.key).remove();
-                    }
+                setState(() {
+                  entry.delay = int.parse(_controllerDelay.text);
+                  entry.name = _controllerName.text;
+                  entry.next = _selectedNext?.key;
+                  entry.action = _selectedEntry?.key;
+                  if (entry.key != null) {
+                    entry.reference.child(entry.key).update(entry.toJson());
+                  } else {
                     entry.reference.push().set(entry.toJson());
-                  });
-                } catch (exception, stackTrace) {}
-
+                  }
+                });
                 Navigator.pop(context, null);
               }),
           new FlatButton(
@@ -378,22 +352,16 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 
-  _onRadioEntryAdded(Event event) {
+  void _onGraphEntryAdded(Event event) {
+    print('_onGraphEntryAdded');
+    IoEntry ioEntry = new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     setState(() {
-      radioTxSaves
-          .add(new RadioCodeEntry.fromSnapshot(_radioTxRef, event.snapshot));
-    });
-  }
-
-  _onDoutEntryAdded(Event event) {
-    setState(() {
-      doutSaves.add(new IoEntry.fromSnapshot(_doutRef, event.snapshot));
-    });
-  }
-
-  _onLoutEntryAdded(Event event) {
-    setState(() {
-      loutSaves.add(new IoEntry.fromSnapshot(_loutRef, event.snapshot));
+      entryIoList.add(ioEntry);
+      if (entry.action == ioEntry.key) {
+        _selectedEntry = ioEntry;
+        _selectedType = ioEntry.type;
+        _ioMenu = entryIoList.where((el) => el.type == _selectedType).toList();
+      }
     });
   }
 }
