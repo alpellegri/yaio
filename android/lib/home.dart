@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
+import 'chart_history.dart';
 import 'const.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -191,21 +192,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   new ListTile(
-                    leading: (current.difference(_heartbeatTime) >
-                        time_limit)
+                    leading: (current.difference(_heartbeatTime) > time_limit)
                         ? (new Icon(Icons.album, color: Colors.red[200]))
                         : (new Icon(Icons.album, color: Colors.green[200])),
                     title: const Text('Device Status'),
                   ),
                   new ListTile(
                     leading: (_status['alarm'] == true)
-                        ? (new Icon(Icons.lock_outline,
-                        color: Colors.red[200]))
-                        : (new Icon(Icons.lock_open,
-                        color: Colors.green[200])),
+                        ? (new Icon(Icons.lock_outline, color: Colors.red[200]))
+                        : (new Icon(Icons.lock_open, color: Colors.green[200])),
                     title: const Text('Alarm Status'),
-                    subtitle: new Text(
-                        '${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
+                    subtitle:
+                        new Text('${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
                     trailing: new ButtonTheme.bar(
                       // make buttons use the appropriate styles for cards
                       child: new ButtonBar(
@@ -234,9 +232,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   new ListTile(
                     leading: const Icon(Icons.show_chart),
-                    title: const Text('Temperature/Humidity'),
+                    title: const Text('Temperature / Humidity'),
                     subtitle: new Text(
                         '${_status["temperature"]}°C / ${_status["humidity"]}%'),
+                    trailing: new ButtonTheme.bar(
+                      child: new ButtonBar(
+                        children: <Widget>[
+                          new FlatButton(
+                            child: const Text('SHOW'),
+                            onPressed: () {
+                              Navigator.of(context)
+                                ..pushNamed(ChartHistory.routeName);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -259,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: new Text(monitorButton),
                             onPressed: () {
                               _control['radio_learn'] =
-                              !_control['radio_learn'];
+                                  !_control['radio_learn'];
                               DateTime now = new DateTime.now();
                               _control['time'] =
                                   now.millisecondsSinceEpoch ~/ 1000;
@@ -278,8 +289,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   new ListTile(
                     leading: (_control['reboot'] == 3)
                         ? (new LinearProgressIndicator(
-                      value: null,
-                    ))
+                            value: null,
+                          ))
                         : (const Icon(Icons.flash_on)),
                     title: const Text('Update Node'),
                     subtitle: new Text('Configuration'),
@@ -299,8 +310,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   new ListTile(
                     leading: (_control['reboot'] == 1)
                         ? (new LinearProgressIndicator(
-                      value: null,
-                    ))
+                            value: null,
+                          ))
                         : (const Icon(Icons.power)),
                     title: const Text('PowerUp'),
                     subtitle: new Text('${_startupTime.toString()}'),
@@ -320,8 +331,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   new ListTile(
                     leading: (_control['reboot'] == 2)
                         ? (new LinearProgressIndicator(
-                      value: null,
-                    ))
+                            value: null,
+                          ))
                         : (const Icon(Icons.flash_on)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${_startup["version"]}'),
@@ -383,8 +394,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _control['reboot'] = value;
     _controlRef.set(_control);
     DateTime now = new DateTime.now();
-    _control['time'] =
-        now.millisecondsSinceEpoch ~/ 1000;
+    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(_control);
   }
 }

@@ -34,11 +34,13 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
+
   @override
   Widget build(BuildContext context) {
+    final TextStyle textStyle = Theme.of(context).textTheme.display1;
     return new Drawer(
       child: new ListView(children: <Widget>[
-        new DrawerHeader(child: new Text('Header')),
+        new DrawerHeader(child: new Text('uHome', style: textStyle)),
         new ListTile(
             leading: new Icon(Icons.developer_board),
             title: new Text('NodeSetup'),
