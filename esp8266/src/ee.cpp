@@ -15,22 +15,28 @@
 
 static char ee_ssid[30] = "";
 static char ee_password[30] = "";
-static char ee_firebase_url[50] = "";
-static char ee_firebase_secret[50] = "";
-static char ee_firebase_server_key[200] = "";
-static char ee_firebase_storage_bucket[50] = "";
+static char ee_domain[30] = "";
+static char ee_nodename[30] = "";
+
+// do not include 'https://'
+static char ee_fb_url[] = "uhome-9b8a1.firebaseio.com";
+static char ee_fb_secret[] = "HFfNAKvCGiLhSGwhy1aNTnj1QK6k5lZJukAaKprz";
+static char ee_fb_cloud_messaging_server_key[] =
+    "AAAAfnPi7d8:APA91bED_durAs8Hn4oyKvaDWQihT_vgRYGKk_Y_"
+    "oUkwEpqnctgXUTsnLsiHm241L3RRY9UxcXiHNF3QxBavFmrasx5RjJOk13oETI82c8Awji2ydV"
+    "jjruTiZ9Um6Ue72JErI0kwy-Nu";
+static char ee_fb_storage_bucket[] = "uhome-9b8a1.firebaseio.com";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
 char *EE_GetSSID() { return ee_ssid; }
 char *EE_GetPassword() { return ee_password; }
-char *EE_GetFirebaseUrl() {
-  /* skip: https:// */
-  return &ee_firebase_url[8];
-}
-char *EE_GetFirebaseSecret() { return ee_firebase_secret; }
-char *EE_GetFirebaseServerKey() { return ee_firebase_server_key; }
-char *EE_GetFirebaseStorageBucket() { return ee_firebase_storage_bucket; }
+char *EE_GetDomain() { return ee_domain; }
+char *EE_GetNodeName() { return ee_nodename; }
+char *EE_GetFirebaseUrl() { return ee_fb_url; }
+char *EE_GetFirebaseSecret() { return ee_fb_secret; }
+char *EE_GetFirebaseServerKey() { return ee_fb_cloud_messaging_server_key; }
+char *EE_GetFirebaseStorageBucket() { return ee_fb_storage_bucket; }
 
 void EE_EraseData() {
   int i;
@@ -77,27 +83,18 @@ bool EE_LoadData(void) {
     const char *password = root["password"];
     Serial.print(F("password: "));
     Serial.println(password);
-    const char *firebase_url = root["firebase_url"];
-    Serial.print(F("firebase_url: "));
-    Serial.println(firebase_url);
-    const char *firebase_secret = root["firebase_secret"];
-    Serial.print(F("firebase_secret: "));
-    Serial.println(firebase_secret);
-    const char *firebase_server_key = root["firebase_server_key"];
-    Serial.print(F("firebase_server_key: "));
-    Serial.println(firebase_server_key);
-    const char *storage_bucket = root["storage_bucket"];
-    Serial.print(F("storage_bucket: "));
-    Serial.println(storage_bucket);
-    if ((ssid != NULL) && (password != NULL) && (firebase_url != NULL) &&
-        (firebase_secret != NULL) && (firebase_server_key != NULL) &&
-        (storage_bucket != NULL)) {
+    const char *domain = root["domain"];
+    Serial.print(F("domain: "));
+    Serial.println(domain);
+    const char *nodename = root["nodename"];
+    Serial.print(F("nodename: "));
+    Serial.println(nodename);
+    if ((ssid != NULL) && (password != NULL) && (domain != NULL) &&
+        (nodename != NULL)) {
       strcpy(ee_ssid, ssid);
       strcpy(ee_password, password);
-      strcpy(ee_firebase_url, firebase_url);
-      strcpy(ee_firebase_secret, firebase_secret);
-      strcpy(ee_firebase_server_key, firebase_server_key);
-      strcpy(ee_firebase_storage_bucket, storage_bucket);
+      strcpy(ee_domain, domain);
+      strcpy(ee_nodename, nodename);
       Serial.println(F("EEPROM ok"));
       ret = true;
     } else {

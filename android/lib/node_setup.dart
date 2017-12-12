@@ -61,12 +61,11 @@ class _NodeSetupState extends State<NodeSetup> {
   ServiceWebSocket ws;
   Icon iconConnStatus;
   bool connStatus;
-  Map _fbJsonMap;
   Map _nodeConfigMap = new Map();
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
-  final TextEditingController _ctrlFbSecretKey = new TextEditingController();
-  final TextEditingController _ctrlFbMsgKey = new TextEditingController();
+  final TextEditingController _ctrlDomain = new TextEditingController();
+  final TextEditingController _ctrlNodeName = new TextEditingController();
   SharedPreferences _prefs;
   String _nodeConfigJson;
 
@@ -77,25 +76,20 @@ class _NodeSetupState extends State<NodeSetup> {
   Future<Null> initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _nodeConfigJson = _prefs.getString('node_config_json');
-    _nodeConfigMap = JSON.decode(_nodeConfigJson);
-    _ctrlSSID.text = _nodeConfigMap['ssid'];
-    _ctrlPassword.text = _nodeConfigMap['password'];
-    _ctrlFbSecretKey.text = _nodeConfigMap['firebase_secret'];
-    _ctrlFbMsgKey.text = _nodeConfigMap['firebase_server_key'];
+
+    if (_nodeConfigJson != null) {
+      _nodeConfigMap = JSON.decode(_nodeConfigJson);
+      _ctrlSSID.text = _nodeConfigMap['ssid'];
+      _ctrlPassword.text = _nodeConfigMap['password'];
+      _ctrlDomain.text = _nodeConfigMap['domain'];
+      _ctrlNodeName.text = _nodeConfigMap['nodename'];
+    }
   }
 
   @override
   void initState() {
     super.initState();
     initSharedPreferences();
-    configFirefase().then((value) {
-      _fbJsonMap = value;
-      _nodeConfigMap['firebase_url'] =
-          _fbJsonMap['project_info']['firebase_url'];
-      _nodeConfigMap['storage_bucket'] =
-          _fbJsonMap['project_info']['storage_bucket'];
-      print(JSON.encode(_nodeConfigMap));
-    });
     connStatus = false;
     iconConnStatus = const Icon(Icons.settings_remote);
   }
@@ -121,7 +115,6 @@ class _NodeSetupState extends State<NodeSetup> {
                 controller: _ctrlSSID,
                 decoration: new InputDecoration(
                   hintText: 'SSID',
-
                 ),
               ),
               new TextField(
@@ -131,15 +124,15 @@ class _NodeSetupState extends State<NodeSetup> {
                 ),
               ),
               new TextField(
-                controller: _ctrlFbSecretKey,
+                controller: _ctrlDomain,
                 decoration: new InputDecoration(
-                  hintText: 'Secret Key',
+                  hintText: 'Domain',
                 ),
               ),
               new TextField(
-                controller: _ctrlFbMsgKey,
+                controller: _ctrlNodeName,
                 decoration: new InputDecoration(
-                  hintText: 'Messaging Key',
+                  hintText: 'Node Name',
                 ),
               ),
               new ButtonTheme.bar(
@@ -161,11 +154,11 @@ class _NodeSetupState extends State<NodeSetup> {
                 title: const Text('Current Configration'),
                 trailing: new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
-                      new FlatButton(
-                        child: new Text('SEND TO NODE'),
-                        onPressed: _sendParameters,
-                      ),
-                    ])),
+                  new FlatButton(
+                    child: new Text('SEND TO NODE'),
+                    onPressed: _sendParameters,
+                  ),
+                ])),
               ),
               new Text('${_nodeConfigJson}'),
             ],
@@ -183,12 +176,15 @@ class _NodeSetupState extends State<NodeSetup> {
   void _sendParameters() {
     ws.send(_nodeConfigJson);
   }
+
   void _savePreferences() {
     if (_prefs != null) {
       _nodeConfigMap['ssid'] = _ctrlSSID.text;
       _nodeConfigMap['password'] = _ctrlPassword.text;
-      _nodeConfigMap['firebase_secret'] = _ctrlFbSecretKey.text;
-      _nodeConfigMap['firebase_server_key'] = _ctrlFbMsgKey.text;
+      _nodeConfigMap['domain'] = _ctrlDomain.text;
+      _nodeConfigMap['nodename'] = _ctrlNodeName.text;
+      _nodeConfigJson = '';
+      _prefs.setString('node_config_json', _nodeConfigJson);
       setState(() {
         _nodeConfigJson = JSON.encode(_nodeConfigMap);
       });
