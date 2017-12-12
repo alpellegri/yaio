@@ -286,7 +286,6 @@ bool FbmService(void) {
           DynamicJsonBuffer jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
           status["alarm"] = status_alarm;
-          status["monitor"] = fbm_monitor_run;
           status["heap"] = ESP.getFreeHeap();
           status["humidity"] = humidity_data;
           status["temperature"] = temperature_data;
