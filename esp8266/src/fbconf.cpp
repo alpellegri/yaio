@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ee.h"
 #include "fbconf.h"
 #include "fcm.h"
 #include "rf.h"
-#include "ee.h"
 
 String kstartup = "startup";
 String kcontrol = "control";
@@ -17,7 +17,8 @@ String kmessaging = "FCM_Registration_IDs";
 String kgraph = "graph";
 
 void FbmInit(void) {
-  String prefix = String(EE_GetDomain()) + "/" + String(EE_GetNodeName()) + "/";
+  String prefix = String(EE_GetUID()) + "/" + String(EE_GetDomain()) + "/" +
+                  String(EE_GetNodeName()) + "/";
   kstartup = prefix + kstartup;
   kcontrol = prefix + kcontrol;
   kstatus = prefix + kstatus;
