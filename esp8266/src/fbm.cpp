@@ -147,11 +147,9 @@ bool FbmService(void) {
   // firebase init
   case 0: {
     bool ret = true;
-    char *firebase_url = NULL;
-    char *firebase_secret = NULL;
 
-    firebase_url = EE_GetFirebaseUrl();
-    firebase_secret = EE_GetFirebaseSecret();
+    String firebase_url = EE_GetFirebaseUrl();
+    String firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
     boot_sm = 1;
     yield();

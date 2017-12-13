@@ -141,11 +141,11 @@ bool AP_Task(void) {
         Serial.println(F("no networks found"));
         ESP.restart();
       } else {
-        char *sta_ssid = EE_GetSSID();
+        String sta_ssid = EE_GetSSID();
 
         for (int i = 0; i < n; ++i) {
           yield();
-          int test = WiFi.SSID(i).compareTo(String(sta_ssid));
+          int test = WiFi.SSID(i).compareTo(sta_ssid);
           Serial.println(WiFi.SSID(i));
           if (test == 0) {
             Serial.print(F("network found: "));

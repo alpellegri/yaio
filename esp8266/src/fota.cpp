@@ -65,7 +65,7 @@ bool FOTA_UpdateReq(void) {
 bool FOTAService(void) {
 
   FOTA_StateMachine_t state_current;
-  String storage_bucket = String(EE_GetFirebaseStorageBucket());
+  String storage_bucket = EE_GetFirebaseStorageBucket();
 
   state_current = state;
 

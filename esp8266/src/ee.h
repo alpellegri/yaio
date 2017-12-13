@@ -4,15 +4,15 @@
 #include <Arduino.h>
 
 extern void EE_Setup();
-extern char *EE_GetSSID();
-extern char *EE_GetPassword();
-extern char *EE_GetUID();
-extern char *EE_GetDomain();
-extern char *EE_GetNodeName();
-extern char *EE_GetFirebaseUrl();
-extern char *EE_GetFirebaseSecret();
-extern char *EE_GetFirebaseServerKey();
-extern char *EE_GetFirebaseStorageBucket();
+extern String EE_GetSSID();
+extern String EE_GetPassword();
+extern String EE_GetUID();
+extern String EE_GetDomain();
+extern String EE_GetNodeName();
+extern String EE_GetFirebaseUrl();
+extern String EE_GetFirebaseSecret();
+extern String EE_GetFirebaseServerKey();
+extern String EE_GetFirebaseStorageBucket();
 extern void EE_EraseData(void);
 extern void EE_StoreData(uint8_t *data, uint16_t len);
 extern bool EE_LoadData(void);

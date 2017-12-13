@@ -26,8 +26,6 @@ bool STA_Setup(void) {
   bool ret = true;
   bool sts = false;
   int cnt;
-  char *sta_ssid = NULL;
-  char *sta_password = NULL;
 
   digitalWrite(LED, true);
 
@@ -43,14 +41,14 @@ bool STA_Setup(void) {
     delay(100);
     WiFi.mode(WIFI_STA);
 
-    sta_ssid = EE_GetSSID();
-    sta_password = EE_GetPassword();
+    String sta_ssid = EE_GetSSID();
+    String sta_password = EE_GetPassword();
     Serial.print(F("sta_ssid: "));
     Serial.println(sta_ssid);
     Serial.print(F("sta_password: "));
     Serial.println(sta_password);
     Serial.println(F("trying to connect..."));
-    WiFi.begin(sta_ssid, sta_password);
+    WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
     cnt = 0;
     while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
       Serial.print(F("."));

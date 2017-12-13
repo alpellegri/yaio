@@ -13,32 +13,32 @@
 // #define PSTR(x) (x)
 // #define printf_P printf
 
-static char ee_ssid[30] = "";
-static char ee_password[30] = "";
-static char ee_uid[30] = "";
-static char ee_domain[30] = "";
-static char ee_nodename[30] = "";
+static String ee_ssid;
+static String ee_password;
+static String ee_uid;
+static String ee_domain;
+static String ee_nodename;
 
 // do not include 'https://'
-static char ee_fb_url[] = "uhome-9b8a1.firebaseio.com";
-static char ee_fb_secret[] = "HFfNAKvCGiLhSGwhy1aNTnj1QK6k5lZJukAaKprz";
-static char ee_fb_cloud_messaging_server_key[] =
+String ee_fb_url = "uhome-9b8a1.firebaseio.com";
+String ee_fb_secret = "HFfNAKvCGiLhSGwhy1aNTnj1QK6k5lZJukAaKprz";
+String ee_fb_cloud_messaging_server_key =
     "AAAAfnPi7d8:APA91bED_durAs8Hn4oyKvaDWQihT_vgRYGKk_Y_"
     "oUkwEpqnctgXUTsnLsiHm241L3RRY9UxcXiHNF3QxBavFmrasx5RjJOk13oETI82c8Awji2ydV"
     "jjruTiZ9Um6Ue72JErI0kwy-Nu";
-static char ee_fb_storage_bucket[] = "uhome-9b8a1.firebaseio.com";
+String ee_fb_storage_bucket = "uhome-9b8a1.firebaseio.com";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
-char *EE_GetSSID() { return ee_ssid; }
-char *EE_GetPassword() { return ee_password; }
-char *EE_GetUID() { return ee_uid; }
-char *EE_GetDomain() { return ee_domain; }
-char *EE_GetNodeName() { return ee_nodename; }
-char *EE_GetFirebaseUrl() { return ee_fb_url; }
-char *EE_GetFirebaseSecret() { return ee_fb_secret; }
-char *EE_GetFirebaseServerKey() { return ee_fb_cloud_messaging_server_key; }
-char *EE_GetFirebaseStorageBucket() { return ee_fb_storage_bucket; }
+String EE_GetSSID() { return ee_ssid; }
+String EE_GetPassword() { return ee_password; }
+String EE_GetUID() { return ee_uid; }
+String EE_GetDomain() { return ee_domain; }
+String EE_GetNodeName() { return ee_nodename; }
+String EE_GetFirebaseUrl() { return ee_fb_url; }
+String EE_GetFirebaseSecret() { return ee_fb_secret; }
+String EE_GetFirebaseServerKey() { return ee_fb_cloud_messaging_server_key; }
+String EE_GetFirebaseStorageBucket() { return ee_fb_storage_bucket; }
 
 void EE_EraseData() {
   int i;
@@ -96,11 +96,11 @@ bool EE_LoadData(void) {
     Serial.println(nodename);
     if ((ssid != NULL) && (password != NULL) && (uid != NULL) &&
         (domain != NULL) && (nodename != NULL)) {
-      strcpy(ee_ssid, ssid);
-      strcpy(ee_password, password);
-      strcpy(ee_uid, uid);
-      strcpy(ee_domain, domain);
-      strcpy(ee_nodename, nodename);
+      ee_ssid = String(ssid);
+      ee_password = String(password);
+      ee_uid = String(uid);
+      ee_domain = String(domain);
+      ee_nodename = String(nodename);
       Serial.println(F("EEPROM ok"));
       ret = true;
     } else {
