@@ -7,6 +7,12 @@ import 'package:flutter/services.dart' show rootBundle;
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
+FirebaseUser _user;
+
+FirebaseUser getFirebaseUser() {
+  return _user;
+}
+
 Future<Map> configFirefase() async {
   final String fbConfig = await rootBundle.loadString('android/app/google-services.json');
   Map parsedMap = JSON.decode(fbConfig);
@@ -29,5 +35,6 @@ Future<String> signInWithGoogle() async {
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
   print(user);
+  _user = user;
   return 'signInWithGoogle succeeded: $user';
 }

@@ -7,6 +7,24 @@
 #include "fbconf.h"
 #include "fcm.h"
 #include "rf.h"
+#include "ee.h"
+
+String kstartup = "startup";
+String kcontrol = "control";
+String kstatus = "status";
+String kfunctions = "Functions";
+String kmessaging = "FCM_Registration_IDs";
+String kgraph = "graph";
+
+void FbmInit(void) {
+  String prefix = String(EE_GetDomain()) + "/" + String(EE_GetNodeName()) + "/";
+  kstartup = prefix + kstartup;
+  kcontrol = prefix + kcontrol;
+  kstatus = prefix + kstatus;
+  kfunctions = prefix + kfunctions;
+  kmessaging = prefix + kmessaging;
+  kgraph = prefix + kgraph;
+}
 
 bool FbmUpdateRadioCodes(void) {
   bool ret = true;

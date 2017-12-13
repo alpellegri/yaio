@@ -14,6 +14,7 @@
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
+#include "fbconf.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -56,6 +57,8 @@ bool STA_Setup(void) {
       delay(500);
     }
     Serial.println();
+
+		FbmInit();
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print(F("connected: "));

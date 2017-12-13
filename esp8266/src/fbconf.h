@@ -11,6 +11,7 @@
 #define kRadioElem 5
 #define kTimer 6
 
+void FbmInit(void);
 extern bool FbmUpdateRadioCodes(void);
 
 #endif

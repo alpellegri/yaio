@@ -15,6 +15,7 @@
 
 static char ee_ssid[30] = "";
 static char ee_password[30] = "";
+static char ee_uid[30] = "";
 static char ee_domain[30] = "";
 static char ee_nodename[30] = "";
 
@@ -31,6 +32,7 @@ void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
 char *EE_GetSSID() { return ee_ssid; }
 char *EE_GetPassword() { return ee_password; }
+char *EE_GetUID() { return ee_uid; }
 char *EE_GetDomain() { return ee_domain; }
 char *EE_GetNodeName() { return ee_nodename; }
 char *EE_GetFirebaseUrl() { return ee_fb_url; }
@@ -83,16 +85,20 @@ bool EE_LoadData(void) {
     const char *password = root["password"];
     Serial.print(F("password: "));
     Serial.println(password);
+    const char *uid = root["uid"];
+    Serial.print(F("uid: "));
+    Serial.println(uid);
     const char *domain = root["domain"];
     Serial.print(F("domain: "));
     Serial.println(domain);
     const char *nodename = root["nodename"];
     Serial.print(F("nodename: "));
     Serial.println(nodename);
-    if ((ssid != NULL) && (password != NULL) && (domain != NULL) &&
-        (nodename != NULL)) {
+    if ((ssid != NULL) && (password != NULL) && (uid != NULL) &&
+        (domain != NULL) && (nodename != NULL)) {
       strcpy(ee_ssid, ssid);
       strcpy(ee_password, password);
+      strcpy(ee_uid, uid);
       strcpy(ee_domain, domain);
       strcpy(ee_nodename, nodename);
       Serial.println(F("EEPROM ok"));

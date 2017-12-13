@@ -6,6 +6,7 @@
 extern void EE_Setup();
 extern char *EE_GetSSID();
 extern char *EE_GetPassword();
+extern char *EE_GetUID();
 extern char *EE_GetDomain();
 extern char *EE_GetNodeName();
 extern char *EE_GetFirebaseUrl();

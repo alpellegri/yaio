@@ -84,6 +84,9 @@ class _NodeSetupState extends State<NodeSetup> {
       _ctrlDomain.text = _nodeConfigMap['domain'];
       _ctrlNodeName.text = _nodeConfigMap['nodename'];
     }
+    _nodeConfigMap['uid'] = getFirebaseUser().uid;
+    _nodeConfigJson = JSON.encode(_nodeConfigMap);
+    print('ciao ${_nodeConfigMap["uid"]}');
   }
 
   @override
@@ -160,7 +163,7 @@ class _NodeSetupState extends State<NodeSetup> {
                   ),
                 ])),
               ),
-              new Text('${_nodeConfigJson}'),
+              new Text('$_nodeConfigJson'),
             ],
           ),
         ),
