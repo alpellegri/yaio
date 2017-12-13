@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "ee.h"
+#include "fbconf.h"
 #include "fcm.h"
 #include "timesrv.h"
 
@@ -19,5 +20,5 @@ void fblog_log(String &message, boolean fcm_notify) {
   if (fcm_notify == true) {
     FcmSendPush(message);
   }
-  Firebase.push(F("logs/Reports"), JsonVariant(log));
+  Firebase.push((klogs + "/Reports"), JsonVariant(log));
 }

@@ -15,16 +15,19 @@ String kstatus = "status";
 String kfunctions = "Functions";
 String kmessaging = "FCM_Registration_IDs";
 String kgraph = "graph";
+String klogs = "logs";
 
-void FbmInit(void) {
-  String prefix = String(EE_GetUID()) + "/" + String(EE_GetDomain()) + "/" +
-                  String(EE_GetNodeName()) + "/";
+void FbconfInit(void) {
+  String prefix = "users/" + String(EE_GetUID()) + "/" +
+                  String(EE_GetDomain()) + "/" + String(EE_GetNodeName()) + "/";
+
   kstartup = prefix + kstartup;
   kcontrol = prefix + kcontrol;
   kstatus = prefix + kstatus;
   kfunctions = prefix + kfunctions;
   kmessaging = prefix + kmessaging;
   kgraph = prefix + kgraph;
+  klogs = prefix + klogs;
 }
 
 bool FbmUpdateRadioCodes(void) {
@@ -32,9 +35,10 @@ bool FbmUpdateRadioCodes(void) {
   yield();
 
   if (ret == true) {
-    FirebaseObject ref = Firebase.get(F("FCM_Registration_IDs"));
+    Serial.println(kmessaging);
+    FirebaseObject ref = Firebase.get(kmessaging);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: FCM_Registration_IDs"));
+      Serial.print(F("get failed: kmessaging"));
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -53,10 +57,10 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.println(F("FbmUpdateFuncions"));
-    FirebaseObject ref = Firebase.get(F("Functions"));
+    Serial.println(kfunctions);
+    FirebaseObject ref = Firebase.get(kfunctions);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: Funcions"));
+      Serial.print(F("get failed: kfunctions"));
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -82,10 +86,10 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.println(F("graph"));
-    FirebaseObject ref = Firebase.get(F("graph"));
+    Serial.println(kgraph);
+    FirebaseObject ref = Firebase.get(kgraph);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: graph"));
+      Serial.print(F("get failed: kgraph"));
       Serial.println(Firebase.error());
       ret = false;
     } else {

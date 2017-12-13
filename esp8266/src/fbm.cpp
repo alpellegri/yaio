@@ -108,7 +108,7 @@ void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
 static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
   bool ret = false;
   if (port == 0) {
-    Firebase.setBool(F("control/alarm"), value);
+    Firebase.setBool((kcontrol + "/alarm"), value);
     if (Firebase.failed()) {
     } else {
       ret = true;
@@ -159,9 +159,10 @@ bool FbmService(void) {
 
   // firebase control/status init
   case 1: {
-    FirebaseObject fbobject = Firebase.get(F("startup"));
+    FirebaseObject fbobject = Firebase.get(kstartup);
     if (Firebase.failed()) {
-      Serial.println(F("set failed: status/bootcnt"));
+      Serial.println(F("get failed: kstartup"));
+      Serial.printf("%s\n", kstartup.c_str());
       Serial.print(Firebase.error());
     } else {
       JsonVariant variant = fbobject.getJsonVariant();
@@ -172,10 +173,10 @@ bool FbmService(void) {
         object["time"] = getTime();
         object["version"] = String(VERS_getVersion());
         yield();
-        Firebase.set(F("startup"), JsonVariant(object));
+        Firebase.set(kstartup, JsonVariant(object));
         if (Firebase.failed()) {
           bootcnt--;
-          Serial.println(F("set failed: status/bootcnt"));
+          Serial.println(F("set failed: kstartup"));
           Serial.println(Firebase.error());
         } else {
           boot_sm = 2;
@@ -208,9 +209,9 @@ bool FbmService(void) {
   } break;
 
   case 21: {
-    Firebase.setInt(F("control/reboot"), 0);
+    Firebase.setInt((kcontrol + "/reboot"), 0);
     if (Firebase.failed()) {
-      Serial.print(F("set failed: control/reboot"));
+      Serial.print(F("set failed: kcontrol/reboot"));
       Serial.println(Firebase.error());
     } else {
       boot_sm = 3;
@@ -237,9 +238,9 @@ bool FbmService(void) {
       }
       yield();
 
-      control_time = Firebase.getInt(F("control/time"));
+      control_time = Firebase.getInt(kcontrol + "/time");
       if (Firebase.failed() == true) {
-        Serial.print(F("get failed: control/time"));
+        Serial.print(F("get failed: kcontrol/time"));
         Serial.println(Firebase.error());
       } else {
         if (control_time != control_time_last) {
@@ -252,9 +253,9 @@ bool FbmService(void) {
             fbm_monitor_run = false;
           }
 
-          FirebaseObject fbobject = Firebase.get(F("control"));
+          FirebaseObject fbobject = Firebase.get(kcontrol);
           if (Firebase.failed() == true) {
-            Serial.println(F("get failed: control"));
+            Serial.println(F("get failed: kcontrol"));
             Serial.print(Firebase.error());
           } else {
             JsonVariant variant = fbobject.getJsonVariant();
@@ -291,9 +292,9 @@ bool FbmService(void) {
           status["temperature"] = temperature_data;
           status["time"] = time_now;
           yield();
-          Firebase.set(F("status"), JsonVariant(status));
+          Firebase.set(kstatus, JsonVariant(status));
           if (Firebase.failed()) {
-            Serial.print(F("set failed: status"));
+            Serial.print(F("set failed: kstatus"));
             Serial.println(Firebase.error());
           }
         }
@@ -308,9 +309,9 @@ bool FbmService(void) {
         th["t"] = temperature_data;
         th["h"] = humidity_data;
         yield();
-        Firebase.push(F("logs/TH"), JsonVariant(th));
+        Firebase.push((klogs + "/TH"), JsonVariant(th));
         if (Firebase.failed()) {
-          Serial.print(F("push failed: logs/TH"));
+          Serial.print(F("push failed: klogs/TH"));
           Serial.println(Firebase.error());
         } else {
           // update in case of success
@@ -376,9 +377,9 @@ bool FbmService(void) {
           JsonObject &inactive = jsonBuffer.createObject();
           inactive["name"] = "inactive";
           inactive["id"] = code;
-          inactive["type"] = 5;
+          inactive["type"] = kRadioElem;
           yield();
-          Firebase.set(F("graph/inactive"), JsonVariant(inactive));
+          Firebase.set((kgraph + "/inactive"), JsonVariant(inactive));
 
           // Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
           if (Firebase.failed()) {

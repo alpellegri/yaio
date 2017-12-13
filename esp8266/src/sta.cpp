@@ -58,7 +58,7 @@ bool STA_Setup(void) {
     }
     Serial.println();
 
-		FbmInit();
+		FbconfInit();
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print(F("connected: "));

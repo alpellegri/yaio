@@ -11,7 +11,15 @@
 #define kRadioElem 5
 #define kTimer 6
 
-void FbmInit(void);
+extern String kstartup;
+extern String kcontrol;
+extern String kstatus;
+extern String kfunctions;
+extern String kmessaging;
+extern String kgraph;
+extern String klogs;
+
+void FbconfInit(void);
 extern bool FbmUpdateRadioCodes(void);
 
 #endif
