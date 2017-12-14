@@ -86,7 +86,6 @@ class _NodeSetupState extends State<NodeSetup> {
     }
     _nodeConfigMap['uid'] = getFirebaseUser().uid;
     _nodeConfigJson = JSON.encode(_nodeConfigMap);
-    print('ciao ${_nodeConfigMap["uid"]}');
   }
 
   @override
