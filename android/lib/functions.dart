@@ -91,7 +91,7 @@ class Functions extends StatefulWidget {
 
 class _FunctionsState extends State<Functions> {
   final DatabaseReference _controlRef =
-      FirebaseDatabase.instance.reference().child(kControlRef);
+      FirebaseDatabase.instance.reference().child(dControlRef);
 
   List<FunctionEntry> entryList = new List();
   DatabaseReference _entryRef;
@@ -100,7 +100,7 @@ class _FunctionsState extends State<Functions> {
   StreamSubscription<Event> _onRemoveSubscription;
 
   _FunctionsState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(kFunctionsRef);
+    _entryRef = FirebaseDatabase.instance.reference().child(dFunctionsRef);
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
@@ -210,7 +210,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   _EntryDialogState(this.entry, this.functionList) {
     print('EntryDialogState');
-    _graphRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _graphRef = FirebaseDatabase.instance.reference().child(dGraphRef);
     _onAddSubscription = _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
     selectTypeMenu.add(kEntryId2Name[kDOut]);

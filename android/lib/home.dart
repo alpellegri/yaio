@@ -20,13 +20,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const time_limit = const Duration(seconds: 20);
   final DatabaseReference _controlRef =
-      FirebaseDatabase.instance.reference().child(kControlRef);
+      FirebaseDatabase.instance.reference().child(dControlRef);
   final DatabaseReference _statusRef =
-      FirebaseDatabase.instance.reference().child(kStatusRef);
+      FirebaseDatabase.instance.reference().child(dStatusRef);
   final DatabaseReference _startupRef =
-      FirebaseDatabase.instance.reference().child(kStartupRef);
+      FirebaseDatabase.instance.reference().child(dStartupRef);
   final DatabaseReference _fcmRef =
-      FirebaseDatabase.instance.reference().child(kTokenIDsRef);
+      FirebaseDatabase.instance.reference().child(dTokenIDsRef);
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   StreamSubscription<Event> _controlSub;

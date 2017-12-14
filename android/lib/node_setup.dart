@@ -61,11 +61,11 @@ class _NodeSetupState extends State<NodeSetup> {
   ServiceWebSocket ws;
   Icon iconConnStatus;
   bool connStatus;
-  Map _nodeConfigMap = new Map();
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
   final TextEditingController _ctrlDomain = new TextEditingController();
   final TextEditingController _ctrlNodeName = new TextEditingController();
+  Map _nodeConfigMap = new Map();
   SharedPreferences _prefs;
   String _nodeConfigJson;
 

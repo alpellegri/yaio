@@ -86,7 +86,7 @@ class _TimerState extends State<Timer> {
   StreamSubscription<Event> _onRemoveSubscription;
 
   _TimerState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(kGraphRef);
+    _entryRef = FirebaseDatabase.instance.reference().child(dGraphRef);
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
