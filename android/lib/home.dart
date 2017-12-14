@@ -19,15 +19,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const time_limit = const Duration(seconds: 20);
-  final DatabaseReference _controlRef =
-      FirebaseDatabase.instance.reference().child(dControlRef);
-  final DatabaseReference _statusRef =
-      FirebaseDatabase.instance.reference().child(dStatusRef);
-  final DatabaseReference _startupRef =
-      FirebaseDatabase.instance.reference().child(dStartupRef);
-  final DatabaseReference _fcmRef =
-      FirebaseDatabase.instance.reference().child(dTokenIDsRef);
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+  DatabaseReference _controlRef;
+  DatabaseReference _statusRef;
+  DatabaseReference _startupRef;
+  DatabaseReference _fcmRef;
 
   StreamSubscription<Event> _controlSub;
   StreamSubscription<Event> _statusSub;
@@ -87,6 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // _navigateToItemDetail(message);
         },
       );
+
       _firebaseMessaging.requestNotificationPermissions(
           const IosNotificationSettings(sound: true, badge: true, alert: true));
       _firebaseMessaging.onIosSettingsRegistered
@@ -98,34 +95,45 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           _homeScreenText = "Push Messaging token: $token";
         });
-        _fcmRef.once().then((DataSnapshot onValue) {
-          print("once: ${onValue.value}");
-          Map map = onValue.value;
-          bool tokenFound = false;
-          if (map != null) {
-            map.forEach((key, value) {
-              if (value == token) {
-                print("key test: $key");
-                tokenFound = true;
-              }
-            });
-          }
-          if (tokenFound == false) {
-            _nodeNeedUpdate = true;
-            _fcmRef.push().set(token);
-            print("token saved: $token");
-          }
-          // at the end, not before
-          FirebaseDatabase.instance.setPersistenceEnabled(true);
-          FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
-        });
         print(_homeScreenText);
-        _connected = true;
+        initSharedPreferences().then((_) {
+          _controlRef =
+              FirebaseDatabase.instance.reference().child(getControlRef());
+          _statusRef =
+              FirebaseDatabase.instance.reference().child(getStatusRef());
+          _startupRef =
+              FirebaseDatabase.instance.reference().child(getStartupRef());
+          _fcmRef =
+              FirebaseDatabase.instance.reference().child(getTokenIDsRef());
+          _controlSub = _controlRef.onValue.listen(_onValueControl);
+          _statusSub = _statusRef.onValue.listen(_onValueStatus);
+          _startupSub = _startupRef.onValue.listen(_onValueStartup);
+          _fcmRef.once().then((DataSnapshot onValue) {
+            print("once: ${onValue.value}");
+            Map map = onValue.value;
+            bool tokenFound = false;
+            if (map != null) {
+              map.forEach((key, value) {
+                if (value == token) {
+                  print("key test: $key");
+                  tokenFound = true;
+                }
+              });
+            }
+            if (tokenFound == false) {
+              _nodeNeedUpdate = true;
+              _fcmRef.push().set(token);
+              print("token saved: $token");
+            }
+            setState(() {
+              _connected = true;
+            });
+            // at the end, not before
+            FirebaseDatabase.instance.setPersistenceEnabled(true);
+            FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
+          });
+        });
       });
-
-      _controlSub = _controlRef.onValue.listen(_onValueControl);
-      _statusSub = _statusRef.onValue.listen(_onValueStatus);
-      _startupSub = _startupRef.onValue.listen(_onValueStartup);
     });
     print('_MyHomePageState');
   }
