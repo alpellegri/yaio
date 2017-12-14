@@ -266,30 +266,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   new ListTile(
-                    leading: const Icon(Icons.network_check),
-                    title: const Text('RF monitoring'),
-                    subtitle: new Text(
-                        '${_control["radio_learn"] ? "ACTIVE" : "INACTIVE"}'),
-                    trailing: new ButtonTheme.bar(
-                      // make buttons use the appropriate styles for cards
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: new Text(monitorButton),
-                            onPressed: () {
-                              _control['radio_learn'] =
-                                  !_control['radio_learn'];
-                              DateTime now = new DateTime.now();
-                              _control['time'] =
-                                  now.millisecondsSinceEpoch ~/ 1000;
-                              _controlRef.set(_control);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  new ListTile(
                     leading: const Icon(Icons.link),
                     title: const Text('HeartBeat'),
                     subtitle: new Text('${_heartbeatTime.toString()}'),
