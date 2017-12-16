@@ -17,7 +17,6 @@ class Setup extends StatefulWidget {
 
 class _SetupState extends State<Setup> {
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-  String _infoConfig = "";
   String _homeScreenText = "Waiting for token...";
   bool _connected = false;
 
@@ -56,6 +55,9 @@ class _SetupState extends State<Setup> {
           _homeScreenText = "Push Messaging token: $token";
         });
         _connected = true;
+        initSharedPreferences().then((value){
+          print(getControlRef());
+        });
       });
     });
   }

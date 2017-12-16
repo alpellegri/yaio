@@ -177,13 +177,7 @@ class _NodeSetupState extends State<NodeSetup> {
   }
 
   void _sendParameters() {
-    DatabaseReference _controlRef =
-        FirebaseDatabase.instance.reference().child(getControlRef());
-    DatabaseReference _startupRef =
-        FirebaseDatabase.instance.reference().child(getStartupRef());
     ws.send(_nodeConfigJson);
-    _controlRef.set(getControlDefault());
-    _startupRef.set(getStartupDefault());
   }
 
   void _savePreferences() {
