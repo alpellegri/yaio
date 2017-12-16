@@ -111,3 +111,15 @@ String getTHRef() {
   print(dTHRef);
   return dTHRef;
 }
+
+Map<String, Object> _controlDefault = {
+  'alarm': false,
+  'reboot': false,
+  'time': 0,
+};
+
+Map<String, Object> _startupDefault = {
+  'bootcnt': 0,
+  'time': 0,
+  'version': '',
+};
