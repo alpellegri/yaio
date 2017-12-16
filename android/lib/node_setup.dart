@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
@@ -91,9 +92,9 @@ class _NodeSetupState extends State<NodeSetup> {
   @override
   void initState() {
     super.initState();
-    initSharedPreferences();
     connStatus = false;
     iconConnStatus = const Icon(Icons.settings_remote);
+    initSharedPreferences();
   }
 
   @override
@@ -176,7 +177,13 @@ class _NodeSetupState extends State<NodeSetup> {
   }
 
   void _sendParameters() {
+    DatabaseReference _controlRef =
+        FirebaseDatabase.instance.reference().child(getControlRef());
+    DatabaseReference _startupRef =
+        FirebaseDatabase.instance.reference().child(getStartupRef());
     ws.send(_nodeConfigJson);
+    _controlRef.set(getControlDefault());
+    _startupRef.set(getStartupDefault());
   }
 
   void _savePreferences() {

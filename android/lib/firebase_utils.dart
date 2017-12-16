@@ -28,13 +28,6 @@ FirebaseUser getFirebaseUser() {
   return _user;
 }
 
-Future<Map> configFirefase() async {
-  final String fbConfig =
-      await rootBundle.loadString('android/app/google-services.json');
-  Map parsedMap = JSON.decode(fbConfig);
-  return parsedMap;
-}
-
 Future<String> signInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -115,7 +108,7 @@ String getTHRef() {
 Map<String, Object> _controlDefault = {
   'alarm': false,
   'reboot': false,
-  'time': 0,
+  'time': -1,
 };
 
 Map<String, Object> _startupDefault = {
@@ -123,3 +116,11 @@ Map<String, Object> _startupDefault = {
   'time': 0,
   'version': '',
 };
+
+Map<String, Object> getControlDefault() {
+  return _controlDefault;
+}
+
+Map<String, Object> getStartupDefault() {
+  return _startupDefault;
+}

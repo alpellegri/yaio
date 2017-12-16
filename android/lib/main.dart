@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'drawer.dart';
-import 'home.dart';
+import 'setup.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         accentColor: Colors.amber[200],
       ),
-      home: new MyHomePage(title: 'uHome'),
+      home: new Setup(title: 'Host'),
       routes: menuRoutes,
     );
   }

@@ -10,6 +10,8 @@ import 'const.dart';
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
+  static const String routeName = '/home';
+
   final String title;
 
   @override
@@ -39,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'reboot': false,
     'time': 0,
   };
+
   Map<String, Object> _status = {
     'alarm': false,
     'heap': 0,
@@ -46,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'temperature': 0,
     'time': 0,
   };
+
   Map<String, Object> _startup = {
     'bootcnt': 0,
     'time': 0,
@@ -55,15 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    print('_MyHomePageState');
     _connected = false;
-    configFirefase().then((value) {
-      _fbJsonMap = value;
-      _infoConfig =
-          'project_number ${_fbJsonMap["project_info"]['project_number']}\n'
-          'firebase_url ${_fbJsonMap["project_info"]['firebase_url']}\n'
-          'project_id ${_fbJsonMap["project_info"]['project_id']}\n'
-          'storage_bucket ${_fbJsonMap["project_info"]['storage_bucket']}\n';
-    });
     signInWithGoogle().then((onValue) {
       _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) {
@@ -131,7 +128,6 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       });
     });
-    print('_MyHomePageState');
   }
 
   @override
@@ -167,12 +163,6 @@ class _MyHomePageState extends State<MyHomePage> {
         } else {
           alarmButton = "ARMING";
         }
-      }
-      String monitorButton;
-      if (_control["radio_learn"] == true) {
-        monitorButton = "DEACTIVATE";
-      } else {
-        monitorButton = "ACTIVATE";
       }
       DateTime current = new DateTime.now();
       DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home.dart';
 import 'node_setup.dart';
 import 'radiocode.dart';
 import 'timer.dart';
@@ -11,6 +12,7 @@ import 'chart_history.dart';
 final MyDrawer drawer = new MyDrawer();
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
+  MyHomePage.routeName: (BuildContext context) => new NodeSetup(title: 'Home'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'NodeSetup'),
   DigitalIO.routeName: (BuildContext context) =>
@@ -34,13 +36,20 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-
   @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
     return new Drawer(
       child: new ListView(children: <Widget>[
-        new DrawerHeader(child: new Text('uHome', style: textStyle)),
+        new DrawerHeader(child: new Center(child: new Text('uHome', style: textStyle))),
+        new ListTile(
+            leading: new Icon(Icons.developer_board),
+            title: new Text('Home'),
+            onTap: () {
+              Navigator.of(context)
+                ..pop()
+                ..pushNamed(MyHomePage.routeName);
+            }),
         new ListTile(
             leading: new Icon(Icons.developer_board),
             title: new Text('NodeSetup'),
