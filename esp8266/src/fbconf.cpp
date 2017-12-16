@@ -18,8 +18,8 @@ String kgraph = "graph";
 String klogs = "logs";
 
 void FbconfInit(void) {
-  String prefix = "users/" + String(EE_GetUID()) + "/" +
-                  String(EE_GetDomain()) + "/" + String(EE_GetNodeName()) + "/";
+  String prefix = "users/" + EE_GetUID() + "/" + EE_GetDomain() + "/" +
+                  EE_GetNodeName() + "/";
 
   kstartup = prefix + kstartup;
   kcontrol = prefix + kcontrol;
@@ -28,6 +28,14 @@ void FbconfInit(void) {
   kmessaging = prefix + kmessaging;
   kgraph = prefix + kgraph;
   klogs = prefix + klogs;
+  Serial.println(kstartup);
+  Serial.println(kcontrol);
+  Serial.println(kstatus);
+  Serial.println(kfunctions);
+  Serial.println(kmessaging);
+  Serial.println(kmessaging);
+  Serial.println(kgraph);
+  Serial.println(klogs);
 }
 
 bool FbmUpdateRadioCodes(void) {

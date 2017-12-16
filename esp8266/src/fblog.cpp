@@ -12,13 +12,14 @@
 void fblog_log(String &message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
+  String msg = EE_GetDomain() + " " + EE_GetNodeName() + " " + message;
 
   log["time"] = getTime();
-  log["msg"] = message;
+  log["msg"] = msg;
 
-  Serial.println(message);
+  Serial.println(msg);
   if (fcm_notify == true) {
-    FcmSendPush(message);
+    FcmSendPush(msg);
   }
   Firebase.push((klogs + "/Reports"), JsonVariant(log));
 }
