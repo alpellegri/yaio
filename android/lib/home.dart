@@ -41,8 +41,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Map<String, Object> _control = {
     'alarm': false,
-    'radio_learn': false,
-    'radio_update': false,
     'reboot': false,
     'time': 0,
   };
@@ -50,7 +48,6 @@ class _MyHomePageState extends State<MyHomePage> {
     'alarm': false,
     'heap': 0,
     'humidity': 0,
-    'monitor': false,
     'temperature': 0,
     'time': 0,
   };
@@ -164,12 +161,6 @@ class _MyHomePageState extends State<MyHomePage> {
           alarmButton = "ARMING";
         }
       }
-      String monitorButton;
-      if (_control["radio_learn"] == true) {
-        monitorButton = "DEACTIVATE";
-      } else {
-        monitorButton = "ACTIVATE";
-      }
       DateTime current = new DateTime.now();
       DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_startup['time'].toString()) * 1000);
@@ -257,30 +248,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  new ListTile(
-                    leading: const Icon(Icons.network_check),
-                    title: const Text('RF monitoring'),
-                    subtitle: new Text(
-                        '${_control["radio_learn"] ? "ACTIVE" : "INACTIVE"}'),
-                    trailing: new ButtonTheme.bar(
-                      // make buttons use the appropriate styles for cards
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: new Text(monitorButton),
-                            onPressed: () {
-                              _control['radio_learn'] =
-                                  !_control['radio_learn'];
-                              DateTime now = new DateTime.now();
-                              _control['time'] =
-                                  now.millisecondsSinceEpoch ~/ 1000;
-                              _controlRef.set(_control);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                   new ListTile(
                     leading: const Icon(Icons.link),
                     title: const Text('HeartBeat'),
