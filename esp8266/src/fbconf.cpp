@@ -33,7 +33,6 @@ void FbconfInit(void) {
   Serial.println(kstatus);
   Serial.println(kfunctions);
   Serial.println(kmessaging);
-  Serial.println(kmessaging);
   Serial.println(kgraph);
   Serial.println(klogs);
 }
