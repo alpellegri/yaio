@@ -44,6 +44,7 @@ static uint32_t fbm_time_th_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
+static bool ht_monitor_run = false;
 static float humidity_data;
 static float temperature_data;
 
@@ -228,8 +229,9 @@ bool FbmService(void) {
       float h = dht.readHumidity();
       float t = dht.readTemperature();
       if (isnan(h) || isnan(t)) {
-        // Serial.println(F("Failed to read from DHT sensor!"));
+        ht_monitor_run = false;
       } else {
+        ht_monitor_run = true;
         humidity_data = h;
         temperature_data = t;
       }
@@ -305,13 +307,15 @@ bool FbmService(void) {
         th["t"] = temperature_data;
         th["h"] = humidity_data;
         yield();
-        Firebase.push((klogs + "/TH"), JsonVariant(th));
-        if (Firebase.failed()) {
-          Serial.print(F("push failed: klogs/TH"));
-          Serial.println(Firebase.error());
-        } else {
-          // update in case of success
-          fbm_time_th_last = time_now;
+        if (ht_monitor_run == true) {
+          Firebase.push((klogs + "/TH"), JsonVariant(th));
+          if (Firebase.failed()) {
+            Serial.print(F("push failed: klogs/TH"));
+            Serial.println(Firebase.error());
+          } else {
+            // update in case of success
+            fbm_time_th_last = time_now;
+          }
         }
       } else {
         /* do nothing */
