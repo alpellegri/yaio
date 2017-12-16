@@ -35,7 +35,6 @@ static bool boot_first = false;
 static bool status_alarm = false;
 static bool status_alarm_last = false;
 static bool control_alarm = false;
-static bool control_radio_learn = false;
 static uint32_t control_time;
 static uint32_t control_time_last;
 
@@ -260,7 +259,6 @@ bool FbmService(void) {
             JsonObject &object = variant.as<JsonObject>();
             if (object.success()) {
               control_alarm = object["alarm"];
-              control_radio_learn = object["radio_learn"];
               control_time = object["time"];
 
               bool control_wol = object["wol"];
@@ -328,7 +326,7 @@ bool FbmService(void) {
     }
 
     // manage RF activation/deactivation
-    if ((status_alarm == true) || (control_radio_learn == true)) {
+    if (status_alarm == true) {
       RF_Enable();
     } else {
       RF_Disable();
