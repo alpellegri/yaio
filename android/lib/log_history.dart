@@ -5,7 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
 import 'entries.dart';
-import 'const.dart';
+import 'firebase_utils.dart';
 
 class LogListItem extends StatelessWidget {
   final LogEntry logEntry;
