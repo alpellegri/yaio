@@ -78,7 +78,7 @@ class _LogicalIOState extends State<LogicalIO> {
   StreamSubscription<Event> _onRemoveSub;
 
   _LogicalIOState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(dGraphRef);
+    _entryRef = FirebaseDatabase.instance.reference().child(getGraphRef());
     _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSub = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);

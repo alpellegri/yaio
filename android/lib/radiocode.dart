@@ -72,7 +72,7 @@ class RadioCode extends StatefulWidget {
 
 class _RadioCodeState extends State<RadioCode> {
   final DatabaseReference _controlRef =
-      FirebaseDatabase.instance.reference().child(dControlRef);
+      FirebaseDatabase.instance.reference().child(getControlRef());
 
   List<IoEntry> entryList = new List();
   DatabaseReference _graphRef;
@@ -83,7 +83,7 @@ class _RadioCodeState extends State<RadioCode> {
   StreamSubscription<Event> _onRemoveSubscription;
 
   _RadioCodeState() {
-    _graphRef = FirebaseDatabase.instance.reference().child(dGraphRef);
+    _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
     _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
@@ -228,9 +228,9 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final IoEntry entry;
   final DatabaseReference _graphRef =
-      FirebaseDatabase.instance.reference().child(dGraphRef);
+      FirebaseDatabase.instance.reference().child(getGraphRef());
   final DatabaseReference _functionRef =
-      FirebaseDatabase.instance.reference().child(dFunctionsRef);
+      FirebaseDatabase.instance.reference().child(getFunctionsRef());
   List<FunctionEntry> _functionList = new List();
 
   int _selectedType;

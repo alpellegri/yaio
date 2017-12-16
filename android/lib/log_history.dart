@@ -72,7 +72,7 @@ class _LogHistoryState extends State<LogHistory> {
   StreamSubscription<Event> _onRemoveSub;
 
   _LogHistoryState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(dLogsReportsRef);
+    _entryRef = FirebaseDatabase.instance.reference().child(getLogsReportsRef());
     _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }

@@ -35,7 +35,7 @@ class _ChartHistoryState extends State<ChartHistory> {
   );
 
   _ChartHistoryState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(dTHRef);
+    _entryRef = FirebaseDatabase.instance.reference().child(getTHRef());
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
   }
 
