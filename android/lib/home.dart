@@ -36,8 +36,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Map<String, Object> _control = {
     'alarm': false,
-    'radio_learn': false,
-    'radio_update': false,
     'reboot': false,
     'time': 0,
   };
@@ -45,7 +43,6 @@ class _MyHomePageState extends State<MyHomePage> {
     'alarm': false,
     'heap': 0,
     'humidity': 0,
-    'monitor': false,
     'temperature': 0,
     'time': 0,
   };
