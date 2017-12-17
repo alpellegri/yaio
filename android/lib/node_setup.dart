@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'const.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
 
@@ -58,43 +58,23 @@ class NodeSetup extends StatefulWidget {
 
 class _NodeSetupState extends State<NodeSetup> {
   String response = "";
-  static const String kWsUri = 'ws://192.168.2.1';
-  ServiceWebSocket ws;
-  Icon iconConnStatus;
-  bool connStatus;
-  final TextEditingController _ctrlSSID = new TextEditingController();
-  final TextEditingController _ctrlPassword = new TextEditingController();
-  final TextEditingController _ctrlDomain = new TextEditingController();
-  final TextEditingController _ctrlNodeName = new TextEditingController();
-  Map _nodeConfigMap = new Map();
-  SharedPreferences _prefs;
+  ServiceWebSocket _ws;
+  Icon _iconConnStatus;
+  bool _connStatus;
+  Map _prefs;
   String _nodeConfigJson;
 
   _NodeSetupState() {
-    ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
-  }
-
-  Future<Null> initSharedPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-    _nodeConfigJson = _prefs.getString('node_config_json');
-
-    if (_nodeConfigJson != null) {
-      _nodeConfigMap = JSON.decode(_nodeConfigJson);
-      _ctrlSSID.text = _nodeConfigMap['ssid'];
-      _ctrlPassword.text = _nodeConfigMap['password'];
-      _ctrlDomain.text = _nodeConfigMap['domain'];
-      _ctrlNodeName.text = _nodeConfigMap['nodename'];
-    }
-    _nodeConfigMap['uid'] = getFirebaseUser().uid;
-    _nodeConfigJson = JSON.encode(_nodeConfigMap);
+    _ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
   }
 
   @override
   void initState() {
     super.initState();
-    connStatus = false;
-    iconConnStatus = const Icon(Icons.settings_remote);
-    initSharedPreferences();
+    _connStatus = false;
+    _iconConnStatus = const Icon(Icons.settings_remote);
+    _prefs = getPreferences();
+    _nodeConfigJson = JSON.encode(_prefs);
   }
 
   @override
@@ -114,37 +94,26 @@ class _NodeSetupState extends State<NodeSetup> {
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: _ctrlSSID,
-                decoration: new InputDecoration(
-                  hintText: 'SSID',
-                ),
+              new ListTile(
+                  leading: new Icon(Icons.album),
+                  title: const Text('SSID'),
+                  subtitle: new Text(_prefs["ssid"])
               ),
-              new TextField(
-                controller: _ctrlPassword,
-                decoration: new InputDecoration(
-                  hintText: 'Password',
-                ),
+              new ListTile(
+                  leading: new Icon(Icons.album),
+                  title: const Text('PASSWORD'),
+                  subtitle: new Text(_prefs["password"])
               ),
-              new TextField(
-                controller: _ctrlDomain,
-                decoration: new InputDecoration(
-                  hintText: 'Domain',
-                ),
+              new ListTile(
+                  leading: new Icon(Icons.album),
+                  title: const Text('DOMAIN'),
+                  subtitle: new Text(_prefs["domain"])
               ),
-              new TextField(
-                controller: _ctrlNodeName,
-                decoration: new InputDecoration(
-                  hintText: 'Node Name',
-                ),
+              new ListTile(
+                  leading: new Icon(Icons.album),
+                  title: const Text('NODE NAME'),
+                  subtitle: new Text(_prefs["nodename"])
               ),
-              new ButtonTheme.bar(
-                  child: new ButtonBar(children: <Widget>[
-                new FlatButton(
-                  child: new Text('SAVE'),
-                  onPressed: _savePreferences,
-                ),
-              ])),
             ],
           ),
         ),
@@ -169,37 +138,22 @@ class _NodeSetupState extends State<NodeSetup> {
         ),
       ]),
       floatingActionButton: new FloatingActionButton(
-        onPressed: (connStatus == false) ? ws.open : ws.close,
+        onPressed: (_connStatus == false) ? _ws.open : _ws.close,
         tooltip: 'Connect or Disconnect to Node',
-        child: iconConnStatus,
+        child: _iconConnStatus,
       ),
     );
   }
 
   void _sendParameters() {
-    ws.send(_nodeConfigJson);
-  }
-
-  void _savePreferences() {
-    if (_prefs != null) {
-      _nodeConfigMap['ssid'] = _ctrlSSID.text;
-      _nodeConfigMap['password'] = _ctrlPassword.text;
-      _nodeConfigMap['domain'] = _ctrlDomain.text;
-      _nodeConfigMap['nodename'] = _ctrlNodeName.text;
-      _nodeConfigJson = '';
-      _prefs.setString('node_config_json', _nodeConfigJson);
-      setState(() {
-        _nodeConfigJson = JSON.encode(_nodeConfigMap);
-      });
-      _prefs.setString('node_config_json', _nodeConfigJson);
-    }
+    _ws.send(_nodeConfigJson);
   }
 
   void _openCb() {
     print('_openCb');
     setState(() {
-      connStatus = true;
-      iconConnStatus = const Icon(Icons.settings_remote, color: Colors.red);
+      _connStatus = true;
+      _iconConnStatus = const Icon(Icons.settings_remote, color: Colors.red);
     });
   }
 
@@ -213,16 +167,16 @@ class _NodeSetupState extends State<NodeSetup> {
   void _errorCb(String data) {
     print('_errorCb');
     setState(() {
-      connStatus = false;
-      iconConnStatus = const Icon(Icons.settings_remote);
+      _connStatus = false;
+      _iconConnStatus = const Icon(Icons.settings_remote);
     });
   }
 
   void _closeCb() {
     print('_closeCb');
     setState(() {
-      connStatus = false;
-      iconConnStatus = const Icon(Icons.settings_remote);
+      _connStatus = false;
+      _iconConnStatus = const Icon(Icons.settings_remote);
     });
   }
 }

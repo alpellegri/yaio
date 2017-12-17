@@ -7,20 +7,19 @@ import 'firebase_utils.dart';
 import 'chart_history.dart';
 import 'const.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class Home extends StatefulWidget {
+  Home({Key key, this.title}) : super(key: key);
 
   static const String routeName = '/home';
 
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _HomeState createState() => new _HomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeState extends State<Home> {
   static const time_limit = const Duration(seconds: 20);
-  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   DatabaseReference _controlRef;
   DatabaseReference _statusRef;
   DatabaseReference _startupRef;
@@ -30,9 +29,6 @@ class _MyHomePageState extends State<MyHomePage> {
   StreamSubscription<Event> _statusSub;
   StreamSubscription<Event> _startupSub;
 
-  Map _fbJsonMap;
-  String _infoConfig = "";
-  String _homeScreenText = "Waiting for token...";
   bool _connected = false;
   bool _nodeNeedUpdate = false;
 
@@ -60,73 +56,39 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     print('_MyHomePageState');
-    _connected = false;
-    signInWithGoogle().then((onValue) {
-      _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) {
-          print("onMessage: $message");
-          // _showItemDialog(message);
-        },
-        onLaunch: (Map<String, dynamic> message) {
-          print("onLaunch: $message");
-          // _navigateToItemDetail(message);
-        },
-        onResume: (Map<String, dynamic> message) {
-          print("onResume: $message");
-          // _navigateToItemDetail(message);
-        },
-      );
+    _connected = true;
+    String token = getFbToken();
 
-      _firebaseMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(sound: true, badge: true, alert: true));
-      _firebaseMessaging.onIosSettingsRegistered
-          .listen((IosNotificationSettings settings) {
-        print("Settings registered: $settings");
-      });
-      _firebaseMessaging.getToken().then((String token) {
-        assert(token != null);
-        setState(() {
-          _homeScreenText = "Push Messaging token: $token";
+    _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
+    _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
+    _startupRef = FirebaseDatabase.instance.reference().child(getStartupRef());
+    _fcmRef = FirebaseDatabase.instance.reference().child(getTokenIDsRef());
+    _controlSub = _controlRef.onValue.listen(_onValueControl);
+    _statusSub = _statusRef.onValue.listen(_onValueStatus);
+    _startupSub = _startupRef.onValue.listen(_onValueStartup);
+    _fcmRef.once().then((DataSnapshot onValue) {
+      print("once: ${onValue.value}");
+      Map map = onValue.value;
+      bool tokenFound = false;
+      if (map != null) {
+        map.forEach((key, value) {
+          if (value == token) {
+            print("key test: $key");
+            tokenFound = true;
+          }
         });
-        print(_homeScreenText);
-        initSharedPreferences().then((_) {
-          _controlRef =
-              FirebaseDatabase.instance.reference().child(getControlRef());
-          _statusRef =
-              FirebaseDatabase.instance.reference().child(getStatusRef());
-          _startupRef =
-              FirebaseDatabase.instance.reference().child(getStartupRef());
-          _fcmRef =
-              FirebaseDatabase.instance.reference().child(getTokenIDsRef());
-          _controlSub = _controlRef.onValue.listen(_onValueControl);
-          _statusSub = _statusRef.onValue.listen(_onValueStatus);
-          _startupSub = _startupRef.onValue.listen(_onValueStartup);
-          _fcmRef.once().then((DataSnapshot onValue) {
-            print("once: ${onValue.value}");
-            Map map = onValue.value;
-            bool tokenFound = false;
-            if (map != null) {
-              map.forEach((key, value) {
-                if (value == token) {
-                  print("key test: $key");
-                  tokenFound = true;
-                }
-              });
-            }
-            if (tokenFound == false) {
-              _nodeNeedUpdate = true;
-              _fcmRef.push().set(token);
-              print("token saved: $token");
-            }
-            setState(() {
-              _connected = true;
-            });
-            // at the end, not before
-            FirebaseDatabase.instance.setPersistenceEnabled(true);
-            FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
-          });
-        });
+      }
+      if (tokenFound == false) {
+        _nodeNeedUpdate = true;
+        _fcmRef.push().set(token);
+        print("token saved: $token");
+      }
+      setState(() {
+        _connected = true;
       });
+      // at the end, not before
+      FirebaseDatabase.instance.setPersistenceEnabled(true);
+      FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
     });
   }
 
@@ -327,10 +289,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   new Text('Node Heap Memory: ${_status["heap"]}'),
-                  new Text('Firebase info'),
-                  new Text(_infoConfig),
-                  new Text('Firebase Messaging info'),
-                  new Text(_homeScreenText),
                 ],
               ),
             ),

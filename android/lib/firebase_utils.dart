@@ -11,10 +11,11 @@ final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
 FirebaseUser _user;
 
-Map _nodeConfigMap;
+Map _nodeConfigMap = new Map();
 SharedPreferences _prefs;
 String _nodeConfigJson;
 
+String dRootRef;
 String dControlRef;
 String dStatusRef;
 String dStartupRef;
@@ -47,61 +48,119 @@ Future<String> signInWithGoogle() async {
   return 'signInWithGoogle succeeded: $user';
 }
 
-Future<Null> initSharedPreferences() async {
+Future<Map> loadPreferences() async {
+  dRootRef = 'users/' + getFirebaseUser().uid + '/root';
+
   _prefs = await SharedPreferences.getInstance();
   _nodeConfigJson = _prefs.getString('node_config_json');
 
   if (_nodeConfigJson != null) {
     _nodeConfigMap = JSON.decode(_nodeConfigJson);
+    print(_nodeConfigMap);
+    String prefix = dRootRef +
+        '/' +
+        _nodeConfigMap['domain'] +
+        '/' +
+        _nodeConfigMap['nodename'] +
+        '/';
+    dControlRef = prefix + kControlRef;
+    dStatusRef = prefix + kStatusRef;
+    dStartupRef = prefix + kStartupRef;
+    dTokenIDsRef = prefix + kTokenIDsRef;
+    dFunctionsRef = prefix + kFunctionsRef;
+    dGraphRef = prefix + kGraphRef;
+    dLogsReportsRef = prefix + kLogsReportsRef;
+    dTHRef = prefix + kTHRef;
+    _nodeConfigMap['uid'] = getFirebaseUser().uid;
   }
+
+  return _nodeConfigMap;
+}
+
+Map getPreferences() {
+  return _nodeConfigMap;
+}
+
+void savePreferences(String domain, String ssid, String password, String node) {
+  _nodeConfigMap['ssid'] = ssid;
+  _nodeConfigMap['password'] = password;
+  _nodeConfigMap['domain'] = domain;
+  _nodeConfigMap['nodename'] = node;
   _nodeConfigMap['uid'] = getFirebaseUser().uid;
+
   _nodeConfigJson = JSON.encode(_nodeConfigMap);
-  String prefix = 'users/' +
-      _nodeConfigMap['uid'] +
-      '/' +
-      _nodeConfigMap['domain'] +
-      '/' +
-      _nodeConfigMap['nodename'] + '/';
-  dControlRef = prefix + kControlRef;
-  dStatusRef = prefix + kStatusRef;
-  dStartupRef = prefix + kStartupRef;
-  dTokenIDsRef = prefix + kTokenIDsRef;
-  dFunctionsRef = prefix + kFunctionsRef;
-  dGraphRef = prefix + kGraphRef;
-  dLogsReportsRef = prefix + kLogsReportsRef;
-  dTHRef = prefix + kTHRef;
+  if (_nodeConfigJson != null) {
+    _nodeConfigMap = JSON.decode(_nodeConfigJson);
+    print(_nodeConfigMap);
+    String prefix = dRootRef +
+        '/' +
+        _nodeConfigMap['domain'] +
+        '/' +
+        _nodeConfigMap['nodename'] +
+        '/';
+    dControlRef = prefix + kControlRef;
+    dStatusRef = prefix + kStatusRef;
+    dStartupRef = prefix + kStartupRef;
+    dTokenIDsRef = prefix + kTokenIDsRef;
+    dFunctionsRef = prefix + kFunctionsRef;
+    dGraphRef = prefix + kGraphRef;
+    dLogsReportsRef = prefix + kLogsReportsRef;
+    dTHRef = prefix + kTHRef;
+    _nodeConfigMap['uid'] = getFirebaseUser().uid;
+  }
+  _prefs.setString('node_config_json', _nodeConfigJson);
+}
+
+String _token;
+String getFbToken() {
+  return _token;
+}
+void setFbToken(String token) {
+  _token = token;
+}
+
+String getRootRef() {
+  print('getRootRef: $dRootRef');
+  return dRootRef;
 }
 
 String getControlRef() {
-  print(dControlRef);
+  print('getControlRef: $dControlRef');
   return dControlRef;
 }
+
 String getStatusRef() {
-  print(dStatusRef);
+  print('getStatusRef: $dStatusRef');
   return dStatusRef;
 }
+
 String getStartupRef() {
-  print(dStartupRef);
+  print('getStartupRef: $dStartupRef');
   return dStartupRef;
 }
+
 String getTokenIDsRef() {
-  print(dTokenIDsRef);
+  print('getTokenIDsRef: $dTokenIDsRef');
   return dTokenIDsRef;
 }
+
 String getFunctionsRef() {
-  print(dFunctionsRef);
+  print('getFunctionsRef: $dFunctionsRef');
   return dFunctionsRef;
 }
+
 String getGraphRef() {
-  print(dGraphRef);
-  return dGraphRef;
-}
-String getLogsReportsRef() {
-  print(dLogsReportsRef);
+  print('getGraphRef: $dLogsReportsRef');
   return dLogsReportsRef;
 }
+
+String getLogsReportsRef() {
+  print('getLogsReportsRef: $dLogsReportsRef');
+  return dLogsReportsRef;
+}
+
 String getTHRef() {
-  print(dTHRef);
+  print('getTHRef: $dTHRef');
   return dTHRef;
 }
 
@@ -117,10 +176,22 @@ Map<String, Object> _startupDefault = {
   'version': '',
 };
 
+Map<String, Object> _statusDefault = {
+  'alarm': false,
+  'heap': 0,
+  'humidity': 0,
+  'temperature': 0,
+  'time': 0,
+};
+
 Map<String, Object> getControlDefault() {
   return _controlDefault;
 }
 
 Map<String, Object> getStartupDefault() {
   return _startupDefault;
+}
+
+Map<String, Object> getStatusDefault() {
+  return _statusDefault;
 }

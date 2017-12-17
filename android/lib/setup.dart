@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
+import 'node_setup.dart';
 import 'firebase_utils.dart';
 
 class Setup extends StatefulWidget {
@@ -16,9 +17,13 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
-  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-  String _homeScreenText = "Waiting for token...";
+  final TextEditingController _ctrlDomain = new TextEditingController();
+  final TextEditingController _ctrlSSID = new TextEditingController();
+  final TextEditingController _ctrlPassword = new TextEditingController();
+  final TextEditingController _ctrlNodeName = new TextEditingController();
+  final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   bool _connected = false;
+  DatabaseReference ref;
 
   _SetupState() {}
 
@@ -28,7 +33,7 @@ class _SetupState extends State<Setup> {
     print('_MyHomePageState');
     _connected = false;
     signInWithGoogle().then((onValue) {
-      _firebaseMessaging.configure(
+      _fbMessaging.configure(
         onMessage: (Map<String, dynamic> message) {
           print("onMessage: $message");
           // _showItemDialog(message);
@@ -43,20 +48,30 @@ class _SetupState extends State<Setup> {
         },
       );
 
-      _firebaseMessaging.requestNotificationPermissions(
+      _fbMessaging.requestNotificationPermissions(
           const IosNotificationSettings(sound: true, badge: true, alert: true));
-      _firebaseMessaging.onIosSettingsRegistered
+      _fbMessaging.onIosSettingsRegistered
           .listen((IosNotificationSettings settings) {
         print("Settings registered: $settings");
       });
-      _firebaseMessaging.getToken().then((String token) {
+      _fbMessaging.getToken().then((String token) {
         assert(token != null);
+        setFbToken(token);
         setState(() {
-          _homeScreenText = "Push Messaging token: $token";
+          _connected = true;
         });
-        _connected = true;
-        initSharedPreferences().then((value){
-          print(getControlRef());
+
+        loadPreferences().then((map) {
+          ref = FirebaseDatabase.instance.reference().child(getRootRef());
+
+          if (map != null) {
+            setState(() {
+              _ctrlDomain.text = map['domain'];
+              _ctrlSSID.text = map['ssid'];
+              _ctrlPassword.text = map['password'];
+              _ctrlNodeName.text = map['nodename'];
+            });
+          }
         });
       });
     });
@@ -82,16 +97,77 @@ class _SetupState extends State<Setup> {
         appBar: new AppBar(
           title: new Text(widget.title),
         ),
-        body: new Text(_homeScreenText),
+        body: new ListView(children: <Widget>[
+          new Card(
+            child: new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new TextField(
+                  controller: _ctrlDomain,
+                  decoration: new InputDecoration(
+                    hintText: 'Domain',
+                  ),
+                ),
+                new TextField(
+                  controller: _ctrlSSID,
+                  decoration: new InputDecoration(
+                    hintText: 'SSID',
+                  ),
+                ),
+                new TextField(
+                  controller: _ctrlPassword,
+                  decoration: new InputDecoration(
+                    hintText: 'Password',
+                  ),
+                ),
+                new TextField(
+                  controller: _ctrlNodeName,
+                  decoration: new InputDecoration(
+                    hintText: 'Node Name',
+                  ),
+                ),
+                new ButtonTheme.bar(
+                    child: new ButtonBar(children: <Widget>[
+                      new FlatButton(
+                        child: new Text('SAVE'),
+                        onPressed: _savePreferences,
+                      ),
+                      new FlatButton(
+                        child: new Text('NODE CONFIGURE'),
+                        onPressed: () {
+                          Navigator.of(context)
+                            ..pushNamed(NodeSetup.routeName);
+                        },
+                      ),
+                ])),
+              ],
+            ),
+          ),
+        ]),
         floatingActionButton: new FloatingActionButton(
           onPressed: _onFloatingActionButtonPressed,
           tooltip: 'add',
           child: new Icon(Icons.add),
         ),
       );
-
     }
   }
 
-  void _onFloatingActionButtonPressed() {}
+  void _onFloatingActionButtonPressed() {
+    print('_onFloatingActionButtonPressed');
+  }
+
+  void _savePreferences() {
+    print('_savePreferences');
+    savePreferences(_ctrlDomain.text, _ctrlSSID.text, _ctrlPassword.text,
+        _ctrlNodeName.text);
+
+    DatabaseReference ref;
+    ref = FirebaseDatabase.instance.reference().child(getControlRef());
+    ref.set(getControlDefault());
+    ref = FirebaseDatabase.instance.reference().child(getStartupRef());
+    ref.set(getStartupDefault());
+    ref = FirebaseDatabase.instance.reference().child(getStatusRef());
+    ref.set(getStatusDefault());
+  }
 }

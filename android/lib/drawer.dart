@@ -12,7 +12,7 @@ import 'chart_history.dart';
 final MyDrawer drawer = new MyDrawer();
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
-  MyHomePage.routeName: (BuildContext context) => new NodeSetup(title: 'Home'),
+  Home.routeName: (BuildContext context) => new Home(title: 'Home'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'NodeSetup'),
   DigitalIO.routeName: (BuildContext context) =>
@@ -43,16 +43,16 @@ class _MyDrawerState extends State<MyDrawer> {
       child: new ListView(children: <Widget>[
         new DrawerHeader(child: new Center(child: new Text('uHome', style: textStyle))),
         new ListTile(
-            leading: new Icon(Icons.developer_board),
+            leading: new Icon(Icons.home),
             title: new Text('Home'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
-                ..pushNamed(MyHomePage.routeName);
+                ..pushNamed(Home.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.developer_board),
-            title: new Text('NodeSetup'),
+            title: new Text('Node Setup'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
@@ -60,7 +60,7 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.label_outline),
-            title: new Text('DigitalIO'),
+            title: new Text('Digital IO'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
@@ -68,7 +68,7 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.label_outline),
-            title: new Text('LogicalIO'),
+            title: new Text('Logical IO'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
@@ -76,7 +76,7 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.settings_input_antenna),
-            title: new Text('RadioCode'),
+            title: new Text('Radio Code'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
@@ -100,7 +100,7 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.message),
-            title: new Text('LogHistory'),
+            title: new Text('Log History'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
@@ -108,7 +108,7 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.show_chart),
-            title: new Text('ChartHistory'),
+            title: new Text('Chart History'),
             onTap: () {
               Navigator.of(context)
                 ..pop()

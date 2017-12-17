@@ -18,7 +18,7 @@ String kgraph = "graph";
 String klogs = "logs";
 
 void FbconfInit(void) {
-  String prefix = "users/" + EE_GetUID() + "/" + EE_GetDomain() + "/" +
+  String prefix = "users/" + EE_GetUID() + "/root/" + EE_GetDomain() + "/" +
                   EE_GetNodeName() + "/";
 
   kstartup = prefix + kstartup;
