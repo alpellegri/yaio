@@ -175,8 +175,8 @@ String getFunctionsRef() {
 }
 
 String getGraphRef() {
-  print('getGraphRef: $dLogsReportsRef');
-  return dLogsReportsRef;
+  print('getGraphRef: $dGraphRef');
+  return dGraphRef;
 }
 
 String getLogsReportsRef() {
