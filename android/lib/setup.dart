@@ -17,9 +17,9 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
-  final TextEditingController _ctrlDomain = new TextEditingController();
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
+  final TextEditingController _ctrlDomain = new TextEditingController();
   final TextEditingController _ctrlNodeName = new TextEditingController();
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   bool _connected = false;
@@ -103,18 +103,6 @@ class _SetupState extends State<Setup> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 new TextField(
-                  controller: _ctrlSSID,
-                  decoration: new InputDecoration(
-                    hintText: 'SSID',
-                  ),
-                ),
-                new TextField(
-                  controller: _ctrlPassword,
-                  decoration: new InputDecoration(
-                    hintText: 'Password',
-                  ),
-                ),
-                new TextField(
                   controller: _ctrlDomain,
                   decoration: new InputDecoration(
                     hintText: 'Domain',
@@ -130,7 +118,7 @@ class _SetupState extends State<Setup> {
                     child: new ButtonBar(children: <Widget>[
                       new FlatButton(
                         child: new Text('CHANGE'),
-                        onPressed: _resetPreferences,
+                        onPressed: _changePreferences,
                       ),
                       new FlatButton(
                         child: new Text('RESET'),
@@ -163,14 +151,12 @@ class _SetupState extends State<Setup> {
 
   void _changePreferences() {
     print('_savePreferences');
-    savePreferences(_ctrlDomain.text, _ctrlSSID.text, _ctrlPassword.text,
-        _ctrlNodeName.text);
+    savePreferencesDN(_ctrlDomain.text, _ctrlNodeName.text);
   }
 
   void _resetPreferences() {
     print('_savePreferences');
-    savePreferences(_ctrlDomain.text, _ctrlSSID.text, _ctrlPassword.text,
-        _ctrlNodeName.text);
+    savePreferencesDN(_ctrlDomain.text, _ctrlNodeName.text);
 
     DatabaseReference ref;
     ref = FirebaseDatabase.instance.reference().child(getControlRef());

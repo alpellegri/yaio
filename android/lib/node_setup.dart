@@ -62,6 +62,8 @@ class _NodeSetupState extends State<NodeSetup> {
   bool _connStatus;
   Map _prefs;
   String _nodeConfigJson;
+  final TextEditingController _ctrlSSID = new TextEditingController();
+  final TextEditingController _ctrlPassword = new TextEditingController();
 
   _NodeSetupState() {
     _ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
@@ -74,6 +76,8 @@ class _NodeSetupState extends State<NodeSetup> {
     _iconConnStatus = const Icon(Icons.settings_remote);
     _prefs = getPreferences();
     _nodeConfigJson = JSON.encode(_prefs);
+    _ctrlSSID.text = _prefs['ssid'];
+    _ctrlPassword.text = _prefs['password'];
   }
 
   @override
@@ -94,14 +98,36 @@ class _NodeSetupState extends State<NodeSetup> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new ListTile(
-                  leading: new Icon(Icons.router),
-                  title: new Text('${_prefs["ssid"]}'),
-                  subtitle: new Text('${_prefs["password"]}')
-              ),
-              new ListTile(
                   leading: new Icon(Icons.link),
-                  title: new Text('${_prefs["domain"]}'),
-                  subtitle: new Text('${_prefs["nodename"]}')
+                  title: new Text(_prefs["domain"]),
+                  subtitle: new Text(_prefs["nodename"])),
+              new ListTile(
+                leading: new Icon(Icons.router),
+                title: new TextField(
+                  controller: _ctrlSSID,
+                  decoration: new InputDecoration(
+                    hintText: 'SSID',
+                  ),
+                ),
+                subtitle: new TextField(
+                  controller: _ctrlPassword,
+                  decoration: new InputDecoration(
+                    hintText: 'PASSWORD',
+                  ),
+                ),
+                trailing: new ButtonTheme.bar(
+                  // make buttons use the appropriate styles for cards
+                  child: new ButtonBar(
+                    children: <Widget>[
+                      new FlatButton(
+                        child: new Text('SET'),
+                        onPressed: () {
+                          savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

@@ -81,12 +81,37 @@ Map getPreferences() {
   return _nodeConfigMap;
 }
 
-void savePreferences(String domain, String ssid, String password, String node) {
-  _nodeConfigMap['ssid'] = ssid;
-  _nodeConfigMap['password'] = password;
+void savePreferencesDN(String domain, String node) {
   _nodeConfigMap['domain'] = domain;
   _nodeConfigMap['nodename'] = node;
   _nodeConfigMap['uid'] = getFirebaseUser().uid;
+
+  _nodeConfigJson = JSON.encode(_nodeConfigMap);
+  if (_nodeConfigJson != null) {
+    _nodeConfigMap = JSON.decode(_nodeConfigJson);
+    print(_nodeConfigMap);
+    String prefix = dRootRef +
+        '/' +
+        _nodeConfigMap['domain'] +
+        '/' +
+        _nodeConfigMap['nodename'] +
+        '/';
+    dControlRef = prefix + kControlRef;
+    dStatusRef = prefix + kStatusRef;
+    dStartupRef = prefix + kStartupRef;
+    dTokenIDsRef = prefix + kTokenIDsRef;
+    dFunctionsRef = prefix + kFunctionsRef;
+    dGraphRef = prefix + kGraphRef;
+    dLogsReportsRef = prefix + kLogsReportsRef;
+    dTHRef = prefix + kTHRef;
+    _nodeConfigMap['uid'] = getFirebaseUser().uid;
+  }
+  _prefs.setString('node_config_json', _nodeConfigJson);
+}
+
+void savePreferencesSP(String ssid, String password) {
+  _nodeConfigMap['ssid'] = ssid;
+  _nodeConfigMap['password'] = password;
 
   _nodeConfigJson = JSON.encode(_nodeConfigMap);
   if (_nodeConfigJson != null) {
