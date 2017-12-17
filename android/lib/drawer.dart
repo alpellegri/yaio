@@ -107,7 +107,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 ..pushNamed(LogHistory.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.show_chart),
+            leading: new Icon(Icons.timeline),
             title: new Text('Chart History'),
             onTap: () {
               Navigator.of(context)

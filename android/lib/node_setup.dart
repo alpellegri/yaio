@@ -98,10 +98,6 @@ class _NodeSetupState extends State<NodeSetup> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new ListTile(
-                  leading: new Icon(Icons.link),
-                  title: new Text(_prefs["domain"]),
-                  subtitle: new Text(_prefs["nodename"])),
-              new ListTile(
                 leading: new Icon(Icons.router),
                 title: new TextField(
                   controller: _ctrlSSID,
@@ -129,6 +125,14 @@ class _NodeSetupState extends State<NodeSetup> {
                   ),
                 ),
               ),
+              new ListTile(
+                  leading: new Icon(Icons.device_hub),
+                  title: new Text('Domain'),
+                  subtitle: new Text(_prefs["domain"])),
+              new ListTile(
+                  leading: new Icon(Icons.developer_board),
+                  title: new Text('Node'),
+                  subtitle: new Text(_prefs["nodename"])),
             ],
           ),
         ),

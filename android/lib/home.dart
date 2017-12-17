@@ -149,8 +149,8 @@ class _HomeState extends State<Home> {
                 children: <Widget>[
                   new ListTile(
                     leading: (current.difference(_heartbeatTime) > time_limit)
-                        ? (new Icon(Icons.album, color: Colors.red[200]))
-                        : (new Icon(Icons.album, color: Colors.green[200])),
+                        ? (new Icon(Icons.sync_problem, color: Colors.red[200]))
+                        : (new Icon(Icons.sync, color: Colors.green[200])),
                     title: const Text('Device Status'),
                   ),
                   new ListTile(
