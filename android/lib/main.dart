@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         accentColor: Colors.amber[200],
       ),
-      home: new Setup(title: 'Host'),
+      home: new Setup(title: 'Device'),
       routes: menuRoutes,
     );
   }

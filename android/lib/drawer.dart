@@ -14,13 +14,13 @@ final MyDrawer drawer = new MyDrawer();
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Home.routeName: (BuildContext context) => new Home(title: 'Home'),
   NodeSetup.routeName: (BuildContext context) =>
-      new NodeSetup(title: 'NodeSetup'),
+      new NodeSetup(title: 'Node Setup'),
   DigitalIO.routeName: (BuildContext context) =>
-      new DigitalIO(title: 'DigitalIO'),
+      new DigitalIO(title: 'Digital IO'),
   LogicalIO.routeName: (BuildContext context) =>
-      new LogicalIO(title: 'LogicalIO'),
+      new LogicalIO(title: 'Logical IO'),
   RadioCode.routeName: (BuildContext context) =>
-      new RadioCode(title: 'RadioCode'),
+      new RadioCode(title: 'Radio Code'),
   Functions.routeName: (BuildContext context) =>
       new Functions(title: 'Functions'),
   Timer.routeName: (BuildContext context) => new Timer(title: 'Timer'),

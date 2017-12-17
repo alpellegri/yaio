@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'const.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
@@ -95,24 +94,14 @@ class _NodeSetupState extends State<NodeSetup> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new ListTile(
-                  leading: new Icon(Icons.album),
-                  title: const Text('SSID'),
-                  subtitle: new Text(_prefs["ssid"])
+                  leading: new Icon(Icons.router),
+                  title: new Text('${_prefs["ssid"]}'),
+                  subtitle: new Text('${_prefs["password"]}')
               ),
               new ListTile(
-                  leading: new Icon(Icons.album),
-                  title: const Text('PASSWORD'),
-                  subtitle: new Text(_prefs["password"])
-              ),
-              new ListTile(
-                  leading: new Icon(Icons.album),
-                  title: const Text('DOMAIN'),
-                  subtitle: new Text(_prefs["domain"])
-              ),
-              new ListTile(
-                  leading: new Icon(Icons.album),
-                  title: const Text('NODE NAME'),
-                  subtitle: new Text(_prefs["nodename"])
+                  leading: new Icon(Icons.link),
+                  title: new Text('${_prefs["domain"]}'),
+                  subtitle: new Text('${_prefs["nodename"]}')
               ),
             ],
           ),

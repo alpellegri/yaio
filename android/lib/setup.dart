@@ -103,12 +103,6 @@ class _SetupState extends State<Setup> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 new TextField(
-                  controller: _ctrlDomain,
-                  decoration: new InputDecoration(
-                    hintText: 'Domain',
-                  ),
-                ),
-                new TextField(
                   controller: _ctrlSSID,
                   decoration: new InputDecoration(
                     hintText: 'SSID',
@@ -121,6 +115,12 @@ class _SetupState extends State<Setup> {
                   ),
                 ),
                 new TextField(
+                  controller: _ctrlDomain,
+                  decoration: new InputDecoration(
+                    hintText: 'Domain',
+                  ),
+                ),
+                new TextField(
                   controller: _ctrlNodeName,
                   decoration: new InputDecoration(
                     hintText: 'Node Name',
@@ -129,8 +129,12 @@ class _SetupState extends State<Setup> {
                 new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
                       new FlatButton(
-                        child: new Text('SAVE'),
-                        onPressed: _savePreferences,
+                        child: new Text('CHANGE'),
+                        onPressed: _resetPreferences,
+                      ),
+                      new FlatButton(
+                        child: new Text('RESET'),
+                        onPressed: _resetPreferences,
                       ),
                       new FlatButton(
                         child: new Text('NODE CONFIGURE'),
@@ -157,7 +161,13 @@ class _SetupState extends State<Setup> {
     print('_onFloatingActionButtonPressed');
   }
 
-  void _savePreferences() {
+  void _changePreferences() {
+    print('_savePreferences');
+    savePreferences(_ctrlDomain.text, _ctrlSSID.text, _ctrlPassword.text,
+        _ctrlNodeName.text);
+  }
+
+  void _resetPreferences() {
     print('_savePreferences');
     savePreferences(_ctrlDomain.text, _ctrlSSID.text, _ctrlPassword.text,
         _ctrlNodeName.text);
