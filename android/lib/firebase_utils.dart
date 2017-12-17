@@ -145,47 +145,38 @@ void setFbToken(String token) {
 }
 
 String getRootRef() {
-  print('getRootRef: $dRootRef');
   return dRootRef;
 }
 
 String getControlRef() {
-  print('getControlRef: $dControlRef');
   return dControlRef;
 }
 
 String getStatusRef() {
-  print('getStatusRef: $dStatusRef');
   return dStatusRef;
 }
 
 String getStartupRef() {
-  print('getStartupRef: $dStartupRef');
   return dStartupRef;
 }
 
 String getTokenIDsRef() {
-  print('getTokenIDsRef: $dTokenIDsRef');
   return dTokenIDsRef;
 }
 
 String getFunctionsRef() {
-  print('getFunctionsRef: $dFunctionsRef');
   return dFunctionsRef;
 }
 
 String getGraphRef() {
-  print('getGraphRef: $dGraphRef');
   return dGraphRef;
 }
 
 String getLogsReportsRef() {
-  print('getLogsReportsRef: $dLogsReportsRef');
   return dLogsReportsRef;
 }
 
 String getTHRef() {
-  print('getTHRef: $dTHRef');
   return dTHRef;
 }
 
