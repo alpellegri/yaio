@@ -48,6 +48,9 @@ bool STA_Setup(void) {
     Serial.print(F("sta_password: "));
     Serial.println(sta_password);
     Serial.println(F("trying to connect..."));
+
+    TimeSetup();
+
     WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
     cnt = 0;
     while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {

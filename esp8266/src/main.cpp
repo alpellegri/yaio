@@ -1,10 +1,4 @@
 #include <Arduino.h>
-#include <Ticker.h>
-
-#include <SPI.h>
-#include <Wire.h>
-// #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -17,8 +11,6 @@
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
-
-#define OLED_RESET LED_BUILTIN // 4
 
 // Adafruit_SSD1306 display(OLED_RESET);
 
