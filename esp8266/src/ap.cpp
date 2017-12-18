@@ -28,6 +28,7 @@ static uint8_t port_id;
 
 // #define PSTR(x) (x)
 // #define printf_P printf
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t lenght) {
   uint16_t len;

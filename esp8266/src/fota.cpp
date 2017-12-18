@@ -11,7 +11,7 @@
 #include "ee.h"
 #include "fota.h"
 
-static const char *storage_host = "firebasestorage.googleapis.com";
+static String storage_host = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
 
 static const char *storage_fingerprint =
@@ -34,7 +34,7 @@ typedef enum {
 
 static HTTPWeakClient http;
 
-static const uint16_t block_size = 2048;
+static const uint16_t block_size = 1024;
 static uint16_t block;
 static uint16_t num_blocks;
 
@@ -76,7 +76,7 @@ bool FOTAService(void) {
   case FOTA_Sm_GET_MD5: {
     String md5file_url =
         "/v0/b/" + storage_bucket + "/o/" + md5file_name + "?alt=media";
-    addr = "https://" + String(storage_host) + String(md5file_url);
+    addr = "https://" + storage_host + md5file_url;
     Serial.print(F("FOTA_Sm_GET_MD5 "));
     Serial.println(addr);
     http.setReuse(true);
@@ -121,7 +121,7 @@ bool FOTAService(void) {
   case FOTA_Sm_CHECK: {
     String file_url =
         "/v0/b/" + storage_bucket + "/o/" + file_name + "?alt=media";
-    addr = "https://" + String(storage_host) + String(file_url);
+    addr = "https://" + storage_host + file_url;
     Serial.print(F("FOTA_Sm_CHECK "));
     Serial.println(addr);
     bool res = http.begin(addr, storage_fingerprint);
