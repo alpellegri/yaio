@@ -140,10 +140,12 @@ class Chart extends CustomPainter {
 
       // grid
       _drawLines(canvas, tOffset, 0.0, 150.0, 12);
+      _drawLabelsY(canvas, 0, tOffset, tMin, tMax, tRatio, 12, '°C');
       _drawLabelsY(canvas, 1, tOffset, tMin, tMax, tRatio, 12, '°C');
       _drawLabelsX(canvas, tOffset, timeMin, timeMax, timeRatio, 8);
       // grid
       _drawLines(canvas, hOffset, 0.0, 150.0, 12);
+      _drawLabelsY(canvas, 0, hOffset, hMin, hMax, hRatio, 12, '%');
       _drawLabelsY(canvas, 1, hOffset, hMin, hMax, hRatio, 12, '%');
       _drawLabelsX(canvas, hOffset, timeMin, timeMax, timeRatio, 8);
 
