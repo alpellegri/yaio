@@ -26,7 +26,7 @@ String ee_fb_cloud_messaging_server_key =
     "AAAAfnPi7d8:APA91bED_durAs8Hn4oyKvaDWQihT_vgRYGKk_Y_"
     "oUkwEpqnctgXUTsnLsiHm241L3RRY9UxcXiHNF3QxBavFmrasx5RjJOk13oETI82c8Awji2ydV"
     "jjruTiZ9Um6Ue72JErI0kwy-Nu";
-String ee_fb_storage_bucket = "uhome-9b8a1.firebaseio.com";
+String ee_fb_storage_bucket = "uhome-9b8a1.appspot.com";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
