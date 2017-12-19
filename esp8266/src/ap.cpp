@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Hash.h>
 #include <WebSockets.h>
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>

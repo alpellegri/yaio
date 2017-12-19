@@ -12,8 +12,6 @@
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-// Adafruit_SSD1306 display(OLED_RESET);
-
 static uint8_t mode;
 static uint32_t current_time;
 static uint32_t schedule_time;
@@ -31,22 +29,6 @@ void setup() {
   Serial.print(F("SW version: "));
   Serial.println(VERS_getVersion());
   Serial.println(F("Node starting..."));
-
-#if 0
-  // init oled display
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  // Clear the buffer.
-  display.clearDisplay();
-  display.display();
-
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println("WIFI mode");
-  display.setTextSize(2);
-  display.println("AP");
-  display.display();
-#endif
 
   mode = 0;
   if (mode == 0) {

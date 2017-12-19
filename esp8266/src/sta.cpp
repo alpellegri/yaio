@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include <ESP8266WiFi.h>
 #include <FS.h>
 #include <WiFiClient.h>
@@ -9,12 +8,12 @@
 
 #include "ap.h"
 #include "ee.h"
+#include "fbconf.h"
 #include "fbm.h"
 #include "fcm.h"
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
-#include "fbconf.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -59,7 +58,7 @@ bool STA_Setup(void) {
     }
     Serial.println();
 
-		FbconfInit();
+    FbconfInit();
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print(F("connected: "));
@@ -120,6 +119,7 @@ bool STA_Task(void) {
 }
 
 void STA_Loop() {
+#if 0
   uint8_t in = digitalRead(BUTTON);
 
   if (in != sta_button) {
@@ -130,4 +130,5 @@ void STA_Loop() {
       RF_executeIoEntryDB(1);
     }
   }
+#endif
 }
