@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <FS.h>
-#include <WiFiClient.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -81,6 +80,7 @@ bool STA_Setup(void) {
 
   if (sts != true) {
     Serial.println(F("not connected to router"));
+    ESP.restart();
     ret = false;
   }
 

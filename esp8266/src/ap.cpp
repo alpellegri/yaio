@@ -1,6 +1,4 @@
 #include <Arduino.h>
-#include <WebSockets.h>
-#include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
 #include <WiFiServer.h>
 #include <stdio.h>
@@ -39,7 +37,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     enable_WiFi_Scan = EE_LoadData();
     Serial.print(F("["));
     Serial.print(num);
-    Serial.print(F(" Disconnected!"));
+    Serial.print(F("]"));
+    Serial.println(F(" Disconnected!"));
+    ESP.restart();
     break;
 
   case WStype_CONNECTED: {

@@ -653,13 +653,7 @@ bool RECEIVE_ATTR RCSwitch::receiveProtocol(const int p, unsigned int changeCoun
     return false;
 }
 
-#include "interrupts.h"
-
 void RECEIVE_ATTR RCSwitch::handleInterrupt() {
-
-InterruptLock lock;
-
-// noInterrupts();
 
   static unsigned int changeCount = 0;
   static unsigned long lastTime = 0;
@@ -699,6 +693,5 @@ InterruptLock lock;
 
   RCSwitch::timings[changeCount++] = duration;
   lastTime = time;
-// interrupts();
 }
 #endif
