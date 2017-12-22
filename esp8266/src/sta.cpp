@@ -78,6 +78,7 @@ bool STA_Setup(void) {
 
   if (sts != true) {
     Serial.println(F("not connected to router"));
+    ESP.restart();
     ret = false;
   }
 
@@ -116,6 +117,7 @@ bool STA_Task(void) {
 }
 
 void STA_Loop() {
+#if 0
   uint8_t in = digitalRead(BUTTON);
 
   if (in != sta_button) {
@@ -126,4 +128,5 @@ void STA_Loop() {
       RF_executeIoEntryDB(1);
     }
   }
+#endif
 }
