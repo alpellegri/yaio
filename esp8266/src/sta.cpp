@@ -89,7 +89,7 @@ bool STA_Setup(void) {
 
 void STA_FotaReq(void) {
   SPIFFS.open("/fota.req", "w");
-  delay(5000);
+  delay(500);
   ESP.restart();
 }
 
