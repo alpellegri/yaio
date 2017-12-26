@@ -12,7 +12,7 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-static const char *ap_ssid = "esp8266";
+static const char *ap_ssid = "uHomeDevice";
 static const char *ap_password = "123456789";
 
 static uint16_t ap_task_cnt;
@@ -88,23 +88,25 @@ bool AP_Setup(void) {
 
   enable_WiFi_Scan = EE_LoadData();
 
-  port_id = 0xFF;
-  Serial.println(F("connecting mode AP"));
+  if (enable_WiFi_Scan == false) {
+    port_id = 0xFF;
+    Serial.println(F("connecting mode AP"));
 
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(100);
-  WiFi.mode(WIFI_AP_STA);
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    WiFi.mode(WIFI_AP_STA);
 
-  WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(ap_ssid, ap_password);
+    WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
+    WiFi.softAP(ap_ssid, ap_password);
 
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.println(F("AP mode enabled"));
-  Serial.print(F("IP address: "));
-  Serial.println(myIP);
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
+    IPAddress myIP = WiFi.softAPIP();
+    Serial.println(F("AP mode enabled"));
+    Serial.print(F("IP address: "));
+    Serial.println(myIP);
+    webSocket.begin();
+    webSocket.onEvent(webSocketEvent);
+  }
 
   return ret;
 }

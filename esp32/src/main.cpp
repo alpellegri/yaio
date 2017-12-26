@@ -5,6 +5,7 @@
 
 #include "ap.h"
 #include "ee.h"
+#include "rf.h"
 #include "sta.h"
 #include "vers.h"
 
@@ -41,6 +42,8 @@ void setup() {
 
 void loop() {
   bool ret;
+
+  RF_Loop();
 
   if (mode == 0) {
     AP_Loop();

@@ -15,8 +15,8 @@ uint32_t getTime(void) {
 void TimeSetup(void) { configTime(0, 0, "pool.ntp.org"); }
 
 bool TimeService(void) {
-  uint32_t current = getTime();
   if (time_init == false) {
+  uint32_t current = getTime();
     if (current == 0) {
       Serial.println(F("wait for NTP..."));
     } else {

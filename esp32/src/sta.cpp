@@ -99,7 +99,6 @@ void STA_FotaReq(void) {
 /* main function task */
 bool STA_Task(void) {
   bool ret = true;
-  sta_cnt++;
 
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
@@ -116,7 +115,6 @@ bool STA_Task(void) {
       }
     }
   } else {
-    Serial.print(sta_cnt);
     Serial.println(F(" WiFi.status != WL_CONNECTED"));
   }
 
