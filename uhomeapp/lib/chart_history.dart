@@ -20,9 +20,10 @@ class ChartHistory extends StatefulWidget {
   _ChartHistoryState createState() => new _ChartHistoryState();
 }
 
+const xmax = 280.0;
+const ymax = 600.0;
+
 class _ChartHistoryState extends State<ChartHistory> {
-  static double xmax = 300.0;
-  static double ymax = 600.0;
   List<THEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
@@ -126,7 +127,7 @@ class Chart extends CustomPainter {
       delta = 0.1 * (timeMax - timeMin).toDouble();
       timeMin -= delta.toInt();
       timeMax += delta.toInt();
-      double timeRatio = 300.0 / (timeMax - timeMin).toDouble();
+      double timeRatio = xmax / (timeMax - timeMin).toDouble();
       delta = 0.1 * (tMax - tMin);
       tMin -= delta;
       tMax += delta;
@@ -203,7 +204,7 @@ class Chart extends CustomPainter {
     double d = min;
     for (int i = 0; i <= step; i++) {
       double y = offset - (d - min);
-      canvas.drawLine(new Offset(0.0, y), new Offset(300.0, y), paintLine);
+      canvas.drawLine(new Offset(0.0, y), new Offset(xmax, y), paintLine);
       d += delta;
     }
   }
@@ -215,9 +216,10 @@ class Chart extends CustomPainter {
     for (int i = 0; i <= step; i++) {
       double y = offset - ratio * (d - min);
       ui.Paragraph paragraph = _buildNumberLabel(d.toStringAsFixed(1) + unit);
+      double xoffset = (type == 1) ? (xmax + 10.0) : -40.0;
       canvas.drawParagraph(
         paragraph,
-        new Offset(-40.0 + 350 * type, y - 5),
+        new Offset(xoffset, y - 5),
       );
       d += delta;
     }
