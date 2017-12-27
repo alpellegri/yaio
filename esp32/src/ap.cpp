@@ -130,8 +130,6 @@ bool AP_Task(void) {
   String str;
 
   if (enable_WiFi_Scan == true) {
-    // ret = false;
-#if 1
     Serial.println(F("networks scan"));
     if (ap_task_cnt-- == 0) {
       ap_task_cnt = 10;
@@ -156,7 +154,6 @@ bool AP_Task(void) {
         }
       }
     }
-#endif
   }
 
   return ret;
