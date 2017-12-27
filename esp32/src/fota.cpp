@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include "ee.h"
+#include "vers.h"
 #include "fota.h"
 
 static String storage_host = "firebasestorage.googleapis.com";
@@ -72,7 +73,7 @@ bool FOTAService(void) {
 
   case FOTA_Sm_GET_MD5: {
     String md5file_url =
-        "/v0/b/" + storage_bucket + "/o/" + md5file_name + "?alt=media";
+        "/v0/b/" + storage_bucket + "/o/" + VERS_HW_VER + md5file_name + "?alt=media";
     addr = "https://" + storage_host + md5file_url;
     Serial.print(F("FOTA_Sm_GET_MD5 "));
     Serial.println(addr);
@@ -117,7 +118,7 @@ bool FOTAService(void) {
 
   case FOTA_Sm_CHECK: {
     String file_url =
-        "/v0/b/" + storage_bucket + "/o/" + file_name + "?alt=media";
+        "/v0/b/" + storage_bucket + "/o/" + VERS_HW_VER + file_name + "?alt=media";
     addr = "https://" + storage_host + file_url;
     Serial.print(F("FOTA_Sm_CHECK "));
     Serial.println(addr);
