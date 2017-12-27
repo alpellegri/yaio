@@ -119,6 +119,7 @@ bool STA_Task(void) {
 }
 
 void STA_Loop() {
+  RF_Loop();
 #if 0
   uint8_t in = digitalRead(BUTTON);
 
