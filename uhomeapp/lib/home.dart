@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
 import 'chart_history.dart';
@@ -32,31 +31,14 @@ class _HomeState extends State<Home> {
   bool _connected = false;
   bool _nodeNeedUpdate = false;
 
-  Map<String, Object> _control = {
-    'alarm': false,
-    'reboot': false,
-    'time': 0,
-  };
-
-  Map<String, Object> _status = {
-    'alarm': false,
-    'heap': 0,
-    'humidity': 0,
-    'temperature': 0,
-    'time': 0,
-  };
-
-  Map<String, Object> _startup = {
-    'bootcnt': 0,
-    'time': 0,
-    'version': '',
-  };
+  Map<String, Object> _control;
+  Map<String, Object> _status;
+  Map<String, Object> _startup;
 
   @override
   void initState() {
     super.initState();
     print('_MyHomePageState');
-    _connected = true;
     String token = getFbToken();
 
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
@@ -83,9 +65,7 @@ class _HomeState extends State<Home> {
         _fcmRef.push().set(token);
         print("token saved: $token");
       }
-      setState(() {
-        _connected = true;
-      });
+
       // at the end, not before
       FirebaseDatabase.instance.setPersistenceEnabled(true);
       FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
@@ -104,6 +84,11 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     String alarmButton;
     if (_connected == false) {
+      if ((_control != null) && (_status != null) && (_startup != null)) {
+        setState(() {
+          _connected = true;
+        });
+      }
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
@@ -306,8 +291,10 @@ class _HomeState extends State<Home> {
     // update control time to keep up node
     DateTime now = new DateTime.now();
     setState(() {
-      _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-      _controlRef.set(_control);
+      if (_control != null) {
+        _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
+        _controlRef.set(_control);
+      }
       _status = event.snapshot.value;
     });
   }
