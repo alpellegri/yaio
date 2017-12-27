@@ -11,7 +11,7 @@
 // #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-static const char *ap_ssid = "uHomeDevice";
+static const char *ap_ssid = "uHome-node";
 static const char *ap_password = "123456789";
 
 static uint16_t ap_task_cnt;
@@ -89,7 +89,7 @@ bool AP_Setup(void) {
 
   if (enable_WiFi_Scan == false) {
     port_id = 0xFF;
-    Serial.println(F("connecting mode AP"));
+    Serial.println(F("Connecting mode AP"));
 
     WiFi.disconnect();
     WiFi.mode(WIFI_AP_STA);
@@ -130,8 +130,8 @@ bool AP_Task(void) {
   String str;
 
   if (enable_WiFi_Scan == true) {
-    ret = false;
-#if 0
+    // ret = false;
+#if 1
     Serial.println(F("networks scan"));
     if (ap_task_cnt-- == 0) {
       ap_task_cnt = 10;
