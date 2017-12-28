@@ -60,6 +60,8 @@ static IPAddress computer_ip(192, 168, 1, 255);
  */
 static byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
 
+String FBM_getResetReason() { return ESP.getResetReason(); }
+
 void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
   const byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   byte i;
@@ -193,7 +195,8 @@ bool FbmService(void) {
     if (res == true) {
       if (boot_first == false) {
         boot_first = true;
-        String str = String(ESP.getResetReason());
+        String str = "\n";
+        str += FBM_getResetReason();
         fblog_log(str, true);
       }
 

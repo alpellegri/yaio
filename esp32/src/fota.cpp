@@ -78,8 +78,6 @@ bool FOTAService(void) {
     Serial.print(F("FOTA_Sm_GET_MD5 "));
     Serial.println(addr);
     http.setReuse(true);
-    // WiFiUDP::stopAll();
-    // WiFiClient::stopAll();
 
     bool res = http.begin(addr);
     if (res == true) {

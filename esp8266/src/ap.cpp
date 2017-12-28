@@ -1,6 +1,6 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 #include <WebSocketsServer.h>
-#include <WiFiServer.h>
 #include <stdio.h>
 #include <string.h>
 

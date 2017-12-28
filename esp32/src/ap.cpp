@@ -24,6 +24,7 @@ static uint8_t port_id;
 
 // #define PSTR(x) (x)
 // #define printf_P printf
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t lenght) {
   uint16_t len;
@@ -91,8 +92,11 @@ bool AP_Setup(void) {
     port_id = 0xFF;
     Serial.println(F("Connecting mode AP"));
 
+    WiFi.mode(WIFI_STA);
     WiFi.disconnect();
+    delay(100);
     WiFi.mode(WIFI_AP_STA);
+
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP(ap_ssid, ap_password);
 

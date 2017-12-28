@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <WiFiUDP.h>
 
-// #include <DHT.h>
+#include <DHT.h>
 #include <FirebaseArduino.h>
 
 #include <stdio.h>
@@ -18,8 +18,8 @@
 #include "vers.h"
 #include <rom/rtc.h>
 
-// #define DHTPIN D6
-// #define DHTTYPE DHT22
+#define DHTPIN 16
+#define DHTTYPE DHT22
 
 #define FBM_UPDATE_TH (30 * 60)
 #define FBM_UPDATE_MONITOR_FAST (1)
@@ -29,7 +29,7 @@
 // #define PSTR(x) (x)
 // #define printf_P printf
 
-// DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHTPIN, DHTTYPE);
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
@@ -114,6 +114,14 @@ String verbose_print_reset_reason(RESET_REASON reason) {
   }
 
   return result;
+}
+
+String FBM_getResetReason(void) {
+  String ret;
+  ret = verbose_print_reset_reason((RESET_REASON)0);
+  ret += "\n";
+  ret += verbose_print_reset_reason((RESET_REASON)1);
+  return ret;
 }
 
 void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
@@ -250,8 +258,7 @@ bool FbmService(void) {
       if (boot_first == false) {
         boot_first = true;
         String str = "\n";
-        str += "CPU0: " + verbose_print_reset_reason((RESET_REASON)0) + "\n";
-        str += "CPU1: " + verbose_print_reset_reason((RESET_REASON)1) + "\n";
+        str += FBM_getResetReason();
         fblog_log(str, true);
       }
 
@@ -285,7 +292,6 @@ bool FbmService(void) {
                       ESP.getFreeHeap());
       fbm_update_last = time_now;
 
-#if 0
       float h = dht.readHumidity();
       float t = dht.readTemperature();
       if (isnan(h) || isnan(t)) {
@@ -295,7 +301,6 @@ bool FbmService(void) {
         humidity_data = h;
         temperature_data = t;
       }
-#endif
       yield();
 
       control_time = Firebase.getInt(kcontrol + "/time");
@@ -382,6 +387,7 @@ bool FbmService(void) {
         /* do nothing */
       }
     }
+    yield();
 
     // monitor for alarm activation
     if (status_alarm != control_alarm) {
@@ -389,7 +395,6 @@ bool FbmService(void) {
       if (status_alarm == true) {
       }
     }
-    yield();
 
 #if 0
     // manage RF activation/deactivation
