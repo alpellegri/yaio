@@ -90,7 +90,7 @@ bool AP_Setup(void) {
 
   if (enable_WiFi_Scan == false) {
     port_id = 0xFF;
-    Serial.println(F("connecting mode AP"));
+    Serial.println(F("Connecting mode AP"));
 
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
