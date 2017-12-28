@@ -127,11 +127,11 @@ class _NodeSetupState extends State<NodeSetup> {
               ),
               new ListTile(
                   leading: new Icon(Icons.device_hub),
-                  title: new Text('Domain'),
+                  title: new Text('Domain Name'),
                   subtitle: new Text(_prefs["domain"])),
               new ListTile(
                   leading: new Icon(Icons.developer_board),
-                  title: new Text('Node'),
+                  title: new Text('Node Name'),
                   subtitle: new Text(_prefs["nodename"])),
             ],
           ),
@@ -146,7 +146,7 @@ class _NodeSetupState extends State<NodeSetup> {
                 trailing: new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
                   new FlatButton(
-                    child: new Text('SEND TO NODE'),
+                    child: new Text('STORE TO NODE'),
                     onPressed: _sendParameters,
                   ),
                 ])),
