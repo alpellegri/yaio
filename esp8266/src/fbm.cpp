@@ -216,6 +216,7 @@ bool FbmService(void) {
       Serial.println(Firebase.error());
     } else {
       RF_Enable();
+      dht.begin();
       boot_sm = 3;
     }
   } break;
@@ -232,6 +233,7 @@ bool FbmService(void) {
 
       float h = dht.readHumidity();
       float t = dht.readTemperature();
+      Serial.printf_P(PSTR("t: %f - h: %f\n"), t, h);
       if (isnan(h) || isnan(t)) {
         ht_monitor_run = false;
       } else {

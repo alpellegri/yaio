@@ -8,7 +8,6 @@
 #include "sta.h"
 
 #define LED 13 // Led in NodeMCU at pin GPIO16 (D0).
-// #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
 static const char *ap_ssid = "uHome-node";

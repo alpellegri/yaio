@@ -9,8 +9,6 @@
 #include "sta.h"
 #include "vers.h"
 
-// #define BUTTON D3 // flash button at pin GPIO00 (D3)
-
 static uint8_t mode;
 static uint32_t current_time;
 static uint32_t schedule_time;

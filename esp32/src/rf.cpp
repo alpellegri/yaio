@@ -16,9 +16,6 @@
 #define NUM_IO_ENTRY_MAX 10
 #define NUM_IO_FUNCTION_MAX 10
 
-// #define PSTR(x) (x)
-// #define printf_P printf
-
 typedef struct {
   uint32_t id;
   uint8_t type;
@@ -319,7 +316,7 @@ void RF_Enable(void) {
     RF_StatusEnable = true;
     RadioCode = 0;
     Serial.println(F("RF Enable"));
-    // mySwitch.enableReceive(D7);
+    mySwitch.enableReceive(15);
   }
 }
 
@@ -370,7 +367,7 @@ void RF_Loop() {
       if (value != RadioCodeLast) {
         Serial.printf_P(PSTR("radio code: %06X\n"), value);
         RadioCode = value;
-        // RFRcvTimer.attach(2.0, RF_Unmask);
+        // RFRcvTimer.attach(1.0, RF_Unmask);
       } else {
         Serial.println(F("."));
       }
