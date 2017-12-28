@@ -77,15 +77,13 @@ class _RadioCodeState extends State<RadioCode> {
   DatabaseReference _graphRef;
   List<IoEntry> destinationSaves;
   String selection;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<Event> _onEditSub;
+  StreamSubscription<Event> _onRemoveSub;
 
   _RadioCodeState() {
     _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
+    _onEditSub = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSub = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -97,9 +95,8 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
-    _onEditSubscription.cancel();
-    _onRemoveSubscription.cancel();
+    _onEditSub.cancel();
+    _onRemoveSub.cancel();
   }
 
   @override
@@ -235,13 +232,13 @@ class _EntryDialogState extends State<EntryDialog> {
   int _selectedType;
   FunctionEntry _selectedFunction;
   List<String> radioMenu = new List();
-  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onFunctionAddSub;
 
   _EntryDialogState({
     this.entry,
   }) {
     print('EntryDialogState');
-    _onAddSubscription = _functionRef.onChildAdded.listen(_onFunctionAdded);
+    _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
     _selectedType = entry.type;
   }
@@ -254,7 +251,7 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
+    _onFunctionAddSub.cancel();
   }
 
   @override
@@ -328,13 +325,13 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
-                var prev_type = entry.type;
+                var prevType = entry.type;
                 entry.type = _selectedType;
                 if (_selectedFunction != null) {
                   entry.func = _selectedFunction.key;
                 }
                 if (entry.key != null) {
-                  if (prev_type == kRadioElem) {
+                  if (prevType == kRadioElem) {
                     entry.reference.child(entry.key).remove();
                     entry.reference.push().set(entry.toJson());
                   } else {

@@ -9,9 +9,9 @@ const int kRadioElem = 5;
 const int kTimer = 6;
 
 const String kStringDOut = 'DOut';
-const String kStringRadioIn = 'RadioIn';
 const String kStringLOut = 'LOut';
 const String kStringDIn = 'DIn';
+const String kStringRadioIn = 'RadioIn';
 const String kStringRadioOut = 'RadioOut';
 const String kStringRadioElem = 'RadioElem';
 

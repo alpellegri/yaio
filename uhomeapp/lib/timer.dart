@@ -80,13 +80,13 @@ class Timer extends StatefulWidget {
 class _TimerState extends State<Timer> {
   List<IoEntry> entryList = new List();
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onFunctionAddSub;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
   _TimerState() {
     _entryRef = FirebaseDatabase.instance.reference().child(dGraphRef);
-    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onFunctionAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
@@ -100,10 +100,11 @@ class _TimerState extends State<Timer> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
+    _onFunctionAddSub.cancel();
     _onEditSubscription.cancel();
     _onRemoveSubscription.cancel();
   }
+
   @override
   Widget build(BuildContext context) {
     var query = entryList.where((el) => (el.type == kTimer)).toList();
@@ -177,17 +178,34 @@ class EntryDialog extends StatefulWidget {
 
 class _EntryDialogState extends State<EntryDialog> {
   final IoEntry entry;
+  final DatabaseReference _functionRef =
+      FirebaseDatabase.instance.reference().child(getFunctionsRef());
+  List<FunctionEntry> _functionList = new List();
 
   final TextEditingController _controllerName = new TextEditingController();
-  final TextEditingController _controllerPort = new TextEditingController();
-  final TextEditingController _controllerValue = new TextEditingController();
+  final TextEditingController _controllerHours = new TextEditingController();
+  final TextEditingController _controllerMinutes = new TextEditingController();
+  FunctionEntry _selectedFunction;
+  StreamSubscription<Event> _onFunctionAddSub;
 
   _EntryDialogState(this.entry) {
+    _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     if (entry.id != null) {
       _controllerName.text = entry.name;
-      _controllerPort.text = entry.getPort().toString();
-      _controllerValue.text = entry.getValue().toString();
+      _controllerHours.text = entry.getPort().toString();
+      _controllerMinutes.text = entry.getValue().toString();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onFunctionAddSub.cancel();
   }
 
   @override
@@ -205,17 +223,38 @@ class _EntryDialogState extends State<EntryDialog> {
                 ),
               ),
               new TextField(
-                controller: _controllerPort,
+                controller: _controllerHours,
                 decoration: new InputDecoration(
                   hintText: 'hour',
                 ),
               ),
               new TextField(
-                controller: _controllerValue,
+                controller: _controllerMinutes,
                 decoration: new InputDecoration(
                   hintText: 'minute',
                 ),
               ),
+              (_functionList.length > 0)
+                  ? new ListTile(
+                title: const Text('Function Call'),
+                trailing: new DropdownButton<FunctionEntry>(
+                  hint: const Text('select a function'),
+                  value: _selectedFunction,
+                  onChanged: (FunctionEntry newValue) {
+                    print(newValue.name);
+                    setState(() {
+                      _selectedFunction = newValue;
+                    });
+                  },
+                  items: _functionList.map((FunctionEntry entry) {
+                    return new DropdownMenuItem<FunctionEntry>(
+                      value: entry,
+                      child: new Text(entry.name),
+                    );
+                  }).toList(),
+                ),
+              )
+                  : new Text('Functions not declared yet'),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -232,8 +271,11 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.type = kTimer;
-                  entry.setPort(int.parse(_controllerPort.text));
-                  entry.setValue(int.parse(_controllerValue.text));
+                  entry.setPort(int.parse(_controllerHours.text));
+                  entry.setValue(int.parse(_controllerMinutes.text));
+                  if (_selectedFunction != null) {
+                    entry.func = _selectedFunction.key;
+                  }
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
                   } else {
@@ -248,5 +290,16 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
+  }
+
+  void _onFunctionAdded(Event event) {
+    FunctionEntry funcEntry =
+        new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
+    setState(() {
+      _functionList.add(funcEntry);
+      if (entry.func == funcEntry.key) {
+        _selectedFunction = funcEntry;
+      }
+    });
   }
 }

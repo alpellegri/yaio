@@ -117,7 +117,7 @@ class _SetupState extends State<Setup> {
                 new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
                       new FlatButton(
-                        child: new Text('CHANGE'),
+                        child: new Text('SET'),
                         onPressed: _changePreferences,
                       ),
                       new FlatButton(
@@ -125,7 +125,7 @@ class _SetupState extends State<Setup> {
                         onPressed: _resetPreferences,
                       ),
                       new FlatButton(
-                        child: new Text('NODE CONFIGURE'),
+                        child: new Text('CONFIGURE'),
                         onPressed: () {
                           Navigator.of(context)
                             ..pushNamed(NodeSetup.routeName);
