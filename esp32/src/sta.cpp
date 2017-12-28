@@ -32,9 +32,6 @@ bool STA_Setup(void) {
 
   digitalWrite(LED, LED_OFF);
 
-  // WiFi.disconnect();
-  // WiFi.softAPdisconnect(true);
-
   Serial.println(F("connecting mode STA"));
   Serial.println(F("Configuration parameters:"));
 

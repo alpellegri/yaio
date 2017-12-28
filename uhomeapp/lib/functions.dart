@@ -218,7 +218,9 @@ class _EntryDialogState extends State<EntryDialog> {
 
     _controllerName.text = entry?.name;
     if (entry.delay != null) {
-      _controllerDelay.text = entry?.delay.toString();
+      _controllerDelay.text = entry.delay.toString();
+    } else {
+      // _controllerDelay.text = '0';
     }
     if (entry.next != null) {
       _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
@@ -331,7 +333,11 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 setState(() {
-                  entry.delay = int.parse(_controllerDelay.text);
+                  if (_controllerDelay.text != null) {
+                    entry.delay = int.parse(_controllerDelay.text);
+                  } else {
+                    entry.delay = 0;
+                  }
                   entry.name = _controllerName.text;
                   entry.next = _selectedNext?.key;
                   entry.action = _selectedEntry?.key;
