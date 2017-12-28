@@ -212,6 +212,7 @@ bool FbmService(void) {
       Serial.print(F("set failed: kcontrol/reboot"));
       Serial.println(Firebase.error());
     } else {
+      RF_Enable();
       boot_sm = 3;
     }
   } break;
@@ -321,6 +322,7 @@ bool FbmService(void) {
         /* do nothing */
       }
     }
+    yield();
 
     // monitor for alarm activation
     if (status_alarm != control_alarm) {
@@ -329,6 +331,7 @@ bool FbmService(void) {
       }
     }
 
+#if 0
     // manage RF activation/deactivation
     if (status_alarm == true) {
       RF_Enable();
@@ -336,6 +339,7 @@ bool FbmService(void) {
       RF_Disable();
     }
     yield();
+#endif
 
     // manage alarm arming/disarming notifications
     if (status_alarm_last != status_alarm) {
