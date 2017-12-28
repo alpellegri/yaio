@@ -41,8 +41,6 @@ void setup() {
 void loop() {
   bool ret;
 
-  RF_Loop();
-
   if (mode == 0) {
     AP_Loop();
   } else if (mode == 1) {
