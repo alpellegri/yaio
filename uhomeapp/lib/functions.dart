@@ -28,7 +28,7 @@ class FunctionListItem extends StatelessWidget {
                   children: [
                     new Text(
                       '${entry.name}',
-                      textScaleFactor: 1.5,
+                      textScaleFactor: 1.3,
                       textAlign: TextAlign.left,
                     ),
                     /*
@@ -198,8 +198,8 @@ class _EntryDialogState extends State<EntryDialog> {
 
   int _selectedType;
   FunctionEntry _selectedNext;
+  var _selectedNextList;
   List<String> selectTypeMenu = new List();
-  Map<int, List> _selectedList = new Map();
   List<IoEntry> _ioMenu = new List();
   IoEntry _selectedEntry;
 
@@ -223,7 +223,12 @@ class _EntryDialogState extends State<EntryDialog> {
       // _controllerDelay.text = '0';
     }
     if (entry.next != null) {
-      _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
+      _selectedNextList = functionList.where((el) => el.key == entry.next);
+      if (_selectedNextList.length == 1) {
+        _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
+      } else {
+        entry.next = null;
+      }
     }
   }
 
