@@ -9,17 +9,17 @@
 #include <stdlib.h>
 
 #include "ee.h"
-#include "vers.h"
 #include "fota.h"
+#include "vers.h"
 
-static String storage_host = "firebasestorage.googleapis.com";
+static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
 
-static const String file_name = "firmware.bin";
-static const String md5file_name = "firmware.md5";
+static const char storage_fingerprint[] PROGMEM =
+    "C2:95:F5:7C:8F:23:0A:10:30:86:66:80:7E:83:80:48:E5:B0:06:FF";
 
-// #define PSTR(x) (x)
-// #define printf_P printf
+static const char file_name[] PROGMEM = "firmware.bin";
+static const char md5file_name[] PROGMEM = "firmware.md5";
 
 typedef enum {
   FOTA_Sm_IDLE = 0,
@@ -72,9 +72,10 @@ bool FOTAService(void) {
     break;
 
   case FOTA_Sm_GET_MD5: {
-    String md5file_url =
-        "/v0/b/" + storage_bucket + "/o/" + VERS_HW_VER + md5file_name + "?alt=media";
-    addr = "https://" + storage_host + md5file_url;
+    String md5file_url = String(F("/v0/b/")) + storage_bucket +
+                         String(F("/o/")) + VERS_HW_VER +
+                         String(FPSTR(md5file_name)) + String(F("?alt=media"));
+    addr = String(F("https://")) + String(FPSTR(storage_host)) + md5file_url;
     Serial.print(F("FOTA_Sm_GET_MD5 "));
     Serial.println(addr);
     http.setReuse(true);
@@ -115,9 +116,10 @@ bool FOTAService(void) {
   } break;
 
   case FOTA_Sm_CHECK: {
-    String file_url =
-        "/v0/b/" + storage_bucket + "/o/" + VERS_HW_VER + file_name + "?alt=media";
-    addr = "https://" + storage_host + file_url;
+    String file_url = String(F("/v0/b/")) + storage_bucket + String(F("/o/")) +
+                      VERS_HW_VER + String(FPSTR(file_name)) +
+                      String(F("?alt=media"));
+    addr = String(F("https://")) + String(FPSTR(storage_host)) + file_url;
     Serial.print(F("FOTA_Sm_CHECK "));
     Serial.println(addr);
     bool res = http.begin(addr);
