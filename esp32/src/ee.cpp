@@ -10,9 +10,6 @@
 
 #define EE_SIZE 512
 
-// #define PSTR(x) (x)
-// #define printf_P printf
-
 static String ee_ssid;
 static String ee_password;
 static String ee_uid;

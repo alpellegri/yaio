@@ -77,13 +77,15 @@ class _RadioCodeState extends State<RadioCode> {
   DatabaseReference _graphRef;
   List<IoEntry> destinationSaves;
   String selection;
-  StreamSubscription<Event> _onEditSub;
-  StreamSubscription<Event> _onRemoveSub;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _RadioCodeState() {
     _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onEditSub = _graphRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSub = _graphRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -95,8 +97,9 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   void dispose() {
     super.dispose();
-    _onEditSub.cancel();
-    _onRemoveSub.cancel();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override

@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <RCSwitch.h>
-// #include <Ticker.h>
+#include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -35,8 +35,8 @@ typedef struct {
   uint32_t timer;
 } FunctionEntry_t;
 
-// static Ticker FunctionTimer;
-// static Ticker RFRcvTimer;
+static Ticker FunctionTimer;
+static Ticker RFRcvTimer;
 
 static RCSwitch mySwitch = RCSwitch();
 static uint32_t RadioCode;
@@ -163,7 +163,7 @@ void FunctionReq(uint8_t src_idx, char *key) {
     FunctionReqIdx = idx;
     FunctionReqPending = 1;
     Function[idx].src_idx = src_idx;
-    // FunctionTimer.attach(0.1, FunctionSrv);
+    FunctionTimer.attach(0.1, FunctionSrv);
   } else {
   }
 }
@@ -198,7 +198,7 @@ void FunctionSrv(void) {
     if (Function[i].timer_run == 1) {
       if ((curr_time - Function[i].timer) >= Function[i].delay) {
         Function[i].timer_run = 0;
-        // FunctionTimer.detach();
+        FunctionTimer.detach();
         if (Function[i].next[0] != '\0') {
           FunctionReq(Function[i].src_idx, Function[i].next);
         }
@@ -344,7 +344,7 @@ uint32_t RF_GetRadioCode(void) {
 // avoid receiving multiple code from same telegram
 void RF_Unmask(void) {
   RadioCodeLast = 0;
-  // RFRcvTimer.detach();
+  RFRcvTimer.detach();
 }
 
 void RF_Loop() {
@@ -367,7 +367,7 @@ void RF_Loop() {
       if (value != RadioCodeLast) {
         Serial.printf_P(PSTR("radio code: %06X\n"), value);
         RadioCode = value;
-        // RFRcvTimer.attach(1.0, RF_Unmask);
+        RFRcvTimer.attach(1.0, RF_Unmask);
       } else {
         Serial.println(F("."));
       }

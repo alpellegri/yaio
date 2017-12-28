@@ -7,7 +7,9 @@
 #include "ee.h"
 #include "sta.h"
 
-#define LED 13 // Led in NodeMCU at pin GPIO16 (D0).
+#define LED 13
+#define LED_OFF LOW
+#define LED_ON HIGH
 
 // AP mode: local access
 static const char *ap_ssid = "uHome-node";
@@ -77,7 +79,7 @@ bool AP_Setup(void) {
 
   ap_task_cnt = 0;
   pinMode(LED, OUTPUT);
-  digitalWrite(LED, true);
+  digitalWrite(LED, LED_ON);
 
   // static ip for AP mode
   IPAddress ip(192, 168, 2, 1);
