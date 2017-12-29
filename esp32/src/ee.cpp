@@ -79,19 +79,19 @@ bool EE_LoadData(void) {
 
   // Test if parsing succeeds.
   if (root.success() == 1) {
-    const char *ssid = root["ssid"];
+    const char *ssid = root[FPSTR("ssid")];
     Serial.print(F("ssid: "));
     Serial.println(ssid);
-    const char *password = root["password"];
+    const char *password = root[FPSTR("password")];
     Serial.print(F("password: "));
     Serial.println(password);
-    const char *uid = root["uid"];
+    const char *uid = root[FPSTR("uid")];
     Serial.print(F("uid: "));
     Serial.println(uid);
-    const char *domain = root["domain"];
+    const char *domain = root[FPSTR("domain")];
     Serial.print(F("domain: "));
     Serial.println(domain);
-    const char *nodename = root["nodename"];
+    const char *nodename = root[FPSTR("nodename")];
     Serial.print(F("nodename: "));
     Serial.println(nodename);
     if ((ssid != NULL) && (password != NULL) && (uid != NULL) &&
