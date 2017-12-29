@@ -29,7 +29,7 @@ typedef enum {
 
 static HTTPClient http;
 
-static const uint16_t block_size = 16384;
+static const uint16_t block_size = 8*1500;
 static uint16_t block;
 static uint16_t num_blocks;
 

@@ -41,7 +41,6 @@ class MyDrawer extends StatefulWidget {
 class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
-    print(getFirebaseUser().photoUrl);
     return new Drawer(
       child: new ListView(children: <Widget>[
         new UserAccountsDrawerHeader(
