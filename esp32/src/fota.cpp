@@ -15,9 +15,6 @@
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
 
-static const char storage_fingerprint[] PROGMEM =
-    "C2:95:F5:7C:8F:23:0A:10:30:86:66:80:7E:83:80:48:E5:B0:06:FF";
-
 static const char file_name[] PROGMEM = "firmware.bin";
 static const char md5file_name[] PROGMEM = "firmware.md5";
 
@@ -32,7 +29,7 @@ typedef enum {
 
 static HTTPClient http;
 
-static const uint16_t block_size = 4096;
+static const uint16_t block_size = 16384;
 static uint16_t block;
 static uint16_t num_blocks;
 

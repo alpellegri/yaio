@@ -9,6 +9,7 @@ import 'logical_io.dart';
 import 'functions.dart';
 import 'log_history.dart';
 import 'chart_history.dart';
+import 'firebase_utils.dart';
 
 final MyDrawer drawer = new MyDrawer();
 
@@ -40,11 +41,18 @@ class MyDrawer extends StatefulWidget {
 class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).textTheme.display1;
+    print(getFirebaseUser().photoUrl);
     return new Drawer(
       child: new ListView(children: <Widget>[
-        new DrawerHeader(
-            child: new Center(child: new Text('uHome', style: textStyle))),
+        new UserAccountsDrawerHeader(
+          accountName: new Text(getFirebaseUser().displayName),
+          accountEmail: new Text(getFirebaseUser().email),
+          currentAccountPicture: new CircleAvatar(
+            backgroundImage: new NetworkImage(
+              getFirebaseUser().photoUrl,
+            ),
+          ),
+        ),
         new ListTile(
             leading: new Icon(Icons.home),
             title: new Text('Home'),
