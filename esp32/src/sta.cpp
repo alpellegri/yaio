@@ -56,7 +56,6 @@ bool STA_Setup(void) {
   }
   Serial.println();
 
-  FbconfInit();
   preferences.begin("my-app", false);
 
   if (WiFi.status() == WL_CONNECTED) {
@@ -65,6 +64,7 @@ bool STA_Setup(void) {
 
     uint32_t req = preferences.getUInt("fota-req", 2);
     if (req == 0) {
+      FbconfInit();
       fota_mode = false;
     } else if (req == 1) {
       fota_mode = true;

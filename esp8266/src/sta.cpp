@@ -58,21 +58,19 @@ bool STA_Setup(void) {
   }
   Serial.println();
 
-  FbconfInit();
-
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print(F("connected: "));
     Serial.println(WiFi.localIP());
 
     SPIFFS.begin();
-    File f = SPIFFS.open("/fota.req", "r+");
+    File f = SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("r+")).c_str());
     if (!f) {
       FbconfInit();
       fota_mode = false;
     } else {
       fota_mode = true;
       Serial.println(F("file open "));
-      SPIFFS.remove("/fota.req");
+      SPIFFS.remove(String(FPSTR("/fota.req")).c_str());
       FOTA_UpdateReq();
     }
   } else {
@@ -89,7 +87,7 @@ bool STA_Setup(void) {
 }
 
 void STA_FotaReq(void) {
-  SPIFFS.open("/fota.req", "w");
+  SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("w")).c_str());
   delay(500);
   ESP.restart();
 }

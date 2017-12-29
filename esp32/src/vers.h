@@ -4,6 +4,6 @@
 extern const char *VERS_getVersion(void);
 
 #define VERS_HW_VER "ESP32"
-#define VERS_SW_VER "0.1.0.2"
+#define VERS_SW_VER "0.1.0.3"
 
 #endif
