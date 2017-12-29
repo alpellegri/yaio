@@ -12,8 +12,8 @@
 #define LED_ON HIGH
 
 // AP mode: local access
-static const char *ap_ssid = "uHome-node";
-static const char *ap_password = "123456789";
+static const char ap_ssid[] PROGMEM = "uHome-node";
+static const char ap_password[] PROGMEM = "123456789";
 
 static uint16_t ap_task_cnt;
 static bool enable_WiFi_Scan = false;
@@ -22,9 +22,6 @@ static uint16_t ap_button = 0x55;
 // create sebsocket server
 static WebSocketsServer webSocket = WebSocketsServer(80);
 static uint8_t port_id;
-
-// #define PSTR(x) (x)
-// #define printf_P printf
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t lenght) {
@@ -99,7 +96,7 @@ bool AP_Setup(void) {
     WiFi.mode(WIFI_AP_STA);
 
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
-    WiFi.softAP(ap_ssid, ap_password);
+    WiFi.softAP(String(FPSTR(ap_ssid)).c_str(), String(FPSTR(ap_password)).c_str());
 
     IPAddress myIP = WiFi.softAPIP();
     Serial.println(F("AP mode enabled"));

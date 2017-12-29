@@ -5,7 +5,6 @@
 
 #include "ap.h"
 #include "ee.h"
-#include "rf.h"
 #include "sta.h"
 #include "vers.h"
 

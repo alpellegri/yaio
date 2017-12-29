@@ -15,6 +15,8 @@
 #include "timesrv.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
+#define LED_OFF HIGH
+#define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 static uint8_t sta_button = 0x55;
@@ -25,7 +27,7 @@ bool STA_Setup(void) {
   bool sts = true;
   int cnt;
 
-  digitalWrite(LED, true);
+  digitalWrite(LED, LED_OFF);
 
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);

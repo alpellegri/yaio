@@ -17,13 +17,14 @@ static String ee_domain;
 static String ee_nodename;
 
 // do not include 'https://'
-String ee_fb_url = "uhome-9b8a1.firebaseio.com";
-String ee_fb_secret = "HFfNAKvCGiLhSGwhy1aNTnj1QK6k5lZJukAaKprz";
-String ee_fb_cloud_messaging_server_key =
+static const char ee_fb_url[] PROGMEM = "uhome-9b8a1.firebaseio.com";
+static const char ee_fb_secret[] PROGMEM =
+    "HFfNAKvCGiLhSGwhy1aNTnj1QK6k5lZJukAaKprz";
+static const char ee_fb_cloud_messaging_server_key[] PROGMEM =
     "AAAAfnPi7d8:APA91bED_durAs8Hn4oyKvaDWQihT_vgRYGKk_Y_"
     "oUkwEpqnctgXUTsnLsiHm241L3RRY9UxcXiHNF3QxBavFmrasx5RjJOk13oETI82c8Awji2ydV"
     "jjruTiZ9Um6Ue72JErI0kwy-Nu";
-String ee_fb_storage_bucket = "uhome-9b8a1.appspot.com";
+static const char ee_fb_storage_bucket[] PROGMEM = "uhome-9b8a1.appspot.com";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 
@@ -32,10 +33,12 @@ String EE_GetPassword() { return ee_password; }
 String EE_GetUID() { return ee_uid; }
 String EE_GetDomain() { return ee_domain; }
 String EE_GetNodeName() { return ee_nodename; }
-String EE_GetFirebaseUrl() { return ee_fb_url; }
-String EE_GetFirebaseSecret() { return ee_fb_secret; }
-String EE_GetFirebaseServerKey() { return ee_fb_cloud_messaging_server_key; }
-String EE_GetFirebaseStorageBucket() { return ee_fb_storage_bucket; }
+String EE_GetFirebaseUrl() { return FPSTR(ee_fb_url); }
+String EE_GetFirebaseSecret() { return FPSTR(ee_fb_secret); }
+String EE_GetFirebaseServerKey() {
+  return FPSTR(ee_fb_cloud_messaging_server_key);
+}
+String EE_GetFirebaseStorageBucket() { return FPSTR(ee_fb_storage_bucket); }
 
 void EE_EraseData() {
   int i;

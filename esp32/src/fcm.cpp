@@ -17,7 +17,7 @@ typedef enum {
   Fcm_Sm_CLOSE,
 } Fbm_StateMachine_t;
 
-static const char FcmServer[25] = "fcm.googleapis.com";
+static const char FcmServer[] PROGMEM = "fcm.googleapis.com";
 
 static WiFiClient fcm_client;
 static uint16_t fcm_sts = Fcm_Sm_IDLE;
@@ -48,8 +48,8 @@ void FcmSendPush(String &message) {
 
 static String FcmPostMsg(void) {
   int i;
-  String fcm_host = String(FcmServer);
-  String fcm_server_key = String(EE_GetFirebaseServerKey());
+  String fcm_host = String(FPSTR(FcmServer));
+  String fcm_server_key = EE_GetFirebaseServerKey();
 
   //  DATA='{
   //  "notification": {
@@ -69,43 +69,42 @@ static String FcmPostMsg(void) {
   //  key=<FCM SERVER KEY>"
 
   /* json data: the notification message multiple devices */
-  String json = "";
-  json += "{";
-  json += "\"notification\":{";
-  json += "\"title\":\"ESP8266 Alert\",";
-  json += "\"body\":\"";
+  String json;
+  json = F("{");
+  json += F("\"notification\":{");
+  json += F("\"title\":\"ESP8266 Alert\",");
+  json += F("\"body\":\"");
   json += FcmMessage;
-  json += "\",";
-  json += "\"sound\":\"default\"";
-  json += "},";
+  json += F("\",");
+  json += F("\"sound\":\"default\"");
+  json += F("},");
 
-  json += "\"data\":{";
-  json += "\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",";
-  json += "\"id\":\"1\",";
-  json += "\"status\":\"done\",";
-  json += "},";
+  json += F("\"data\":{");
+  json += F("\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",");
+  json += F("\"id\":\"1\",");
+  json += F("\"status\":\"done\",");
+  json += F("},");
 
-  json += "\"registration_ids\":[";
+  json += F("\"registration_ids\":[");
   for (i = 0; i < RegIDsLen - 1; i++) {
-    json += "\"" + RegIDs[i] + "\",";
+    json += String(F("\"")) + RegIDs[i] + F("\",");
   }
-  json += "\"" + RegIDs[i] + "\"";
-  json += "]";
-  json += "}";
+  json += String(F("\"")) + RegIDs[i] + F("\"");
+  json += F("]}");
 
   // http post message
-  String http = "";
-  http += "POST /fcm/send HTTP/1.1\r\n";
-  http += "Host: " + fcm_host + "\r\n";
-  http += "Accept: */";
-  http += "*\r\n";
-  http += "Content-Type:application/json\r\n";
-  http += "Authorization:key=" + fcm_server_key + "\r\n";
-  http += "Content-Length: ";
+  String http;
+  http = F("POST /fcm/send HTTP/1.1\r\n");
+  http += String(F("Host: ")) + fcm_host + F("\r\n");
+  http += F("Accept: */");
+  http += F("*\r\n");
+  http += F("Content-Type:application/json\r\n");
+  http += "Authorization:key=" + fcm_server_key + F("\r\n");
+  http += F("Content-Length: ");
   http += String(json.length());
-  http += "\r\n\r\n";
+  http += F("\r\n\r\n");
   http += json;
-  http += "\r\n\r\n";
+  http += F("\r\n\r\n");
 
   return http;
 }
@@ -115,7 +114,7 @@ void FcmService(void) {
 
   switch (fcm_sts) {
   case Fcm_Sm_CONNECT: {
-    uint32_t retVal = fcm_client.connect(FcmServer, 80);
+    uint32_t retVal = fcm_client.connect(String(FPSTR(FcmServer)).c_str(), 80);
     if (retVal == 1) {
       Serial.println(F("fcm connect Connected with server!"));
       fcm_sts = Fcm_Sm_SEND;

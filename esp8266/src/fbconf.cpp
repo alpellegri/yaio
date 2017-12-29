@@ -9,25 +9,34 @@
 #include "fcm.h"
 #include "rf.h"
 
-String kstartup = "startup";
-String kcontrol = "control";
-String kstatus = "status";
-String kfunctions = "Functions";
-String kmessaging = "FCM_Registration_IDs";
-String kgraph = "graph";
-String klogs = "logs";
+static const char _kstartup[] PROGMEM = "startup";
+static const char _kcontrol[] PROGMEM = "control";
+static const char _kstatus[] PROGMEM = "status";
+static const char _kfunctions[] PROGMEM = "Functions";
+static const char _kmessaging[] PROGMEM = "FCM_Registration_IDs";
+static const char _kgraph[] PROGMEM = "graph";
+static const char _klogs[] PROGMEM = "logs";
+
+String kstartup;
+String kcontrol;
+String kstatus;
+String kfunctions;
+String kmessaging;
+String kgraph;
+String klogs;
 
 void FbconfInit(void) {
-  String prefix = "users/" + EE_GetUID() + "/root/" + EE_GetDomain() + "/" +
-                  EE_GetNodeName() + "/";
+  String prefix = String(F("users/")) + EE_GetUID() + String(F("/root/")) +
+                  EE_GetDomain() + String(F("/")) + EE_GetNodeName() +
+                  String(F("/"));
 
-  kstartup = prefix + kstartup;
-  kcontrol = prefix + kcontrol;
-  kstatus = prefix + kstatus;
-  kfunctions = prefix + kfunctions;
-  kmessaging = prefix + kmessaging;
-  kgraph = prefix + kgraph;
-  klogs = prefix + klogs;
+  kstartup = prefix + String(FPSTR(_kstartup));
+  kcontrol = prefix + String(FPSTR(_kcontrol));
+  kstatus = prefix + String(FPSTR(_kstatus));
+  kfunctions = prefix + String(FPSTR(_kfunctions));
+  kmessaging = prefix + String(FPSTR(_kmessaging));
+  kgraph = prefix + String(FPSTR(_kgraph));
+  klogs = prefix + String(FPSTR(_klogs));
   Serial.println(kstartup);
   Serial.println(kcontrol);
   Serial.println(kstatus);
