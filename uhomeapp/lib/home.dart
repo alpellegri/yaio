@@ -23,6 +23,7 @@ class _HomeState extends State<Home> {
   DatabaseReference _statusRef;
   DatabaseReference _startupRef;
   DatabaseReference _fcmRef;
+  int _controlTimeoutCnt;
 
   StreamSubscription<Event> _controlSub;
   StreamSubscription<Event> _statusSub;
@@ -41,6 +42,7 @@ class _HomeState extends State<Home> {
     print('_MyHomePageState');
     String token = getFbToken();
 
+    _controlTimeoutCnt = 0;
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
     _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
     _startupRef = FirebaseDatabase.instance.reference().child(getStartupRef());
@@ -103,12 +105,14 @@ class _HomeState extends State<Home> {
           alarmButton = "DEACTIVATE";
         } else {
           alarmButton = "DISARMING";
+          _nodeUpdate(kNodeIdle);
         }
       } else {
         if (_control["alarm"] == false) {
           alarmButton = "ACTIVATE";
         } else {
           alarmButton = "ARMING";
+          _nodeUpdate(kNodeIdle);
         }
       }
       DateTime current = new DateTime.now();
@@ -291,7 +295,7 @@ class _HomeState extends State<Home> {
     // update control time to keep up node
     DateTime now = new DateTime.now();
     setState(() {
-      if (_control != null) {
+      if ((_control != null) && (_controlTimeoutCnt++ < 10)) {
         _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
         _controlRef.set(_control);
       }
@@ -306,6 +310,7 @@ class _HomeState extends State<Home> {
   }
 
   void _nodeUpdate(int value) {
+    _controlTimeoutCnt = 0;
     _control['reboot'] = value;
     _controlRef.set(_control);
     DateTime now = new DateTime.now();

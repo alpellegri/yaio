@@ -9,6 +9,7 @@ const String kTHRef = 'logs/TH';
 
 const String kWsUri = 'ws://192.168.2.1';
 
+const int kNodeIdle = 0;
 const int kNodeReboot = 1;
 const int kNodeFlash = 2;
 const int kNodeUpdate = 3;
