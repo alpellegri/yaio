@@ -10,7 +10,7 @@ uint32_t getTime(void) {
   return (uint32_t)now;
 }
 
-void TimeSetup(void) { configTime(0, 0, "pool.ntp.org"); }
+void TimeSetup(void) { configTime(0, 0, "pool.ntp.org", "time.nist.gov"); }
 
 bool TimeService(void) {
   if (time_init == false) {
