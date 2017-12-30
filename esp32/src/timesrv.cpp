@@ -1,14 +1,12 @@
 #include <string.h>
-#include <sys/time.h> // struct timeval
 #include <time.h>
 
 #include "timesrv.h"
 
-time_t now;
 bool time_init = false;
 
 uint32_t getTime(void) {
-  now = time(nullptr);
+  time_t now = time(nullptr);
   return (uint32_t)now;
 }
 
@@ -16,11 +14,12 @@ void TimeSetup(void) { configTime(0, 0, "pool.ntp.org"); }
 
 bool TimeService(void) {
   if (time_init == false) {
-    uint32_t current = getTime();
-    if (current == 0) {
+    struct tm timeinfo;
+    time_init = getLocalTime(&timeinfo, 0);
+    if (time_init == false) {
       Serial.println(F("wait for NTP..."));
     } else {
-      time_init = true;
+      uint32_t current = getTime();
       Serial.print(F("UTC time: "));
       Serial.println(current);
     }

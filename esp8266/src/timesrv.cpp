@@ -4,11 +4,10 @@
 
 #include "timesrv.h"
 
-time_t now;
 bool time_init = false;
 
 uint32_t getTime(void) {
-  now = time(nullptr);
+  time_t now = time(nullptr);
   return (uint32_t)now;
 }
 

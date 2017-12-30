@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -17,13 +18,15 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
+  DatabaseReference _entryRef;
+  StreamSubscription<Event> _onAddSubscription;
+  Map<String, dynamic> entryMap;
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
   final TextEditingController _ctrlDomain = new TextEditingController();
   final TextEditingController _ctrlNodeName = new TextEditingController();
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   bool _connected = false;
-  DatabaseReference ref;
 
   _SetupState() {}
 
@@ -62,7 +65,9 @@ class _SetupState extends State<Setup> {
         });
 
         loadPreferences().then((map) {
-          ref = FirebaseDatabase.instance.reference().child(getRootRef());
+          print(getRootRef());
+          // _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
+          // _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
 
           if (map != null) {
             setState(() {
@@ -78,7 +83,10 @@ class _SetupState extends State<Setup> {
   }
 
   @override
-  void dispose() {}
+  void dispose() {
+    super.dispose();
+    _onAddSubscription.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,21 +124,20 @@ class _SetupState extends State<Setup> {
                 ),
                 new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
-                      new FlatButton(
-                        child: new Text('SET'),
-                        onPressed: _changePreferences,
-                      ),
-                      new FlatButton(
-                        child: new Text('RESET'),
-                        onPressed: _resetPreferences,
-                      ),
-                      new FlatButton(
-                        child: new Text('CONFIGURE'),
-                        onPressed: () {
-                          Navigator.of(context)
-                            ..pushNamed(NodeSetup.routeName);
-                        },
-                      ),
+                  new FlatButton(
+                    child: new Text('SET'),
+                    onPressed: _changePreferences,
+                  ),
+                  new FlatButton(
+                    child: new Text('RESET'),
+                    onPressed: _resetPreferences,
+                  ),
+                  new FlatButton(
+                    child: new Text('CONFIGURE'),
+                    onPressed: () {
+                      Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                    },
+                  ),
                 ])),
               ],
             ),
@@ -147,6 +154,19 @@ class _SetupState extends State<Setup> {
 
   void _onFloatingActionButtonPressed() {
     print('_onFloatingActionButtonPressed');
+  }
+
+  void _onEntryAdded(Event event) {
+    print('_onEntryAdded');
+    print(event.snapshot);
+    Map<String, dynamic> map = {event.snapshot.key: event.snapshot.value};
+    print(map);
+    print(event.snapshot.key);
+    print(event.snapshot.value);
+    // entryMap.putIfAbsent(event.snapshot.key, JSON.decode(event.snapshot.value));
+    setState(() {
+      // entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
+    });
   }
 
   void _changePreferences() {
