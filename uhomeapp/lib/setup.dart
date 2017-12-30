@@ -20,9 +20,7 @@ class Setup extends StatefulWidget {
 class _SetupState extends State<Setup> {
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
-  Map<String, dynamic> entryMap;
-  final TextEditingController _ctrlSSID = new TextEditingController();
-  final TextEditingController _ctrlPassword = new TextEditingController();
+  Map<String, List<String>> entryMap = new Map<String, List<String>>();
   final TextEditingController _ctrlDomain = new TextEditingController();
   final TextEditingController _ctrlNodeName = new TextEditingController();
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
@@ -66,16 +64,25 @@ class _SetupState extends State<Setup> {
 
         loadPreferences().then((map) {
           print(getRootRef());
-          // _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
-          // _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-
+          _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
+          _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
           if (map != null) {
             setState(() {
               _ctrlDomain.text = map['domain'];
-              _ctrlSSID.text = map['ssid'];
-              _ctrlPassword.text = map['password'];
               _ctrlNodeName.text = map['nodename'];
             });
+            /*
+            _entryRef.once().then((v) {
+              v.value.forEach((k, v) {
+                List<String> l = new List<String>();
+                print(k);
+                v.forEach((k, v) {
+                  print(k);
+                  l.add(k);
+                });
+                entryMap.putIfAbsent(k, () => l);
+              });
+            });*/
           }
         });
       });
@@ -158,14 +165,14 @@ class _SetupState extends State<Setup> {
 
   void _onEntryAdded(Event event) {
     print('_onEntryAdded');
-    print(event.snapshot);
-    Map<String, dynamic> map = {event.snapshot.key: event.snapshot.value};
-    print(map);
-    print(event.snapshot.key);
-    print(event.snapshot.value);
-    // entryMap.putIfAbsent(event.snapshot.key, JSON.decode(event.snapshot.value));
+
+    List<String> l = new List<String>();
+    event.snapshot.value.forEach((k, v) {
+      l.add(k);
+    });
+
     setState(() {
-      // entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
+      entryMap.putIfAbsent(event.snapshot.key, () => l);
     });
   }
 
