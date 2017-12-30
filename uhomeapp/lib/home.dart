@@ -40,7 +40,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     print('_MyHomePageState');
-    String token = getFbToken();
 
     _controlTimeoutCnt = 0;
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
@@ -54,6 +53,7 @@ class _HomeState extends State<Home> {
       print("once: ${onValue.value}");
       Map map = onValue.value;
       bool tokenFound = false;
+      String token = getFbToken();
       if (map != null) {
         map.forEach((key, value) {
           if (value == token) {
@@ -86,11 +86,6 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     String alarmButton;
     if (_connected == false) {
-      if ((_control != null) && (_status != null) && (_startup != null)) {
-        setState(() {
-          _connected = true;
-        });
-      }
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
@@ -285,13 +280,19 @@ class _HomeState extends State<Home> {
     }
   }
 
+  bool checkConnected(){
+    return ((_control != null) && (_status != null) && (_startup != null));
+  }
   void _onValueControl(Event event) {
+    print('_onValueControl');
     setState(() {
       _control = event.snapshot.value;
+      _connected = checkConnected();
     });
   }
 
   void _onValueStatus(Event event) {
+    print('_onValueStatus');
     // update control time to keep up node
     DateTime now = new DateTime.now();
     setState(() {
@@ -300,12 +301,15 @@ class _HomeState extends State<Home> {
         _controlRef.set(_control);
       }
       _status = event.snapshot.value;
+      _connected = checkConnected();
     });
   }
 
   void _onValueStartup(Event event) {
+    print('_onValueStartup');
     setState(() {
       _startup = event.snapshot.value;
+      _connected = checkConnected();
     });
   }
 
