@@ -251,9 +251,9 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   List<DemoItem<dynamic>> _demoItems;
   Map<String, dynamic> entryMap = new Map<String, dynamic>();
   bool _isPreferencesReady = false;
-  String _ctrlDomain = '';
+  String _ctrlDomainName = '';
   String _ctrlNodeName = '';
-  bool _isNeedCreate = false;
+  bool _isNeedCreate = true;
 
   @override
   void initState() {
@@ -267,16 +267,16 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       print(getRootRef());
       _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
       _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-      if (map != null) {
+      if (map.isNotEmpty) {
         setState(() {
-          _ctrlDomain = map['domain'];
+          _ctrlDomainName = map['domain'];
           _ctrlNodeName = map['nodename'];
         });
       }
       _demoItems = <DemoItem<dynamic>>[
         new DemoItem<String>(
             name: 'Domain',
-            value: _ctrlDomain,
+            value: _ctrlDomainName,
             hint: 'Select domain',
             valueToString: (String location) => location,
             builder: (DemoItem<String> item) {
@@ -298,7 +298,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 return new CollapsibleBody(
                   onSave: () {
                     Form.of(context).save();
-                    _ctrlDomain = item.value;
+                    _ctrlDomainName = item.value;
                     close();
                   },
                   onCancel: () {
@@ -448,19 +448,21 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         new ListTile(
           leading: const Icon(Icons.developer_board),
           title: const Text('Domain/Node'),
-          subtitle: new Text('$_ctrlDomain/$_ctrlNodeName'),
-          trailing: new ButtonTheme.bar(
-            child: new ButtonBar(
-              children: <Widget>[
-                new FlatButton(
-                  child: const Text('CONFIGURE'),
-                  onPressed: () {
-                    Navigator.of(context)..pushNamed(NodeSetup.routeName);
-                  },
-                ),
-              ],
-            ),
-          ),
+          subtitle: new Text('$_ctrlDomainName/$_ctrlNodeName'),
+          trailing: (_isNeedCreate == false)
+              ? (const Text('Need configuration'))
+              : (new ButtonTheme.bar(
+                  child: new ButtonBar(
+                    children: <Widget>[
+                      new FlatButton(
+                        child: const Text('CONFIGURE'),
+                        onPressed: () {
+                          Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                        },
+                      ),
+                    ],
+                  ),
+                )),
         ),
       ]);
     }
@@ -490,7 +492,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
   void _changePreferences() {
     print('_savePreferences');
-    savePreferencesDN(_ctrlDomain, _ctrlNodeName);
+    savePreferencesDN(_ctrlDomainName, _ctrlNodeName);
     if (_isNeedCreate == true) {
       DatabaseReference ref;
       ref = FirebaseDatabase.instance.reference().child(getControlRef());
