@@ -17,14 +17,7 @@ class Setup extends StatefulWidget {
   _SetupState createState() => new _SetupState();
 }
 
-Map<String, dynamic> entryMap = new Map<String, dynamic>();
-
 class _SetupState extends State<Setup> {
-  DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSubscription;
-
-  final TextEditingController _ctrlDomain = new TextEditingController();
-  final TextEditingController _ctrlNodeName = new TextEditingController();
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   bool _connected = false;
 
@@ -63,26 +56,8 @@ class _SetupState extends State<Setup> {
         setState(() {
           _connected = true;
         });
-
-        loadPreferences().then((map) {
-          print(getRootRef());
-          _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
-          _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-          if (map != null) {
-            setState(() {
-              _ctrlDomain.text = map['domain'];
-              _ctrlNodeName.text = map['nodename'];
-            });
-          }
-        });
       });
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _onAddSubscription.cancel();
   }
 
   @override
@@ -93,82 +68,16 @@ class _SetupState extends State<Setup> {
           appBar: new AppBar(
             title: new Text(widget.title),
           ),
-          body: new LinearProgressIndicator(
-            value: null,
-          ));
+          body: new LinearProgressIndicator(value: null));
     } else {
       return new Scaffold(
         drawer: drawer,
         appBar: new AppBar(
           title: new Text(widget.title),
         ),
-        body: new ListView(children: <Widget>[
-          new Card(
-            child: new Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new TextField(
-                  controller: _ctrlDomain,
-                  decoration: new InputDecoration(
-                    hintText: 'Domain',
-                  ),
-                ),
-                new TextField(
-                  controller: _ctrlNodeName,
-                  decoration: new InputDecoration(
-                    hintText: 'Node Name',
-                  ),
-                ),
-                new ButtonTheme.bar(
-                    child: new ButtonBar(children: <Widget>[
-                  new FlatButton(
-                    child: new Text('SET'),
-                    onPressed: _changePreferences,
-                  ),
-                  new FlatButton(
-                    child: new Text('RESET'),
-                    onPressed: _resetPreferences,
-                  ),
-                  new FlatButton(
-                    child: new Text('CONFIGURE'),
-                    onPressed: () {
-                      Navigator.of(context)..pushNamed(NodeSetup.routeName);
-                    },
-                  ),
-                ])),
-              ],
-            ),
-          ),
-        ]),
-        /* body: new ExpasionPanelsDemo(), */
+        body: new ExpasionPanelsDemo(),
       );
     }
-  }
-
-  void _onEntryAdded(Event event) {
-    print('_onEntryAdded');
-
-    setState(() {
-      entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
-    });
-  }
-
-  void _changePreferences() {
-    print('_savePreferences');
-    savePreferencesDN(_ctrlDomain.text, _ctrlNodeName.text);
-  }
-
-  void _resetPreferences() {
-    print('_savePreferences');
-    savePreferencesDN(_ctrlDomain.text, _ctrlNodeName.text);
-
-    DatabaseReference ref;
-    ref = FirebaseDatabase.instance.reference().child(getControlRef());
-    ref.set(getControlDefault());
-    ref = FirebaseDatabase.instance.reference().child(getStartupRef());
-    ref.set(getStartupDefault());
-    ref = FirebaseDatabase.instance.reference().child(getStatusRef());
-    ref.set(getStatusDefault());
   }
 }
 
@@ -251,12 +160,17 @@ class DualHeaderWithHint extends StatelessWidget {
 
 class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody(
-      {this.margin: EdgeInsets.zero, this.child, this.onSave, this.onCancel});
+      {this.margin: EdgeInsets.zero,
+      this.child,
+      this.onSave,
+      this.onCancel,
+      this.onAdd});
 
   final EdgeInsets margin;
   final Widget child;
   final VoidCallback onSave;
   final VoidCallback onCancel;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -272,27 +186,23 @@ class CollapsibleBody extends StatelessWidget {
                   style: textTheme.caption.copyWith(fontSize: 15.0),
                   child: child))),
       const Divider(height: 1.0),
-      new Container(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: new Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                new Container(
-                    margin: const EdgeInsets.only(right: 8.0),
-                    child: new FlatButton(
-                        onPressed: onCancel,
-                        child: const Text('CANCEL',
-                            style: const TextStyle(
-                                color: Colors.black54,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w500)))),
-                new Container(
-                    margin: const EdgeInsets.only(right: 8.0),
-                    child: new FlatButton(
-                        onPressed: onSave,
-                        textTheme: ButtonTextTheme.accent,
-                        child: const Text('SAVE')))
-              ]))
+      new ButtonTheme.bar(
+          child: new ButtonBar(children: <Widget>[
+        new FlatButton(
+            onPressed: onAdd,
+            child: const Text(
+              'ADD',
+            )),
+        new FlatButton(
+            onPressed: onCancel,
+            child: const Text(
+              'CANCEL',
+            )),
+        new FlatButton(
+            onPressed: onSave,
+            // textTheme: ButtonTextTheme.accent,
+            child: const Text('SAVE')),
+      ])),
     ]);
   }
 }
@@ -315,6 +225,7 @@ class DemoItem<T> {
   final ValueToString<T> valueToString;
   T value;
   bool isExpanded = false;
+  bool isModeEdit = false;
 
   ExpansionPanelHeaderBuilder get headerBuilder {
     return (BuildContext context, bool isExpanded) {
@@ -335,127 +246,259 @@ class ExpasionPanelsDemo extends StatefulWidget {
 }
 
 class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
+  DatabaseReference _entryRef;
+  StreamSubscription<Event> _onAddSubscription;
   List<DemoItem<dynamic>> _demoItems;
+  Map<String, dynamic> entryMap = new Map<String, dynamic>();
+  bool _isPreferencesReady = false;
+  String _ctrlDomain = '';
+  String _ctrlNodeName = '';
+  bool _isNeedCreate = false;
 
   @override
   void initState() {
     super.initState();
 
-    _demoItems = <DemoItem<dynamic>>[
-      new DemoItem<String>(
-          name: 'Domain',
-          value: '',
-          hint: 'Select domain',
-          valueToString: (String location) => location,
-          builder: (DemoItem<String> item) {
-            void close() {
-              setState(() {
-                item.isExpanded = false;
-              });
-            }
+    loadPreferences().then((map) {
+      setState(() {
+        _isPreferencesReady = true;
+      });
 
-            return new Form(child: new Builder(builder: (BuildContext context) {
-              return new CollapsibleBody(
-                onSave: () {
-                  Form.of(context).save();
-                  close();
-                },
-                onCancel: () {
-                  Form.of(context).reset();
-                  close();
-                },
-                child: new FormField<String>(
-                    initialValue: item.value,
-                    onSaved: (String result) {
-                      item.value = result;
-                    },
-                    builder: (FormFieldState<String> field) {
-                      // var query = entryMap.keys.toList();
-                      return new ListView.builder(
-                        shrinkWrap: true,
-                        reverse: true,
-                        itemCount: item.query.length,
-                        itemBuilder: (buildContext, index) {
-                          return new InkWell(
-                              child: new ListItem(item.query[index], field));
-                        },
-                      );
-                    }),
-              );
-            }));
-          }),
-      new DemoItem<String>(
-          name: 'Node',
-          value: '',
-          hint: 'Select node',
-          valueToString: (String location) => location,
-          builder: (DemoItem<String> item) {
-            void close() {
-              setState(() {
-                item.isExpanded = false;
-              });
-            }
+      print(getRootRef());
+      _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
+      _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+      if (map != null) {
+        setState(() {
+          _ctrlDomain = map['domain'];
+          _ctrlNodeName = map['nodename'];
+        });
+      }
+      _demoItems = <DemoItem<dynamic>>[
+        new DemoItem<String>(
+            name: 'Domain',
+            value: _ctrlDomain,
+            hint: 'Select domain',
+            valueToString: (String location) => location,
+            builder: (DemoItem<String> item) {
+              void close() {
+                setState(() {
+                  item.isExpanded = false;
+                  item.isModeEdit = false;
+                });
+              }
 
-            return new Form(child: new Builder(builder: (BuildContext context) {
-              return new CollapsibleBody(
-                onSave: () {
-                  Form.of(context).save();
-                  close();
-                },
-                onCancel: () {
-                  Form.of(context).reset();
-                  close();
-                },
-                child: new FormField<String>(
-                    initialValue: item.value,
-                    onSaved: (String result) {
-                      item.value = result;
-                    },
-                    builder: (FormFieldState<String> field) {
-                      return new ListView.builder(
-                        shrinkWrap: true,
-                        reverse: true,
-                        itemCount: item.query.length,
-                        itemBuilder: (buildContext, index) {
-                          return new InkWell(
-                              child: new ListItem(item.query[index], field));
-                        },
-                      );
-                    }),
-              );
-            }));
-          }),
-    ];
+              void add() {
+                setState(() {
+                  item.isModeEdit = true;
+                });
+              }
+
+              return new Form(
+                  child: new Builder(builder: (BuildContext context) {
+                return new CollapsibleBody(
+                  onSave: () {
+                    Form.of(context).save();
+                    _ctrlDomain = item.value;
+                    close();
+                  },
+                  onCancel: () {
+                    Form.of(context).reset();
+                    close();
+                  },
+                  onAdd: () {
+                    add();
+                  },
+                  child: (item.isModeEdit == true)
+                      ? (new TextFormField(
+                          controller: item.textController,
+                          decoration: new InputDecoration(
+                            hintText: item.hint,
+                            labelText: item.name,
+                          ),
+                          onSaved: (String value) {
+                            item.value = value;
+                          },
+                        ))
+                      : (new FormField<String>(
+                          initialValue: item.value,
+                          onSaved: (String result) {
+                            item.value = result;
+                          },
+                          builder: (FormFieldState<String> field) {
+                            // var query = entryMap.keys.toList();
+                            return new ListView.builder(
+                              shrinkWrap: true,
+                              reverse: true,
+                              itemCount: item.query.length,
+                              itemBuilder: (buildContext, index) {
+                                return new InkWell(
+                                    child:
+                                        new ListItem(item.query[index], field));
+                              },
+                            );
+                          })),
+                );
+              }));
+            }),
+        new DemoItem<String>(
+            name: 'Node',
+            value: _ctrlNodeName,
+            hint: 'Select node',
+            valueToString: (String location) => location,
+            builder: (DemoItem<String> item) {
+              void close() {
+                setState(() {
+                  item.isExpanded = false;
+                  item.isModeEdit = false;
+                });
+              }
+
+              void add() {
+                setState(() {
+                  item.isModeEdit = true;
+                });
+              }
+
+              return new Form(
+                  child: new Builder(builder: (BuildContext context) {
+                return new CollapsibleBody(
+                  onSave: () {
+                    Form.of(context).save();
+                    _ctrlNodeName = item.value;
+                    _changePreferences();
+                    close();
+                  },
+                  onCancel: () {
+                    Form.of(context).reset();
+                    close();
+                  },
+                  onAdd: () {
+                    add();
+                  },
+                  child: (item.isModeEdit == true)
+                      ? (new TextFormField(
+                          controller: item.textController,
+                          decoration: new InputDecoration(
+                            hintText: item.hint,
+                            labelText: item.name,
+                          ),
+                          onSaved: (String value) {
+                            item.value = value;
+                          },
+                        ))
+                      : (new FormField<String>(
+                          initialValue: item.value,
+                          onSaved: (String result) {
+                            item.value = result;
+                          },
+                          builder: (FormFieldState<String> field) {
+                            // var query = entryMap.keys.toList();
+                            return new ListView.builder(
+                              shrinkWrap: true,
+                              reverse: true,
+                              itemCount: item.query.length,
+                              itemBuilder: (buildContext, index) {
+                                return new InkWell(
+                                    child:
+                                        new ListItem(item.query[index], field));
+                              },
+                            );
+                          })),
+                );
+              }));
+            }),
+      ];
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    _demoItems[0].query = entryMap.keys.toList();
-    if (_demoItems[0].value != '') {
-      _demoItems[1].query = entryMap[_demoItems[0].value].keys.toList();
-    }
-    return new Scaffold(
-      body: new SingleChildScrollView(
-        child: new SafeArea(
-          top: false,
-          bottom: false,
-          child: new Container(
-            margin: const EdgeInsets.all(24.0),
-            child: new ExpansionPanelList(
-                expansionCallback: (int index, bool isExpanded) {
-                  setState(() {
-                    _demoItems[index].isExpanded = !isExpanded;
-                  });
-                },
-                children: _demoItems.map((DemoItem<dynamic> item) {
-                  return new ExpansionPanel(
-                      isExpanded: item.isExpanded,
-                      headerBuilder: item.headerBuilder,
-                      body: item.builder(item));
-                }).toList()),
+    if (_isPreferencesReady == false) {
+      return new LinearProgressIndicator(value: null);
+    } else {
+      _isNeedCreate = _update();
+      return new Column(children: <Widget>[
+        new SingleChildScrollView(
+          child: new SafeArea(
+            top: false,
+            bottom: false,
+            child: new Container(
+              margin: const EdgeInsets.all(24.0),
+              child: new ExpansionPanelList(
+                  expansionCallback: (int index, bool isExpanded) {
+                    setState(() {
+                      _demoItems[index].isExpanded = !isExpanded;
+                    });
+                  },
+                  children: _demoItems.map((DemoItem<dynamic> item) {
+                    return new ExpansionPanel(
+                        isExpanded: item.isExpanded,
+                        headerBuilder: item.headerBuilder,
+                        body: item.builder(item));
+                  }).toList()),
+            ),
           ),
         ),
-      ),
-    );
+        new ListTile(
+          leading: const Icon(Icons.developer_board),
+          title: const Text('Domain/Node'),
+          subtitle: new Text('$_ctrlDomain/$_ctrlNodeName'),
+          trailing: new ButtonTheme.bar(
+            child: new ButtonBar(
+              children: <Widget>[
+                new FlatButton(
+                  child: const Text('CONFIGURE'),
+                  onPressed: () {
+                    Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]);
+    }
+  }
+
+  bool _update() {
+    bool ret = false;
+    var keyList = entryMap.keys.toList();
+    _demoItems[0].query = keyList;
+    var keyValue = _demoItems[0].value;
+    if (keyList.contains(keyValue)) {
+      keyList = entryMap[keyValue].keys.toList();
+      _demoItems[1].query = keyList;
+      keyValue = _demoItems[1].value;
+      ret = keyList.contains(keyValue);
+    }
+    return ret;
+  }
+
+  void _onEntryAdded(Event event) {
+    print('_onEntryAdded');
+
+    setState(() {
+      entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
+    });
+  }
+
+  void _changePreferences() {
+    print('_savePreferences');
+    savePreferencesDN(_ctrlDomain, _ctrlNodeName);
+    if (_isNeedCreate == true) {
+      DatabaseReference ref;
+      ref = FirebaseDatabase.instance.reference().child(getControlRef());
+      ref.set(getControlDefault());
+      ref = FirebaseDatabase.instance.reference().child(getStartupRef());
+      ref.set(getStartupDefault());
+      ref = FirebaseDatabase.instance.reference().child(getStatusRef());
+      ref.set(getStatusDefault());
+    }
   }
 }
