@@ -120,7 +120,7 @@ class DualHeaderWithHint extends StatelessWidget {
       sizeCurve: Curves.fastOutSlowIn,
       crossFadeState:
           isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -159,12 +159,13 @@ class DualHeaderWithHint extends StatelessWidget {
 }
 
 class CollapsibleBody extends StatelessWidget {
-  const CollapsibleBody(
-      {this.margin: EdgeInsets.zero,
-      this.child,
-      this.onSave,
-      this.onCancel,
-      this.onAdd});
+  const CollapsibleBody({
+    this.margin: EdgeInsets.zero,
+    this.child,
+    this.onSave,
+    this.onCancel,
+    this.onAdd,
+  });
 
   final EdgeInsets margin;
   final Widget child;
@@ -179,7 +180,7 @@ class CollapsibleBody extends StatelessWidget {
 
     return new Column(children: <Widget>[
       new Container(
-          margin: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0) -
+          margin: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 0.0) -
               margin,
           child: new Center(
               child: new DefaultTextStyle(
@@ -446,23 +447,25 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           ),
         ),
         new ListTile(
-          leading: const Icon(Icons.developer_board),
-          title: const Text('Domain/Node'),
-          subtitle: new Text('$_ctrlDomainName/$_ctrlNodeName'),
+          leading: (_isNeedCreate == false)
+              ? (const Icon(Icons.link_off))
+              : (const Icon(Icons.link)),
+          title: const Text('Selected Device'),
+          subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
           trailing: (_isNeedCreate == false)
-              ? (const Text('Need configuration'))
+              ? (const Text(''))
               : (new ButtonTheme.bar(
-                  child: new ButtonBar(
-                    children: <Widget>[
-                      new FlatButton(
-                        child: const Text('CONFIGURE'),
-                        onPressed: () {
-                          Navigator.of(context)..pushNamed(NodeSetup.routeName);
-                        },
-                      ),
-                    ],
-                  ),
-                )),
+            child: new ButtonBar(
+              children: <Widget>[
+                new FlatButton(
+                  child: const Text('CONFIGURE'),
+                  onPressed: () {
+                    Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                  },
+                ),
+              ],
+            ),
+          )),
         ),
       ]);
     }
