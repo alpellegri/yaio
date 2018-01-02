@@ -36,8 +36,8 @@ void FbconfInit(void) {
   kcontrol = prefix_node + String(FPSTR(_kcontrol));
   kstatus = prefix_node + String(FPSTR(_kstatus));
   kfunctions = prefix_node + String(FPSTR(_kfunctions));
-  kgraph = prefix + String(FPSTR(_kgraph));
-  klogs = prefix + String(FPSTR(_klogs));
+  kgraph = prefix_node + String(FPSTR(_kgraph));
+  klogs = prefix_node + String(FPSTR(_klogs));
   Serial.println(kstartup);
   Serial.println(kcontrol);
   Serial.println(kstatus);
