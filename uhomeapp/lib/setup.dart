@@ -131,7 +131,7 @@ class DualHeaderWithHint extends StatelessWidget {
 
     return new Row(children: <Widget>[
       new Expanded(
-        flex: 2,
+        flex: 1,
         child: new Container(
           margin: const EdgeInsets.only(left: 24.0),
           child: new FittedBox(
@@ -145,7 +145,7 @@ class DualHeaderWithHint extends StatelessWidget {
         ),
       ),
       new Expanded(
-          flex: 3,
+          flex: 1,
           child: new Container(
               margin: const EdgeInsets.only(left: 24.0),
               child: _crossFade(
@@ -186,7 +186,7 @@ class CollapsibleBody extends StatelessWidget {
               child: new DefaultTextStyle(
                   style: textTheme.caption.copyWith(fontSize: 15.0),
                   child: child))),
-      const Divider(height: 1.0),
+      //const Divider(height: 1.0),
       new ButtonTheme.bar(
           child: new ButtonBar(children: <Widget>[
         new FlatButton(
