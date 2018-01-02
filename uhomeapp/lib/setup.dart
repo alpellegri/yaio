@@ -420,6 +420,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       setState(() {
         _isNeedCreate = update;
       });
+      print('_isNeedCreate $_isNeedCreate');
       return new ListView(children: <Widget>[
         new SingleChildScrollView(
           child: new SafeArea(
@@ -443,12 +444,12 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           ),
         ),
         new ListTile(
-          leading: (_isNeedCreate == false)
+          leading: (_isNeedCreate == true)
               ? (const Icon(Icons.link_off))
               : (const Icon(Icons.link)),
           title: const Text('Selected Device'),
           subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
-          trailing: (_isNeedCreate == false)
+          trailing: (_isNeedCreate == true)
               ? (const Text(''))
               : (new ButtonTheme.bar(
                   child: new ButtonBar(
@@ -491,6 +492,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
   void _changePreferences() {
     print('_savePreferences');
+    print('_isNeedCreate $_isNeedCreate');
     savePreferencesDN(_ctrlDomainName, _ctrlNodeName);
     if (_isNeedCreate == true) {
       DatabaseReference ref;

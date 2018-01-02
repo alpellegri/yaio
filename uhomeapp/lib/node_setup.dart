@@ -119,6 +119,9 @@ class _NodeSetupState extends State<NodeSetup> {
                         child: new Text('SET'),
                         onPressed: () {
                           savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
+                          setState(() {
+                            _nodeConfigJson = JSON.encode(_prefs);
+                          });
                         },
                       ),
                     ],
