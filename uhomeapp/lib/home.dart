@@ -45,10 +45,10 @@ class _HomeState extends State<Home> {
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
     _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
     _startupRef = FirebaseDatabase.instance.reference().child(getStartupRef());
-    _fcmRef = FirebaseDatabase.instance.reference().child(getTokenIDsRef());
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
+    _fcmRef = FirebaseDatabase.instance.reference().child(getTokenIDsRef());
     _fcmRef.once().then((DataSnapshot onValue) {
       print("once: ${onValue.value}");
       Map map = onValue.value;

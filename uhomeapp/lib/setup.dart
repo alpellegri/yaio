@@ -131,7 +131,6 @@ class DualHeaderWithHint extends StatelessWidget {
 
     return new Row(children: <Widget>[
       new Expanded(
-        flex: 1,
         child: new Container(
           margin: const EdgeInsets.only(left: 24.0),
           child: new FittedBox(
@@ -145,7 +144,6 @@ class DualHeaderWithHint extends StatelessWidget {
         ),
       ),
       new Expanded(
-          flex: 1,
           child: new Container(
               margin: const EdgeInsets.only(left: 24.0),
               child: _crossFade(
@@ -239,7 +237,6 @@ class DemoItem<T> {
 }
 
 class ExpasionPanelsDemo extends StatefulWidget {
-
   @override
   _ExpansionPanelsDemoState createState() => new _ExpansionPanelsDemoState();
 }
@@ -419,7 +416,10 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     if (_isPreferencesReady == false) {
       return new LinearProgressIndicator(value: null);
     } else {
-      _isNeedCreate = _update();
+      var update = _update();
+      setState(() {
+        _isNeedCreate = update;
+      });
       return new ListView(children: <Widget>[
         new SingleChildScrollView(
           child: new SafeArea(
@@ -451,24 +451,24 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           trailing: (_isNeedCreate == false)
               ? (const Text(''))
               : (new ButtonTheme.bar(
-            child: new ButtonBar(
-              children: <Widget>[
-                new FlatButton(
-                  child: const Text('CONFIGURE'),
-                  onPressed: () {
-                    Navigator.of(context)..pushNamed(NodeSetup.routeName);
-                  },
-                ),
-              ],
-            ),
-          )),
+                  child: new ButtonBar(
+                    children: <Widget>[
+                      new FlatButton(
+                        child: const Text('CONFIGURE'),
+                        onPressed: () {
+                          Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                        },
+                      ),
+                    ],
+                  ),
+                )),
         ),
       ]);
     }
   }
 
   bool _update() {
-    bool ret = false;
+    bool ret = true;
     var keyList = entryMap.keys.toList();
     _demoItems[0].query = keyList;
     var keyValue = _demoItems[0].value;
@@ -476,7 +476,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       keyList = entryMap[keyValue].keys.toList();
       _demoItems[1].query = keyList;
       keyValue = _demoItems[1].value;
-      ret = keyList.contains(keyValue);
+      ret = !keyList.contains(keyValue);
     }
     return ret;
   }
