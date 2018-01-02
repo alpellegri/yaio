@@ -4,6 +4,6 @@
 extern const char *VERS_getVersion(void);
 
 #define VERS_HW_VER "ESP8266"
-#define VERS_SW_VER "0.2.0.8"
+#define VERS_SW_VER "0.2.1.0"
 
 #endif

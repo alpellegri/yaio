@@ -22,7 +22,6 @@ class _HomeState extends State<Home> {
   DatabaseReference _controlRef;
   DatabaseReference _statusRef;
   DatabaseReference _startupRef;
-  DatabaseReference _fcmRef;
   int _controlTimeoutCnt;
 
   StreamSubscription<Event> _controlSub;
@@ -30,7 +29,6 @@ class _HomeState extends State<Home> {
   StreamSubscription<Event> _startupSub;
 
   bool _connected = false;
-  bool _nodeNeedUpdate = false;
 
   Map<String, Object> _control;
   Map<String, Object> _status;
@@ -48,33 +46,6 @@ class _HomeState extends State<Home> {
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
-
-    /*
-    _fcmRef = FirebaseDatabase.instance.reference().child(getFcmTokenRef());
-    _fcmRef.once().then((DataSnapshot onValue) {
-      print("once: ${onValue.value}");
-      Map map = onValue.value;
-      bool tokenFound = false;
-      String token = getFbToken();
-      if (map != null) {
-        map.forEach((key, value) {
-          if (value == token) {
-            print("key test: $key");
-            tokenFound = true;
-          }
-        });
-      }
-      if (tokenFound == false) {
-        _nodeNeedUpdate = true;
-        _fcmRef.push().set(token);
-        print("token saved: $token");
-      }
-
-      // at the end, not before
-      FirebaseDatabase.instance.setPersistenceEnabled(true);
-      FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
-    });
-    */
   }
 
   @override
@@ -118,11 +89,6 @@ class _HomeState extends State<Home> {
           int.parse(_startup['time'].toString()) * 1000);
       DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_status['time'].toString()) * 1000);
-      // if FCM token regid was not present require a node update
-      // if (_nodeNeedUpdate == true) {
-      //   _nodeNeedUpdate = false;
-      //   _nodeUpdate(kNodeUpdate);
-      // }
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
@@ -283,9 +249,10 @@ class _HomeState extends State<Home> {
     }
   }
 
-  bool checkConnected(){
+  bool checkConnected() {
     return ((_control != null) && (_status != null) && (_startup != null));
   }
+
   void _onValueControl(Event event) {
     print('_onValueControl');
     setState(() {
