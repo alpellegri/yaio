@@ -14,11 +14,12 @@ Map _nodeConfigMap = new Map();
 SharedPreferences _prefs;
 String _nodeConfigJson;
 
+String dUserRef;
 String dRootRef;
 String dControlRef;
 String dStatusRef;
 String dStartupRef;
-String dTokenIDsRef;
+String dFcmTokenRef;
 String dFunctionsRef;
 String dGraphRef;
 String dLogsReportsRef;
@@ -47,30 +48,37 @@ Future<String> signInWithGoogle() async {
   return 'signInWithGoogle succeeded: $user';
 }
 
-Future<Map> loadPreferences() async {
-  dRootRef = 'users/' + getFirebaseUser().uid + '/root';
+void updateUserRef() {
+  dUserRef = 'users/' + getFirebaseUser().uid;
+  dRootRef = dUserRef + '/root';
+}
 
+void updateNodeRef(Map config) {
+  print(config);
+  String prefix =
+      dRootRef + '/' + config['domain'] + '/' + config['nodename'] + '/';
+
+  dFcmTokenRef = prefix + kFcmTokenRef;
+  dControlRef = prefix + kControlRef;
+  dStatusRef = prefix + kStatusRef;
+  dStartupRef = prefix + kStartupRef;
+  dFunctionsRef = prefix + kFunctionsRef;
+  dGraphRef = prefix + kGraphRef;
+  dLogsReportsRef = prefix + kLogsReportsRef;
+  dTHRef = prefix + kTHRef;
+}
+
+Future<Map> loadPreferences() async {
   _prefs = await SharedPreferences.getInstance();
   _nodeConfigJson = _prefs.getString('node_config_json');
 
+  updateUserRef();
   if (_nodeConfigJson != null) {
+    print(_nodeConfigJson);
     _nodeConfigMap = JSON.decode(_nodeConfigJson);
-    print(_nodeConfigMap);
-    String prefix = dRootRef +
-        '/' +
-        _nodeConfigMap['domain'] +
-        '/' +
-        _nodeConfigMap['nodename'] +
-        '/';
-    dControlRef = prefix + kControlRef;
-    dStatusRef = prefix + kStatusRef;
-    dStartupRef = prefix + kStartupRef;
-    dTokenIDsRef = prefix + kTokenIDsRef;
-    dFunctionsRef = prefix + kFunctionsRef;
-    dGraphRef = prefix + kGraphRef;
-    dLogsReportsRef = prefix + kLogsReportsRef;
-    dTHRef = prefix + kTHRef;
+    // override
     _nodeConfigMap['uid'] = getFirebaseUser().uid;
+    updateNodeRef(_nodeConfigMap);
   }
 
   return _nodeConfigMap;
@@ -81,64 +89,37 @@ Map getPreferences() {
 }
 
 void savePreferencesDN(String domain, String node) {
+  // override previous
   _nodeConfigMap['domain'] = domain;
   _nodeConfigMap['nodename'] = node;
   _nodeConfigMap['uid'] = getFirebaseUser().uid;
 
+  // update firebase references
+  updateNodeRef(_nodeConfigMap);
+
   _nodeConfigJson = JSON.encode(_nodeConfigMap);
-  if (_nodeConfigJson != null) {
-    _nodeConfigMap = JSON.decode(_nodeConfigJson);
-    print(_nodeConfigMap);
-    String prefix = dRootRef +
-        '/' +
-        _nodeConfigMap['domain'] +
-        '/' +
-        _nodeConfigMap['nodename'] +
-        '/';
-    dControlRef = prefix + kControlRef;
-    dStatusRef = prefix + kStatusRef;
-    dStartupRef = prefix + kStartupRef;
-    dTokenIDsRef = prefix + kTokenIDsRef;
-    dFunctionsRef = prefix + kFunctionsRef;
-    dGraphRef = prefix + kGraphRef;
-    dLogsReportsRef = prefix + kLogsReportsRef;
-    dTHRef = prefix + kTHRef;
-    _nodeConfigMap['uid'] = getFirebaseUser().uid;
-  }
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
 void savePreferencesSP(String ssid, String password) {
+  // override previous
   _nodeConfigMap['ssid'] = ssid;
   _nodeConfigMap['password'] = password;
+  _nodeConfigMap['uid'] = getFirebaseUser().uid;
+
+  // update firebase references
+  updateNodeRef(_nodeConfigMap);
 
   _nodeConfigJson = JSON.encode(_nodeConfigMap);
-  if (_nodeConfigJson != null) {
-    _nodeConfigMap = JSON.decode(_nodeConfigJson);
-    print(_nodeConfigMap);
-    String prefix = dRootRef +
-        '/' +
-        _nodeConfigMap['domain'] +
-        '/' +
-        _nodeConfigMap['nodename'] +
-        '/';
-    dControlRef = prefix + kControlRef;
-    dStatusRef = prefix + kStatusRef;
-    dStartupRef = prefix + kStartupRef;
-    dTokenIDsRef = prefix + kTokenIDsRef;
-    dFunctionsRef = prefix + kFunctionsRef;
-    dGraphRef = prefix + kGraphRef;
-    dLogsReportsRef = prefix + kLogsReportsRef;
-    dTHRef = prefix + kTHRef;
-    _nodeConfigMap['uid'] = getFirebaseUser().uid;
-  }
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
 String _token;
+
 String getFbToken() {
   return _token;
 }
+
 void setFbToken(String token) {
   _token = token;
 }
@@ -159,8 +140,8 @@ String getStartupRef() {
   return dStartupRef;
 }
 
-String getTokenIDsRef() {
-  return dTokenIDsRef;
+String getFcmTokenRef() {
+  return dFcmTokenRef;
 }
 
 String getFunctionsRef() {

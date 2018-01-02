@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
-    _fcmRef = FirebaseDatabase.instance.reference().child(getTokenIDsRef());
+    _fcmRef = FirebaseDatabase.instance.reference().child(getFcmTokenRef());
     _fcmRef.once().then((DataSnapshot onValue) {
       print("once: ${onValue.value}");
       Map map = onValue.value;
