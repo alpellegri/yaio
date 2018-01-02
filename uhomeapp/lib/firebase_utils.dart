@@ -49,16 +49,16 @@ Future<String> signInWithGoogle() async {
 }
 
 void updateUserRef() {
-  dUserRef = 'users/' + getFirebaseUser().uid;
-  dRootRef = dUserRef + '/root';
+  dUserRef = 'users/' + getFirebaseUser().uid + '/';
+  dRootRef = dUserRef + 'root/';
 }
 
 void updateNodeRef(Map config) {
   print(config);
   String prefix =
-      dRootRef + '/' + config['domain'] + '/' + config['nodename'] + '/';
+      dRootRef + config['domain'] + '/' + config['nodename'] + '/';
 
-  dFcmTokenRef = prefix + kFcmTokenRef;
+  dFcmTokenRef = dUserRef + kFcmTokenRef;
   dControlRef = prefix + kControlRef;
   dStatusRef = prefix + kStatusRef;
   dStartupRef = prefix + kStartupRef;

@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'node_setup.dart';
 import 'firebase_utils.dart';
+import 'const.dart';
 
 class Setup extends StatefulWidget {
   Setup({Key key, this.title}) : super(key: key);
@@ -242,6 +243,9 @@ class ExpasionPanelsDemo extends StatefulWidget {
 }
 
 class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
+  DatabaseReference _fcmRef;
+  bool _nodeNeedUpdate = false;
+
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
   List<DemoItem<dynamic>> _demoItems;
@@ -269,6 +273,32 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           _ctrlNodeName = map['nodename'];
         });
       }
+
+      _fcmRef = FirebaseDatabase.instance.reference().child(getFcmTokenRef());
+      _fcmRef.once().then((DataSnapshot onValue) {
+        print("once: ${onValue.value}");
+        Map map = onValue.value;
+        bool tokenFound = false;
+        String token = getFbToken();
+        if (map != null) {
+          map.forEach((key, value) {
+            if (value == token) {
+              print("key test: $key");
+              tokenFound = true;
+            }
+          });
+        }
+        if (tokenFound == false) {
+          _nodeNeedUpdate = true;
+          _fcmRef.push().set(token);
+          print("token saved: $token");
+        }
+
+        // at the end, not before
+        // FirebaseDatabase.instance.setPersistenceEnabled(true);
+        // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
+      });
+
       _demoItems = <DemoItem<dynamic>>[
         new DemoItem<String>(
             name: 'Domain',
@@ -482,12 +512,34 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     return ret;
   }
 
+  void _nodeUpdate(String source) {
+    DatabaseReference dataRef;
+    String root = getRootRef();
+    String dataSource = '$root/$source/control';
+    print(dataSource);
+    dataRef = FirebaseDatabase.instance.reference().child('$dataSource/reboot');
+    dataRef.set(kNodeUpdate);
+    DateTime now = new DateTime.now();
+    dataRef = FirebaseDatabase.instance.reference().child('$dataSource/time');
+    dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
+  }
+
   void _onEntryAdded(Event event) {
     print('_onEntryAdded');
 
     setState(() {
       entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
     });
+
+    print(_nodeNeedUpdate);
+    if (_nodeNeedUpdate == true) {
+      var domain = event.snapshot.key;
+      // value contain a map of nodes, each key is the name of the node
+      var v = event.snapshot.value;
+      v.forEach((node, v) {
+        _nodeUpdate('$domain/$node/');
+      });
+    }
   }
 
   void _changePreferences() {

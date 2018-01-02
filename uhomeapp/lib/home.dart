@@ -48,6 +48,8 @@ class _HomeState extends State<Home> {
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
+
+    /*
     _fcmRef = FirebaseDatabase.instance.reference().child(getFcmTokenRef());
     _fcmRef.once().then((DataSnapshot onValue) {
       print("once: ${onValue.value}");
@@ -72,6 +74,7 @@ class _HomeState extends State<Home> {
       FirebaseDatabase.instance.setPersistenceEnabled(true);
       FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
     });
+    */
   }
 
   @override
@@ -116,10 +119,10 @@ class _HomeState extends State<Home> {
       DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_status['time'].toString()) * 1000);
       // if FCM token regid was not present require a node update
-      if (_nodeNeedUpdate == true) {
-        _nodeNeedUpdate = false;
-        _nodeUpdate(kNodeUpdate);
-      }
+      // if (_nodeNeedUpdate == true) {
+      //   _nodeNeedUpdate = false;
+      //   _nodeUpdate(kNodeUpdate);
+      // }
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(

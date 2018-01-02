@@ -13,7 +13,7 @@ static const char _kstartup[] PROGMEM = "startup";
 static const char _kcontrol[] PROGMEM = "control";
 static const char _kstatus[] PROGMEM = "status";
 static const char _kfunctions[] PROGMEM = "Functions";
-static const char _kmessaging[] PROGMEM = "FCM_Registration_IDs";
+static const char _kmessaging[] PROGMEM = "fcmtoken";
 static const char _kgraph[] PROGMEM = "graph";
 static const char _klogs[] PROGMEM = "logs";
 
@@ -26,12 +26,12 @@ String kgraph;
 String klogs;
 
 void FbconfInit(void) {
-  String prefix_user = String(F("users/")) + EE_GetUID();
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
 
-  String prefix_node = prefix_user + String(F("/root/")) + EE_GetDomain() +
+  String prefix_node = prefix_user + String(F("root/")) + EE_GetDomain() +
                        String(F("/")) + EE_GetNodeName() + String(F("/"));
 
-  kmessaging = prefix_node + String(FPSTR(_kmessaging));
+  kmessaging = prefix_user + String(FPSTR(_kmessaging));
   kstartup = prefix_node + String(FPSTR(_kstartup));
   kcontrol = prefix_node + String(FPSTR(_kcontrol));
   kstatus = prefix_node + String(FPSTR(_kstatus));
