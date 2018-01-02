@@ -26,15 +26,16 @@ String kgraph;
 String klogs;
 
 void FbconfInit(void) {
-  String prefix = String(F("users/")) + EE_GetUID() + String(F("/root/")) +
-                  EE_GetDomain() + String(F("/")) + EE_GetNodeName() +
-                  String(F("/"));
+  String prefix_user = String(F("users/")) + EE_GetUID();
 
-  kstartup = prefix + String(FPSTR(_kstartup));
-  kcontrol = prefix + String(FPSTR(_kcontrol));
-  kstatus = prefix + String(FPSTR(_kstatus));
-  kfunctions = prefix + String(FPSTR(_kfunctions));
-  kmessaging = prefix + String(FPSTR(_kmessaging));
+  String prefix_node = prefix_user + String(F("/root/")) + EE_GetDomain() +
+                       String(F("/")) + EE_GetNodeName() + String(F("/"));
+
+  kmessaging = prefix_node + String(FPSTR(_kmessaging));
+  kstartup = prefix_node + String(FPSTR(_kstartup));
+  kcontrol = prefix_node + String(FPSTR(_kcontrol));
+  kstatus = prefix_node + String(FPSTR(_kstatus));
+  kfunctions = prefix_node + String(FPSTR(_kfunctions));
   kgraph = prefix + String(FPSTR(_kgraph));
   klogs = prefix + String(FPSTR(_klogs));
   Serial.println(kstartup);

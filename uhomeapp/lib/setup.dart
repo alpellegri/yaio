@@ -186,7 +186,6 @@ class CollapsibleBody extends StatelessWidget {
               child: new DefaultTextStyle(
                   style: textTheme.caption.copyWith(fontSize: 15.0),
                   child: child))),
-      //const Divider(height: 1.0),
       new ButtonTheme.bar(
           child: new ButtonBar(children: <Widget>[
         new FlatButton(
@@ -240,7 +239,6 @@ class DemoItem<T> {
 }
 
 class ExpasionPanelsDemo extends StatefulWidget {
-  // static const String routeName = '/material/expansion_panels';
 
   @override
   _ExpansionPanelsDemoState createState() => new _ExpansionPanelsDemoState();
@@ -326,7 +324,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                             item.value = result;
                           },
                           builder: (FormFieldState<String> field) {
-                            // var query = entryMap.keys.toList();
                             return new ListView.builder(
                               shrinkWrap: true,
                               reverse: true,
@@ -393,7 +390,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                             item.value = result;
                           },
                           builder: (FormFieldState<String> field) {
-                            // var query = entryMap.keys.toList();
                             return new ListView.builder(
                               shrinkWrap: true,
                               reverse: true,
@@ -424,7 +420,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       return new LinearProgressIndicator(value: null);
     } else {
       _isNeedCreate = _update();
-      return new Column(children: <Widget>[
+      return new ListView(children: <Widget>[
         new SingleChildScrollView(
           child: new SafeArea(
             top: false,
