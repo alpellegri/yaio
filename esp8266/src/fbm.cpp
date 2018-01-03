@@ -110,7 +110,7 @@ void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
 static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
   bool ret = false;
   if (port == 0) {
-    Firebase.setBool((kcontrol + "/alarm"), value);
+    Firebase.setBool((kcontrol + F("/alarm")), value);
     if (Firebase.failed()) {
     } else {
       ret = true;
@@ -195,7 +195,7 @@ bool FbmService(void) {
     if (res == true) {
       if (boot_first == false) {
         boot_first = true;
-        String str = "\n";
+        String str = F("\n");
         str += FBM_getResetReason();
         fblog_log(str, true);
       }
@@ -210,7 +210,7 @@ bool FbmService(void) {
   } break;
 
   case 21: {
-    Firebase.setInt((kcontrol + "/reboot"), 0);
+    Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
       Serial.print(F("set failed: kcontrol/reboot"));
       Serial.println(Firebase.error());
@@ -243,7 +243,7 @@ bool FbmService(void) {
       }
       yield();
 
-      control_time = Firebase.getInt(kcontrol + "/time");
+      control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
         Serial.print(F("get failed: kcontrol/time"));
         Serial.println(Firebase.error());
@@ -314,7 +314,7 @@ bool FbmService(void) {
         th["h"] = humidity_data;
         yield();
         if (ht_monitor_run == true) {
-          Firebase.push((klogs + "/TH"), JsonVariant(th));
+          Firebase.push((klogs + F("/TH")), JsonVariant(th));
           if (Firebase.failed()) {
             Serial.print(F("push failed: klogs/TH"));
             Serial.println(Firebase.error());
@@ -388,7 +388,7 @@ bool FbmService(void) {
           inactive["id"] = code;
           inactive["type"] = kRadioElem;
           yield();
-          Firebase.set((kgraph + "/inactive"), JsonVariant(inactive));
+          Firebase.set((kgraph + F("/inactive")), JsonVariant(inactive));
 
           // Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
           if (Firebase.failed()) {

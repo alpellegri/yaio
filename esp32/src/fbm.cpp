@@ -65,52 +65,52 @@ String verbose_print_reset_reason(RESET_REASON reason) {
   String result;
   switch (reason) {
   case 1:
-    result = "Vbat power on reset";
+    result = F("Vbat power on reset");
     break;
   case 3:
-    result = "Software reset digital core";
+    result = F("Software reset digital core");
     break;
   case 4:
-    result = "Legacy watch dog reset digital core";
+    result = F("Legacy watch dog reset digital core");
     break;
   case 5:
-    result = "Deep Sleep reset digital core";
+    result = F("Deep Sleep reset digital core");
     break;
   case 6:
-    result = "Reset by SLC module, reset digital core";
+    result = F("Reset by SLC module, reset digital core");
     break;
   case 7:
-    result = "Timer Group0 Watch dog reset digital core";
+    result = F("Timer Group0 Watch dog reset digital core");
     break;
   case 8:
-    result = "Timer Group1 Watch dog reset digital core";
+    result = F("Timer Group1 Watch dog reset digital core");
     break;
   case 9:
-    result = "RTC Watch dog Reset digital core";
+    result = F("RTC Watch dog Reset digital core");
     break;
   case 10:
-    result = "Instrusion tested to reset CPU";
+    result = F("Instrusion tested to reset CPU");
     break;
   case 11:
-    result = "Time Group reset CPU";
+    result = F("Time Group reset CPU");
     break;
   case 12:
-    result = "Software reset CPU";
+    result = F("Software reset CPU");
     break;
   case 13:
-    result = "RTC Watch dog Reset CPU";
+    result = F("RTC Watch dog Reset CPU");
     break;
   case 14:
-    result = "for APP CPU, reseted by PRO CPU";
+    result = F("for APP CPU, reseted by PRO CPU");
     break;
   case 15:
-    result = "Reset when the vdd voltage is not stable";
+    result = F("Reset when the vdd voltage is not stable");
     break;
   case 16:
-    result = "RTC Watch dog reset digital core and rtc module";
+    result = F("RTC Watch dog reset digital core and rtc module");
     break;
   default:
-    result = "NO_MEAN";
+    result = F("NO_MEAN");
   }
 
   return result;
@@ -118,9 +118,10 @@ String verbose_print_reset_reason(RESET_REASON reason) {
 
 String FBM_getResetReason(void) {
   String ret;
-  ret = verbose_print_reset_reason((RESET_REASON)0);
-  ret += "\n";
-  ret += verbose_print_reset_reason((RESET_REASON)1);
+  ret = F("CPU0: ");
+  ret += verbose_print_reset_reason(rtc_get_reset_reason(0));
+  ret += F("\nCPU1: ");
+  ret += verbose_print_reset_reason(rtc_get_reset_reason(1));
   return ret;
 }
 
@@ -172,7 +173,7 @@ void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
 static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
   bool ret = false;
   if (port == 0) {
-    Firebase.setBool((kcontrol + "/alarm"), value);
+    Firebase.setBool((kcontrol + F("/alarm")), value);
     if (Firebase.failed()) {
     } else {
       ret = true;
@@ -257,7 +258,7 @@ bool FbmService(void) {
     if (res == true) {
       if (boot_first == false) {
         boot_first = true;
-        String str = "\n";
+        String str = F("\n");
         str += FBM_getResetReason();
         fblog_log(str, true);
       }
@@ -272,7 +273,7 @@ bool FbmService(void) {
   } break;
 
   case 21: {
-    Firebase.setInt((kcontrol + "/reboot"), 0);
+    Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
       Serial.print(F("set failed: kcontrol/reboot"));
       Serial.println(Firebase.error());
@@ -305,7 +306,7 @@ bool FbmService(void) {
       }
       yield();
 
-      control_time = Firebase.getInt(kcontrol + "/time");
+      control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
         Serial.print(F("get failed: kcontrol/time"));
         Serial.println(Firebase.error());
@@ -376,7 +377,7 @@ bool FbmService(void) {
         th["h"] = humidity_data;
         yield();
         if (ht_monitor_run == true) {
-          Firebase.push((klogs + "/TH"), JsonVariant(th));
+          Firebase.push((klogs + F("/TH")), JsonVariant(th));
           if (Firebase.failed()) {
             Serial.print(F("push failed: klogs/TH"));
             Serial.println(Firebase.error());
@@ -450,7 +451,7 @@ bool FbmService(void) {
           inactive["id"] = code;
           inactive["type"] = kRadioElem;
           yield();
-          Firebase.set((kgraph + "/inactive"), JsonVariant(inactive));
+          Firebase.set((kgraph + F("/inactive")), JsonVariant(inactive));
 
           // Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
           if (Firebase.failed()) {
