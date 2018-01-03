@@ -52,7 +52,7 @@ public:
     timerAlarmEnable(timer);
   }
 
-  void detach() {
+  void ICACHE_RAM_ATTR detach() {
     timerDetachInterrupt(timer);
     timer = NULL;
   }

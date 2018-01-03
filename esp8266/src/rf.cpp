@@ -54,7 +54,7 @@ static char FunctionReqName[DBKEY_LEN];
 static uint8_t FunctionReqPending;
 static uint8_t FunctionReqIdx = 0xFF;
 
-void FunctionSrv(void);
+void ICACHE_RAM_ATTR FunctionSrv(void);
 
 void RF_deinitIoEntryDB(void) {
   if (IoEntry != NULL) {
@@ -178,7 +178,7 @@ void FunctionExec(uint8_t idx) {
   RF_Action(Function[idx].src_idx, Function[idx].action);
 }
 
-void FunctionSrv(void) {
+void ICACHE_RAM_ATTR FunctionSrv(void) {
   uint32_t curr_time;
   uint8_t i;
 
@@ -342,7 +342,7 @@ uint32_t RF_GetRadioCode(void) {
 }
 
 // avoid receiving multiple code from same telegram
-void RF_Unmask(void) {
+void ICACHE_RAM_ATTR RF_Unmask(void) {
   RadioCodeLast = 0;
   RFRcvTimer.detach();
 }
