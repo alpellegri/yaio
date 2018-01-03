@@ -248,13 +248,6 @@ uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
   return idx;
 }
 
-bool RF_TestInRange(uint32_t t_test, uint32_t t_low, uint32_t t_high) {
-  bool ret = false;
-  // Serial.printf(">> %d, %d, %d\n", t_low, t_test, t_high);
-  ret = (t_test >= t_low) && (t_test <= t_high);
-  return ret;
-}
-
 void RF_Action(uint8_t src_idx, char *action) {
 
   uint8_t idx = getIoEntryIdx(action);
@@ -262,8 +255,8 @@ void RF_Action(uint8_t src_idx, char *action) {
   uint8_t value = IoEntry[idx].id & 0xFF;
 
   Serial.printf_P(PSTR("RF_Action: %d, %s\n"), idx, action);
-  Serial.printf_P(PSTR("type: %d, id: %08X, port: %d, value: %d\n"),
-                  IoEntry[idx].type, IoEntry[idx].id, port, value);
+  Serial.printf_P(PSTR("type: %d, name: %s, port: %d, value: %d\n"),
+                  IoEntry[idx].type, IoEntry[idx].name, port, value);
   switch (IoEntry[idx].type) {
   case kDOut: {
     // dout
@@ -283,28 +276,27 @@ void RF_Action(uint8_t src_idx, char *action) {
   }
 }
 
+#define RF_TestInRange(x, l, h) (((x) > (l)) && ((x) <= (h)))
+
 void RF_MonitorTimers(void) {
   // get time
-  uint32_t mytime = getTime();
-  // Serial.printf(">> %d, %d, %d\n", (mytime/3600)%24, (mytime/60)%60,
-  // (mytime)%60);
-  uint32_t t247 = 60 * ((mytime / 3600) % 24) + (mytime / 60) % 60;
+  uint32_t current = getTime();
+  uint32_t t247 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
   // Serial.printf(">> t247 %d\n", t247);
 
   // loop over timers
   for (uint8_t i = 0; i < IoEntryLen; i++) {
     // test in range
     if (IoEntry[i].type == kTimer) {
-      uint32_t _time = IoEntry[i].id;
+      // convert is to 24_7 time
+      uint32_t _time = 60 * (IoEntry[i].id >> 24) + (IoEntry[i].id & 0xFF);
       bool res = RF_TestInRange(_time, t247_last, t247);
       if (res == true) {
         // action
-        Serial.printf_P(PSTR(">>> action on timer %d at time %d\n"), i, t247);
-        String log =
-            "action on timer " + String(i) + " at time " + String(t247) + "\n";
+        Serial.printf_P(PSTR(">>> Action on timer %s at time %d\n"), IoEntry[i].name, t247);
+        String log = F("Action on timer ");
+        log += String(IoEntry[i].name) + F("\n");
         fblog_log(log, false);
-
-        // RF_Action(5, 0, IoEntry[i].action);
       }
     }
   }
