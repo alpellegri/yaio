@@ -173,7 +173,7 @@ class _HomeState extends State<Home> {
                   ),
                   new ListTile(
                     leading: (_control['reboot'] == 3)
-                        ? (new LinearProgressIndicator(
+                        ? (new CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.flash_on)),
@@ -194,7 +194,7 @@ class _HomeState extends State<Home> {
                   ),
                   new ListTile(
                     leading: (_control['reboot'] == 1)
-                        ? (new LinearProgressIndicator(
+                        ? (new CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.power)),
@@ -215,7 +215,7 @@ class _HomeState extends State<Home> {
                   ),
                   new ListTile(
                     leading: (_control['reboot'] == 2)
-                        ? (new LinearProgressIndicator(
+                        ? (new CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.flash_on)),
