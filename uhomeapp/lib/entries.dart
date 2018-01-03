@@ -14,6 +14,7 @@ const String kStringDIn = 'DIn';
 const String kStringRadioIn = 'RadioIn';
 const String kStringRadioOut = 'RadioOut';
 const String kStringRadioElem = 'RadioElem';
+const String kStringTimerElem = 'Timer';
 
 const Map<int, String> kEntryId2Name = const {
   kDOut: kStringDOut,
@@ -22,6 +23,7 @@ const Map<int, String> kEntryId2Name = const {
   kDIn: kStringDIn,
   kRadioOut: kStringRadioOut,
   kRadioElem: kStringRadioElem,
+  kTimer: kStringTimerElem,
 };
 
 const Map<String, int> kEntryName2Id = const {
@@ -31,6 +33,7 @@ const Map<String, int> kEntryName2Id = const {
   kStringDIn: kDIn,
   kStringRadioOut: kRadioOut,
   kStringRadioElem: kRadioElem,
+  kStringTimerElem: kTimer,
 };
 
 class IoEntry {

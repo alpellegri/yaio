@@ -175,9 +175,14 @@ class _RadioCodeState extends State<RadioCode> {
   }
 
   void _onEntryAdded(Event event) {
-    setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
-    });
+    var snap = event.snapshot;
+    if ((snap.value['type'] == kRadioIn) ||
+        (snap.value['type'] == kRadioOut) ||
+        (snap.value['type'] == kRadioElem)) {
+      setState(() {
+        entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
+      });
+    }
   }
 
   void _onEntryEdited(Event event) {

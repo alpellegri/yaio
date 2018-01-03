@@ -71,16 +71,16 @@ class DigitalIO extends StatefulWidget {
 
 class _DigitalIOState extends State<DigitalIO> {
   List<IoEntry> entryList = new List();
-  DatabaseReference _entryRef;
+  DatabaseReference _graphRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
   _DigitalIOState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -99,7 +99,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList.where((el) => (el.type == kDOut)).toList();
+    var query = entryList;
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -124,9 +124,12 @@ class _DigitalIOState extends State<DigitalIO> {
   }
 
   void _onEntryAdded(Event event) {
-    setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
-    });
+    var snap = event.snapshot;
+    if (snap.value['type'] == kDOut) {
+      setState(() {
+        entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
+      });
+    }
   }
 
   void _onEntryEdited(Event event) {
@@ -134,7 +137,7 @@ class _DigitalIOState extends State<DigitalIO> {
         entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList[entryList.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_entryRef, event.snapshot);
+          new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
@@ -154,7 +157,7 @@ class _DigitalIOState extends State<DigitalIO> {
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry(_entryRef);
+    final IoEntry entry = new IoEntry(_graphRef);
     _openEntryDialog(entry);
   }
 }

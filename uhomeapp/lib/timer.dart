@@ -79,16 +79,16 @@ class Timer extends StatefulWidget {
 
 class _TimerState extends State<Timer> {
   List<IoEntry> entryList = new List();
-  DatabaseReference _entryRef;
-  StreamSubscription<Event> _onFunctionAddSub;
+  DatabaseReference _graphRef;
+  StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
   _TimerState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(dGraphRef);
-    _onFunctionAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _graphRef = FirebaseDatabase.instance.reference().child(dGraphRef);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -100,14 +100,15 @@ class _TimerState extends State<Timer> {
   @override
   void dispose() {
     super.dispose();
-    _onFunctionAddSub.cancel();
+    _onAddSubscription.cancel();
     _onEditSubscription.cancel();
     _onRemoveSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList.where((el) => (el.type == kTimer)).toList();
+    // var query = entryList.where((el) => (el.type == kTimer)).toList();
+    var query = entryList;
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -132,9 +133,12 @@ class _TimerState extends State<Timer> {
   }
 
   void _onEntryAdded(Event event) {
-    setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
-    });
+    var snap = event.snapshot;
+    if (snap.value['type'] == kTimer) {
+      setState(() {
+        entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
+      });
+    }
   }
 
   void _onEntryEdited(Event event) {
@@ -142,7 +146,7 @@ class _TimerState extends State<Timer> {
         entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList[entryList.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_entryRef, event.snapshot);
+          new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
@@ -162,7 +166,7 @@ class _TimerState extends State<Timer> {
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry(_entryRef);
+    final IoEntry entry = new IoEntry(_graphRef);
     _openEntryDialog(entry);
   }
 }
@@ -236,24 +240,24 @@ class _EntryDialogState extends State<EntryDialog> {
               ),
               (_functionList.length > 0)
                   ? new ListTile(
-                title: const Text('Function Call'),
-                trailing: new DropdownButton<FunctionEntry>(
-                  hint: const Text('select a function'),
-                  value: _selectedFunction,
-                  onChanged: (FunctionEntry newValue) {
-                    print(newValue.name);
-                    setState(() {
-                      _selectedFunction = newValue;
-                    });
-                  },
-                  items: _functionList.map((FunctionEntry entry) {
-                    return new DropdownMenuItem<FunctionEntry>(
-                      value: entry,
-                      child: new Text(entry.name),
-                    );
-                  }).toList(),
-                ),
-              )
+                      title: const Text('Function Call'),
+                      trailing: new DropdownButton<FunctionEntry>(
+                        hint: const Text('select a function'),
+                        value: _selectedFunction,
+                        onChanged: (FunctionEntry newValue) {
+                          print(newValue.name);
+                          setState(() {
+                            _selectedFunction = newValue;
+                          });
+                        },
+                        items: _functionList.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<FunctionEntry>(
+                            value: entry,
+                            child: new Text(entry.name),
+                          );
+                        }).toList(),
+                      ),
+                    )
                   : new Text('Functions not declared yet'),
             ]),
         actions: <Widget>[

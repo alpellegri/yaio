@@ -71,16 +71,16 @@ class LogicalIO extends StatefulWidget {
 
 class _LogicalIOState extends State<LogicalIO> {
   List<IoEntry> entryList = new List();
-  DatabaseReference _entryRef;
+  DatabaseReference _graphRef;
   StreamSubscription<Event> _onAddSub;
   StreamSubscription<Event> _onEditSub;
   StreamSubscription<Event> _onRemoveSub;
 
   _LogicalIOState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSub = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
+    _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
+    _onAddSub = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSub = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSub = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -99,7 +99,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList.where((el) => (el.type == kLOut)).toList();
+    var query = entryList;
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -124,9 +124,12 @@ class _LogicalIOState extends State<LogicalIO> {
   }
 
   void _onEntryAdded(Event event) {
-    setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_entryRef, event.snapshot));
-    });
+    var snap = event.snapshot;
+    if (snap.value['type'] == kLOut) {
+      setState(() {
+        entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
+      });
+    }
   }
 
   void _onEntryEdited(Event event) {
@@ -134,7 +137,7 @@ class _LogicalIOState extends State<LogicalIO> {
         entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList[entryList.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_entryRef, event.snapshot);
+          new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     });
   }
 
@@ -154,7 +157,7 @@ class _LogicalIOState extends State<LogicalIO> {
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry(_entryRef);
+    final IoEntry entry = new IoEntry(_graphRef);
     _openEntryDialog(entry);
   }
 }
