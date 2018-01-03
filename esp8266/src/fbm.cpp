@@ -11,9 +11,11 @@
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
+#include "fbutils.h"
 #include "fcm.h"
 #include "rf.h"
 #include "sta.h"
+#include "timers.h"
 #include "timesrv.h"
 #include "vers.h"
 
@@ -24,9 +26,6 @@
 #define FBM_UPDATE_MONITOR_FAST (1)
 #define FBM_UPDATE_MONITOR_SLOW (5)
 #define FBM_MONITOR_TIMERS (15)
-
-// #define PSTR(x) (x)
-// #define printf_P printf
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -117,7 +116,7 @@ static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
     }
   } else if (port == 1) {
     String str = String(F("Intrusion in: ")) +
-                 String(RF_getRadioName(src_idx)) + String(F(" !!!"));
+                 String(FB_getIoEntryNameById(src_idx)) + String(F(" !!!"));
     fblog_log(str, status_alarm);
     ret = true;
   } else {
@@ -201,8 +200,7 @@ bool FbmService(void) {
       }
 
       Serial.println(F("Node is up!"));
-      // trick
-      RF_ForceDisable();
+      RF_Disable();
       status_alarm = false;
       control_time_last = 0;
       boot_sm = 21;
@@ -358,7 +356,7 @@ bool FbmService(void) {
     // monitor timers, every 15 sec
     if ((time_now - fbm_update_timer_last) >= FBM_MONITOR_TIMERS) {
       fbm_update_timer_last = time_now;
-      RF_MonitorTimers();
+      MonitorTimers();
     }
     yield();
 

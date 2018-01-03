@@ -6,6 +6,7 @@
 
 #include "ee.h"
 #include "fbconf.h"
+#include "fbutils.h"
 #include "fcm.h"
 #include "rf.h"
 
@@ -81,14 +82,14 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_deinitFunctionDB();
+      FB_deinitFunctionDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
       uint8_t num = 0;
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         num++;
       }
-      RF_initFunctionDB(num);
+      FB_initFunctionDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -97,7 +98,7 @@ bool FbmUpdateRadioCodes(void) {
         String action = nestedObject["action"];
         uint32_t delay = nestedObject["delay"];
         String next = nestedObject["next"];
-        RF_addFunctionDB(key, type, action, delay, next);
+        FB_addFunctionDB(key, type, action, delay, next);
       }
     }
   }
@@ -110,7 +111,7 @@ bool FbmUpdateRadioCodes(void) {
       Serial.println(Firebase.error());
       ret = false;
     } else {
-      RF_deinitIoEntryDB();
+      FB_deinitIoEntryDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
       uint8_t num = 0;
@@ -118,7 +119,7 @@ bool FbmUpdateRadioCodes(void) {
         num++;
       }
 
-      RF_initIoEntryDB(num);
+      FB_initIoEntryDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -127,12 +128,12 @@ bool FbmUpdateRadioCodes(void) {
         String id = nestedObject["id"];
         uint8_t type = nestedObject["type"];
         String func = nestedObject["func"];
-        RF_addIoEntryDB(key, type, id, name, func);
+        FB_addIoEntryDB(key, type, id, name, func);
       }
     }
   }
 
-  RF_dumpIoEntry();
+  FB_dumpIoEntry();
 
   return ret;
 }
