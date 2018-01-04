@@ -70,10 +70,18 @@ void FB_addIoEntryDB(String key, uint8_t type, String id, String name,
 }
 
 void FB_dumpIoEntry(void) {
+  Serial.println("FB_dumpIoEntry");
   for (uint8_t i = 0; i < IoEntryLen; i++) {
     Serial.printf("%d: %06X, %d, %s, %s, %s\n", i, IoEntry[i].id,
                   IoEntry[i].type, IoEntry[i].key, IoEntry[i].name,
                   IoEntry[i].func);
+  }
+}
+
+void FB_dumpFunctions(void) {
+  Serial.println("FB_dumpFunctions");
+  for (uint8_t i = 0; i < FunctionLen; i++) {
+    Serial.printf("%d: %s\n", i, Function[i].key);
   }
 }
 

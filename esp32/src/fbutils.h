@@ -48,6 +48,7 @@ extern void FB_executeIoEntryDB(uint8_t idx);
 extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);
 
 extern void FB_dumpIoEntry(void);
+extern void FB_dumpFunctions(void);
 extern uint8_t FB_getIoEntryIdx(char *key);
 extern uint8_t FB_getFunctionIdx(char *key);
 

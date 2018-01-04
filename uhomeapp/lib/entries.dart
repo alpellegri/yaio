@@ -41,6 +41,7 @@ class IoEntry {
   static const int mask = (1 << shift) - 1;
   DatabaseReference reference;
   String key;
+  String owner;
   int type;
   String name;
   int id;
@@ -51,6 +52,7 @@ class IoEntry {
   IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
     reference = ref;
     key = snapshot.key;
+    owner = snapshot.value['owner'];
     type = snapshot.value['type'];
     name = snapshot.value['name'];
     id = snapshot.value['id'];
@@ -79,10 +81,15 @@ class IoEntry {
     id = (port << shift) | (value & mask);
   }
 
+  setOwner(String _owner) {
+    owner = _owner;
+  }
+
   toJson() {
     var json;
     if (func != null) {
       json = {
+        'owner': owner,
         'type': type,
         'id': id,
         'name': name,
@@ -90,6 +97,7 @@ class IoEntry {
       };
     } else {
       json = {
+        'owner': owner,
         'type': type,
         'id': id,
         'name': name,
@@ -102,6 +110,7 @@ class IoEntry {
 class FunctionEntry {
   DatabaseReference reference;
   String key;
+  String owner;
   String name;
   String action;
   int delay;
@@ -112,13 +121,19 @@ class FunctionEntry {
   FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
+        owner = snapshot.value['owner'],
         action = snapshot.value['action'],
         delay = snapshot.value['delay'],
         name = snapshot.value['name'],
         next = snapshot.value['next'];
 
+  setOwner(String _owner) {
+    owner = _owner;
+  }
+
   toJson() {
     return {
+      'owner': owner,
       'action': action,
       'delay': delay,
       'name': name,
