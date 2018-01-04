@@ -1,0 +1,421 @@
+0. Definition
+   ==========
+   
+* physical i/o
+
+  generic definition
+  key: {
+    name: <name>,
+    code: <type>,
+    value: <identifier>,
+    cb: <callback>,
+  }
+
+  i/o are addressed by id (port, value: v)
+
+  . input is scanned periodically (or event driven)
+    on change can generate a call back
+  . output is program driven
+
+  input
+  identifier = pin<<24
+  key: {
+    name: <name>,
+    code: phyin,
+    value: <identifier>,
+    cb: <callback>,
+  }
+
+  output
+  identifier = pin<<24|value
+  key: {
+    name: <name>,
+    code: phyout,
+    value: <identifier>,
+    cb: <callback>,
+  }
+  type: {phyin, phyout}
+
+  time is a logical values
+  key-time: {
+    name: <name>,
+    code: login,
+    value: ktime,
+    cb: <callback>,
+  }
+
+  notify is a logical values
+  key-notify: {
+    name: <name>,
+    code: logout,
+    value: kmessage,
+    cb: <callback>,
+  }
+
+* variables are input/output and may have a callback
+
+  generic definition
+  key: {
+    name: <name>,
+    code: <type>,
+    value: <value>,
+    cb: <callback>,
+  }
+
+  type: {bool, int, float}
+
+functions: execute a statement of a program, can call other statement
+  key: {
+    name: <name>,
+    code: <instr>,
+    value: <arg>,
+    cb: <callback>,
+  }
+  
+  instr: {
+    ld, // load value
+    st, // store value
+    rd, // read locally
+    wr, // write locally
+    lt, // less than
+    gt, // grater than
+    eqz, // equal to zero (no argument)
+    equ,
+  }
+  
+A1. example simple sensor trigger
+   =============================
+
+sensor: physical input mapped on a pin
+thr1: variable
+
+pseudo-code:
+if (sensor>thr) {
+  status = true;
+} else {
+  status = false;
+}
+
+or:
+status = (sensor>thr);
+
+key-sensor: {
+  name: 'sensor',
+  code: phyin,
+  value: pin<<24,
+  cb: key-f01,
+}
+key-thr1: {
+  name: 'thr1',
+  code: var,
+  value: 90,
+  cb: end,
+}
+key-status: {
+  name: 'status',
+  code: bool,
+  value: 0,
+  cb: end,
+}
+
+f01: rd v, f02
+f02: lt thr, f03
+f03: wr status, end
+
+A2. example led on/off depending by a variable
+   ==========================================
+
+led: physical output mapped on a pin
+status: variable
+
+pseudo-code:
+if (status != 0) {
+  led = true;
+} else {
+  led = false;
+}
+
+or:
+led = (status != 0);
+
+instruction-code:
+f01: ld status, f02
+f02: eqz null, f03
+f03: st led, end
+
+key-led: {
+  name: 'led',
+  code: phyout,
+  value: pin<<24,
+  cb: key-f01,
+}
+key-status: {
+  name: 'status',
+  code: bool,
+  value: 0,
+  cb: key-f01,
+}
+key-f01: {
+  name: 'f01',
+  code: ld,
+  value: key-status,
+  cb: key-f02,
+}
+key-f02: {
+  name: 'f02',
+  code: eqz,
+  value: 0,
+  cb: key-f03,
+}
+key-f03: {
+  name: 'f03',
+  code: st,
+  value: key-led,
+  cb: end,
+}
+
+A3. example sensor trigger with hysteresis switching a relay
+   ========================================================
+
+pseudo-code:
+
+init:
+status = false;
+thr1 = 90
+thr2 = 110
+
+run:
+if (status == true) {
+  if (sensor<thr1) {
+    status = false;
+  }
+} else {
+  if (sensor>thr2) {
+    status = true;
+  }
+}
+
+sensor: physical input mapped on a pin
+key-sensor: {
+  name: 'sensor',
+  code: phyin,
+  value: pin<<24,
+  cb: key-f01,
+}
+
+status: variable
+key-status: {
+  name: 'status',
+  code: int,
+  value: 0, // only the init value
+  cb: end,
+}
+key-thr1: {
+  name: 'thr1',
+  code: int,
+  value: 90,
+  cb: end,
+}
+key-thr2: {
+  name: 'thr2',
+  code: int,
+  value: 110,
+  cb: end,
+}
+
+instruction-code:
+f01: rd status, f02
+f02: bz f6, f03
+f03: ld sensor, f04
+f04: lt thr1, f05
+f05: bz end, f09
+f06: ld sensor, f07
+f07: lt thr1, f08
+f08: bnz end, f09
+f09: wr status, end
+
+functions
+key-f01: {
+  name: 'f01',
+  code: rd,
+  value: key-status,
+  cb: key-f02,
+}
+key-f02: {
+  name: 'f02',
+  code: bz,
+  value: key-f06,
+  cb: key-f03,
+}
+key-f03: {
+  name: 'f03',
+  code: ld,
+  value: key-sensor,
+  cb: key-f04,
+}
+key-f04: {
+  name: 'f04',
+  code: lt,
+  value: key-thr1,
+  cb: key-f05,
+}
+key-f05: {
+  name: 'f05',
+  code: bz,
+  value: end,
+  cb: key-f09,
+}
+key-f06: {
+  name: 'f06',
+  code: ld,
+  value: key-sensor,
+  cb: key-f07,
+}
+key-f07: {
+  name: 'f07',
+  code: lt,
+  value: key-thr2,
+  cb: key-f08,
+}
+key-f08: {
+  name: 'f08',
+  code: bnz,
+  value: end,
+  cb: key-f09,
+}
+key-f09: {
+  name: 'f09',
+  code: wr,
+  value: key-status,
+  cb: key-f10,
+}
+key-f10: {
+  name: 'f10',
+  code: st,
+  value: key-led,
+  cb: end,
+}
+
+diagram
+:)f01~rd)--:)f02~bz)--:)f03~rd)--:)f04~lt)--:)f05~bz)--:)f09~wr
+status      f06   |    v          thr1       end      | status
+                  |                                   |
+                  +--:)f06~rd)--:)f07~gt)--:)f08~bnz)-+
+                     v          thr2       end
+
+diagram
+v->(f01: rd status)->(f02: bz f06)->(f03: rd v)->(f04: lt thr1)->(f05: bz end)->(f09: wr status)->(f10: st led)->end
+                              |                                               |
+                              +---->(f06: rd v)->(f07: gt thr2)->(f08: bnz)---+
+
+A4. example radio code and alarm (only one code)
+   ============================================
+
+sensor: radio input
+alarm-status: variable
+id: variable
+
+pseudo-code:
+if (alarm-status == true) {
+  if (radio == id) {
+    notify = true;
+  } else {
+    unknown-radio = radio;
+  }
+}
+
+or:
+status = (sensor>thr);
+
+key-sensor: {
+  name: 'sensor',
+  code: radioin,
+  value: 0, // no meaning
+  cb: key-f01,
+}
+key-id: {
+  name: 'id',
+  code: int,
+  value: 0xffaaff,
+  cb: end,
+}
+key-unknown-radio: {
+  name: 'unknown-radio',
+  code: int,
+  value: 0,
+  cb: end,
+}
+key-notify: {
+  name: 'notify',
+  code: logout,
+  value: kmessage,
+  cb: end,
+}
+key-alarm-status: {
+  name: 'alarm-status',
+  code: bool,
+  value: 0, // only the init value
+  cb: end,
+}
+key-f01: {
+  name: 'f01',
+  code: rd,
+  value: key-alarm-status,
+  cb: key-f02,
+}
+key-f02: {
+  name: 'f02',
+  code: bz,
+  value: end,
+  cb: key-f03,
+}
+key-f03: {
+  name: 'f03',
+  code: equ,
+  value: key-id,
+  cb: key-f04,
+}
+key-f04: {
+  name: 'f04',
+  code: bz,
+  value: key-f06,
+  cb: key-f05,
+}
+key-f05: {
+  name: 'f05',
+  code: st,
+  value: key-notify,
+  cb: end,
+}
+key-f06: {
+  name: 'f06',
+  code: st,
+  value: key-unknown-radio,
+  cb: end,
+}
+
+A5. timer
+   ======
+Time is a physical values
+
+key-time: {
+  name: <name>,
+  code: login,
+  value: ktime,
+  cb: key-f01,
+}
+
+Timer are simple variable
+
+key-timer: {
+  name: <name>,
+  code: int,
+  value: <arg>,
+  cb: <callback>,
+}
+
+arg:
+hour:8bit
+minutes:8bit
+mask:7bits (day of the week)
+
