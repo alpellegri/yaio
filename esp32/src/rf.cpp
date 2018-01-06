@@ -25,12 +25,12 @@ uint8_t RF_checkRadioCodeDB(uint32_t code) {
   uint8_t idx = 0xFF;
 
   uint8_t len = FB_getIoEntryLen();
-  IoEntry_t *io_entry = FB_getIoEntry();
 
   Serial.printf_P(PSTR("RF_CheckRadioCodeDB: code %06X\n"), code);
   while ((i < len) && (idx == 0xFF)) {
-    if ((code == io_entry[i].id) && (io_entry[i].type == kRadioIn)) {
-      Serial.printf_P(PSTR("radio code found in table %06X\n"), io_entry[i].id);
+    IoEntry entry = FB_getIoEntry(i);
+    if ((code == entry.id) && (entry.type == kRadioIn)) {
+      Serial.printf_P(PSTR("radio code found in table %06X\n"), entry.id);
       idx = i;
     }
     i++;
@@ -40,25 +40,25 @@ uint8_t RF_checkRadioCodeDB(uint32_t code) {
 }
 
 void RF_executeIoEntryDB(uint8_t idx) {
-  IoEntry_t *io_entry = FB_getIoEntry();
+  IoEntry entry = FB_getIoEntry(idx);
   // call
-  FunctionReq(idx, io_entry[idx].func);
+  FunctionReq(idx, entry.func);
 }
 
 uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t len = FB_getIoEntryLen();
-  IoEntry_t *io_entry = FB_getIoEntry();
 
   Serial.print(F("RF_CheckRadioCodeTxDB: code "));
   Serial.println(code);
   while ((i < len) && (idx == 0xFF)) {
+    IoEntry io_entry = FB_getIoEntry(i);
     Serial.print(F("radio table: "));
-    Serial.println(io_entry[i].id);
-    if ((code == io_entry[i].id) && (io_entry[i].type == kRadioOut)) {
+    Serial.println(io_entry.id);
+    if ((code == io_entry.id) && (io_entry.type == kRadioOut)) {
       Serial.print(F("radio Tx code found in table "));
-      Serial.println(io_entry[i].id);
+      Serial.println(io_entry.id);
       idx = i;
     }
     i++;
