@@ -27,21 +27,13 @@ void FB_deinitFunctionDB(void) {
   FunctionLen = 0;
 }
 
-IoEntry_t *FB_getIoEntry(void) {
-  return IoEntry;
-}
+IoEntry_t *FB_getIoEntry(void) { return IoEntry; }
 
-uint8_t FB_getIoEntryLen(void) {
-  return IoEntryLen;
-}
+uint8_t FB_getIoEntryLen(void) { return IoEntryLen; }
 
-FunctionEntry_t *FB_getFunction(void) {
-  return Function;
-}
+FunctionEntry_t *FB_getFunction(void) { return Function; }
 
-uint8_t FB_getFunctionLen(void) {
-  return FunctionLen;
-}
+uint8_t FB_getFunctionLen(void) { return FunctionLen; }
 
 void FB_initIoEntryDB(uint8_t num) {
   IoEntryLen = 0;
@@ -81,7 +73,7 @@ void FB_dumpIoEntry(void) {
 void FB_dumpFunctions(void) {
   Serial.println("FB_dumpFunctions");
   for (uint8_t i = 0; i < FunctionLen; i++) {
-    Serial.printf("%d: %s\n", i, Function[i].key);
+    Serial.printf("%d: %s, %s\n", i, Function[i].key, Function[i].next);
   }
 }
 
