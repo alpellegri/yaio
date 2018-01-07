@@ -7,6 +7,9 @@ const int kDIn = 3;
 const int kRadioOut = 4;
 const int kRadioElem = 5;
 const int kTimer = 6;
+const int kBool = 7;
+const int kInt = 8;
+const int kFloat = 9;
 
 const String kStringDOut = 'DOut';
 const String kStringLOut = 'LOut';
@@ -14,7 +17,10 @@ const String kStringDIn = 'DIn';
 const String kStringRadioIn = 'RadioIn';
 const String kStringRadioOut = 'RadioOut';
 const String kStringRadioElem = 'RadioElem';
-const String kStringTimerElem = 'Timer';
+const String kStringTimer = 'Timer';
+const String kStringBool = 'bool';
+const String kStringInt = 'int';
+const String kStringFloat = 'float';
 
 const Map<int, String> kEntryId2Name = const {
   kDOut: kStringDOut,
@@ -23,7 +29,10 @@ const Map<int, String> kEntryId2Name = const {
   kDIn: kStringDIn,
   kRadioOut: kStringRadioOut,
   kRadioElem: kStringRadioElem,
-  kTimer: kStringTimerElem,
+  kTimer: kStringTimer,
+  kBool: kStringBool,
+  kInt: kStringInt,
+  kFloat: kStringFloat,
 };
 
 const Map<String, int> kEntryName2Id = const {
@@ -33,7 +42,10 @@ const Map<String, int> kEntryName2Id = const {
   kStringDIn: kDIn,
   kStringRadioOut: kRadioOut,
   kStringRadioElem: kRadioElem,
-  kStringTimerElem: kTimer,
+  kStringTimer: kTimer,
+  kStringBool: kBool,
+  kStringInt: kInt,
+  kStringFloat: kFloat,
 };
 
 class IoEntry {

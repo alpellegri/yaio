@@ -53,7 +53,7 @@
     owner: <owner>,
     name: <namer>,
     code: timer,
-    value: <configuration>, // it is a int
+    value: <configuration>, // it is an number
     cb: <callback>,
   }
   hour: (5bits)
@@ -69,7 +69,7 @@
     owner: <owner>,
     name: <radio>,
     code: radioin,
-    value: <configuration>, // it is a int
+    value: <configuration>, // it is a number
     cb: <callback>,
   }
   configuration: mask
@@ -96,7 +96,7 @@
     owner: <owner>,
     name: <radio>,
     code: radioout,
-    value: <configuration>, // it is a int
+    value: <configuration>, // it is a number
     cb: <callback>,
   }
   configuration: mask
@@ -108,7 +108,7 @@
     owner: <owner>,
     name: <name>,
     code: logout,
-    value: kmessage, // it is a string
+    value: kmessage, // it is a number
     cb: <callback>,
   }
 
@@ -121,8 +121,8 @@
   key: {
     owner: <node>,  // it is a string
     name: <name>,   // it is a string
-    code: <type>,   // it is a string (enum)
-    value: <value>, // it is a dynamic
+    code: <type>,   // it is a number (enum)
+    value: <value>, // it is a number
     subscriber: {   // this is an array
       <node>: <callback>,
       ...,
@@ -144,7 +144,7 @@ functions: execute a statement of a program, can call other statement
 
   key: {
     name: <name>,   // it is a string
-    code: <instr>,  // it is a string (enum?)
+    code: <instr>,  // it is a number (enum?)
     value: <arg>,   // it is dynamic: a string or a number
     cb: <callback>, // it is a string representing the key of the database
   }
