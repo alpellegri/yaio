@@ -9,7 +9,7 @@
     name: <name>,   // it is a string
     code: <type>,   // it is a string (enum?)
     value: <value>, // it is dynamic: a string or a number
-    cb: <callback>, // it is a string representign the key of the database
+    cb: <callback>, // it is a string representing the key of the database
   }
   type: {phyin, phyout, login, logout, bool, int, float}
 
@@ -42,7 +42,7 @@
   }
 
 * timer is a logical value.
-  it variable descibing the time in a day or a week.
+  it variable describing the time in a day or a week.
   Time is represent a tick (a minute) inside a day (24*60=1440 ticks) or a week
   (7*24*60=34560 ticks) time is a modulo number.
   in case of modulo-day 1439+1 overflow to 0, in case of modulo-week 34559+1 overflow to 0.
@@ -146,7 +146,7 @@ functions: execute a statement of a program, can call other statement
     name: <name>,   // it is a string
     code: <instr>,  // it is a string (enum?)
     value: <arg>,   // it is dynamic: a string or a number
-    cb: <callback>, // it is a string representign the key of the database
+    cb: <callback>, // it is a string representing the key of the database
   }
 
   instr: {
