@@ -178,8 +178,8 @@ static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
       ret = true;
     }
   } else if (port == 1) {
-    String str = String(F("Intrusion in: ")) +
-                 String(FB_getIoEntryNameById(src_idx)) + String(F(" !!!"));
+    String str = String(F("Event triggered on: ")) +
+                 FB_getIoEntryNameById(src_idx) + String(F(" !!!"));
     fblog_log(str, status_alarm);
     ret = true;
   } else {
@@ -387,25 +387,16 @@ bool FbmService(void) {
       } else {
         /* do nothing */
       }
+      yield();
     }
-    yield();
 
     // monitor for alarm activation
     if (status_alarm != control_alarm) {
       status_alarm = control_alarm;
       if (status_alarm == true) {
       }
+      yield();
     }
-
-#if 0
-    // manage RF activation/deactivation
-    if (status_alarm == true) {
-      RF_Enable();
-    } else {
-      RF_Disable();
-    }
-    yield();
-#endif
 
     // manage alarm arming/disarming notifications
     if (status_alarm_last != status_alarm) {
@@ -420,8 +411,8 @@ bool FbmService(void) {
     if ((time_now - fbm_update_timer_last) >= FBM_MONITOR_TIMERS) {
       fbm_update_timer_last = time_now;
       MonitorTimers();
+      yield();
     }
-    yield();
 
     // monitor for RF radio codes
     uint32_t code = RF_GetRadioCode();
@@ -459,6 +450,7 @@ bool FbmService(void) {
           }
         }
       }
+      yield();
     }
 
     // call function service

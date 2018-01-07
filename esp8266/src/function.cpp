@@ -11,96 +11,112 @@
 
 static Ticker FunctionTimer;
 
-static char FunctionReqName[DBKEY_LEN];
 static uint8_t FunctionReqPending;
 static uint8_t FunctionReqIdx = 0xFF;
 
 void ICACHE_RAM_ATTR FunctionSrv(void);
 
-void Action(uint8_t src_idx, char *action) {
-
-  IoEntry_t *io_entry = FB_getIoEntry();
+void ICACHE_RAM_ATTR Action(uint8_t src_idx, String &action) {
 
   uint8_t idx = FB_getIoEntryIdx(action);
-  uint8_t port = io_entry[idx].id >> 24;
-  uint8_t value = io_entry[idx].id & 0xFF;
-
-  Serial.printf_P(PSTR("RF_Action: %d, %s\n"), idx, action);
-  Serial.printf_P(PSTR("type: %d, name: %s, port: %d, value: %d\n"),
-                  io_entry[idx].type, io_entry[idx].name, port, value);
-  switch (io_entry[idx].type) {
-  case kDOut: {
-    // dout
-    pinMode(port, OUTPUT);
-    digitalWrite(port, !!value);
-  } break;
-  case kRadioOut:
-    // rf
-    RF_Send(io_entry[idx].id, 24);
-    break;
-  case kLOut: {
-    // lout
-    FbmLogicReq(src_idx, port, !!value);
-  } break;
-  default:
-    break;
-  }
-}
-
-void FunctionReq(uint8_t src_idx, char *key) {
-  uint8_t idx;
-
-  FunctionEntry_t *function = FB_getFunction();
-
-  idx = FB_getFunctionIdx(key);
+  // Serial.printf("debug  Action %s, %d\n", action.c_str(), idx);
   if (idx != 0xFF) {
-    strcpy(FunctionReqName, key);
-    FunctionReqIdx = idx;
-    FunctionReqPending = 1;
-    function[idx].src_idx = src_idx;
-    FunctionTimer.attach(0.1, FunctionSrv);
+    IoEntry entry = FB_getIoEntry(idx);
+    uint8_t port = entry.id >> 24;
+    uint8_t value = entry.id & 0xFF;
+
+    Serial.printf_P(PSTR("RF_Action: %d, %d, %s\n"), src_idx, idx,
+                    action.c_str());
+    Serial.printf_P(PSTR("type: %d, name: %s, port: %d, value: %d\n"),
+                    entry.type, entry.name.c_str(), port, value);
+    switch (entry.type) {
+    case kDOut: {
+      // dout
+      pinMode(port, OUTPUT);
+      digitalWrite(port, !!value);
+    } break;
+    case kRadioOut:
+      // rf
+      RF_Send(entry.id, 24);
+      break;
+    case kLOut: {
+      // lout
+      FbmLogicReq(src_idx, port, !!value);
+    } break;
+    default:
+      break;
+    }
   } else {
+    Serial.println("Action error\n");
   }
 }
 
-void FunctionRel(void) {
-  FunctionReqName[0] = '\0';
-  FunctionReqPending = 0;
-  FunctionReqIdx = 0xFF;
-}
-
-void FunctionExec(uint8_t idx) {
-  FunctionEntry_t *function = FB_getFunction();
-  Action(function[idx].src_idx, function[idx].action);
+void ICACHE_RAM_ATTR FunctionReq(uint8_t src_idx, String key) {
+  uint8_t idx = FB_getFunctionIdx(key);
+  if (idx != 0xFF) {
+    // Serial.printf("debug FunctionReq %s %d\n", key.c_str(), idx);
+    FunctionEntry &entry = FB_getFunction(idx);
+    noInterrupts();
+    if (FunctionReqPending == 0) {
+      // Serial.printf("debug FunctionReq set pending: %d\n", entry.src_idx);
+      FunctionReqPending = 1;
+      FunctionReqIdx = idx;
+      entry.src_idx = src_idx;
+      interrupts();
+      FunctionTimer.attach_ms(100, FunctionSrv);
+    } else {
+      interrupts();
+      // Serial.printf("debug FunctionReq is pending\n");
+    }
+  } else {
+    // Serial.printf("debug FunctionReq error\n");
+  }
 }
 
 void ICACHE_RAM_ATTR FunctionSrv(void) {
   uint32_t curr_time;
   uint8_t i;
 
+  FunctionTimer.detach();
   curr_time = millis();
-  FunctionEntry_t *function = FB_getFunction();
-  uint8_t len = FB_getFunctionLen();
 
   // manage requests
   if (FunctionReqPending == 1) {
-    function[FunctionReqIdx].timer = curr_time;
-    function[FunctionReqIdx].timer_run = 1;
-    FunctionExec(FunctionReqIdx);
-    FunctionRel();
+    FunctionEntry &function = FB_getFunction(FunctionReqIdx);
+    function.timer = curr_time;
+    function.timer_run = 1;
+    // Serial.printf("debug call Action %d: %s\n", FunctionReqIdx, function.action.c_str());
+    if (function.action.length() != 0) {
+      Action(function.src_idx, function.action);
+    }
+    FunctionReqPending = 0;
+    // Serial.printf("debug FunctionSrv release pending\n");
+  } else {
   }
 
+  bool need_arm = false;
+  uint8_t len = FB_getFunctionLen();
   // delay manager (many delayed action may be cuncurrent)
   for (i = 0; i < len; i++) {
-    // printf("delay manager @ id %d timer_run %d\n", i, Function[i].timer_run);
-    if (function[i].timer_run == 1) {
-      if ((curr_time - function[i].timer) >= function[i].delay) {
-        function[i].timer_run = 0;
-        FunctionTimer.detach();
-        if (function[i].next[0] != '\0') {
-          FunctionReq(function[i].src_idx, function[i].next);
+    FunctionEntry &function = FB_getFunction(i);
+    // Serial.printf("delay manager @ id %d timer_run %d\n", i,
+    //               function.timer_run);
+    // Serial.printf("function.next.length %d\n", function.next.length());
+    if (function.timer_run == 1) {
+      if ((curr_time - function.timer) >= function.delay) {
+        function.timer_run = 0;
+        if (function.next.length() != 0) {
+          FunctionReq(function.src_idx, function.next);
         }
+      } else {
+        need_arm = true;
       }
     }
+  }
+
+  if (need_arm == true) {
+    FunctionTimer.attach_ms(100, FunctionSrv);
+  } else {
+    // FunctionTimer.detach();
   }
 }

@@ -38,7 +38,7 @@ class Ticker {
 public:
   hw_timer_t *timer = NULL;
 
-  void attach(unsigned milis, void func()) {
+  void attach_ms(uint32_t ms, void func()) {
     // Use 1st timer of 4 (counted from zero).
     // Set 80 divider for prescaler (see ESP32 Technical Reference Manual for
     // more info).
@@ -47,7 +47,7 @@ public:
     timerAttachInterrupt(timer, func, true);
     // Set alarm to call onTimer function every second (value in microseconds).
     // Repeat the alarm (third parameter)
-    timerAlarmWrite(timer, milis, true);
+    timerAlarmWrite(timer, ms*1000, true);
     // Start an alarm
     timerAlarmEnable(timer);
   }

@@ -89,7 +89,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         num++;
       }
-      FB_initFunctionDB(num);
+
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -119,7 +119,6 @@ bool FbmUpdateRadioCodes(void) {
         num++;
       }
 
-      FB_initIoEntryDB(num);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -134,6 +133,7 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   FB_dumpIoEntry();
+  FB_dumpFunctions();
 
   return ret;
 }
