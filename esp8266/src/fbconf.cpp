@@ -25,20 +25,26 @@ String kfunctions;
 String kmessaging;
 String kgraph;
 String klogs;
+String knodesubpath;
+
+String FB_getNodeSubPath(void) { return knodesubpath; }
 
 void FbconfInit(void) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-
-  String prefix_node = prefix_user + String(F("root/")) + EE_GetDomain() +
-                       String(F("/")) + EE_GetNodeName() + String(F("/"));
+  knodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_node =
+      prefix_user + String(F("root/")) + knodesubpath + String(F("/"));
+  String prefix_data = prefix_user + String(F("data/"));
 
   kmessaging = prefix_user + String(FPSTR(_kmessaging));
+
   kstartup = prefix_node + String(FPSTR(_kstartup));
   kcontrol = prefix_node + String(FPSTR(_kcontrol));
   kstatus = prefix_node + String(FPSTR(_kstatus));
-  kfunctions = prefix_node + String(FPSTR(_kfunctions));
-  kgraph = prefix_node + String(FPSTR(_kgraph));
-  klogs = prefix_node + String(FPSTR(_klogs));
+
+  kfunctions = prefix_data + String(FPSTR(_kfunctions));
+  kgraph = prefix_data + String(FPSTR(_kgraph));
+  klogs = prefix_data + String(FPSTR(_klogs));
   Serial.println(kstartup);
   Serial.println(kcontrol);
   Serial.println(kstatus);
@@ -87,18 +93,23 @@ bool FbmUpdateRadioCodes(void) {
       JsonObject &object = variant.as<JsonObject>();
       uint8_t num = 0;
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
+        JsonObject &nestedObject = i->value;
+        if (nestedObject["owner"] == FB_getNodeSubPath()) {
+          num++;
+        }
       }
 
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        String key = i->key;
-        String type = nestedObject["type"];
-        String action = nestedObject["action"];
-        uint32_t delay = nestedObject["delay"];
-        String next = nestedObject["next"];
-        FB_addFunctionDB(key, type, action, delay, next);
+        if (nestedObject["owner"] == FB_getNodeSubPath()) {
+          String key = i->key;
+          String type = nestedObject["type"];
+          String action = nestedObject["action"];
+          uint32_t delay = nestedObject["delay"];
+          String next = nestedObject["next"];
+          FB_addFunctionDB(key, type, action, delay, next);
+        }
       }
     }
   }
@@ -116,18 +127,23 @@ bool FbmUpdateRadioCodes(void) {
       JsonObject &object = variant.as<JsonObject>();
       uint8_t num = 0;
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
+        JsonObject &nestedObject = i->value;
+        if (nestedObject["owner"] == FB_getNodeSubPath()) {
+          num++;
+        }
       }
 
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        String key = i->key;
-        String name = nestedObject["name"];
-        String id = nestedObject["id"];
-        uint8_t type = nestedObject["type"];
-        String func = nestedObject["func"];
-        FB_addIoEntryDB(key, type, id, name, func);
+        if (nestedObject["owner"] == FB_getNodeSubPath()) {
+          String key = i->key;
+          String name = nestedObject["name"];
+          String id = nestedObject["id"];
+          uint8_t type = nestedObject["type"];
+          String func = nestedObject["func"];
+          FB_addIoEntryDB(key, type, id, name, func);
+        }
       }
     }
   }
