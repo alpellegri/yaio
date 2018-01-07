@@ -40,9 +40,9 @@ uint8_t RF_checkRadioCodeDB(uint32_t code) {
 }
 
 void RF_executeIoEntryDB(uint8_t idx) {
-  IoEntry entry = FB_getIoEntry(idx);
-  // call
-  FunctionReq(idx, entry.func);
+  if (FB_getIoEntry(idx).func.length() != 0) {
+    FunctionReq(idx, FB_getIoEntry(idx).func);
+  }
 }
 
 uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
@@ -116,7 +116,7 @@ void RF_Loop() {
       if (value != RadioCodeLast) {
         Serial.printf_P(PSTR("radio code: %06X\n"), value);
         RadioCode = value;
-        RFRcvTimer.attach(1.0, RF_Unmask);
+        RFRcvTimer.attach_ms(1000, RF_Unmask);
       } else {
         Serial.println(F("."));
       }

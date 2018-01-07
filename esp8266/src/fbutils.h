@@ -32,14 +32,14 @@ public:
 
 extern void FB_deinitIoEntryDB(void);
 extern void FB_deinitFunctionDB(void);
-extern IoEntry FB_getIoEntry(uint8_t i);
+extern IoEntry& FB_getIoEntry(uint8_t i);
 extern uint8_t FB_getIoEntryLen(void);
-extern FunctionEntry FB_getFunction(uint8_t i);
+extern FunctionEntry& FB_getFunction(uint8_t i);
 extern uint8_t FB_getFunctionLen(void);
 
 extern void FB_addIoEntryDB(String key, uint8_t type, String id, String name,
                             String func);
-extern const char *FB_getIoEntryNameById(uint8_t i);
+extern String& FB_getIoEntryNameById(uint8_t i);
 
 extern void FB_addFunctionDB(String key, String type, String action,
                              uint32_t delay, String next);
@@ -49,7 +49,7 @@ extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);
 
 extern void FB_dumpIoEntry(void);
 extern void FB_dumpFunctions(void);
-extern uint8_t FB_getIoEntryIdx(String key);
-extern uint8_t FB_getFunctionIdx(String key);
+extern uint8_t FB_getIoEntryIdx(String& key);
+extern uint8_t FB_getFunctionIdx(String& key);
 
 #endif

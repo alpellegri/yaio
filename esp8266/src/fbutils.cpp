@@ -19,11 +19,11 @@ void FB_deinitFunctionDB(void) {
   FunctionVec.erase(FunctionVec.begin(), FunctionVec.end());
 }
 
-IoEntry FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
+IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
 
 uint8_t FB_getIoEntryLen(void) { return IoEntryVec.size(); }
 
-FunctionEntry FB_getFunction(uint8_t i) { return FunctionVec[i]; }
+FunctionEntry &FB_getFunction(uint8_t i) { return FunctionVec[i]; }
 
 uint8_t FB_getFunctionLen(void) { return FunctionVec.size(); }
 
@@ -40,9 +40,9 @@ void FB_addIoEntryDB(String key, uint8_t type, String id, String name,
   }
 }
 
-const char *FB_getIoEntryNameById(uint8_t i) {
-  IoEntry entry = IoEntryVec[i];
-  return entry.name.c_str();
+String& FB_getIoEntryNameById(uint8_t i) {
+  IoEntry& entry = IoEntryVec[i];
+  return entry.name;
 }
 
 void FB_addFunctionDB(String key, String type, String action, uint32_t delay,
@@ -51,22 +51,23 @@ void FB_addFunctionDB(String key, String type, String action, uint32_t delay,
     FunctionEntry entry;
     entry.key = key;
     entry.type = atoi(type.c_str());
-    entry.action = atoi(action.c_str());
+    entry.action = action;
     entry.delay = delay;
     entry.next = next;
+    entry.timer_run = 0;
+    entry.src_idx = 0xFF;
+    entry.timer = 0;
     FunctionVec.push_back(entry);
   }
 }
 
-uint8_t FB_getIoEntryIdx(String key) {
+uint8_t FB_getIoEntryIdx(String &key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
-  std::string key2 = key.c_str();
   while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
-    std::string key1 = IoEntryVec[i].key.c_str();
-    res = key1.compare(key2);
+    res = strcmp(IoEntryVec[i].key.c_str(), key.c_str());
     if (res == 0) {
       idx = i;
     }
@@ -76,26 +77,23 @@ uint8_t FB_getIoEntryIdx(String key) {
   return idx;
 }
 
-uint8_t FB_getFunctionIdx(String key) {
+uint8_t FB_getFunctionIdx(String &key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
-  std::string key2 = key.c_str();
   while ((i < FunctionVec.size()) && (idx == 0xFF)) {
-    std::string key1 = FunctionVec[i].key.c_str();
-    res = key1.compare(key2);
+    res = strcmp(FunctionVec[i].key.c_str(), key.c_str());
     if (res == 0) {
       idx = i;
     }
     i++;
   }
-
   return idx;
 }
 
 void FB_dumpIoEntry(void) {
-  Serial.println("FB_dumpIoEntry");
+  Serial.println(F("FB_dumpIoEntry"));
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
     Serial.printf("%d: %06X, %d, %s, %s, %s\n", i, IoEntryVec[i].id,
                   IoEntryVec[i].type, IoEntryVec[i].key.c_str(),
@@ -104,9 +102,9 @@ void FB_dumpIoEntry(void) {
 }
 
 void FB_dumpFunctions(void) {
-  Serial.println("FB_dumpFunctions");
+  Serial.println(F("FB_dumpFunctions"));
   for (uint8_t i = 0; i < FunctionVec.size(); ++i) {
-    Serial.printf("%d: %s, %s\n", i, FunctionVec[i].key.c_str(),
-                  FunctionVec[i].next.c_str());
+    Serial.printf("%d: %s, %s, %s\n", i, FunctionVec[i].key.c_str(),
+                  FunctionVec[i].action.c_str(), FunctionVec[i].next.c_str());
   }
 }
