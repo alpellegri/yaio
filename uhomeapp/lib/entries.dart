@@ -42,10 +42,10 @@ class IoEntry {
   DatabaseReference reference;
   String key;
   String owner;
-  int type;
   String name;
-  int id;
-  String func;
+  int code;
+  int value;
+  String cb;
 
   IoEntry(DatabaseReference ref) : reference = ref;
 
@@ -53,32 +53,32 @@ class IoEntry {
     reference = ref;
     key = snapshot.key;
     owner = snapshot.value['owner'];
-    type = snapshot.value['type'];
     name = snapshot.value['name'];
-    id = snapshot.value['id'];
-    func = snapshot.value['func'];
+    code = snapshot.value['code'];
+    value = snapshot.value['value'];
+    cb = snapshot.value['func'];
   }
 
   int getPort() {
-    id ??= 0;
-    return id >> shift;
+    value ??= 0;
+    return value >> shift;
   }
 
   setPort(int port) {
-    id ??= 0;
-    int value = id & mask;
-    id = port << shift | value;
+    value ??= 0;
+    value = value & mask;
+    value = port << shift | value;
   }
 
   int getValue() {
-    id ??= 0;
-    return id & mask;
+    value ??= 0;
+    return value & mask;
   }
 
   setValue(int value) {
-    id ??= 0;
-    int port = id >> shift;
-    id = (port << shift) | (value & mask);
+    value ??= 0;
+    int port = value >> shift;
+    value = (port << shift) | (value & mask);
   }
 
   setOwner(String _owner) {
@@ -87,24 +87,38 @@ class IoEntry {
 
   toJson() {
     var json;
-    if (func != null) {
+    if (cb != null) {
       json = {
         'owner': owner,
-        'type': type,
-        'id': id,
         'name': name,
-        'func': func,
+        'code': code,
+        'value': value,
+        'cb': cb,
       };
     } else {
       json = {
         'owner': owner,
-        'type': type,
-        'id': id,
         'name': name,
+        'code': code,
+        'value': value,
       };
     }
     return json;
   }
+}
+
+enum Instruction {
+  ldi, // load immediate arg value into ACC (this involves a fetch from DB)
+  ld, // load arg value into ACC (this involves a fetch from DB)
+  st, // store arg value into ACC (this involves a write back to DB)
+  rd, // read arg value locally into ACC
+  wr, // write arg value locally into ACC
+  lt, // if ACC is less than arg, then ACC=1, else ACC=0
+  gt, // if ACC is grater than arg, then ACC=1, else ACC=0
+  eqi, // if ACC is equal to immediate arg value, then ACC=1, else ACC=0
+  eq, // if ACC is equal to arg, then ACC=1, else ACC=0
+  bz, // branch if ACC is zero
+  bnz, // branch if ACC is not zero
 }
 
 class FunctionEntry {
@@ -112,9 +126,9 @@ class FunctionEntry {
   String key;
   String owner;
   String name;
-  String action;
-  int delay;
-  String next;
+  int code;
+  String value;
+  String cb;
 
   FunctionEntry(DatabaseReference ref) : reference = ref;
 
@@ -122,10 +136,10 @@ class FunctionEntry {
       : reference = ref,
         key = snapshot.key,
         owner = snapshot.value['owner'],
-        action = snapshot.value['action'],
-        delay = snapshot.value['delay'],
+        code = snapshot.value['code'],
+        value = snapshot.value['value'],
         name = snapshot.value['name'],
-        next = snapshot.value['next'];
+        cb = snapshot.value['cb'];
 
   setOwner(String _owner) {
     owner = _owner;
@@ -134,10 +148,10 @@ class FunctionEntry {
   toJson() {
     return {
       'owner': owner,
-      'action': action,
-      'delay': delay,
       'name': name,
-      'next': next,
+      'code': code,
+      'value': value,
+      'cb': cb,
     };
   }
 }

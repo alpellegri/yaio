@@ -46,7 +46,7 @@ class ListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      'ID: ${entry.id}',
+                      'ID: ${entry.value}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -134,7 +134,7 @@ class _TimerState extends State<Timer> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if (snap.value['type'] == kTimer) {
+    if (snap.value['code'] == kTimer) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -194,7 +194,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   _EntryDialogState(this.entry) {
     _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
-    if (entry.id != null) {
+    if (entry.value != null) {
       _controllerName.text = entry.name;
       _controllerHours.text = entry.getPort().toString();
       _controllerMinutes.text = entry.getValue().toString();
@@ -274,11 +274,11 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.type = kTimer;
+                  entry.code = kTimer;
                   entry.setPort(int.parse(_controllerHours.text));
                   entry.setValue(int.parse(_controllerMinutes.text));
                   if (_selectedFunction != null) {
-                    entry.func = _selectedFunction.key;
+                    entry.cb = _selectedFunction.key;
                   }
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
@@ -302,7 +302,7 @@ class _EntryDialogState extends State<EntryDialog> {
         new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
     setState(() {
       _functionList.add(funcEntry);
-      if (entry.func == funcEntry.key) {
+      if (entry.cb == funcEntry.key) {
         _selectedFunction = funcEntry;
       }
     });

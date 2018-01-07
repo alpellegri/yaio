@@ -47,7 +47,7 @@ class FunctionListItem extends StatelessWidget {
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),*/
+                    ),
                     new Text(
                       'delay: ${entry.delay.toString()}',
                       textScaleFactor: 1.0,
@@ -55,9 +55,9 @@ class FunctionListItem extends StatelessWidget {
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
-                    ),
+                    ),*/
                     new Text(
-                      'next: ${entry.next}',
+                      'next: ${entry.cb}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -192,7 +192,6 @@ class EntryDialog extends StatefulWidget {
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
-  final TextEditingController _controllerDelay = new TextEditingController();
   final FunctionEntry entry;
   List<FunctionEntry> functionList;
 
@@ -217,17 +216,12 @@ class _EntryDialogState extends State<EntryDialog> {
     selectTypeMenu.add(kEntryId2Name[kRadioOut]);
 
     _controllerName.text = entry?.name;
-    if (entry.delay != null) {
-      _controllerDelay.text = entry.delay.toString();
-    } else {
-      // _controllerDelay.text = '0';
-    }
-    if (entry.next != null) {
-      _selectedNextList = functionList.where((el) => el.key == entry.next);
+    if (entry.cb != null) {
+      _selectedNextList = functionList.where((el) => el.key == entry.cb);
       if (_selectedNextList.length == 1) {
-        _selectedNext = functionList.singleWhere((el) => el.key == entry.next);
+        _selectedNext = functionList.singleWhere((el) => el.key == entry.cb);
       } else {
-        entry.next = null;
+        entry.cb = null;
       }
     }
   }
@@ -260,13 +254,13 @@ class _EntryDialogState extends State<EntryDialog> {
               new ListTile(
                 title: const Text('Action Type'),
                 trailing: new DropdownButton<String>(
-                  hint: const Text('type'),
+                  hint: const Text('code'),
                   value: kEntryId2Name[_selectedType],
                   onChanged: (String newValue) {
                     setState(() {
                       _selectedType = kEntryName2Id[newValue];
                       _ioMenu = entryIoList
-                          .where((el) => el.type == _selectedType)
+                          .where((el) => el.code == _selectedType)
                           .toList();
                       _ioMenu.forEach((e) => print(e.name));
                       _selectedEntry = null;
@@ -300,12 +294,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       ),
                     )
                   : new Text('Actions not declared yet'),
-              new TextField(
-                controller: _controllerDelay,
-                decoration: new InputDecoration(
-                  hintText: 'delay',
-                ),
-              ),
               (functionList.length > 0)
                   ? new ListTile(
                       title: const Text('Next Function'),
@@ -338,14 +326,9 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 setState(() {
-                  if (_controllerDelay.text != null) {
-                    entry.delay = int.parse(_controllerDelay.text);
-                  } else {
-                    entry.delay = 0;
-                  }
                   entry.name = _controllerName.text;
-                  entry.next = _selectedNext?.key;
-                  entry.action = _selectedEntry?.key;
+                  entry.cb = _selectedNext?.key;
+                  entry.value = _selectedEntry?.key;
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
                   } else {
@@ -368,10 +351,10 @@ class _EntryDialogState extends State<EntryDialog> {
     IoEntry ioEntry = new IoEntry.fromSnapshot(_graphRef, event.snapshot);
     setState(() {
       entryIoList.add(ioEntry);
-      if (entry.action == ioEntry.key) {
+      if (entry.value == ioEntry.key) {
         _selectedEntry = ioEntry;
-        _selectedType = ioEntry.type;
-        _ioMenu = entryIoList.where((el) => el.type == _selectedType).toList();
+        _selectedType = ioEntry.code;
+        _ioMenu = entryIoList.where((el) => el.code == _selectedType).toList();
       }
     });
   }

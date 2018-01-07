@@ -125,7 +125,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if (snap.value['type'] == kLOut) {
+    if (snap.value['code'] == kLOut) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -179,7 +179,7 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerValue = new TextEditingController();
 
   _EntryDialogState(this.entry) {
-    if (entry.id != null) {
+    if (entry.value != null) {
       _controllerName.text = entry.name;
       _controllerPort.text = entry.getPort().toString();
       _controllerValue.text = entry.getValue().toString();
@@ -227,7 +227,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.type = kLOut;
+                  entry.code = kLOut;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {

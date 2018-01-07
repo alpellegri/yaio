@@ -30,7 +30,7 @@ class RadioCodeListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'ID: ${entry.id.toRadixString(16).toUpperCase()}',
+                      'ID: ${entry.value.toRadixString(16).toUpperCase()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -105,9 +105,9 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   Widget build(BuildContext context) {
     var inactiveList =
-        entryList.where((el) => (el.type == kRadioElem)).toList();
-    var activeRxList = entryList.where((el) => (el.type == kRadioIn)).toList();
-    var activeTxList = entryList.where((el) => (el.type == kRadioOut)).toList();
+        entryList.where((el) => (el.code == kRadioElem)).toList();
+    var activeRxList = entryList.where((el) => (el.code == kRadioIn)).toList();
+    var activeTxList = entryList.where((el) => (el.code == kRadioOut)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -176,9 +176,9 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if ((snap.value['type'] == kRadioIn) ||
-        (snap.value['type'] == kRadioOut) ||
-        (snap.value['type'] == kRadioElem)) {
+    if ((snap.value['code'] == kRadioIn) ||
+        (snap.value['code'] == kRadioOut) ||
+        (snap.value['code'] == kRadioElem)) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -248,7 +248,7 @@ class _EntryDialogState extends State<EntryDialog> {
     print('EntryDialogState');
     _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
-    _selectedType = entry.type;
+    _selectedType = entry.code;
   }
 
   @override
@@ -333,10 +333,10 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
-                var prevType = entry.type;
-                entry.type = _selectedType;
+                var prevType = entry.code;
+                entry.code = _selectedType;
                 if (_selectedFunction != null) {
-                  entry.func = _selectedFunction.key;
+                  entry.cb = _selectedFunction.key;
                 }
                 if (entry.key != null) {
                   if (prevType == kRadioElem) {
@@ -364,7 +364,7 @@ class _EntryDialogState extends State<EntryDialog> {
         new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
     setState(() {
       _functionList.add(funcEntry);
-      if (entry.func == funcEntry.key) {
+      if (entry.cb == funcEntry.key) {
         _selectedFunction = funcEntry;
       }
     });
