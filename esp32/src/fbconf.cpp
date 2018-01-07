@@ -104,11 +104,10 @@ bool FbmUpdateRadioCodes(void) {
         JsonObject &nestedObject = i->value;
         if (nestedObject["owner"] == FB_getNodeSubPath()) {
           String key = i->key;
-          String type = nestedObject["type"];
-          String action = nestedObject["action"];
-          uint32_t delay = nestedObject["delay"];
-          String next = nestedObject["next"];
-          FB_addFunctionDB(key, type, action, delay, next);
+          String code = nestedObject["code"];
+          String value = nestedObject["value"];
+          String cb = nestedObject["cb"];
+          FB_addFunctionDB(key, code, value, 0, cb);
         }
       }
     }
@@ -139,10 +138,10 @@ bool FbmUpdateRadioCodes(void) {
         if (nestedObject["owner"] == FB_getNodeSubPath()) {
           String key = i->key;
           String name = nestedObject["name"];
-          String id = nestedObject["id"];
-          uint8_t type = nestedObject["type"];
-          String func = nestedObject["func"];
-          FB_addIoEntryDB(key, type, id, name, func);
+          uint8_t code = nestedObject["code"];
+          String value = nestedObject["value"];
+          String cb = nestedObject["func"];
+          FB_addIoEntryDB(key, code, value, name, cb);
         }
       }
     }
