@@ -7,7 +7,7 @@
   key: {
     owner: <owner>, // it is a string
     name: <name>,   // it is a string
-    code: <type>,   // it is a string (enum?)
+    code: <type>,   // it is a enum
     value: <value>, // it is dynamic: a string or a number
     cb: <callback>, // it is a string representing the key of the database
   }
@@ -144,7 +144,7 @@ functions: execute a statement of a program, can call other statement
 
   key: {
     name: <name>,   // it is a string
-    code: <instr>,  // it is a number (enum?)
+    code: <instr>,  // it is a enum
     value: <arg>,   // it is dynamic: a string or a number
     cb: <callback>, // it is a string representing the key of the database
   }
@@ -161,6 +161,7 @@ functions: execute a statement of a program, can call other statement
     eq,  // if ACC is equal to arg, then ACC=1, else ACC=0
     bz,  // branch if ACC is zero
     bnz, // branch if ACC is not zero
+	dly, // delay in ms
   }
   
 A1. example simple sensor trigger
