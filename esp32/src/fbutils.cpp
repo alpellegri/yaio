@@ -45,12 +45,12 @@ String& FB_getIoEntryNameById(uint8_t i) {
   return entry.name;
 }
 
-void FB_addFunctionDB(String key, String code, String value, uint32_t delay,
+void FB_addFunctionDB(String key, uint8_t code, String value, uint32_t delay,
                       String cb) {
   if (FunctionVec.size() < NUM_IO_FUNCTION_MAX) {
     FunctionEntry entry;
     entry.key = key;
-    entry.code = atoi(code.c_str());
+    entry.code = code;
     entry.value = value;
     entry.delay = delay;
     entry.cb = cb;

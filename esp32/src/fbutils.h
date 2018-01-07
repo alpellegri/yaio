@@ -41,7 +41,7 @@ extern void FB_addIoEntryDB(String key, uint8_t code, String value, String name,
                             String cb);
 extern String& FB_getIoEntryNameById(uint8_t i);
 
-extern void FB_addFunctionDB(String key, String code, String value,
+extern void FB_addFunctionDB(String key, uint8_t code, String value,
                              uint32_t delay, String cb);
 extern uint8_t FB_checkRadioCodeDB(uint32_t code);
 extern void FB_executeIoEntryDB(uint8_t idx);
