@@ -98,24 +98,13 @@ class IoEntry {
   }
 
   toJson() {
-    var json;
-    if (cb != null) {
-      json = {
-        'owner': owner,
-        'name': name,
-        'code': code,
-        'value': value,
-        'cb': cb,
-      };
-    } else {
-      json = {
-        'owner': owner,
-        'name': name,
-        'code': code,
-        'value': value,
-      };
-    }
-    return json;
+    return {
+      'owner': owner,
+      'name': name,
+      'code': code,
+      'value': value,
+      'cb': cb,
+    };
   }
 }
 
@@ -131,6 +120,7 @@ enum Instruction {
   eq, // if ACC is equal to arg, then ACC=1, else ACC=0
   bz, // branch if ACC is zero
   bnz, // branch if ACC is not zero
+  dly, // delay in ms
 }
 
 class FunctionEntry {
