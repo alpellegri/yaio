@@ -601,7 +601,7 @@ key-f01: {
   cb: key-f03,
 }
 key-f02: {
-  name: 'f01',
+  name: 'f02',
   code: ldi,
   value: 0,
   cb: key-f03,
