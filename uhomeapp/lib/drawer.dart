@@ -4,6 +4,7 @@ import 'setup.dart';
 import 'node_setup.dart';
 import 'radiocode.dart';
 import 'timer.dart';
+import 'data_io.dart';
 import 'digital_io.dart';
 import 'logical_io.dart';
 import 'functions.dart';
@@ -18,6 +19,7 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Setup.routeName: (BuildContext context) => new Setup(title: 'Device'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'Node Setup'),
+  DataIO.routeName: (BuildContext context) => new DataIO(title: 'data IO'),
   DigitalIO.routeName: (BuildContext context) =>
       new DigitalIO(title: 'Digital IO'),
   LogicalIO.routeName: (BuildContext context) =>
@@ -67,6 +69,14 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.of(context)
                 ..pop()
                 ..pushNamed(Setup.routeName);
+            }),
+        new ListTile(
+            leading: new Icon(Icons.label_outline),
+            title: new Text('Data IO'),
+            onTap: () {
+              Navigator.of(context)
+                ..pop()
+                ..pushNamed(DataIO.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.label_outline),
