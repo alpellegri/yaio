@@ -30,7 +30,7 @@ void ICACHE_RAM_ATTR Action(uint8_t src_idx, String &action) {
     Serial.printf_P(PSTR("type: %d, name: %s, port: %d, value: %d\n"),
                     entry.code, entry.name.c_str(), port, value);
     switch (entry.code) {
-    case kDOut: {
+    case kPhyOut: {
       // dout
       pinMode(port, OUTPUT);
       digitalWrite(port, !!value);
@@ -39,7 +39,7 @@ void ICACHE_RAM_ATTR Action(uint8_t src_idx, String &action) {
       // rf
       RF_Send(entry.value, 24);
       break;
-    case kLOut: {
+    case kLogOut: {
       // lout
       FbmLogicReq(src_idx, port, !!value);
     } break;

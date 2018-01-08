@@ -15,9 +15,9 @@ const String kStringFloat = 'float';
 enum DataCode {
   PhyIn,
   PhyOut,
-  RadioIn,
   LogIn,
   LogOut,
+  RadioIn,
   RadioOut,
   RadioElem,
   Timer,
