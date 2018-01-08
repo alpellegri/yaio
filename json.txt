@@ -190,9 +190,8 @@ VM function execution starts on event.
     value: <arg>,
     cb: <callback>,
   }
-  
   code = stm.code
-
+ 
 3. VM-decode
 
   decode(stm.code, value)
@@ -222,22 +221,22 @@ if instruction is not immediate, value represent a key of the DB:
   V = vm_pipe[code][0](stm.value)
 
 3.2 VM-decode-execution
-execute <instr> against the tuple {ACC, V, function.cb}
+execute <instr> against the tuple {ACC, V, stm.value, stm.cb}
   entry_stm = stm.cb
-  ACC, entry_stm = <instr>(ACC, V, entry_stm)
+  ACC, entry_stm = <instr>(ACC, V, stm.value, entry_stm)
   entry_stm is an output because an instruction is able to change the execution flow
 
   // index 1: exec
   entry_stm = stm.cb
-  ACC = vm_pipe[code][1](ACC, V, &entry_stm)
+  ACC = vm_pipe[code][1](ACC, V, stm.value, &entry_stm)
   
 3.3 VM-decode-write
   data = lookup(stm.value)
   data.value = ACC
 
-  void vm_write(String key) {
+  void vm_write(String key, acc) {
     data = lookup(key.value);
-    data.value = String(ACC);
+    data.value = acc;
     data.wb = true;
   }
 
@@ -277,8 +276,10 @@ uint32_t vm_exec_ld24(uint32_t acc, uint32_t v, String& vString, String& stm) {
   return v&(1<<24-1);
 }
 
-uint32_t vm_exec_st(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  return v&(1<<24-1);
+void vm_exec_st24(uint32_t acc, uint32_t v, String& vString, String& stm) {
+}
+
+void vm_exec_st(uint32_t acc, uint32_t v, String& vString, String& stm) {
 }
 
 uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String& vString, String& stm) {
