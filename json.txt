@@ -162,12 +162,12 @@ The VM is provided by a accumulator register ACC.
   }
 
 * VM execution model
-VM is responsable on capturing Data entities changes (entry.ev == true).
+VM is responsible on capturing Data entities changes (entry.ev == true).
 VM function execution starts on event.
 
 1. VM find a event on a data entry (entry.ev == true), then check the cb (entry.cb)
   and clear the event indication
-  entry.ev = flase
+  entry.ev = false
 
   where:
   entry.cb = 'key-function' is a key of DB
