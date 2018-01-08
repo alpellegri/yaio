@@ -22,14 +22,14 @@ void ICACHE_RAM_ATTR Action(uint8_t src_idx, String &action) {
   // Serial.printf("debug  Action %s, %d\n", action.c_str(), idx);
   if (idx != 0xFF) {
     IoEntry entry = FB_getIoEntry(idx);
-    uint8_t port = entry.id >> 24;
-    uint8_t value = entry.id & 0xFF;
+    uint8_t port = entry.value >> 24;
+    uint8_t value = entry.value & 0xFF;
 
     Serial.printf_P(PSTR("RF_Action: %d, %d, %s\n"), src_idx, idx,
                     action.c_str());
     Serial.printf_P(PSTR("type: %d, name: %s, port: %d, value: %d\n"),
-                    entry.type, entry.name.c_str(), port, value);
-    switch (entry.type) {
+                    entry.code, entry.name.c_str(), port, value);
+    switch (entry.code) {
     case kDOut: {
       // dout
       pinMode(port, OUTPUT);
@@ -37,7 +37,7 @@ void ICACHE_RAM_ATTR Action(uint8_t src_idx, String &action) {
     } break;
     case kRadioOut:
       // rf
-      RF_Send(entry.id, 24);
+      RF_Send(entry.value, 24);
       break;
     case kLOut: {
       // lout
@@ -86,8 +86,8 @@ void ICACHE_RAM_ATTR FunctionSrv(void) {
     function.timer = curr_time;
     function.timer_run = 1;
     // Serial.printf("debug call Action %d: %s\n", FunctionReqIdx, function.action.c_str());
-    if (function.action.length() != 0) {
-      Action(function.src_idx, function.action);
+    if (function.value.length() != 0) {
+      Action(function.src_idx, function.value);
     }
     FunctionReqPending = 0;
     // Serial.printf("debug FunctionSrv release pending\n");
@@ -105,8 +105,8 @@ void ICACHE_RAM_ATTR FunctionSrv(void) {
     if (function.timer_run == 1) {
       if ((curr_time - function.timer) >= function.delay) {
         function.timer_run = 0;
-        if (function.next.length() != 0) {
-          FunctionReq(function.src_idx, function.next);
+        if (function.cb.length() != 0) {
+          FunctionReq(function.src_idx, function.cb);
         }
       } else {
         need_arm = true;

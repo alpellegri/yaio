@@ -27,33 +27,33 @@ FunctionEntry &FB_getFunction(uint8_t i) { return FunctionVec[i]; }
 
 uint8_t FB_getFunctionLen(void) { return FunctionVec.size(); }
 
-void FB_addIoEntryDB(String key, uint8_t type, String id, String name,
-                     String func) {
+void FB_addIoEntryDB(String key, uint8_t code, String value, String name,
+                     String cb) {
   if (IoEntryVec.size() < NUM_IO_ENTRY_MAX) {
     IoEntry entry;
     entry.key = key;
-    entry.type = type;
-    entry.id = atoi(id.c_str());
+    entry.code = code;
+    entry.value = atoi(value.c_str());
     entry.name = name;
-    entry.func = func;
+    entry.cb = cb;
     IoEntryVec.push_back(entry);
   }
 }
 
-String& FB_getIoEntryNameById(uint8_t i) {
-  IoEntry& entry = IoEntryVec[i];
+String &FB_getIoEntryNameById(uint8_t i) {
+  IoEntry &entry = IoEntryVec[i];
   return entry.name;
 }
 
-void FB_addFunctionDB(String key, String type, String action, uint32_t delay,
-                      String next) {
+void FB_addFunctionDB(String key, uint8_t code, String value, uint32_t delay,
+                      String cb) {
   if (FunctionVec.size() < NUM_IO_FUNCTION_MAX) {
     FunctionEntry entry;
     entry.key = key;
-    entry.type = atoi(type.c_str());
-    entry.action = action;
+    entry.code = code;
+    entry.value = value;
     entry.delay = delay;
-    entry.next = next;
+    entry.cb = cb;
     entry.timer_run = 0;
     entry.src_idx = 0xFF;
     entry.timer = 0;
@@ -95,16 +95,16 @@ uint8_t FB_getFunctionIdx(String &key) {
 void FB_dumpIoEntry(void) {
   Serial.println(F("FB_dumpIoEntry"));
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    Serial.printf("%d: %06X, %d, %s, %s, %s\n", i, IoEntryVec[i].id,
-                  IoEntryVec[i].type, IoEntryVec[i].key.c_str(),
-                  IoEntryVec[i].name.c_str(), IoEntryVec[i].func.c_str());
+    Serial.printf_P(PSTR("%d: %06X, %d, %s, %s, %s\n"), i, IoEntryVec[i].value,
+                    IoEntryVec[i].code, IoEntryVec[i].key.c_str(),
+                    IoEntryVec[i].name.c_str(), IoEntryVec[i].cb.c_str());
   }
 }
 
 void FB_dumpFunctions(void) {
   Serial.println(F("FB_dumpFunctions"));
   for (uint8_t i = 0; i < FunctionVec.size(); ++i) {
-    Serial.printf("%d: %s, %s, %s\n", i, FunctionVec[i].key.c_str(),
-                  FunctionVec[i].action.c_str(), FunctionVec[i].next.c_str());
+    Serial.printf_P(PSTR("%d: %s, %s, %s\n"), i, FunctionVec[i].key.c_str(),
+                    FunctionVec[i].value.c_str(), FunctionVec[i].cb.c_str());
   }
 }

@@ -11,21 +11,21 @@
 
 class IoEntry {
 public:
-  uint32_t id;
-  uint8_t type;
+  uint32_t value;
+  uint8_t code;
   String key;
   String name;
-  String func;
+  String cb;
 };
 
 class FunctionEntry {
 public:
   String key;  // firebase key
-  String next; // firebase key
+  String cb; // firebase key
   uint8_t src_idx;
-  uint8_t type;
+  uint8_t code;
   uint8_t timer_run;
-  String action; // firebase key
+  String value; // firebase key
   uint32_t delay;
   uint32_t timer;
 };
@@ -37,12 +37,12 @@ extern uint8_t FB_getIoEntryLen(void);
 extern FunctionEntry& FB_getFunction(uint8_t i);
 extern uint8_t FB_getFunctionLen(void);
 
-extern void FB_addIoEntryDB(String key, uint8_t type, String id, String name,
-                            String func);
+extern void FB_addIoEntryDB(String key, uint8_t code, String value, String name,
+                            String cb);
 extern String& FB_getIoEntryNameById(uint8_t i);
 
-extern void FB_addFunctionDB(String key, String type, String action,
-                             uint32_t delay, String next);
+extern void FB_addFunctionDB(String key, uint8_t code, String value,
+                             uint32_t delay, String cb);
 extern uint8_t FB_checkRadioCodeDB(uint32_t code);
 extern void FB_executeIoEntryDB(uint8_t idx);
 extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);

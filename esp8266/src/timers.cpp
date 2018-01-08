@@ -23,9 +23,9 @@ void MonitorTimers(void) {
   for (uint8_t i = 0; i < len; i++) {
     IoEntry entry = FB_getIoEntry(i);
     // test in range
-    if (entry.type == kTimer) {
+    if (entry.code == kTimer) {
       // convert is to 24_7 time
-      uint32_t _time = 60 * (entry.id >> 24) + (entry.id & 0xFF);
+      uint32_t _time = 60 * (entry.value >> 24) + (entry.value & 0xFF);
       bool res = TestInRange(_time, t247_last, t247);
       if (res == true) {
         // action
