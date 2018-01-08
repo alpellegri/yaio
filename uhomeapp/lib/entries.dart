@@ -77,12 +77,12 @@ class IoEntry {
     cb = snapshot.value['func'];
   }
 
-  int getPort() {
+  int getPin() {
     value ??= 0;
     return value >> shift;
   }
 
-  setPort(int port) {
+  setPin(int port) {
     value ??= 0;
     value = value & mask;
     value = port << shift | value;
@@ -115,11 +115,10 @@ class IoEntry {
 }
 
 enum Instruction {
+  ex0, // exception, illegal op-code 0
   ldi, // load immediate arg value into ACC (this involves a fetch from DB)
   ld, // load arg value into ACC (this involves a fetch from DB)
   st, // store arg value into ACC (this involves a write back to DB)
-  rd, // read arg value locally into ACC
-  wr, // write arg value locally into ACC
   lt, // if ACC is less than arg, then ACC=1, else ACC=0
   gt, // if ACC is grater than arg, then ACC=1, else ACC=0
   eqi, // if ACC is equal to immediate arg value, then ACC=1, else ACC=0

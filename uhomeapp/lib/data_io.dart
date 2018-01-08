@@ -26,12 +26,12 @@ class ListItem extends StatelessWidget {
                   children: [
                     new Text(
                       entry.name,
-                      textScaleFactor: 1.3,
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'PORT: ${entry.getPort()}',
-                      textScaleFactor: 1.0,
+                      'PIN: ${entry.getPin()}',
+                      textScaleFactor: 0.7,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -39,7 +39,7 @@ class ListItem extends StatelessWidget {
                     ),
                     new Text(
                       'VALUE: ${entry.getValue()}',
-                      textScaleFactor: 1.0,
+                      textScaleFactor: 0.7,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -178,7 +178,7 @@ class _EntryDialogState extends State<EntryDialog> {
   _EntryDialogState(this.entry) {
     if (entry.value != null) {
       _controllerName.text = entry.name;
-      _controllerPort.text = entry.getPort().toString();
+      _controllerPort.text = entry.getPin().toString();
       _controllerValue.text = entry.getValue().toString();
     }
   }
@@ -200,7 +200,7 @@ class _EntryDialogState extends State<EntryDialog> {
               new TextField(
                 controller: _controllerPort,
                 decoration: new InputDecoration(
-                  hintText: 'port',
+                  hintText: 'pin',
                 ),
               ),
               new TextField(
@@ -225,7 +225,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.code = DataCode.PhyOut.index;
-                  entry.setPort(int.parse(_controllerPort.text));
+                  entry.setPin(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());

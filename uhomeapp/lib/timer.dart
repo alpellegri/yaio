@@ -30,7 +30,7 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'Hour: ${entry.getPort()}',
+                      'Hour: ${entry.getPin()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -196,7 +196,7 @@ class _EntryDialogState extends State<EntryDialog> {
     _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     if (entry.value != null) {
       _controllerName.text = entry.name;
-      _controllerHours.text = entry.getPort().toString();
+      _controllerHours.text = entry.getPin().toString();
       _controllerMinutes.text = entry.getValue().toString();
     }
   }
@@ -275,7 +275,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.code = DataCode.Timer.index;
-                  entry.setPort(int.parse(_controllerHours.text));
+                  entry.setPin(int.parse(_controllerHours.text));
                   entry.setValue(int.parse(_controllerMinutes.text));
                   if (_selectedFunction != null) {
                     entry.cb = _selectedFunction.key;

@@ -30,7 +30,7 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'PORT: ${entry.getPort()}',
+                      'PIN: ${entry.getPin()}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -181,7 +181,7 @@ class _EntryDialogState extends State<EntryDialog> {
   _EntryDialogState(this.entry) {
     if (entry.value != null) {
       _controllerName.text = entry.name;
-      _controllerPort.text = entry.getPort().toString();
+      _controllerPort.text = entry.getPin().toString();
       _controllerValue.text = entry.getValue().toString();
     }
   }
@@ -203,7 +203,7 @@ class _EntryDialogState extends State<EntryDialog> {
               new TextField(
                 controller: _controllerPort,
                 decoration: new InputDecoration(
-                  hintText: 'port',
+                  hintText: 'pin',
                 ),
               ),
               new TextField(
@@ -228,7 +228,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.code = DataCode.LogOut.index;
-                  entry.setPort(int.parse(_controllerPort.text));
+                  entry.setPin(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
