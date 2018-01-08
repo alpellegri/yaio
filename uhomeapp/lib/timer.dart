@@ -134,7 +134,7 @@ class _TimerState extends State<Timer> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if (snap.value['code'] == kTimer) {
+    if (snap.value['code'] == DataCode.Timer.index) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -274,7 +274,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.code = kTimer;
+                  entry.code = DataCode.Timer.index;
                   entry.setPort(int.parse(_controllerHours.text));
                   entry.setValue(int.parse(_controllerMinutes.text));
                   if (_selectedFunction != null) {

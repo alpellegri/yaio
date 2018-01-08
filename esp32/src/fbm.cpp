@@ -437,8 +437,8 @@ bool FbmService(void) {
           DynamicJsonBuffer jsonBuffer;
           JsonObject &inactive = jsonBuffer.createObject();
           inactive["name"] = "inactive";
-          inactive["id"] = code;
-          inactive["type"] = kRadioElem;
+          inactive["value"] = code;
+          inactive["code"] = kRadioElem;
           yield();
           Firebase.set((kgraph + F("/inactive")), JsonVariant(inactive));
 

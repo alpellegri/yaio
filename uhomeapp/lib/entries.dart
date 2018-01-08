@@ -1,19 +1,9 @@
 import 'package:firebase_database/firebase_database.dart';
 
-const int kDOut = 0;
-const int kRadioIn = 1;
-const int kLOut = 2;
-const int kDIn = 3;
-const int kRadioOut = 4;
-const int kRadioElem = 5;
-const int kTimer = 6;
-const int kBool = 7;
-const int kInt = 8;
-const int kFloat = 9;
-
-const String kStringDOut = 'DOut';
-const String kStringLOut = 'LOut';
-const String kStringDIn = 'DIn';
+const String kStringPhyIn = 'PhyIn';
+const String kStringPhyOut = 'PhyOut';
+const String kStringLogIn = 'LogIn';
+const String kStringLogOut = 'LogOut';
 const String kStringRadioIn = 'RadioIn';
 const String kStringRadioOut = 'RadioOut';
 const String kStringRadioElem = 'RadioElem';
@@ -22,30 +12,46 @@ const String kStringBool = 'bool';
 const String kStringInt = 'int';
 const String kStringFloat = 'float';
 
-const Map<int, String> kEntryId2Name = const {
-  kDOut: kStringDOut,
-  kRadioIn: kStringRadioIn,
-  kLOut: kStringLOut,
-  kDIn: kStringDIn,
-  kRadioOut: kStringRadioOut,
-  kRadioElem: kStringRadioElem,
-  kTimer: kStringTimer,
-  kBool: kStringBool,
-  kInt: kStringInt,
-  kFloat: kStringFloat,
+enum DataCode {
+  PhyIn,
+  PhyOut,
+  RadioIn,
+  LogIn,
+  LogOut,
+  RadioOut,
+  RadioElem,
+  Timer,
+  Bool,
+  Int,
+  Float,
+}
+
+const Map<DataCode, String> kEntryId2Name = const {
+  DataCode.PhyIn: kStringPhyIn,
+  DataCode.PhyOut: kStringPhyOut,
+  DataCode.LogIn: kStringLogIn,
+  DataCode.LogOut: kStringLogOut,
+  DataCode.RadioIn: kStringRadioIn,
+  DataCode.RadioOut: kStringRadioOut,
+  DataCode.RadioElem: kStringRadioElem,
+  DataCode.Timer: kStringTimer,
+  DataCode.Bool: kStringBool,
+  DataCode.Int: kStringInt,
+  DataCode.Float: kStringFloat,
 };
 
-const Map<String, int> kEntryName2Id = const {
-  kStringDOut: kDOut,
-  kStringRadioIn: kRadioIn,
-  kStringLOut: kLOut,
-  kStringDIn: kDIn,
-  kStringRadioOut: kRadioOut,
-  kStringRadioElem: kRadioElem,
-  kStringTimer: kTimer,
-  kStringBool: kBool,
-  kStringInt: kInt,
-  kStringFloat: kFloat,
+const Map<String, DataCode> kEntryName2Id = const {
+  kStringPhyIn: DataCode.PhyIn,
+  kStringPhyOut: DataCode.PhyOut,
+  kStringLogIn: DataCode.LogIn,
+  kStringLogOut: DataCode.LogOut,
+  kStringRadioIn: DataCode.RadioIn,
+  kStringRadioOut: DataCode.RadioOut,
+  kStringRadioElem: DataCode.RadioElem,
+  kStringTimer: DataCode.Timer,
+  kStringBool: DataCode.Bool,
+  kStringInt: DataCode.Int,
+  kStringFloat: DataCode.Float,
 };
 
 class IoEntry {

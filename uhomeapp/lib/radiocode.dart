@@ -105,9 +105,11 @@ class _RadioCodeState extends State<RadioCode> {
   @override
   Widget build(BuildContext context) {
     var inactiveList =
-        entryList.where((el) => (el.code == kRadioElem)).toList();
-    var activeRxList = entryList.where((el) => (el.code == kRadioIn)).toList();
-    var activeTxList = entryList.where((el) => (el.code == kRadioOut)).toList();
+        entryList.where((el) => (el.code == DataCode.RadioElem.index)).toList();
+    var activeRxList =
+        entryList.where((el) => (el.code == DataCode.RadioIn.index)).toList();
+    var activeTxList =
+        entryList.where((el) => (el.code == DataCode.RadioOut.index)).toList();
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -176,9 +178,9 @@ class _RadioCodeState extends State<RadioCode> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if ((snap.value['code'] == kRadioIn) ||
-        (snap.value['code'] == kRadioOut) ||
-        (snap.value['code'] == kRadioElem)) {
+    if ((snap.value['code'] == DataCode.RadioIn.index) ||
+        (snap.value['code'] == DataCode.RadioOut.index) ||
+        (snap.value['code'] == DataCode.RadioElem.index)) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -237,7 +239,7 @@ class _EntryDialogState extends State<EntryDialog> {
       FirebaseDatabase.instance.reference().child(getFunctionsRef());
   List<FunctionEntry> _functionList = new List();
 
-  int _selectedType;
+  DataCode _selectedType;
   FunctionEntry _selectedFunction;
   List<String> radioMenu = new List();
   StreamSubscription<Event> _onFunctionAddSub;
@@ -248,7 +250,7 @@ class _EntryDialogState extends State<EntryDialog> {
     print('EntryDialogState');
     _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     _controllerName.text = entry.name;
-    _selectedType = entry.code;
+    _selectedType = DataCode.values.elementAt(entry.code);
   }
 
   @override
@@ -288,9 +290,9 @@ class _EntryDialogState extends State<EntryDialog> {
                     });
                   },
                   items: <String>[
-                    kEntryId2Name[kRadioIn],
-                    kEntryId2Name[kRadioOut],
-                    kEntryId2Name[kRadioElem]
+                    kEntryId2Name[DataCode.RadioIn],
+                    kEntryId2Name[DataCode.RadioOut],
+                    kEntryId2Name[DataCode.RadioElem]
                   ].map((String entry) {
                     return new DropdownMenuItem<String>(
                       value: entry,
@@ -334,12 +336,12 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.reference = _graphRef;
                 entry.name = _controllerName.text;
                 var prevType = entry.code;
-                entry.code = _selectedType;
+                entry.code = _selectedType.index;
                 if (_selectedFunction != null) {
                   entry.cb = _selectedFunction.key;
                 }
                 if (entry.key != null) {
-                  if (prevType == kRadioElem) {
+                  if (prevType == DataCode.RadioElem.index) {
                     entry.reference.child(entry.key).remove();
                     entry.reference.push().set(entry.toJson());
                   } else {

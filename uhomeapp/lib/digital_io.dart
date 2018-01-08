@@ -125,7 +125,7 @@ class _DigitalIOState extends State<DigitalIO> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if (snap.value['code'] == kDOut) {
+    if (snap.value['code'] == DataCode.PhyOut.index) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -227,7 +227,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.code = kDOut;
+                  entry.code = DataCode.PhyOut.index;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {

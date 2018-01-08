@@ -195,7 +195,7 @@ class _EntryDialogState extends State<EntryDialog> {
   final FunctionEntry entry;
   List<FunctionEntry> functionList;
 
-  int _selectedType;
+  DataCode _selectedType;
   FunctionEntry _selectedNext;
   var _selectedNextList;
   List<String> selectTypeMenu = new List();
@@ -211,9 +211,9 @@ class _EntryDialogState extends State<EntryDialog> {
     _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
     _onAddSubscription = _graphRef.onChildAdded.listen(_onGraphEntryAdded);
 
-    selectTypeMenu.add(kEntryId2Name[kDOut]);
-    selectTypeMenu.add(kEntryId2Name[kLOut]);
-    selectTypeMenu.add(kEntryId2Name[kRadioOut]);
+    selectTypeMenu.add(kEntryId2Name[DataCode.PhyOut]);
+    selectTypeMenu.add(kEntryId2Name[DataCode.LogOut]);
+    selectTypeMenu.add(kEntryId2Name[DataCode.RadioOut]);
 
     _controllerName.text = entry?.name;
     if (entry.cb != null) {
@@ -260,9 +260,10 @@ class _EntryDialogState extends State<EntryDialog> {
                     setState(() {
                       _selectedType = kEntryName2Id[newValue];
                       _ioMenu = entryIoList
-                          .where((el) => el.code == _selectedType)
+                          .where((el) => el.code == _selectedType.index)
                           .toList();
                       _ioMenu.forEach((e) => print(e.name));
+                      print(kEntryId2Name[_selectedType]);
                       _selectedEntry = null;
                     });
                   },
@@ -353,8 +354,8 @@ class _EntryDialogState extends State<EntryDialog> {
       entryIoList.add(ioEntry);
       if (entry.value == ioEntry.key) {
         _selectedEntry = ioEntry;
-        _selectedType = ioEntry.code;
-        _ioMenu = entryIoList.where((el) => el.code == _selectedType).toList();
+        _selectedType = DataCode.values.elementAt(ioEntry.code);
+        _ioMenu = entryIoList.where((el) => el.code == _selectedType.index).toList();
       }
     });
   }

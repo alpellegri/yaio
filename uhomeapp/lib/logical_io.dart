@@ -72,15 +72,15 @@ class LogicalIO extends StatefulWidget {
 class _LogicalIOState extends State<LogicalIO> {
   List<IoEntry> entryList = new List();
   DatabaseReference _graphRef;
-  StreamSubscription<Event> _onAddSub;
-  StreamSubscription<Event> _onEditSub;
-  StreamSubscription<Event> _onRemoveSub;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
 
   _LogicalIOState() {
     _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onAddSub = _graphRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSub = _graphRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSub = _graphRef.onChildRemoved.listen(_onEntryRemoved);
+    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -92,9 +92,9 @@ class _LogicalIOState extends State<LogicalIO> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSub.cancel();
-    _onEditSub.cancel();
-    _onRemoveSub.cancel();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -125,7 +125,7 @@ class _LogicalIOState extends State<LogicalIO> {
 
   void _onEntryAdded(Event event) {
     var snap = event.snapshot;
-    if (snap.value['code'] == kLOut) {
+    if (snap.value['code'] == DataCode.LogOut.index) {
       setState(() {
         entryList.add(new IoEntry.fromSnapshot(_graphRef, snap));
       });
@@ -227,7 +227,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.code = kLOut;
+                  entry.code = DataCode.LogOut.index;
                   entry.setPort(int.parse(_controllerPort.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
