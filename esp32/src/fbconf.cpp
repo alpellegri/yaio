@@ -91,13 +91,6 @@ bool FbmUpdateRadioCodes(void) {
       FB_deinitFunctionDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == FB_getNodeSubPath()) {
-          num++;
-        }
-      }
 
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
@@ -124,13 +117,6 @@ bool FbmUpdateRadioCodes(void) {
       FB_deinitIoEntryDB();
       JsonVariant variant = ref.getJsonVariant();
       JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == FB_getNodeSubPath()) {
-          num++;
-        }
-      }
 
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
