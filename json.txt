@@ -15,7 +15,7 @@
 
 * physical i/o
   type: {phyin, phyout}
-  i/o are addressed by id (port, value: v)
+  i/o are addressed by id (pin, value: v)
 
   . input is scanned periodically (or event driven)
     on change can generate a call back
@@ -161,23 +161,9 @@ The VM is provided by a accumulator register ACC.
     dly, // delay in ms
   }
 
-    code F|R|E|W
-exc|   0|x|x|x| 
-ldi|   1|x|x|x| 
-ld |   2|x|x|x| 
-st |   3|x| |x|x
-lt |   4|x|x|x|
-gt |   5|x|x|x|
-eqi|   6|x|x|x|
-eq |   7|x|x|x|
-bz |   8|x|x|x|
-bnz|   9|x|x|x|
-dly|  10|x|x|x|
-
 * VM execution model
-VM is responsable on capturing Data entities changes. If a data entity is provided by a callback
-'cb'. A cb is a DB index of a function, the VM has to execute the linked function.
-Therefore, VM function execution starts on event.
+VM is responsable on capturing Data entities changes (entry.ev == true).
+VM function execution starts on event.
 
 1. VM find a event on a data entry (entry.ev == true), then check the cb (entry.cb)
   and clear the event indication
@@ -195,25 +181,35 @@ Therefore, VM function execution starts on event.
   entry_stm act as a program counter
   
   if (entry_stm != null) {
-    function = lookup(entry_stm)
+    stm = lookup(entry_stm)
   }
 
-  function = {
+  stm = {
     name: <name>,
     code: <instr>,
     value: <arg>,
     cb: <callback>,
   }
   
-3. VM-read
+  code = stm.code
+
+3. VM-decode
+
+  decode(stm.code, value)
+
+  load data
+  execute
+  write data
+  
+3.1 VM-decode-read
 if instruction is immediate then:
   V = value
   
 if instruction is not immediate, value represent a key of the DB:
-  data = lookup(function.value)
+  data = lookup(stm.value)
   V = data.value
 
-  uint32_t vm_read_im(String key) {
+  uint32_t vm_readi(String key) {
     return atoi(key.c_str());
   }
   
@@ -222,13 +218,21 @@ if instruction is not immediate, value represent a key of the DB:
     return atoi(data.value.c_str());
   }
 
-4. VM-execution
-execute <instr> against the tuple {ACC, V}
-  ACC = <instr>(ACC, V)
-  entry_stm = function.cb
+  // index 0: fetch
+  V = vm_pipe[code][0](stm.value)
 
-5. VM-write
-  data = lookup(function.value)
+3.2 VM-decode-execution
+execute <instr> against the tuple {ACC, V, function.cb}
+  entry_stm = stm.cb
+  ACC, entry_stm = <instr>(ACC, V, entry_stm)
+  entry_stm is an output because an instruction is able to change the execution flow
+
+  // index 1: exec
+  entry_stm = stm.cb
+  ACC = vm_pipe[code][1](ACC, V, &entry_stm)
+  
+3.3 VM-decode-write
+  data = lookup(stm.value)
   data.value = ACC
 
   void vm_write(String key) {
@@ -237,9 +241,71 @@ execute <instr> against the tuple {ACC, V}
     data.wb = true;
   }
 
-6. VM-write-back
+  // index 2: exec
+  vm_pipe[code][2](stm.value, ACC)
+
+4. VM-write-back
 All variable have to contain an indication flag (data.wb == true) are asked to be written back to
 the DB
+
+     code|F|R|E|W|      READ|         EXEC|      WRITE 
+ex0 |   0|x| |x| |      null,  vm_exec_ex0,       null
+ldi |   1|x|x|x| |  vm_readi,  vm_exec_ldi,       null
+ld24|   2|x|x|x| | vm_read24, vm_exec_ld24,       null
+ld  |   3|x|x|x| |   vm_read,  vm_exec_ldi,       null
+st24|   4|x| |x|x|  vm_read0, vm_exec_st24, vm_write24
+st  |   5|x| |x|x|  vm_read0,   vm_exec_st,   vm_write
+lt  |   6|x|x|x| |   vm_read,   vm_exec_lt,       null
+gt  |   7|x|x|x| |   vm_read,   vm_exec_gt,       null
+eqi |   8|x|x|x| |  vm_readi,   vm_exec_eq,       null
+eq  |   9|x|x|x| |   vm_read,   vm_exec_eq,       null
+bz  |  10|x| |x| |  vm_read0,   vm_exec_bz,       null
+bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,       null
+dly |  12|x|x|x| |   vm_read,  vm_exec_dly,       null
+
+uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String& stm) {
+  String empty;
+  stm = empty;
+  return 0;
+}
+
+uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  return v;
+}
+
+uint32_t vm_exec_ld24(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  return v&(1<<24-1);
+}
+
+uint32_t vm_exec_st(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  return v&(1<<24-1);
+}
+
+uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  return v<acc;
+}
+
+uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  return v>acc;
+}
+
+uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  return v==acc;
+}
+
+uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  if (acc == 0) {
+    stm = vString;
+  }
+  return acc;
+}
+
+uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String& vString, String& stm) {
+  if (acc != 0) {
+    stm = vString;
+  }
+  return acc;
+}
 
 A1. example simple sensor trigger
    ==============================
