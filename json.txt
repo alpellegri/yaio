@@ -100,8 +100,6 @@
     cb: <callback>,
   }
   configuration: mask
-  
-  At start VM read all radioin from DB and store them to RAM.
 
 * notify is a logical values
   key-notify: {
@@ -133,44 +131,124 @@
 2. Function Definitions
    ====================
 
-These entities are defined into a database.
+These entities (data and functions) are defined into a database.
 
-Functions run into a simple virtual machine.
-The VM fetch instruction and data and execute them.
-VM is provided by a accumulator register ACC.
-At startup all DB entities are locally copied into the runtime environment.
+Functions run into a simple virtual machine VM. At startup, the VM copies all DB entities into the
+runtime environment.
+On event, the VM fetch instruction and data and execute them.
+The VM is provided by a accumulator register ACC.
 
-functions: execute a statement of a program, can call other statement
+* functions: execute a statement of a program, can call other statement
 
   key: {
     name: <name>,   // it is a string
     code: <instr>,  // it is a enum
-    value: <arg>,   // it is dynamic: a string or a number
+    value: <arg>,   // it is a string. depending on the instruction can be an integer or a string
     cb: <callback>, // it is a string representing the key of the database
   }
 
   instr: {
+    ex0, // exception, illegal op-code 0
     ldi, // load immediate arg value into ACC (this involves a fetch from DB)
     ld,  // load arg value into ACC (this involves a fetch from DB)
     st,  // store arg value into ACC (this involves a write back to DB)
-    rd,  // read arg value locally into ACC
-    wr,  // write arg value locally into ACC
     lt,  // if ACC is less than arg, then ACC=1, else ACC=0
     gt,  // if ACC is grater than arg, then ACC=1, else ACC=0
     eqi, // if ACC is equal to immediate arg value, then ACC=1, else ACC=0
     eq,  // if ACC is equal to arg, then ACC=1, else ACC=0
     bz,  // branch if ACC is zero
     bnz, // branch if ACC is not zero
-	dly, // delay in ms
+    dly, // delay in ms
+  }
+
+    code F|R|E|W
+exc|   0|x|x|x| 
+ldi|   1|x|x|x| 
+ld |   2|x|x|x| 
+st |   3|x| |x|x
+lt |   4|x|x|x|
+gt |   5|x|x|x|
+eqi|   6|x|x|x|
+eq |   7|x|x|x|
+bz |   8|x|x|x|
+bnz|   9|x|x|x|
+dly|  10|x|x|x|
+
+* VM execution model
+VM is responsable on capturing Data entities changes. If a data entity is provided by a callback
+'cb'. A cb is a DB index of a function, the VM has to execute the linked function.
+Therefore, VM function execution starts on event.
+
+1. VM find a event on a data entry (entry.ev == true), then check the cb (entry.cb)
+  and clear the event indication
+  entry.ev = flase
+
+  where:
+  entry.cb = 'key-function' is a key of DB
+
+  if (entry.ev == true) {
+    entry.ev == true;
+    entry_stm = entry.cb
+  }
+
+2. VM-fetch
+  entry_stm act as a program counter
+  
+  if (entry_stm != null) {
+    function = lookup(entry_stm)
+  }
+
+  function = {
+    name: <name>,
+    code: <instr>,
+    value: <arg>,
+    cb: <callback>,
   }
   
+3. VM-read
+if instruction is immediate then:
+  V = value
+  
+if instruction is not immediate, value represent a key of the DB:
+  data = lookup(function.value)
+  V = data.value
+
+  uint32_t vm_read_im(String key) {
+    return atoi(key.c_str());
+  }
+  
+  uint32_t vm_read(String key) {
+    data = lookup(key.value);
+    return atoi(data.value.c_str());
+  }
+
+4. VM-execution
+execute <instr> against the tuple {ACC, V}
+  ACC = <instr>(ACC, V)
+  entry_stm = function.cb
+
+5. VM-write
+  data = lookup(function.value)
+  data.value = ACC
+
+  void vm_write(String key) {
+    data = lookup(key.value);
+    data.value = String(ACC);
+    data.wb = true;
+  }
+
+6. VM-write-back
+All variable have to contain an indication flag (data.wb == true) are asked to be written back to
+the DB
+
 A1. example simple sensor trigger
-   =============================
+   ==============================
 
 sensor: physical input mapped on a pin
 thr1: variable
 
 pseudo-code:
+  @sensor.event
   if (sensor>thr) {
     status = true;
   } else {
@@ -178,7 +256,13 @@ pseudo-code:
   }
   
 or:
+  @sensor.event
   status = (sensor>thr);
+
+instruction code:
+f01: ld sensor, f02
+f02: lt thr, f03
+f03: st status, end
 
 key-sensor: {
   name: 'sensor',
@@ -198,18 +282,32 @@ key-status: {
   value: 0,
   cb: end,
 }
-
-f01: rd v, f02
-f02: lt thr, f03
-f03: wr status, end
+key-f01: {
+  name: 'f01',
+  code: ld,
+  value: key-sensor,
+  cb: key-f02,
+}
+key-f02: {
+  name: 'f02',
+  code: eqi,
+  value: 0,
+  cb: key-f03,
+}
+key-f03: {
+  name: 'f03',
+  code: st,
+  value: key-status,
+  cb: end,
 
 A2. example led on/off depending by a variable
-   ==========================================
+   ===========================================
 
 led: physical output mapped on a pin
 status: variable
 
 pseudo-code:
+  @status.event
   if (status != 0) {
     led = true;
   } else {
@@ -217,6 +315,7 @@ pseudo-code:
   }
 
 or:
+  @status.event
   led = (status != 0);
 
 instruction-code:
@@ -256,7 +355,10 @@ key-f03: {
 }
 
 A3. example sensor trigger with hysteresis switching a relay
-   ========================================================
+   =========================================================
+
+sensor: physical input mapped on a pin
+status: variable
 
 pseudo-code:
 
@@ -266,6 +368,7 @@ init:
   thr2 = 110
 
 run:
+  @sensor.event
   if (status == true) {
     if (sensor<thr1) {
       status = false;
@@ -276,15 +379,23 @@ run:
     }
   }
 
-sensor: physical input mapped on a pin
+instruction-code:
+f01: ld status, f02
+f02: bz f6, f03
+f03: ld sensor, f04
+f04: lt thr1, f05
+f05: bz end, f09
+f06: ld sensor, f07
+f07: lt thr1, f08
+f08: bnz end, f09
+f09: st status, end
+
 key-sensor: {
   name: 'sensor',
   code: phyin,
   value: pin<<24,
   cb: key-f01,
 }
-
-status: variable
 key-status: {
   name: 'status',
   code: bool,
@@ -303,22 +414,9 @@ key-thr2: {
   value: 110,
   cb: end,
 }
-
-instruction-code:
-f01: rd status, f02
-f02: bz f6, f03
-f03: ld sensor, f04
-f04: lt thr1, f05
-f05: bz end, f09
-f06: ld sensor, f07
-f07: lt thr1, f08
-f08: bnz end, f09
-f09: wr status, end
-
-functions
 key-f01: {
   name: 'f01',
-  code: rd,
+  code: ld,
   value: key-status,
   cb: key-f02,
 }
@@ -366,7 +464,7 @@ key-f08: {
 }
 key-f09: {
   name: 'f09',
-  code: wr,
+  code: st,
   value: key-status,
   cb: key-f10,
 }
@@ -378,16 +476,16 @@ key-f10: {
 }
 
 diagram
-:)f01~rd)--:)f02~bz)--:)f03~rd)--:)f04~lt)--:)f05~bz)--:)f09~wr
+:)f01~ld)--:)f02~bz)--:)f03~ld)--:)f04~lt)--:)f05~bz)--:)f09~st
 status      f06   |    v          thr1       end      | status
                   |                                   |
-                  +--:)f06~rd)--:)f07~gt)--:)f08~bnz)-+
+                  +--:)f06~ld)--:)f07~gt)--:)f08~bnz)-+
                      v          thr2       end
 
 diagram
-v->(f01: rd status)->(f02: bz f06)->(f03: rd v)->(f04: lt thr1)->(f05: bz end)->(f09: wr status)->(f10: st led)->end
+v->(f01: ld status)->(f02: bz f06)->(f03: ld v)->(f04: lt thr1)->(f05: bz end)->(f09: st status)->(f10: st led)->end
                               |                                               |
-                              +---->(f06: rd v)->(f07: gt thr2)->(f08: bnz)---+
+                              +---->(f06: ld v)->(f07: gt thr2)->(f08: bnz)---+
 
 A4. example radio code and alarm
    =============================
@@ -398,6 +496,7 @@ alarm-status: variable
 last-radio: variable
 
 pseudo-code:
+  @id.event
   if (sensor == true) {
     if (alarm-status == true) {
       notify = true;
@@ -439,7 +538,7 @@ key-alarm-status: {
 }
 key-f01: {
   name: 'f01',
-  code: rd,
+  code: ld,
   value: key-alarm-status,
   cb: key-f02,
 }
@@ -468,9 +567,11 @@ led: physical output mapped on a pin
 Time is a physical values
 
 pseudo-code:
+  @timer1.event
   if (timer1 == true) {
     led = true;
   }
+  @timer2.event
   if (timer2 == true) {
     led = false;
   }
