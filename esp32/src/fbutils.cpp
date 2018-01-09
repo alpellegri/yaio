@@ -104,7 +104,7 @@ void FB_dumpFunctions(void) {
   Serial.println(F("FB_dumpFunctions"));
   for (uint8_t i = 0; i < FunctionVec.size(); ++i) {
     Serial.printf_P(PSTR("%d: %s, %s, %x, %d, %s\n"), i,
-                    IoEntryVec[i].key.c_str(), IoEntryVec[i].name.c_str(),
-                    IoEntryVec[i].code, IoEntryVec[i].cb.c_str());
+                    FunctionVec[i].key.c_str(), FunctionVec[i].name.c_str(),
+                    FunctionVec[i].code, FunctionVec[i].cb.c_str());
   }
 }
