@@ -343,12 +343,6 @@ key-sensor: {
   value: pin<<24,
   cb: key-f01,
 }
-key-thr1: {
-  name: 'thr1',
-  code: var,
-  value: 90,
-  cb: end,
-}
 key-status: {
   name: 'status',
   code: bool,
@@ -364,7 +358,7 @@ key-f01: {
 key-f02: {
   name: 'f02',
   code: eqi,
-  value: 0,
+  value: 1,
   cb: key-f03,
 }
 key-f03: {
@@ -372,6 +366,7 @@ key-f03: {
   code: st,
   value: key-status,
   cb: end,
+}
 
 A1.2 example simple sensor trigger
     ==============================
