@@ -122,14 +122,14 @@ uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &cb) {
 
 uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String key_value, String &cb) {
   if (acc == 0) {
-    key == key_value;
+    cb == key_value;
   }
   return acc;
 }
 
 uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String key_value, String &cb) {
   if (acc != 0) {
-    key == key_value;
+    cb == key_value;
   }
   return acc;
 }
@@ -173,11 +173,11 @@ uint32_t VM_decode(uint32_t ACC, FunctionEntry &stm) {
 
   /* decode-read */
   uint32_t V = VM_itlb[code].read(value);
-  
+
   /* decode-execute */
   String& cb = stm.cb;
   ACC = VM_itlb[code].exec(ACC, V, value, cb);
-  
+
   /* decode-write */
   VM_itlb[code].write(value, ACC);
 
