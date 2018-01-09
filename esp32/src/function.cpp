@@ -192,6 +192,7 @@ void VM_run(void) {
       FunctionEntry &stm = FunctionVec[id_stm];
       /* decode */
       ACC = VM_decode(ACC, stm);
+      key_stm = stm.cb;
     }
     VM_writeOut();
   }
