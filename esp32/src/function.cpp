@@ -22,9 +22,20 @@ typedef struct {
 
 uint32_t vm_read0(String value) { return 0; }
 
-uint32_t vm_readi(String value) { return atoi(value.c_str()); }
+uint32_t vm_readi(String value) {
+  uint32_t v = atoi(value.c_str());
+  Serial.printf("vm_read V=%d, IN=%s\n", v, value.c_str());
+  return v;
+}
 
-uint32_t vm_read24(String value) { return atoi(value.c_str()) & (1 << 24 - 1); }
+uint32_t vm_read24(String value) {
+  uint8_t id = FB_getIoEntryIdx(value);
+  uint32_t mask = (1 << 24) - 1;
+  uint32_t v = IoEntryVec[id].value & mask;
+  Serial.printf("vm_read24 V=%d, IN=%s, IN=%d\n", v, value.c_str(),
+                IoEntryVec[id].value);
+  return v;
+}
 
 uint32_t vm_read(String key_value) {
   uint8_t id = FB_getIoEntryIdx(key_value);
@@ -40,6 +51,7 @@ uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &cb) {
 }
 
 uint32_t vm_exec_st(uint32_t acc, uint32_t v, String key_value, String &cb) {
+  Serial.printf("vm_exec_st ACC=%d, V=%d\n", acc, v);
   return acc;
 }
 
@@ -52,6 +64,7 @@ uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String key_value, String &cb) {
 }
 
 uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &cb) {
+  Serial.printf("vm_exec_eq ACC=%d, V=%d\n", acc, v);
   return v == acc;
 }
 
@@ -78,12 +91,15 @@ void vm_write0(String key_value, uint32_t acc) {}
 void vm_write(String key_value, uint32_t acc) {
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = acc;
+  IoEntryVec[id].wb = true;
 }
 
 void vm_write24(String key_value, uint32_t acc) {
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
-  IoEntryVec[id].value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
+  uint32_t value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
+  IoEntryVec[id].value = value;
+  IoEntryVec[id].wb = true;
 }
 
 itlb_t VM_pipe[] = {
@@ -133,6 +149,8 @@ void VM_readIn(void) {
       value = digitalRead(pin) & mask;
       if ((IoEntryVec[i].value & mask) != value) {
         IoEntryVec[i].value = (IoEntryVec[i].value & (~mask)) | value;
+        Serial.printf("VM_readIn: %s, %d, %d\n", IoEntryVec[i].name.c_str(),
+                      value, IoEntryVec[i].value);
         IoEntryVec[i].ev = true;
       }
     } break;
@@ -174,22 +192,29 @@ void VM_writeOut(void) {
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     if (IoEntryVec[i].wb == true) {
-      IoEntryVec[i].wb = false;
-    }
-    switch (IoEntryVec[i].code) {
-    case kPhyIn: {
-      uint8_t pin = IoEntryVec[i].value >> 24;
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, IoEntryVec[i].value);
-    } break;
-    case kInt: {
-      uint32_t mask = (1 << 24) - 1;
-      uint32_t value = IoEntryVec[i].value & mask;
-      Firebase.setInt(kgraph + "/" + IoEntryVec[i].key + "/value", value);
-    } break;
-    default:
-      // Serial.printf("VM_readIn: error\n");
-      break;
+      switch (IoEntryVec[i].code) {
+      case kPhyIn: {
+        uint8_t pin = IoEntryVec[i].value >> 24;
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, IoEntryVec[i].value);
+        IoEntryVec[i].wb = false;
+      } break;
+      case kInt: {
+        uint32_t value = IoEntryVec[i].value;
+        Serial.printf("VM_writeOut: kInt %d\n", value);
+        Firebase.setInt(kgraph + "/" + IoEntryVec[i].key + "/value", value);
+        if (Firebase.failed() == true) {
+          Serial.print(F("set failed: kInt"));
+          Serial.println(Firebase.error());
+        } else {
+          IoEntryVec[i].wb = false;
+        }
+
+      } break;
+      default:
+        // Serial.printf("VM_writeOut: error\n");
+        break;
+      }
     }
   }
 }
@@ -199,16 +224,14 @@ void VM_run(void) {
   uint8_t id = VM_findEvent();
   if (id != 0xFF) {
     String key_stm = IoEntryVec[id].cb;
-    Serial.printf("VM_run event: %d, %s\n", id, IoEntryVec[id].cb);
     uint32_t ACC = 0;
     while (key_stm.length() != 0) {
       /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm);
-
       FunctionEntry &stm = FunctionVec[id_stm];
-      Serial.printf("VM_run %d, %s\n", id_stm, stm.name.c_str());
       /* decode */
       ACC = VM_decode(ACC, stm);
+      Serial.printf("VM_run %d, %s\n", ACC, stm.name.c_str());
       /* key_stm works like a program counter */
       key_stm = stm.cb;
     }

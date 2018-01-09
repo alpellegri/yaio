@@ -94,7 +94,7 @@ uint8_t FB_getFunctionIdx(String &key) {
 void FB_dumpIoEntry(void) {
   Serial.println(F("FB_dumpIoEntry"));
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    Serial.printf_P(PSTR("%d: %s, %s, %d, %s\n\n"), i,
+    Serial.printf_P(PSTR("%d: %s, %s, %d, %s\n"), i,
                     IoEntryVec[i].key.c_str(), IoEntryVec[i].name.c_str(),
                     IoEntryVec[i].code, IoEntryVec[i].cb.c_str());
   }
