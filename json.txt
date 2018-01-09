@@ -173,15 +173,15 @@ VM function execution starts on event.
   entry.cb = 'key-function' is a key of DB
 
   if (entry.ev == true) {
-    entry.ev == true;
-    entry_stm = entry.cb
+    entry.ev = false;
+    key_stm = entry.cb
   }
 
 2. VM-fetch
   entry_stm act as a program counter
   
-  if (entry_stm != null) {
-    stm = lookup(entry_stm)
+  if (key_stm != null) {
+    stm = lookup(key_stm)
   }
 
   stm = {

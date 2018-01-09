@@ -14,6 +14,7 @@
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
+#include "function.h"
 
 #define LED 13
 #define LED_OFF LOW
@@ -102,9 +103,9 @@ bool STA_Task(void) {
       bool res = FOTAService();
     } else {
       if (TimeService() == true) {
-        RF_Task();
-        yield();
         FbmService();
+        yield();
+        VM_run();
         yield();
         FcmService();
         yield();

@@ -39,12 +39,15 @@ uint8_t RF_checkRadioCodeDB(uint32_t code) {
   return idx;
 }
 
+#if 0
 void RF_executeIoEntryDB(uint8_t idx) {
   if (FB_getIoEntry(idx).cb.length() != 0) {
     FunctionReq(idx, FB_getIoEntry(idx).cb);
   }
 }
+#endif
 
+#if 0
 uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
@@ -66,6 +69,7 @@ uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
 
   return idx;
 }
+#endif
 
 void RF_Send(uint32_t data, uint8_t bits) { mySwitch.send(data, bits); }
 
@@ -122,10 +126,4 @@ void RF_Loop() {
       }
     }
   }
-}
-
-/* main function task */
-bool RF_Task(void) {
-  bool ret = true;
-  return ret;
 }
