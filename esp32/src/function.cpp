@@ -96,45 +96,45 @@ uint32_t vm_read(String key_value) {
   return IoEntryVec[id].value;
 }
 
-uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return 0;
 }
 
-uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return v;
 }
 
-uint32_t vm_exec_st(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_st(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return acc;
 }
 
-uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return v < acc;
 }
 
-uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return v > acc;
 }
 
-uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return v == acc;
 }
 
-uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String key_value, String &cb) {
   if (acc == 0) {
     key == key_value;
   }
   return acc;
 }
 
-uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String key_value, String &cb) {
   if (acc != 0) {
     key == key_value;
   }
   return acc;
 }
 
-uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &key) {
+uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return acc;
 }
 
@@ -168,13 +168,18 @@ itlb_t VM_itlb[] = {
 };
 
 uint32_t VM_decode(uint32_t ACC, FunctionEntry &stm) {
+  uint32_t code = stm.code;
+  String& value = stm.value;
+
   /* decode-read */
-  uint32_t V = VM_itlb[stm.code].read(stm.value);
+  uint32_t V = VM_itlb[code].read(value);
+  
   /* decode-execute */
-  String key = stm.cb;
-  ACC = VM_itlb[stm.code].exec(ACC, V, stm.value, key);
+  String& cb = stm.cb;
+  ACC = VM_itlb[code].exec(ACC, V, value, cb);
+  
   /* decode-write */
-  VM_itlb[stm.code].write(stm.value, ACC);
+  VM_itlb[code].write(value, ACC);
 
   return ACC;
 }
