@@ -127,7 +127,7 @@ bool FbmUpdateRadioCodes(void) {
           String name = nestedObject["name"];
           uint8_t code = nestedObject["code"];
           String value = nestedObject["value"];
-          String cb = nestedObject["func"];
+          String cb = nestedObject["cb"];
           FB_addIoEntryDB(key, name, code, value, cb);
         }
       }

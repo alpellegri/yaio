@@ -254,20 +254,20 @@ if instruction is not immediate, value represent a key of the DB:
 All variable have to contain an indication flag (data.wb == true) are asked to be written back to
 the DB
 
-     code|F|R|E|W|      READ|         EXEC|      WRITE 
-ex0 |   0|x| |x| |      null,  vm_exec_ex0,       null
-ldi |   1|x|x|x| |  vm_readi,  vm_exec_ldi,       null
-ld24|   2|x|x|x| | vm_read24, vm_exec_ld24,       null
-ld  |   3|x|x|x| |   vm_read,  vm_exec_ldi,       null
-st24|   4|x| |x|x|  vm_read0, vm_exec_st24, vm_write24
-st  |   5|x| |x|x|  vm_read0,   vm_exec_st,   vm_write
-lt  |   6|x|x|x| |   vm_read,   vm_exec_lt,       null
-gt  |   7|x|x|x| |   vm_read,   vm_exec_gt,       null
-eqi |   8|x|x|x| |  vm_readi,   vm_exec_eq,       null
-eq  |   9|x|x|x| |   vm_read,   vm_exec_eq,       null
-bz  |  10|x| |x| |  vm_read0,   vm_exec_bz,       null
-bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,       null
-dly |  12|x|x|x| |   vm_read,  vm_exec_dly,       null
+  |     code|F|R|E|W|      READ|         EXEC|      WRITE 
+00|ex0 |   0|x| |x| |      null,  vm_exec_ex0,       null
+01|ldi |   1|x|x|x| |  vm_readi,  vm_exec_ldi,       null
+02|ld24|   2|x|x|x| | vm_read24, vm_exec_ld24,       null
+03|ld  |   3|x|x|x| |   vm_read,  vm_exec_ldi,       null
+04|st24|   4|x| |x|x|  vm_read0, vm_exec_st24, vm_write24
+05|st  |   5|x| |x|x|  vm_read0,   vm_exec_st,   vm_write
+06|lt  |   6|x|x|x| |   vm_read,   vm_exec_lt,       null
+07|gt  |   7|x|x|x| |   vm_read,   vm_exec_gt,       null
+08|eqi |   8|x|x|x| |  vm_readi,   vm_exec_eq,       null
+09|eq  |   9|x|x|x| |   vm_read,   vm_exec_eq,       null
+10|bz  |  10|x| |x| |  vm_read0,   vm_exec_bz,       null
+11|bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,       null
+12|dly |  12|x|x|x| |   vm_read,  vm_exec_dly,       null
 
 uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String& stm) {
   String empty;
@@ -315,8 +315,66 @@ uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String& vString, String& stm) {
   return acc;
 }
 
-A1. example simple sensor trigger
-   ==============================
+A1.1 example simple boolean trigger
+    ===============================
+
+pin: physical input mapped on a pin
+
+pseudo-code:
+  @pin.event
+  if (pin>0) {
+    status = true;
+  } else {
+    status = false;
+  }
+  
+or:
+  @pin.event
+  status = (pin>0);
+
+instruction code:
+f01: ld24 pin, f02
+f02: eqi 1, f03
+f03: st status, end
+
+key-sensor: {
+  name: 'sensor',
+  code: phyin,
+  value: pin<<24,
+  cb: key-f01,
+}
+key-thr1: {
+  name: 'thr1',
+  code: var,
+  value: 90,
+  cb: end,
+}
+key-status: {
+  name: 'status',
+  code: bool,
+  value: 0,
+  cb: end,
+}
+key-f01: {
+  name: 'f01',
+  code: ld,
+  value: key-sensor,
+  cb: key-f02,
+}
+key-f02: {
+  name: 'f02',
+  code: eqi,
+  value: 0,
+  cb: key-f03,
+}
+key-f03: {
+  name: 'f03',
+  code: st,
+  value: key-status,
+  cb: end,
+
+A1.2 example simple sensor trigger
+    ==============================
 
 sensor: physical input mapped on a pin
 thr1: variable
