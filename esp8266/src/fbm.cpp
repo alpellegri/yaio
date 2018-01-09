@@ -61,23 +61,6 @@ static byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
 
 String FBM_getResetReason() { return ESP.getResetReason(); }
 
-void sendWOL(IPAddress addr, byte *mac, size_t size_of_mac) {
-  const byte preamble[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-  byte i;
-
-  WiFiUDP udp;
-
-  udp.begin(9);
-  udp.beginPacket(addr, 8889);
-  udp.write(preamble, sizeof preamble);
-  for (i = 0; i < 16; i++) {
-    udp.write(mac, size_of_mac);
-  }
-
-  udp.endPacket();
-  yield();
-}
-
 #define FBM_LOGIC_QUEUE_LEN 3
 typedef struct {
   uint8_t func;
@@ -229,18 +212,6 @@ bool FbmService(void) {
                       ESP.getFreeHeap());
       fbm_update_last = time_now;
 
-      float h = dht.readHumidity();
-      float t = dht.readTemperature();
-      Serial.printf_P(PSTR("t: %f - h: %f\n"), t, h);
-      if (isnan(h) || isnan(t)) {
-        ht_monitor_run = false;
-      } else {
-        ht_monitor_run = true;
-        humidity_data = h;
-        temperature_data = t;
-      }
-      yield();
-
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
         Serial.print(F("get failed: kcontrol/time"));
@@ -264,14 +235,8 @@ bool FbmService(void) {
             JsonVariant variant = fbobject.getJsonVariant();
             JsonObject &object = variant.as<JsonObject>();
             if (object.success()) {
-              control_alarm = object["alarm"];
+              // control_alarm = object["alarm"];
               control_time = object["time"];
-
-              bool control_wol = object["wol"];
-              if (control_wol == true) {
-                Serial.println(F("Sending WOL Packet..."));
-                sendWOL(computer_ip, mac, sizeof mac);
-              }
 
               int control_reboot = object["reboot"];
               if (control_reboot == 1) {
@@ -288,10 +253,8 @@ bool FbmService(void) {
 
           DynamicJsonBuffer jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
-          status["alarm"] = status_alarm;
+          // status["alarm"] = status_alarm;
           status["heap"] = ESP.getFreeHeap();
-          status["humidity"] = humidity_data;
-          status["temperature"] = temperature_data;
           status["time"] = time_now;
           yield();
           Firebase.set(kstatus, JsonVariant(status));
@@ -300,94 +263,8 @@ bool FbmService(void) {
             Serial.println(Firebase.error());
           }
         }
-      }
-      yield();
-
-      // log every 30 minutes
-      if ((time_now - fbm_time_th_last) > FBM_UPDATE_TH) {
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &th = jsonBuffer.createObject();
-        th["time"] = time_now;
-        th["t"] = temperature_data;
-        th["h"] = humidity_data;
         yield();
-        if (ht_monitor_run == true) {
-          Firebase.push((klogs + F("/TH")), JsonVariant(th));
-          if (Firebase.failed()) {
-            Serial.print(F("push failed: klogs/TH"));
-            Serial.println(Firebase.error());
-          } else {
-            // update in case of success
-            fbm_time_th_last = time_now;
-          }
-        }
-      } else {
-        /* do nothing */
       }
-      yield();
-    }
-
-    // monitor for alarm activation
-    if (status_alarm != control_alarm) {
-      status_alarm = control_alarm;
-      if (status_alarm == true) {
-      }
-      yield();
-    }
-
-    // manage alarm arming/disarming notifications
-    if (status_alarm_last != status_alarm) {
-      status_alarm_last = status_alarm;
-      String str = F("Alarm ");
-      str += String((status_alarm == true) ? ("active") : ("inactive"));
-      fblog_log(str, false);
-      yield();
-    }
-
-    // monitor timers, every 15 sec
-    if ((time_now - fbm_update_timer_last) >= FBM_MONITOR_TIMERS) {
-      fbm_update_timer_last = time_now;
-      MonitorTimers();
-      yield();
-    }
-
-    // monitor for RF radio codes
-    uint32_t code = RF_GetRadioCode();
-    if (code != 0) {
-      uint8_t idx = RF_checkRadioCodeDB(code);
-      if (idx != 0xFF) {
-        fbm_monitor_last = time_now;
-        fbm_monitor_run = true;
-        // RF found in Rx DB, make an action
-        RF_executeIoEntryDB(idx);
-      }
-
-      // acquire Active Radio Codes from FB
-      if (idx == 0xFF) {
-        fbm_monitor_last = time_now;
-        fbm_monitor_run = true;
-        uint32_t idxTx = RF_checkRadioCodeTxDB(code);
-        if (idxTx == 0xFF) {
-          Serial.print(F("RadioCodes/Inactive: "));
-          Serial.println(code);
-
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &inactive = jsonBuffer.createObject();
-          inactive["name"] = "inactive";
-          inactive["value"] = code;
-          inactive["code"] = kRadioElem;
-          yield();
-          Firebase.set((kgraph + F("/inactive")), JsonVariant(inactive));
-
-          // Firebase.setInt(F("RadioCodes/Inactive/last/id"), code);
-          if (Firebase.failed()) {
-            Serial.print(F("set failed: graph/inactive"));
-            Serial.println(Firebase.error());
-          } else {
-          }
-        }
-      }
-      yield();
     }
 
     // call function service

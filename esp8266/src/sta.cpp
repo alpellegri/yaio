@@ -13,6 +13,7 @@
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
+#include "function.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
@@ -102,9 +103,9 @@ bool STA_Task(void) {
       bool res = FOTAService();
     } else {
       if (TimeService() == true) {
-        RF_Task();
-        yield();
         FbmService();
+        yield();
+        VM_run();
         yield();
         FcmService();
         yield();

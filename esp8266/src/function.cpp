@@ -3,120 +3,196 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <vector>
 
 #include "fbconf.h"
 #include "fbm.h"
 #include "fbutils.h"
 #include "rf.h"
+#include <FirebaseArduino.h>
 
-static Ticker FunctionTimer;
+extern std::vector<IoEntry> IoEntryVec;
+extern std::vector<FunctionEntry> FunctionVec;
 
-static uint8_t FunctionReqPending;
-static uint8_t FunctionReqIdx = 0xFF;
+void VM_readIn(void) {
+  uint32_t value;
 
-void ICACHE_RAM_ATTR FunctionSrv(void);
-
-void ICACHE_RAM_ATTR Action(uint8_t src_idx, String &action) {
-
-  uint8_t idx = FB_getIoEntryIdx(action);
-  // Serial.printf("debug  Action %s, %d\n", action.c_str(), idx);
-  if (idx != 0xFF) {
-    IoEntry entry = FB_getIoEntry(idx);
-    uint8_t port = entry.value >> 24;
-    uint8_t value = entry.value & 0xFF;
-
-    Serial.printf_P(PSTR("RF_Action: %d, %d, %s\n"), src_idx, idx,
-                    action.c_str());
-    Serial.printf_P(PSTR("type: %d, name: %s, port: %d, value: %d\n"),
-                    entry.code, entry.name.c_str(), port, value);
-    switch (entry.code) {
-    case kDOut: {
-      // dout
-      pinMode(port, OUTPUT);
-      digitalWrite(port, !!value);
+  /* loop over data elements looking for events */
+  for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
+    switch (IoEntryVec[i].code) {
+    case kPhyIn: {
+      Serial.printf("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
+      uint8_t pin = IoEntryVec[i].value >> 24;
+      pinMode(pin, INPUT);
+      uint32_t mask = (1 << 24) - 1;
+      value = digitalRead(pin) & mask;
+      if ((IoEntryVec[i].value & mask) != value) {
+        IoEntryVec[i].value = (IoEntryVec[i].value & (~mask)) | value;
+        IoEntryVec[i].ev = true;
+      }
     } break;
-    case kRadioOut:
-      // rf
-      RF_Send(entry.value, 24);
-      break;
-    case kLOut: {
-      // lout
-      FbmLogicReq(src_idx, port, !!value);
+    case kInt: {
+      value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
+      if (Firebase.failed() == true) {
+        Serial.print(F("get failed: kInt"));
+        Serial.println(Firebase.error());
+      } else {
+        if ((IoEntryVec[i].value) != value) {
+          IoEntryVec[i].value = value;
+          IoEntryVec[i].ev = true;
+        }
+      }
     } break;
     default:
+      // Serial.printf("VM_readIn: error\n");
       break;
     }
-  } else {
-    Serial.println("Action error\n");
   }
 }
 
-void ICACHE_RAM_ATTR FunctionReq(uint8_t src_idx, String key) {
-  uint8_t idx = FB_getFunctionIdx(key);
-  if (idx != 0xFF) {
-    // Serial.printf("debug FunctionReq %s %d\n", key.c_str(), idx);
-    FunctionEntry &entry = FB_getFunction(idx);
-    noInterrupts();
-    if (FunctionReqPending == 0) {
-      // Serial.printf("debug FunctionReq set pending: %d\n", entry.src_idx);
-      FunctionReqPending = 1;
-      FunctionReqIdx = idx;
-      entry.src_idx = src_idx;
-      interrupts();
-      FunctionTimer.attach_ms(100, FunctionSrv);
-    } else {
-      interrupts();
-      // Serial.printf("debug FunctionReq is pending\n");
+uint8_t VM_findEvent(void) {
+  uint8_t i = 0;
+  uint8_t idx = 0xFF;
+  /* loop over data elements looking for events */
+  while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
+    if (IoEntryVec[i].ev == true) {
+      IoEntryVec[i].ev = false;
+      idx = i;
     }
-  } else {
-    // Serial.printf("debug FunctionReq error\n");
+    i++;
+  }
+
+  return idx;
+}
+
+void VM_writeOut(void) {
+  /* loop over data elements looking for write-back requests */
+  for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
+    if (IoEntryVec[i].wb == true) {
+      IoEntryVec[i].wb = false;
+    }
+    if (IoEntryVec[i].code == kPhyOut) {
+      uint8_t pin = IoEntryVec[i].value >> 24;
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, IoEntryVec[i].value);
+    }
   }
 }
 
-void ICACHE_RAM_ATTR FunctionSrv(void) {
-  uint32_t curr_time;
-  uint8_t i;
+typedef struct {
+  uint32_t (*read)(String value);
+  uint32_t (*exec)(uint32_t acc, uint32_t v, String key_value, String &key);
+  void (*write)(String key_value, uint32_t acc);
+} itlb_t;
 
-  FunctionTimer.detach();
-  curr_time = millis();
+uint32_t vm_read0(String value) { return 0; }
 
-  // manage requests
-  if (FunctionReqPending == 1) {
-    FunctionEntry &function = FB_getFunction(FunctionReqIdx);
-    function.timer = curr_time;
-    function.timer_run = 1;
-    // Serial.printf("debug call Action %d: %s\n", FunctionReqIdx, function.action.c_str());
-    if (function.value.length() != 0) {
-      Action(function.src_idx, function.value);
-    }
-    FunctionReqPending = 0;
-    // Serial.printf("debug FunctionSrv release pending\n");
-  } else {
+uint32_t vm_readi(String value) { return atoi(value.c_str()); }
+
+uint32_t vm_read24(String value) { return atoi(value.c_str()) & (1 << 24 - 1); }
+
+uint32_t vm_read(String key_value) {
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  return IoEntryVec[id].value;
+}
+
+uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return 0;
+}
+
+uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return v;
+}
+
+uint32_t vm_exec_st(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return acc;
+}
+
+uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return v < acc;
+}
+
+uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return v > acc;
+}
+
+uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return v == acc;
+}
+
+uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String key_value, String &key) {
+  if (acc == 0) {
+    key == key_value;
   }
+  return acc;
+}
 
-  bool need_arm = false;
-  uint8_t len = FB_getFunctionLen();
-  // delay manager (many delayed action may be cuncurrent)
-  for (i = 0; i < len; i++) {
-    FunctionEntry &function = FB_getFunction(i);
-    // Serial.printf("delay manager @ id %d timer_run %d\n", i,
-    //               function.timer_run);
-    // Serial.printf("function.next.length %d\n", function.next.length());
-    if (function.timer_run == 1) {
-      if ((curr_time - function.timer) >= function.delay) {
-        function.timer_run = 0;
-        if (function.cb.length() != 0) {
-          FunctionReq(function.src_idx, function.cb);
-        }
-      } else {
-        need_arm = true;
-      }
-    }
+uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String key_value, String &key) {
+  if (acc != 0) {
+    key == key_value;
   }
+  return acc;
+}
 
-  if (need_arm == true) {
-    FunctionTimer.attach_ms(100, FunctionSrv);
-  } else {
-    // FunctionTimer.detach();
+uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &key) {
+  return acc;
+}
+
+void vm_write0(String key_value, uint32_t acc) {}
+
+void vm_write(String key_value, uint32_t acc) {
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  IoEntryVec[id].value = acc;
+}
+
+void vm_write24(String key_value, uint32_t acc) {
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  uint32_t mask = (1 << 24) - 1;
+  IoEntryVec[id].value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
+}
+
+itlb_t VM_itlb[] = {
+    /* ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
+    /* ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
+    /* ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
+    /* ld   */ {vm_read, vm_exec_ldi, vm_write0},
+    /* st24 */ {vm_read0, vm_exec_st, vm_write24},
+    /* st   */ {vm_read0, vm_exec_st, vm_write},
+    /* lt   */ {vm_read, vm_exec_lt, vm_write0},
+    /* gt   */ {vm_read, vm_exec_gt, vm_write0},
+    /* eqi  */ {vm_readi, vm_exec_eq, vm_write0},
+    /* eq   */ {vm_read, vm_exec_eq, vm_write0},
+    /* bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* dly  */ {vm_read, vm_exec_dly, vm_write0},
+};
+
+uint32_t VM_decode(uint32_t ACC, FunctionEntry &stm) {
+  /* decode-read */
+  uint32_t V = VM_itlb[stm.code].read(stm.value);
+  /* decode-execute */
+  String key = stm.cb;
+  ACC = VM_itlb[stm.code].exec(ACC, V, stm.value, key);
+  /* decode-write */
+  VM_itlb[stm.code].write(stm.value, ACC);
+
+  return ACC;
+}
+
+void VM_run(void) {
+  VM_readIn();
+  uint8_t id = VM_findEvent();
+  if (id != 0xFF) {
+    Serial.printf("VM_run event: %d\n", id);
+    String key_stm = IoEntryVec[id].cb;
+    uint32_t ACC = 0;
+    while (key_stm.length() != 0) {
+      /* fetch */
+      uint8_t id_stm = FB_getFunctionIdx(key_stm);
+      FunctionEntry &stm = FunctionVec[id_stm];
+      /* decode */
+      ACC = VM_decode(ACC, stm);
+    }
+    VM_writeOut();
   }
 }
