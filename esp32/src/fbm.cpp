@@ -271,8 +271,8 @@ bool FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
-      Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
-                      ESP.getFreeHeap());
+      // Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
+      //               ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       control_time = Firebase.getInt(kcontrol + F("/time"));

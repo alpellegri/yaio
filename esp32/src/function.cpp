@@ -24,7 +24,7 @@ uint32_t vm_read0(String value) { return 0; }
 
 uint32_t vm_readi(String value) {
   uint32_t v = atoi(value.c_str());
-  Serial.printf("vm_read V=%d, IN=%s\n", v, value.c_str());
+  Serial.printf("vm_readi V=%d, IN=%s\n", v, value.c_str());
   return v;
 }
 
@@ -39,7 +39,9 @@ uint32_t vm_read24(String value) {
 
 uint32_t vm_read(String key_value) {
   uint8_t id = FB_getIoEntryIdx(key_value);
-  return IoEntryVec[id].value;
+  uint32_t v = IoEntryVec[id].value;
+  Serial.printf("vm_read V=%d, IN=%s, IN=%d\n", v, key_value.c_str(), v);
+  return v;
 }
 
 uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &cb) {
@@ -89,12 +91,14 @@ uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &cb) {
 void vm_write0(String key_value, uint32_t acc) {}
 
 void vm_write(String key_value, uint32_t acc) {
+  Serial.printf("vm_write ACC=%d", acc);
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = acc;
   IoEntryVec[id].wb = true;
 }
 
 void vm_write24(String key_value, uint32_t acc) {
+  Serial.printf("vm_write24 ACC=%d", acc);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
@@ -103,19 +107,19 @@ void vm_write24(String key_value, uint32_t acc) {
 }
 
 itlb_t VM_pipe[] = {
-    /* ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
-    /* ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
-    /* ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
-    /* ld   */ {vm_read, vm_exec_ldi, vm_write0},
-    /* st24 */ {vm_read0, vm_exec_st, vm_write24},
-    /* st   */ {vm_read0, vm_exec_st, vm_write},
-    /* lt   */ {vm_read, vm_exec_lt, vm_write0},
-    /* gt   */ {vm_read, vm_exec_gt, vm_write0},
-    /* eqi  */ {vm_readi, vm_exec_eq, vm_write0},
-    /* eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* bz   */ {vm_read0, vm_exec_bz, vm_write0},
-    /* bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
-    /* dly  */ {vm_read, vm_exec_dly, vm_write0},
+    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
+    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
+    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
+    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
+    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
+    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
+    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
+    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
+    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
+    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
+    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
 };
 
 uint32_t VM_decode(uint32_t ACC, FunctionEntry &stm) {
@@ -191,12 +195,16 @@ uint8_t VM_findEvent(void) {
 void VM_writeOut(void) {
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
+    Serial.printf("VM_writeOut: wb %d, %d\n", i, IoEntryVec[i].wb);
     if (IoEntryVec[i].wb == true) {
       switch (IoEntryVec[i].code) {
-      case kPhyIn: {
+      case kPhyOut: {
+        uint32_t mask = (1 << 24) - 1;
         uint8_t pin = IoEntryVec[i].value >> 24;
         pinMode(pin, OUTPUT);
-        digitalWrite(pin, IoEntryVec[i].value);
+        uint32_t value = IoEntryVec[i].value & mask;
+        Serial.printf("VM_writeOut: kPhyOut %d\n", value);
+        digitalWrite(pin, value);
         IoEntryVec[i].wb = false;
       } break;
       case kInt: {
@@ -224,6 +232,7 @@ void VM_run(void) {
   uint8_t id = VM_findEvent();
   if (id != 0xFF) {
     String key_stm = IoEntryVec[id].cb;
+    Serial.printf("VM_run start %s\n", key_stm.c_str());
     uint32_t ACC = 0;
     while (key_stm.length() != 0) {
       /* fetch */
