@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <string>
 
-#define NUM_IO_ENTRY_MAX 10
-#define NUM_IO_FUNCTION_MAX 10
+#define NUM_IO_ENTRY_MAX 20
+#define NUM_IO_FUNCTION_MAX 20
 
 enum {
   kPhyIn = 0,

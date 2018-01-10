@@ -20,7 +20,10 @@ typedef struct {
   void (*write)(String key_value, uint32_t acc);
 } itlb_t;
 
-uint32_t vm_read0(String value) { return 0; }
+uint32_t vm_read0(String value) {
+  Serial.printf("vm_read0\n");
+  return 0;
+}
 
 uint32_t vm_readi(String value) {
   uint32_t v = atoi(value.c_str());
@@ -45,10 +48,12 @@ uint32_t vm_read(String key_value) {
 }
 
 uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &cb) {
+  Serial.printf("vm_exec_ex0\n");
   return 0;
 }
 
 uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &cb) {
+  Serial.printf("vm_exec_ldi ACC=%d, V=%d\n", acc, v);
   return v;
 }
 
@@ -88,17 +93,19 @@ uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &cb) {
   return acc;
 }
 
-void vm_write0(String key_value, uint32_t acc) {}
+void vm_write0(String key_value, uint32_t acc) {
+  Serial.printf("vm_write0 ACC=%d\n", acc);
+}
 
 void vm_write(String key_value, uint32_t acc) {
-  Serial.printf("vm_write ACC=%d", acc);
+  Serial.printf("vm_write ACC=%d\n", acc);
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = acc;
   IoEntryVec[id].wb = true;
 }
 
 void vm_write24(String key_value, uint32_t acc) {
-  Serial.printf("vm_write24 ACC=%d", acc);
+  Serial.printf("vm_write24 ACC=%d\n", acc);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
@@ -195,7 +202,6 @@ uint8_t VM_findEvent(void) {
 void VM_writeOut(void) {
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
-    Serial.printf("VM_writeOut: wb %d, %d\n", i, IoEntryVec[i].wb);
     if (IoEntryVec[i].wb == true) {
       switch (IoEntryVec[i].code) {
       case kPhyOut: {
@@ -203,7 +209,7 @@ void VM_writeOut(void) {
         uint8_t pin = IoEntryVec[i].value >> 24;
         pinMode(pin, OUTPUT);
         uint32_t value = IoEntryVec[i].value & mask;
-        Serial.printf("VM_writeOut: kPhyOut %d\n", value);
+        Serial.printf("VM_writeOut: kPhyOut %d, %d\n", pin, value);
         digitalWrite(pin, value);
         IoEntryVec[i].wb = false;
       } break;
@@ -238,9 +244,9 @@ void VM_run(void) {
       /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm);
       FunctionEntry &stm = FunctionVec[id_stm];
+      Serial.printf("VM_run code=%d, ACC=%d\n", stm.code, ACC);
       /* decode */
       ACC = VM_decode(ACC, stm);
-      Serial.printf("VM_run %d, %s\n", ACC, stm.name.c_str());
       /* key_stm works like a program counter */
       key_stm = stm.cb;
     }
