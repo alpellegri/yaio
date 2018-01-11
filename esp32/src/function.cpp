@@ -19,95 +19,105 @@ extern std::vector<FunctionEntry> FunctionVec;
 typedef struct {
   uint32_t V;
   uint32_t ACC;
+  String& key_stm;
 } vm_context_t;
 
 typedef struct {
-  void (*read)(vm_context_t &ctx, String value);
-  void (*exec)(vm_context_t &ctx, String key_value, String &cb);
-  void (*write)(vm_context_t &ctx, String key_value);
+  void (*read)(vm_context_t &ctx, String& value);
+  void (*exec)(vm_context_t &ctx, String& key_value);
+  void (*write)(vm_context_t &ctx, String& key_value);
 } itlb_t;
 
-void vm_read0(vm_context_t &ctx, String value) {
+void vm_read0(vm_context_t &ctx, String& value) {
   DEBUG_VM("vm_read0 value=%s\n", value.c_str());
 }
 
-void vm_readi(vm_context_t &ctx, String value) {
+void vm_readi(vm_context_t &ctx, String& value) {
   DEBUG_VM("vm_readi value=%s\n", value.c_str());
   ctx.V = atoi(value.c_str());
 }
 
-void vm_read24(vm_context_t &ctx, String value) {
+void vm_read24(vm_context_t &ctx, String& value) {
   DEBUG_VM("vm_read24 value=%s\n", value.c_str());
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
   ctx.V = IoEntryVec[id].value & mask;
 }
 
-void vm_read(vm_context_t &ctx, String key_value) {
+void vm_read(vm_context_t &ctx, String& key_value) {
   DEBUG_VM("vm_read value=%s\n", value.c_str());
   uint8_t id = FB_getIoEntryIdx(key_value);
   ctx.V = IoEntryVec[id].value;
 }
 
-void vm_exec_ex0(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_ex0 value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_ex0(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_ex0 value=%s, cb=%s\n", key_value.c_str());
   ctx.ACC = 0;
+  return ctx.cb;
 }
 
-void vm_exec_ldi(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_ldi value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_ldi(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_ldi value=%s, cb=%s\n", key_value.c_str());
   ctx.ACC = ctx.V;
+  return ctx.cb;
 }
 
-void vm_exec_st(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_st value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_st(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_st value=%s, cb=%s\n", key_value.c_str());
+  return ctx.cb;
 }
 
-void vm_exec_lt(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_lt value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_lt(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_lt value=%s, cb=%s\n", key_value.c_str());
   ctx.ACC = (ctx.V < ctx.ACC);
+  return ctx.cb;
 }
 
-void vm_exec_gt(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_lt value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_gt(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_lt value=%s, cb=%s\n", key_value.c_str());
   ctx.ACC = (ctx.V > ctx.ACC);
+  return ctx.cb;
 }
 
-void vm_exec_eq(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_eq value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_eq(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_eq value=%s, cb=%s\n", key_value.c_str());
   ctx.ACC = (ctx.V == ctx.ACC);
+  return ctx.cb;
 }
 
-void vm_exec_bz(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_bz value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_bz(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_bz value=%s, cb=%s\n", key_value.c_str());
   if (ctx.ACC == 0) {
-    cb == key_value;
+    return key_value;
   }
+  return ctx.cb;
 }
 
-void vm_exec_bnz(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_bnz value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_bnz(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_bnz value=%s, cb=%s\n", key_value.c_str());
   if (ctx.ACC != 0) {
-    cb == key_value;
+    return key_value;
   }
+  return ctx.cb;
 }
 
-void vm_exec_dly(vm_context_t &ctx, String key_value, String &cb) {
-  DEBUG_VM("vm_exec_dly value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
+String& vm_exec_dly(vm_context_t &ctx, String& key_value) {
+  DEBUG_VM("vm_exec_dly value=%s, cb=%s\n", key_value.c_str());
+  return ctx.cb;
 }
 
-void vm_write0(vm_context_t &ctx, String key_value) {
+void vm_write0(vm_context_t &ctx, String& key_value) {
   DEBUG_VM("vm_write0 value=%s\n", key_value.c_str());
 }
 
-void vm_write(vm_context_t &ctx, String key_value) {
+void vm_write(vm_context_t &ctx, String& key_value) {
   DEBUG_VM("vm_write value=%s\n", key_value.c_str());
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = ctx.ACC;
   IoEntryVec[id].wb = true;
 }
 
-void vm_write24(vm_context_t &ctx, String key_value) {
+void vm_write24(vm_context_t &ctx, String& key_value) {
   DEBUG_VM("vm_write24 value=%s\n", key_value.c_str());
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
@@ -132,19 +142,22 @@ itlb_t VM_pipe[] = {
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
 };
 
-void VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
+String& VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
   uint32_t code = stm.code;
   String &value = stm.value;
+  String& key_stm;
 
   /* decode-read */
   VM_pipe[code].read(value);
 
   /* decode-execute */
-  String &cb = stm.cb;
-  VM_pipe[code].exec(ctx, value, cb);
+  ctx.cb = stm.cb;
+  key_stm = VM_pipe[code].exec(ctx, value);
 
   /* decode-write */
   VM_pipe[code].write(value);
+  
+  return key_stm;
 }
 
 void VM_readIn(void) {
@@ -161,7 +174,7 @@ void VM_readIn(void) {
       value = digitalRead(pin) & mask;
       if ((IoEntryVec[i].value & mask) != value) {
         IoEntryVec[i].value = (IoEntryVec[i].value & (~mask)) | value;
-        Serial.printf("VM_readIn: %s, %d, %d\n", IoEntryVec[i].name.c_str(),
+        DEBUG_VM("VM_readIn: %s, %d, %d\n", IoEntryVec[i].name.c_str(),
                       value, IoEntryVec[i].value);
         IoEntryVec[i].ev = true;
       }
@@ -169,8 +182,7 @@ void VM_readIn(void) {
     case kInt: {
       value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
-        Serial.print(F("get failed: kInt"));
-        Serial.println(Firebase.error());
+        DEBUG_VM("get failed: kInt");
       } else {
         if ((IoEntryVec[i].value) != value) {
           IoEntryVec[i].value = value;
@@ -179,7 +191,7 @@ void VM_readIn(void) {
       }
     } break;
     default:
-      // Serial.printf("VM_readIn: error\n");
+      // DEBUG_VM("VM_readIn: error\n");
       break;
     }
   }
@@ -210,24 +222,23 @@ void VM_writeOut(void) {
         uint8_t pin = IoEntryVec[i].value >> 24;
         pinMode(pin, OUTPUT);
         uint32_t value = IoEntryVec[i].value & mask;
-        Serial.printf("VM_writeOut: kPhyOut %d, %d\n", pin, value);
+        DEBUG_VM("VM_writeOut: kPhyOut %d, %d\n", pin, value);
         digitalWrite(pin, value);
         IoEntryVec[i].wb = false;
       } break;
       case kInt: {
         uint32_t value = IoEntryVec[i].value;
-        Serial.printf("VM_writeOut: kInt %d\n", value);
+        DEBUG_VM("VM_writeOut: kInt %d\n", value);
         Firebase.setInt(kgraph + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          Serial.print(F("set failed: kInt"));
-          Serial.println(Firebase.error());
+          DEBUG_VM("set failed: kInt");
         } else {
           IoEntryVec[i].wb = false;
         }
 
       } break;
       default:
-        // Serial.printf("VM_writeOut: error\n");
+        // DEBUG_VM("VM_writeOut: error\n");
         break;
       }
     }
@@ -238,7 +249,7 @@ void VM_run(void) {
   VM_readIn();
   uint8_t id = VM_findEvent();
   if (id != 0xFF) {
-    String key_stm = IoEntryVec[id].cb;
+    String& key_stm = IoEntryVec[id].cb;
     Serial.printf("VM_run start %s\n", key_stm.c_str());
     
     vm_context_t ctx;
@@ -248,11 +259,9 @@ void VM_run(void) {
       /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm);
       FunctionEntry &stm = FunctionVec[id_stm];
-      Serial.printf("VM_run code=%d, ACC=%d V=%d\n", stm.code, ctx.ACC, ctx.V);
+      DEBUG_VM("VM_run code=%d, ACC=%d V=%d\n", stm.code, ctx.ACC, ctx.V);
       /* decode */
-      VM_decode(ctx, stm);
-      /* key_stm works like a program counter */
-      key_stm = stm.cb;
+      key_stm = VM_decode(ctx, stm);
     }
     VM_writeOut();
   }
