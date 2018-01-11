@@ -15,96 +15,98 @@ extern std::vector<IoEntry> IoEntryVec;
 extern std::vector<FunctionEntry> FunctionVec;
 
 typedef struct {
-  uint32_t (*read)(String value);
-  uint32_t (*exec)(uint32_t acc, uint32_t v, String key_value, String &key);
-  void (*write)(String key_value, uint32_t acc);
+  uint32_t V;
+  uint32_t ACC;
+} vm_context_t;
+
+typedef struct {
+  void (*read)(vm_context_t ctx, String value);
+  void (*exec)(vm_context_t ctx, String key_value, String &key);
+  void (*write)(vm_context_t ctx, String key_value);
 } itlb_t;
 
-uint32_t vm_read0(String value) {
+void vm_read0(vm_context_t ctx, String value) {
   Serial.printf("vm_read0\n");
   return 0;
 }
 
-uint32_t vm_readi(String value) {
+void vm_readi(vm_context_t ctx, String value) {
   uint32_t v = atoi(value.c_str());
   Serial.printf("vm_readi V=%d, IN=%s\n", v, value.c_str());
   return v;
 }
 
-uint32_t vm_read24(String value) {
+void vm_read24(vm_context_t ctx, String value) {
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
-  uint32_t v = IoEntryVec[id].value & mask;
-  Serial.printf("vm_read24 V=%d, IN=%s, IN=%d\n", v, value.c_str(),
+  uint32_t ctx.V = IoEntryVec[id].value & mask;
+  Serial.printf("vm_read24 V=%d, IN=%s, IN=%d\n", ctx.V, value.c_str(),
                 IoEntryVec[id].value);
-  return v;
 }
 
-uint32_t vm_read(String key_value) {
+void vm_read(vm_context_t ctx, String key_value) {
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t v = IoEntryVec[id].value;
   Serial.printf("vm_read V=%d, IN=%s, IN=%d\n", v, key_value.c_str(), v);
-  return v;
+  ctx.V = v;
 }
 
-uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &cb) {
+void vm_exec_ex0(vm_context_t ctx, String key_value, String &cb) {
   Serial.printf("vm_exec_ex0\n");
-  return 0;
+  ctx.ACC = 0;
 }
 
-uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &cb) {
-  Serial.printf("vm_exec_ldi ACC=%d, V=%d\n", acc, v);
-  return v;
+void vm_exec_ldi(vm_context_t ctx, String key_value, String &cb) {
+  Serial.printf("vm_exec_ldi ACC=%d, V=%d\n", acc, ctx.V);
+  ctx.ACC = ctx.V;
 }
 
-uint32_t vm_exec_st(uint32_t acc, uint32_t v, String key_value, String &cb) {
-  Serial.printf("vm_exec_st ACC=%d, V=%d\n", acc, v);
-  return acc;
+void vm_exec_st(vm_context_t ctx, String key_value, String &cb) {
+  Serial.printf("vm_exec_st ACC=%d, V=%d\n", acc, ctx.V);
 }
 
-uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String key_value, String &cb) {
-  return v < acc;
+void vm_exec_lt(vm_context_t ctx, String key_value, String &cb) {
+  ctx.ACC = (ctx.V < ctx.ACC);
 }
 
-uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String key_value, String &cb) {
-  return v > acc;
+void vm_exec_gt(vm_context_t ctx, String key_value, String &cb) {
+  return ctx.V > acc;
 }
 
-uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &cb) {
-  Serial.printf("vm_exec_eq ACC=%d, V=%d\n", acc, v);
-  return v == acc;
+void vm_exec_eq(vm_context_t ctx, String key_value, String &cb) {
+  Serial.printf("vm_exec_eq ACC=%d, V=%d\n", acc, ctx.V);
+  return ctx.V == acc;
 }
 
-uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String key_value, String &cb) {
+void vm_exec_bz(vm_context_t ctx, String key_value, String &cb) {
   if (acc == 0) {
     cb == key_value;
   }
   return acc;
 }
 
-uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String key_value, String &cb) {
+void vm_exec_bnz(vm_context_t ctx, String key_value, String &cb) {
   if (acc != 0) {
     cb == key_value;
   }
   return acc;
 }
 
-uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &cb) {
-  return acc;
+void vm_exec_dly(vm_context_t ctx, String key_value, String &cb) {
 }
 
-void vm_write0(String key_value, uint32_t acc) {
+void vm_write0(vm_context_t ctx, String key_value) {
   Serial.printf("vm_write0 ACC=%d\n", acc);
 }
 
-void vm_write(String key_value, uint32_t acc) {
+void vm_write(vm_context_t ctx, String key_value) {
   Serial.printf("vm_write ACC=%d\n", acc);
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = acc;
   IoEntryVec[id].wb = true;
 }
 
-void vm_write24(String key_value, uint32_t acc) {
+void vm_write24(vm_context_t ctx, String key_value) {
   Serial.printf("vm_write24 ACC=%d\n", acc);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
