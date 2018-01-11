@@ -11,6 +11,8 @@
 #include "rf.h"
 #include <FirebaseArduino.h>
 
+#define DEBUG_VM(...) Serial.printf( __VA_ARGS__ )
+
 extern std::vector<IoEntry> IoEntryVec;
 extern std::vector<FunctionEntry> FunctionVec;
 
@@ -21,91 +23,92 @@ typedef struct {
 
 typedef struct {
   void (*read)(vm_context_t &ctx, String value);
-  void (*exec)(vm_context_t &ctx, String key_value, String &key);
+  void (*exec)(vm_context_t &ctx, String key_value, String &cb);
   void (*write)(vm_context_t &ctx, String key_value);
 } itlb_t;
 
 void vm_read0(vm_context_t &ctx, String value) {
-  Serial.printf("vm_read0\n");
-  return 0;
+  DEBUG_VM("vm_read0 value=%s\n", value.c_str());
 }
 
 void vm_readi(vm_context_t &ctx, String value) {
-  uint32_t v = atoi(value.c_str());
-  Serial.printf("vm_readi V=%d, IN=%s\n", v, value.c_str());
-  return v;
+  DEBUG_VM("vm_readi value=%s\n", value.c_str());
+  ctx.V = atoi(value.c_str());
 }
 
 void vm_read24(vm_context_t &ctx, String value) {
+  DEBUG_VM("vm_read24 value=%s\n", value.c_str());
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
-  uint32_t ctx.V = IoEntryVec[id].value & mask;
-  Serial.printf("vm_read24 V=%d, IN=%s, IN=%d\n", ctx.V, value.c_str(),
-                IoEntryVec[id].value);
+  ctx.V = IoEntryVec[id].value & mask;
 }
 
 void vm_read(vm_context_t &ctx, String key_value) {
+  DEBUG_VM("vm_read value=%s\n", value.c_str());
   uint8_t id = FB_getIoEntryIdx(key_value);
-  uint32_t v = IoEntryVec[id].value;
-  Serial.printf("vm_read V=%d, IN=%s, IN=%d\n", v, key_value.c_str(), v);
-  ctx.V = v;
+  ctx.V = IoEntryVec[id].value;
 }
 
 void vm_exec_ex0(vm_context_t &ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_ex0\n");
+  DEBUG_VM("vm_exec_ex0 value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   ctx.ACC = 0;
 }
 
 void vm_exec_ldi(vm_context_t &ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_ldi ACC=%d, V=%d\n", ctx.ACC, ctx.V);
+  DEBUG_VM("vm_exec_ldi value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   ctx.ACC = ctx.V;
 }
 
 void vm_exec_st(vm_context_t &ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_st ACC=%d, V=%d\n", ctx.ACC, ctx.V);
+  DEBUG_VM("vm_exec_st value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
 }
 
 void vm_exec_lt(vm_context_t &ctx, String key_value, String &cb) {
+  DEBUG_VM("vm_exec_lt value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   ctx.ACC = (ctx.V < ctx.ACC);
 }
 
 void vm_exec_gt(vm_context_t &ctx, String key_value, String &cb) {
+  DEBUG_VM("vm_exec_lt value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   ctx.ACC = (ctx.V > ctx.ACC);
 }
 
 void vm_exec_eq(vm_context_t &ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_eq ACC=%d, V=%d\n", ctx.ACC, ctx.V);
+  DEBUG_VM("vm_exec_eq value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   ctx.ACC = (ctx.V == ctx.ACC);
 }
 
 void vm_exec_bz(vm_context_t &ctx, String key_value, String &cb) {
+  DEBUG_VM("vm_exec_bz value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   if (ctx.ACC == 0) {
     cb == key_value;
   }
 }
 
 void vm_exec_bnz(vm_context_t &ctx, String key_value, String &cb) {
+  DEBUG_VM("vm_exec_bnz value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
   if (ctx.ACC != 0) {
     cb == key_value;
   }
 }
 
 void vm_exec_dly(vm_context_t &ctx, String key_value, String &cb) {
+  DEBUG_VM("vm_exec_dly value=%s, cb=%s\n", key_value.c_str(), cb.c_str());
 }
 
 void vm_write0(vm_context_t &ctx, String key_value) {
-  Serial.printf("vm_write0 ACC=%d\n", ctx.ACC);
+  DEBUG_VM("vm_write0 value=%s\n", key_value.c_str());
 }
 
 void vm_write(vm_context_t &ctx, String key_value) {
-  Serial.printf("vm_write ACC=%d\n", ctx.ACC);
+  DEBUG_VM("vm_write value=%s\n", key_value.c_str());
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = ctx.ACC;
   IoEntryVec[id].wb = true;
 }
 
 void vm_write24(vm_context_t &ctx, String key_value) {
-  Serial.printf("vm_write24 ACC=%d\n", ctx.ACC);
+  DEBUG_VM("vm_write24 value=%s\n", key_value.c_str());
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
