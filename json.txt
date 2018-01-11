@@ -207,9 +207,9 @@ typedef struct {
   
   pipeline definition:
   typedef struct {
-    void (*read)(vm_context_t *ctx, String value);
-    void (*exec)(vm_context_t *ctx, String key_value, String& key);
-    void (*write)(vm_context_t *ctx, String key_value);
+    void (*read)(vm_context_t &ctx, String& value);
+    String& (*exec)(vm_context_t &ctx, String& key_value);
+    void (*write)(vm_context_t &ctx, String& key_value);
   } itlb_t;
 
 3.1 VM-decode-read
@@ -221,25 +221,23 @@ if instruction is not immediate, value represent a key of the DB:
   vm_pipe[code].read(ctx, stm.value)
 
   // immediate value
-  void vm_readi(ctx, String value) {
+  void vm_readi(ctx, String& value) {
     ctx.V = atoi(value.c_str());
   }
 
   // not immediate value
-  void vm_read(ctx, String key_value) {
+  void vm_read(ctx, String& key_value) {
     data = lookup(key_value);
     ctx.V = data.value;
   }
 
 3.2 VM-decode-execution
 
-  key_stm = stm.cb
-  vm_pipe[code].exec(ctx, stm.value, &key_stm)
+  key_stm = vm_pipe[code].exec(ctx, stm.value)
 
-  execute <instr> against the tuple {ACC, V, stm.value, stm.cb}
-  key_stm = stm.cb
-  ACC, entry_stm = <instr>(ACC, V, stm.value, key_stm)
-  entry_stm is an output because an instruction is able to change the execution flow
+  execute <instr> against the tuple {ACC, V, stm.value}
+  key_stm = <instr>(ACC, V, stm.value)
+  key_stm is an output because an instruction is able to change the execution flow
   
 3.3 VM-decode-write
 
@@ -249,7 +247,7 @@ if instruction is not immediate, value represent a key of the DB:
   data = lookup(stm.value)
   data.value = ACC
 
-  void vm_write(ctx, String key) {
+  void vm_write(ctx, String& key) {
     data = lookup(key.value);
     data.value = ctx.ACC;
     data.wb = true;
@@ -260,63 +258,19 @@ All variable have to contain an indication flag (data.wb == true) are asked to b
 the DB
 
   |     code|F|R|E|W|      READ|         EXEC|      WRITE 
-00|ex0 |   0|x| |x| |      null,  vm_exec_ex0,       null
-01|ldi |   1|x|x|x| |  vm_readi,  vm_exec_ldi,       null
-02|ld24|   2|x|x|x| | vm_read24, vm_exec_ld24,       null
-03|ld  |   3|x|x|x| |   vm_read,  vm_exec_ldi,       null
+00|ex0 |   0|x| |x| |      null,  vm_exec_ex0,  vm_write0
+01|ldi |   1|x|x|x| |  vm_readi,  vm_exec_ldi,  vm_write0
+02|ld24|   2|x|x|x| | vm_read24, vm_exec_ld24,  vm_write0
+03|ld  |   3|x|x|x| |   vm_read,  vm_exec_ldi,  vm_write0
 04|st24|   4|x| |x|x|  vm_read0, vm_exec_st24, vm_write24
 05|st  |   5|x| |x|x|  vm_read0,   vm_exec_st,   vm_write
-06|lt  |   6|x|x|x| |   vm_read,   vm_exec_lt,       null
-07|gt  |   7|x|x|x| |   vm_read,   vm_exec_gt,       null
-08|eqi |   8|x|x|x| |  vm_readi,   vm_exec_eq,       null
-09|eq  |   9|x|x|x| |   vm_read,   vm_exec_eq,       null
-10|bz  |  10|x| |x| |  vm_read0,   vm_exec_bz,       null
-11|bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,       null
-12|dly |  12|x|x|x| |   vm_read,  vm_exec_dly,       null
-
-void vm_exec_ex0(uint32_t acc, uint32_t v, String& stm) {
-  String empty;
-  stm = empty;
-  ctx.ACC = 0;
-}
-
-void vm_exec_ldi(vm_context_t *ctx, String& vString, String& stm) {
-  ctx.ACC = ctx.V;
-}
-
-void vm_exec_ld24(vm_context_t *ctx, String& vString, String& stm) {
-  ctx.ACC = ctx.V & (1<<24-1);
-}
-
-void vm_exec_st24(vm_context_t *ctx, String& vString, String& stm) {
-}
-
-void vm_exec_st(vm_context_t *ctx, String& vString, String& stm) {
-}
-
-void vm_exec_lt(vm_context_t *ctx, String& vString, String& stm) {
-  ctx.ACC = ctx.V < ctx.ACC;
-}
-
-void vm_exec_gt(vm_context_t *ctx, String& vString, String& stm) {
-  ctx.ACC = ctx.V > ctx.ACC;
-}
-
-void vm_exec_eq(vm_context_t *ctx, String& vString, String& stm) {
-  ctx.ACC = ctx.V == ctx.ACC;
-}
-
-void vm_exec_bz(vm_context_t *ctx, String& vString, String& stm) {
-  if (ctx.ACC == 0) {
-    stm = vString;
-  }
-}
-
-void vm_exec_bnz(vm_context_t *ctx, String& vString, String& stm) {
-  if (acc != 0) {
-    stm = vString;
-  }
-}
+06|lt  |   6|x|x|x| |   vm_read,   vm_exec_lt,  vm_write0
+07|gt  |   7|x|x|x| |   vm_read,   vm_exec_gt,  vm_write0
+08|eqi |   8|x|x|x| |  vm_readi,   vm_exec_eq,  vm_write0
+09|eq  |   9|x|x|x| |   vm_read,   vm_exec_eq,  vm_write0
+10|bz  |  10|x| |x| |  vm_read0,   vm_exec_bz,  vm_write0
+11|bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,  vm_write0
+12|dly |  12|x|x|x| |   vm_read,  vm_exec_dly,  vm_write0
 
 A1.1 example simple boolean trigger
     ===============================
