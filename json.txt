@@ -163,7 +163,12 @@ At startup, the VM initializes its runtime environment copying all DB entities.
 
 VM is responsible on capturing Data entities changes (entry.ev == true).
 On event, the VM fetch instruction and data and execute them.
-The VM is provided by a accumulator register ACC.
+The VM is provided by a accumulator register ACC and a V register used to store the last read data.
+
+typedef struct {
+  uint32_t V
+  uint32_t ACC;
+} vm_context_t
 
 1. VM find a event on a data entry (entry.ev == true), then check the cb (entry.cb)
   and clear the event indication
@@ -202,9 +207,9 @@ The VM is provided by a accumulator register ACC.
   
   pipeline definition:
   typedef struct {
-    uint32_t (*read)(String value);
-    uint32_t (*exec)(uint32_t acc, uint32_t v, String key_value, String &key);
-    void (*write)(String key_value, uint32_t acc);
+    void (*read)(vm_context_t *ctx, String value);
+    void (*exec)(vm_context_t *ctx, String key_value, String& key);
+    void (*write)(vm_context_t *ctx, String key_value);
   } itlb_t;
 
 3.1 VM-decode-read
@@ -213,23 +218,23 @@ if instruction is immediate then:
   
 if instruction is not immediate, value represent a key of the DB:
   // index 0: fetch
-  V = vm_pipe[code].read(stm.value)
+  vm_pipe[code].read(ctx, stm.value)
 
   // immediate value
-  uint32_t vm_readi(String value) {
-    return atoi(value.c_str());
+  void vm_readi(ctx, String value) {
+    ctx.V = atoi(value.c_str());
   }
 
   // not immediate value
-  uint32_t vm_read(String key_value) {
+  void vm_read(ctx, String key_value) {
     data = lookup(key_value);
-    return data.value;
+    ctx.V = data.value;
   }
 
 3.2 VM-decode-execution
 
   key_stm = stm.cb
-  ACC = vm_pipe[code].exec(ACC, V, stm.value, &key_stm)
+  vm_pipe[code].exec(ctx, stm.value, &key_stm)
 
   execute <instr> against the tuple {ACC, V, stm.value, stm.cb}
   key_stm = stm.cb
@@ -238,15 +243,15 @@ if instruction is not immediate, value represent a key of the DB:
   
 3.3 VM-decode-write
 
-  vm_pipe[code].write(stm.value, ACC);
+  vm_pipe[code].write(ctx, stm.value);
   stm = stm.cb; // move on the next element
   
   data = lookup(stm.value)
   data.value = ACC
 
-  void vm_write(String key, acc) {
+  void vm_write(ctx, String key) {
     data = lookup(key.value);
-    data.value = acc;
+    data.value = ctx.ACC;
     data.wb = true;
   }
 
@@ -269,50 +274,48 @@ the DB
 11|bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,       null
 12|dly |  12|x|x|x| |   vm_read,  vm_exec_dly,       null
 
-uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String& stm) {
+void vm_exec_ex0(uint32_t acc, uint32_t v, String& stm) {
   String empty;
   stm = empty;
-  return 0;
+  ctx.ACC = 0;
 }
 
-uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  return v;
+void vm_exec_ldi(vm_context_t *ctx, String& vString, String& stm) {
+  ctx.ACC = ctx.V;
 }
 
-uint32_t vm_exec_ld24(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  return v&(1<<24-1);
+void vm_exec_ld24(vm_context_t *ctx, String& vString, String& stm) {
+  ctx.ACC = ctx.V & (1<<24-1);
 }
 
-void vm_exec_st24(uint32_t acc, uint32_t v, String& vString, String& stm) {
+void vm_exec_st24(vm_context_t *ctx, String& vString, String& stm) {
 }
 
-void vm_exec_st(uint32_t acc, uint32_t v, String& vString, String& stm) {
+void vm_exec_st(vm_context_t *ctx, String& vString, String& stm) {
 }
 
-uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  return v<acc;
+void vm_exec_lt(vm_context_t *ctx, String& vString, String& stm) {
+  ctx.ACC = ctx.V < ctx.ACC;
 }
 
-uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  return v>acc;
+void vm_exec_gt(vm_context_t *ctx, String& vString, String& stm) {
+  ctx.ACC = ctx.V > ctx.ACC;
 }
 
-uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  return v==acc;
+void vm_exec_eq(vm_context_t *ctx, String& vString, String& stm) {
+  ctx.ACC = ctx.V == ctx.ACC;
 }
 
-uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String& vString, String& stm) {
-  if (acc == 0) {
+void vm_exec_bz(vm_context_t *ctx, String& vString, String& stm) {
+  if (ctx.ACC == 0) {
     stm = vString;
   }
-  return acc;
 }
 
-uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String& vString, String& stm) {
+void vm_exec_bnz(vm_context_t *ctx, String& vString, String& stm) {
   if (acc != 0) {
     stm = vString;
   }
-  return acc;
 }
 
 A1.1 example simple boolean trigger
