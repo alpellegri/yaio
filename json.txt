@@ -470,7 +470,7 @@ f03: ld sensor, f04
 f04: lt thr1, f05
 f05: bz end, f09
 f06: ld sensor, f07
-f07: lt thr1, f08
+f07: gt thr2, f08
 f08: bnz end, f09
 f09: st status, end
 

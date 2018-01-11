@@ -252,12 +252,12 @@ void VM_run(void) {
   uint8_t id = VM_findEvent();
   if (id != 0xFF) {
     String key_stm = IoEntryVec[id].cb;
-    Serial.printf("VM_run start %s\n", key_stm.c_str());
 
     vm_context_t ctx;
     ctx.V = 0;
     ctx.ACC = 0;
     while (key_stm.length() != 0) {
+      Serial.printf("VM_run start %s\n", key_stm.c_str());
       /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm.c_str());
       FunctionEntry &stm = FunctionVec[id_stm];
