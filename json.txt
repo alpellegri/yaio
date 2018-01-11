@@ -467,11 +467,11 @@ instruction-code:
 f01: ld status, f02
 f02: bz f6, f03
 f03: ld sensor, f04
-f04: lt thr1, f05
-f05: bz end, f09
+f04: gt thr1, f05
+f05: bnz end, f09
 f06: ld sensor, f07
 f07: gt thr2, f08
-f08: bnz end, f09
+f08: bz end, f09
 f09: st status, end
 
 key-sensor: {
@@ -560,16 +560,16 @@ key-f10: {
 }
 
 diagram
-:)f01~ld)--:)f02~bz)--:)f03~ld)--:)f04~lt)--:)f05~bz)--:)f09~st
+:)f01~ld)--:)f02~bz)--:)f03~ld)--:)f04~gt)--:)f05~bnz)--:)f09~st
 status      f06   |    v          thr1       end      | status
                   |                                   |
-                  +--:)f06~ld)--:)f07~gt)--:)f08~bnz)-+
+                  +--:)f06~ld)--:)f07~gt)--:)f08~bz)--+
                      v          thr2       end
 
 diagram
-v->(f01: ld status)->(f02: bz f06)->(f03: ld v)->(f04: lt thr1)->(f05: bz end)->(f09: st status)->(f10: st led)->end
+v->(f01: ld status)->(f02: bz f06)->(f03: ld v)->(f04: lt thr1)->(f05: bnz end)->(f09: st status)->(f10: st led)->end
                               |                                               |
-                              +---->(f06: ld v)->(f07: gt thr2)->(f08: bnz)---+
+                              +---->(f06: ld v)->(f07: gt thr2)->(f08: bz)----+
 
 A4. example radio code and alarm
    =============================

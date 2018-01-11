@@ -137,8 +137,8 @@ itlb_t VM_pipe[] = {
     /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
     /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
     /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* 10: bz   */ {vm_read, vm_exec_bz, vm_write0},
-    /* 11: bnz  */ {vm_read, vm_exec_bnz, vm_write0},
+    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
 };
 
