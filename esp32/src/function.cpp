@@ -19,7 +19,6 @@ extern std::vector<FunctionEntry> FunctionVec;
 typedef struct {
   uint32_t V;
   uint32_t ACC;
-  String& key_stm;
 } vm_context_t;
 
 typedef struct {
@@ -151,7 +150,6 @@ String& VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
   VM_pipe[code].read(value);
 
   /* decode-execute */
-  ctx.cb = stm.cb;
   key_stm = VM_pipe[code].exec(ctx, value);
 
   /* decode-write */
