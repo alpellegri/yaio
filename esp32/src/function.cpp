@@ -260,7 +260,7 @@ void VM_run(void) {
 
       /* decode */
       key_stm = VM_decode(ctx, stm);
-      DEBUG_VM("VM_run code=%d, ACC=%d V=%d\n", stm.code, ctx.ACC, ctx.V);
+      DEBUG_VM("VM_run name=%s, ACC=%d V=%d\n", stm.name, ctx.ACC, ctx.V);
     }
     VM_writeOut();
   }
