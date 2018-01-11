@@ -256,16 +256,17 @@ void VM_run(void) {
     vm_context_t ctx;
     ctx.V = 0;
     ctx.ACC = 0;
+    DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
     while (key_stm.length() != 0) {
-      Serial.printf("VM_run start %s\n", key_stm.c_str());
-      /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm.c_str());
       FunctionEntry &stm = FunctionVec[id_stm];
 
+      DEBUG_VM("VM_run start name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
+               ctx.V);
       /* decode */
       key_stm = String(VM_decode(ctx, stm));
 
-      DEBUG_VM("VM_run name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
+      DEBUG_VM("VM_run stop name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
                ctx.V);
     }
     VM_writeOut();
