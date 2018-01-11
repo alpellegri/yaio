@@ -11,7 +11,7 @@
 #include "rf.h"
 #include <FirebaseArduino.h>
 
-#define DEBUG_VM(...) Serial.printf( __VA_ARGS__ )
+#define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
 
 extern std::vector<IoEntry> IoEntryVec;
 extern std::vector<FunctionEntry> FunctionVec;
