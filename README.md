@@ -2,8 +2,7 @@
 
 a **Cloud Home Automation** based on:
 * Firbase + FCM
-* Ionic
-* ESP-8266
+* ESP8266 / ESP32
 
 Please note that this is in **Alpha status**. This project is **under heavy development, experimental, unversioned and not stable**.
 
