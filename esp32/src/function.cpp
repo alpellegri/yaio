@@ -20,23 +20,23 @@ typedef struct {
 } vm_context_t;
 
 typedef struct {
-  void (*read)(vm_context_t ctx, String value);
-  void (*exec)(vm_context_t ctx, String key_value, String &key);
-  void (*write)(vm_context_t ctx, String key_value);
+  void (*read)(vm_context_t &ctx, String value);
+  void (*exec)(vm_context_t &ctx, String key_value, String &key);
+  void (*write)(vm_context_t &ctx, String key_value);
 } itlb_t;
 
-void vm_read0(vm_context_t ctx, String value) {
+void vm_read0(vm_context_t &ctx, String value) {
   Serial.printf("vm_read0\n");
   return 0;
 }
 
-void vm_readi(vm_context_t ctx, String value) {
+void vm_readi(vm_context_t &ctx, String value) {
   uint32_t v = atoi(value.c_str());
   Serial.printf("vm_readi V=%d, IN=%s\n", v, value.c_str());
   return v;
 }
 
-void vm_read24(vm_context_t ctx, String value) {
+void vm_read24(vm_context_t &ctx, String value) {
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t ctx.V = IoEntryVec[id].value & mask;
@@ -44,73 +44,71 @@ void vm_read24(vm_context_t ctx, String value) {
                 IoEntryVec[id].value);
 }
 
-void vm_read(vm_context_t ctx, String key_value) {
+void vm_read(vm_context_t &ctx, String key_value) {
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t v = IoEntryVec[id].value;
   Serial.printf("vm_read V=%d, IN=%s, IN=%d\n", v, key_value.c_str(), v);
   ctx.V = v;
 }
 
-void vm_exec_ex0(vm_context_t ctx, String key_value, String &cb) {
+void vm_exec_ex0(vm_context_t &ctx, String key_value, String &cb) {
   Serial.printf("vm_exec_ex0\n");
   ctx.ACC = 0;
 }
 
-void vm_exec_ldi(vm_context_t ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_ldi ACC=%d, V=%d\n", acc, ctx.V);
+void vm_exec_ldi(vm_context_t &ctx, String key_value, String &cb) {
+  Serial.printf("vm_exec_ldi ACC=%d, V=%d\n", ctx.ACC, ctx.V);
   ctx.ACC = ctx.V;
 }
 
-void vm_exec_st(vm_context_t ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_st ACC=%d, V=%d\n", acc, ctx.V);
+void vm_exec_st(vm_context_t &ctx, String key_value, String &cb) {
+  Serial.printf("vm_exec_st ACC=%d, V=%d\n", ctx.ACC, ctx.V);
 }
 
-void vm_exec_lt(vm_context_t ctx, String key_value, String &cb) {
+void vm_exec_lt(vm_context_t &ctx, String key_value, String &cb) {
   ctx.ACC = (ctx.V < ctx.ACC);
 }
 
-void vm_exec_gt(vm_context_t ctx, String key_value, String &cb) {
-  return ctx.V > acc;
+void vm_exec_gt(vm_context_t &ctx, String key_value, String &cb) {
+  ctx.ACC = (ctx.V > ctx.ACC);
 }
 
-void vm_exec_eq(vm_context_t ctx, String key_value, String &cb) {
-  Serial.printf("vm_exec_eq ACC=%d, V=%d\n", acc, ctx.V);
-  return ctx.V == acc;
+void vm_exec_eq(vm_context_t &ctx, String key_value, String &cb) {
+  Serial.printf("vm_exec_eq ACC=%d, V=%d\n", ctx.ACC, ctx.V);
+  ctx.ACC = (ctx.V == ctx.ACC);
 }
 
-void vm_exec_bz(vm_context_t ctx, String key_value, String &cb) {
-  if (acc == 0) {
+void vm_exec_bz(vm_context_t &ctx, String key_value, String &cb) {
+  if (ctx.ACC == 0) {
     cb == key_value;
   }
-  return acc;
 }
 
-void vm_exec_bnz(vm_context_t ctx, String key_value, String &cb) {
-  if (acc != 0) {
+void vm_exec_bnz(vm_context_t &ctx, String key_value, String &cb) {
+  if (ctx.ACC != 0) {
     cb == key_value;
   }
-  return acc;
 }
 
-void vm_exec_dly(vm_context_t ctx, String key_value, String &cb) {
+void vm_exec_dly(vm_context_t &ctx, String key_value, String &cb) {
 }
 
-void vm_write0(vm_context_t ctx, String key_value) {
-  Serial.printf("vm_write0 ACC=%d\n", acc);
+void vm_write0(vm_context_t &ctx, String key_value) {
+  Serial.printf("vm_write0 ACC=%d\n", ctx.ACC);
 }
 
-void vm_write(vm_context_t ctx, String key_value) {
-  Serial.printf("vm_write ACC=%d\n", acc);
+void vm_write(vm_context_t &ctx, String key_value) {
+  Serial.printf("vm_write ACC=%d\n", ctx.ACC);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  IoEntryVec[id].value = acc;
+  IoEntryVec[id].value = ctx.ACC;
   IoEntryVec[id].wb = true;
 }
 
-void vm_write24(vm_context_t ctx, String key_value) {
-  Serial.printf("vm_write24 ACC=%d\n", acc);
+void vm_write24(vm_context_t &ctx, String key_value) {
+  Serial.printf("vm_write24 ACC=%d\n", ctx.ACC);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
-  uint32_t value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
+  uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
   IoEntryVec[id].value = value;
   IoEntryVec[id].wb = true;
 }
@@ -131,21 +129,19 @@ itlb_t VM_pipe[] = {
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
 };
 
-uint32_t VM_decode(uint32_t ACC, FunctionEntry &stm) {
+void VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
   uint32_t code = stm.code;
   String &value = stm.value;
 
   /* decode-read */
-  uint32_t V = VM_pipe[code].read(value);
+  VM_pipe[code].read(value);
 
   /* decode-execute */
   String &cb = stm.cb;
-  ACC = VM_pipe[code].exec(ACC, V, value, cb);
+  VM_pipe[code].exec(ctx, value, cb);
 
   /* decode-write */
-  VM_pipe[code].write(value, ACC);
-
-  return ACC;
+  VM_pipe[code].write(value);
 }
 
 void VM_readIn(void) {
@@ -241,14 +237,17 @@ void VM_run(void) {
   if (id != 0xFF) {
     String key_stm = IoEntryVec[id].cb;
     Serial.printf("VM_run start %s\n", key_stm.c_str());
-    uint32_t ACC = 0;
+    
+    vm_context_t ctx;
+    ctx.V = 0;
+    ctx.ACC = 0;
     while (key_stm.length() != 0) {
       /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm);
       FunctionEntry &stm = FunctionVec[id_stm];
-      Serial.printf("VM_run code=%d, ACC=%d\n", stm.code, ACC);
+      Serial.printf("VM_run code=%d, ACC=%d V=%d\n", stm.code, ctx.ACC, ctx.V);
       /* decode */
-      ACC = VM_decode(ACC, stm);
+      VM_decode(ctx, stm);
       /* key_stm works like a program counter */
       key_stm = stm.cb;
     }
