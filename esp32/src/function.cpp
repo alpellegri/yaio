@@ -69,19 +69,19 @@ const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
 
 const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_exec_lt value=%s\n", key_value);
-  ctx.ACC = (ctx.V < ctx.ACC);
+  ctx.ACC = (ctx.ACC < ctx.V);
   return ctx.cb;
 }
 
 const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_exec_lt value=%s\n", key_value);
-  ctx.ACC = (ctx.V > ctx.ACC);
+  ctx.ACC = (ctx.ACC > ctx.V);
   return ctx.cb;
 }
 
 const char *vm_exec_eq(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_exec_eq value=%s\n", key_value);
-  ctx.ACC = (ctx.V == ctx.ACC);
+  ctx.ACC = (ctx.ACC == ctx.V);
   return ctx.cb;
 }
 
@@ -137,8 +137,8 @@ itlb_t VM_pipe[] = {
     /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
     /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
     /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
-    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* 10: bz   */ {vm_read, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
 };
 
@@ -149,15 +149,18 @@ const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
   /* decode-read */
   DEBUG_VM("VM_pipe read\n");
   VM_pipe[code].read(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
 
   /* decode-execute */
   DEBUG_VM("VM_pipe exec\n");
   ctx.cb = stm.cb.c_str();
   const char *key_stm = VM_pipe[code].exec(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
 
   /* decode-write */
   DEBUG_VM("VM_pipe write\n");
   VM_pipe[code].write(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
 
   return key_stm;
 }
