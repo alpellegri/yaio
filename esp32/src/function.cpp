@@ -19,106 +19,106 @@ extern std::vector<FunctionEntry> FunctionVec;
 typedef struct {
   uint32_t V;
   uint32_t ACC;
-  String cb;
+  const char *cb;
 } vm_context_t;
 
 typedef struct {
-  void (*read)(vm_context_t &ctx, String &value);
-  String &(*exec)(vm_context_t &ctx, String &key_value);
-  void (*write)(vm_context_t &ctx, String &key_value);
+  void (*read)(vm_context_t &ctx, const char *value);
+  const char *(*exec)(vm_context_t &ctx, const char *key_value);
+  void (*write)(vm_context_t &ctx, const char *key_value);
 } itlb_t;
 
-void vm_read0(vm_context_t &ctx, String &value) {
-  DEBUG_VM("vm_read0 value=%s\n", value.c_str());
+void vm_read0(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_read0 value=%s\n", value);
 }
 
-void vm_readi(vm_context_t &ctx, String &value) {
-  DEBUG_VM("vm_readi value=%s\n", value.c_str());
-  ctx.V = atoi(value.c_str());
+void vm_readi(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_readi value=%s\n", value);
+  ctx.V = atoi(value);
 }
 
-void vm_read24(vm_context_t &ctx, String &value) {
-  DEBUG_VM("vm_read24 value=%s\n", value.c_str());
+void vm_read24(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_read24 value=%s\n", value);
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
   ctx.V = IoEntryVec[id].value & mask;
 }
 
-void vm_read(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_read value=%s\n", key_value.c_str());
+void vm_read(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_read value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   ctx.V = IoEntryVec[id].value;
 }
 
-String &vm_exec_ex0(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_ex0 value=%s\n", key_value.c_str());
+const char *vm_exec_ex0(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_ex0 value=%s\n", key_value);
   ctx.ACC = 0;
   return ctx.cb;
 }
 
-String &vm_exec_ldi(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_ldi value=%s\n", key_value.c_str());
+const char *vm_exec_ldi(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_ldi value=%s\n", key_value);
   ctx.ACC = ctx.V;
   return ctx.cb;
 }
 
-String &vm_exec_st(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_st value=%s\n", key_value.c_str());
+const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_st value=%s\n", key_value);
   return ctx.cb;
 }
 
-String &vm_exec_lt(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_lt value=%s\n", key_value.c_str());
+const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
   ctx.ACC = (ctx.V < ctx.ACC);
   return ctx.cb;
 }
 
-String &vm_exec_gt(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_lt value=%s\n", key_value.c_str());
+const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
   ctx.ACC = (ctx.V > ctx.ACC);
   return ctx.cb;
 }
 
-String &vm_exec_eq(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_eq value=%s\n", key_value.c_str());
+const char *vm_exec_eq(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_eq value=%s\n", key_value);
   ctx.ACC = (ctx.V == ctx.ACC);
   return ctx.cb;
 }
 
-String &vm_exec_bz(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_bz value=%s\n", key_value.c_str());
+const char *vm_exec_bz(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_bz value=%s\n", key_value);
   if (ctx.ACC == 0) {
     return key_value;
   }
   return ctx.cb;
 }
 
-String &vm_exec_bnz(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_bnz value=%s\n", key_value.c_str());
+const char *vm_exec_bnz(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_bnz value=%s\n", key_value);
   if (ctx.ACC != 0) {
     return key_value;
   }
   return ctx.cb;
 }
 
-String &vm_exec_dly(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_exec_dly value=%s\n", key_value.c_str());
+const char *vm_exec_dly(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_dly value=%s\n", key_value);
   return ctx.cb;
 }
 
-void vm_write0(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_write0 value=%s\n", key_value.c_str());
+void vm_write0(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write0 value=%s\n", key_value);
 }
 
-void vm_write(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_write value=%s\n", key_value.c_str());
+void vm_write(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntryVec[id].value = ctx.ACC;
   IoEntryVec[id].wb = true;
 }
 
-void vm_write24(vm_context_t &ctx, String &key_value) {
-  DEBUG_VM("vm_write24 value=%s\n", key_value.c_str());
+void vm_write24(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write24 value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
@@ -142,22 +142,22 @@ itlb_t VM_pipe[] = {
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
 };
 
-String &VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
+const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
   uint32_t code = stm.code;
   String &value = stm.value;
 
   /* decode-read */
   DEBUG_VM("VM_pipe read\n");
-  VM_pipe[code].read(ctx, value);
+  VM_pipe[code].read(ctx, value.c_str());
 
   /* decode-execute */
   DEBUG_VM("VM_pipe exec\n");
-  ctx.cb = stm.cb;
-  String &key_stm = VM_pipe[code].exec(ctx, value);
+  ctx.cb = stm.cb.c_str();
+  const char *key_stm = VM_pipe[code].exec(ctx, value.c_str());
 
   /* decode-write */
   DEBUG_VM("VM_pipe write\n");
-  VM_pipe[code].write(ctx, value);
+  VM_pipe[code].write(ctx, value.c_str());
 
   return key_stm;
 }
@@ -259,11 +259,12 @@ void VM_run(void) {
     ctx.ACC = 0;
     while (key_stm.length() != 0) {
       /* fetch */
-      uint8_t id_stm = FB_getFunctionIdx(key_stm);
+      uint8_t id_stm = FB_getFunctionIdx(key_stm.c_str());
       FunctionEntry &stm = FunctionVec[id_stm];
 
       /* decode */
-      key_stm = VM_decode(ctx, stm);
+      key_stm = String(VM_decode(ctx, stm));
+
       DEBUG_VM("VM_run name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
                ctx.V);
     }

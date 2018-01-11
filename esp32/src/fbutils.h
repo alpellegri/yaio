@@ -62,7 +62,7 @@ extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);
 
 extern void FB_dumpIoEntry(void);
 extern void FB_dumpFunctions(void);
-extern uint8_t FB_getIoEntryIdx(String &key);
-extern uint8_t FB_getFunctionIdx(String &key);
+extern uint8_t FB_getIoEntryIdx(const char *key);
+extern uint8_t FB_getFunctionIdx(const char *key);
 
 #endif

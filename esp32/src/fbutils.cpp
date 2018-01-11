@@ -60,13 +60,13 @@ void FB_addFunctionDB(String key, String name, uint8_t code, String value,
   }
 }
 
-uint8_t FB_getIoEntryIdx(String &key) {
+uint8_t FB_getIoEntryIdx(const char *key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
   while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
-    res = strcmp(IoEntryVec[i].key.c_str(), key.c_str());
+    res = strcmp(IoEntryVec[i].key.c_str(), key);
     if (res == 0) {
       idx = i;
     }
@@ -76,13 +76,13 @@ uint8_t FB_getIoEntryIdx(String &key) {
   return idx;
 }
 
-uint8_t FB_getFunctionIdx(String &key) {
+uint8_t FB_getFunctionIdx(const char *key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
   while ((i < FunctionVec.size()) && (idx == 0xFF)) {
-    res = strcmp(FunctionVec[i].key.c_str(), key.c_str());
+    res = strcmp(FunctionVec[i].key.c_str(), key);
     if (res == 0) {
       idx = i;
     }
