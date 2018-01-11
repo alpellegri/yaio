@@ -257,9 +257,10 @@ void VM_run(void) {
       /* fetch */
       uint8_t id_stm = FB_getFunctionIdx(key_stm);
       FunctionEntry &stm = FunctionVec[id_stm];
-      DEBUG_VM("VM_run code=%d, ACC=%d V=%d\n", stm.code, ctx.ACC, ctx.V);
+
       /* decode */
       key_stm = VM_decode(ctx, stm);
+      DEBUG_VM("VM_run code=%d, ACC=%d V=%d\n", stm.code, ctx.ACC, ctx.V);
     }
     VM_writeOut();
   }
