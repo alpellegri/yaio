@@ -519,13 +519,13 @@ key-f03: {
 }
 key-f04: {
   name: 'f04',
-  code: lt,
+  code: gt,
   value: key-thr1,
   cb: key-f05,
 }
 key-f05: {
   name: 'f05',
-  code: bz,
+  code: bnz,
   value: end,
   cb: key-f09,
 }
@@ -543,7 +543,7 @@ key-f07: {
 }
 key-f08: {
   name: 'f08',
-  code: bnz,
+  code: bz,
   value: end,
   cb: key-f09,
 }
@@ -568,7 +568,7 @@ status      f06   |    v          thr1       end      | status
                      v          thr2       end
 
 diagram
-v->(f01: ld status)->(f02: bz f06)->(f03: ld v)->(f04: lt thr1)->(f05: bnz end)->(f09: st status)->(f10: st led)->end
+v->(f01: ld status)->(f02: bz f06)->(f03: ld v)->(f04: gt thr1)->(f05: bnz end)->(f09: st status)->(f10: st led)->end
                               |                                               |
                               +---->(f06: ld v)->(f07: gt thr2)->(f08: bz)----+
 
