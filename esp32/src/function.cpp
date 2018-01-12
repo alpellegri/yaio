@@ -237,7 +237,7 @@ void VM_writeOut(void) {
         DEBUG_VM("VM_writeOut: kInt %d\n", value);
         Firebase.setInt(kgraph + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_VM("set failed: kInt");
+          DEBUG_VM("set failed: kInt\n");
         } else {
           IoEntryVec[i].wb = false;
         }
