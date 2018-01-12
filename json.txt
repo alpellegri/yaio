@@ -116,7 +116,7 @@
   type: {bool, int, float}
 
   generic definition
-  key: {
+  key -> {
     owner: <node>,  // it is a string
     name: <name>,   // it is a string
     code: <type>,   // it is a number (enum)
@@ -137,7 +137,7 @@ Functions run into a simple virtual machine VM.
 
 * functions: execute a statement of a program, can call other statement
 
-  key: {
+  key -> {
     name: <name>,   // it is a string
     code: <instr>,  // it is a enum
     value: <arg>,   // it is a string. depending on the instruction can be an integer or a string
@@ -207,9 +207,9 @@ typedef struct {
   
   pipeline definition:
   typedef struct {
-    void (*read)(vm_context_t &ctx, String& value);
-    String& (*exec)(vm_context_t &ctx, String& key_value);
-    void (*write)(vm_context_t &ctx, String& key_value);
+    void (*read)(vm_context_t &ctx, const char *value);
+    const char* (*exec)(vm_context_t &ctx, const char *key_value);
+    void (*write)(vm_context_t &ctx, char *key_value);
   } itlb_t;
 
 3.1 VM-decode-read
@@ -217,16 +217,16 @@ if instruction is immediate then:
   V = value
   
 if instruction is not immediate, value represent a key of the DB:
-  // index 0: fetch
+  // fetch
   vm_pipe[code].read(ctx, stm.value)
 
   // immediate value
-  void vm_readi(ctx, String& value) {
+  void vm_readi(ctx, const char *value) {
     ctx.V = atoi(value.c_str());
   }
 
   // not immediate value
-  void vm_read(ctx, String& key_value) {
+  void vm_read(ctx, const char *key_value) {
     data = lookup(key_value);
     ctx.V = data.value;
   }
@@ -247,7 +247,7 @@ if instruction is not immediate, value represent a key of the DB:
   data = lookup(stm.value)
   data.value = ACC
 
-  void vm_write(ctx, String& key) {
+  void vm_write(ctx, const char *key) {
     data = lookup(key.value);
     data.value = ctx.ACC;
     data.wb = true;
@@ -257,20 +257,21 @@ if instruction is not immediate, value represent a key of the DB:
 All variable have to contain an indication flag (data.wb == true) are asked to be written back to
 the DB
 
-  |     code|F|R|E|W|      READ|         EXEC|      WRITE 
-00|ex0 |   0|x| |x| |      null,  vm_exec_ex0,  vm_write0
-01|ldi |   1|x|x|x| |  vm_readi,  vm_exec_ldi,  vm_write0
-02|ld24|   2|x|x|x| | vm_read24, vm_exec_ld24,  vm_write0
-03|ld  |   3|x|x|x| |   vm_read,  vm_exec_ldi,  vm_write0
-04|st24|   4|x| |x|x|  vm_read0, vm_exec_st24, vm_write24
-05|st  |   5|x| |x|x|  vm_read0,   vm_exec_st,   vm_write
-06|lt  |   6|x|x|x| |   vm_read,   vm_exec_lt,  vm_write0
-07|gt  |   7|x|x|x| |   vm_read,   vm_exec_gt,  vm_write0
-08|eqi |   8|x|x|x| |  vm_readi,   vm_exec_eq,  vm_write0
-09|eq  |   9|x|x|x| |   vm_read,   vm_exec_eq,  vm_write0
-10|bz  |  10|x| |x| |  vm_read0,   vm_exec_bz,  vm_write0
-11|bnz |  11|x| |x| |  vm_read0,  vm_exec_bnz,  vm_write0
-12|dly |  12|x|x|x| |   vm_read,  vm_exec_dly,  vm_write0
+itlb_t VM_pipe[] = {
+    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
+    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
+    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
+    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
+    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
+    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
+    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
+    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
+    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
+    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
+    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
+};
 
 A1.1 example simple boolean trigger
     ===============================
