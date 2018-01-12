@@ -180,6 +180,8 @@ void VM_readIn(void) {
         IoEntryVec[i].ev = true;
       }
     } break;
+    case kRadioIn: {
+    } break;
     case kBool:
     case kInt: {
       value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
@@ -187,6 +189,7 @@ void VM_readIn(void) {
         DEBUG_VM("get failed: kInt");
       } else {
         if ((IoEntryVec[i].value) != value) {
+          DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
           IoEntryVec[i].value = value;
           IoEntryVec[i].ev = true;
         }
