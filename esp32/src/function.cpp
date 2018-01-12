@@ -274,5 +274,6 @@ void VM_run(void) {
                ctx.V);
     }
     VM_writeOut();
+    DEBUG_VM("VM_run stop <<<<<<<<<<<<<\n");
   }
 }
