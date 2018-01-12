@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <string>
+#include <vector>
 
 #define NUM_IO_ENTRY_MAX 20
 #define NUM_IO_FUNCTION_MAX 20
@@ -42,6 +43,9 @@ public:
   String value;
   String cb;  // firebase key
 };
+
+extern std::vector<IoEntry> IoEntryVec;
+extern std::vector<FunctionEntry> FunctionVec;
 
 extern void FB_deinitIoEntryDB(void);
 extern void FB_deinitFunctionDB(void);

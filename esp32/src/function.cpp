@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <vector>
 
 #include "fbconf.h"
 #include "fbm.h"
@@ -12,9 +11,6 @@
 #include <FirebaseArduino.h>
 
 #define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
-
-extern std::vector<IoEntry> IoEntryVec;
-extern std::vector<FunctionEntry> FunctionVec;
 
 typedef struct {
   uint32_t V;
@@ -184,6 +180,7 @@ void VM_readIn(void) {
         IoEntryVec[i].ev = true;
       }
     } break;
+    case kBool:
     case kInt: {
       value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
@@ -231,6 +228,7 @@ void VM_writeOut(void) {
         digitalWrite(pin, value);
         IoEntryVec[i].wb = false;
       } break;
+      case kBool:
       case kInt: {
         uint32_t value = IoEntryVec[i].value;
         DEBUG_VM("VM_writeOut: kInt %d\n", value);

@@ -14,5 +14,6 @@ extern void RF_Disable(void);
 extern void RF_Send(uint32_t data, uint8_t bits);
 
 extern void RF_Loop(void);
+extern bool RF_Task(void);
 
 #endif
