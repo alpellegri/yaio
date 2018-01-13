@@ -14,6 +14,7 @@
 #define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
 
 typedef struct {
+  bool cond;
   uint32_t V;
   uint32_t ACC;
   const char *cb;
@@ -61,6 +62,12 @@ const char *vm_exec_ldi(vm_context_t &ctx, const char *key_value) {
 
 const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  return ctx.cb;
+}
+
+const char *vm_exec_stne(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  ctx.cond = true;
   return ctx.cb;
 }
 
@@ -114,6 +121,16 @@ void vm_write(vm_context_t &ctx, const char *key_value) {
   IoEntryVec[id].wb = true;
 }
 
+void vm_cwrite(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_cwrite value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  if ((ctx.cond == true) && (IoEntryVec[id].value != ctx.ACC)) {
+    ctx.cond = false;
+    IoEntryVec[id].value = ctx.ACC;
+    IoEntryVec[id].wb = true;
+  }
+}
+
 void vm_write24(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_write24 value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
@@ -137,6 +154,7 @@ itlb_t VM_pipe[] = {
     /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
     /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
+    /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
 };
 
 const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {

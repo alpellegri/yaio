@@ -273,6 +273,7 @@ itlb_t VM_pipe[] = {
     /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
     /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
+    /* 13: stne */ {vm_read, vm_exec_dly, vm_write0},
 };
 
 A1.1 example simple boolean trigger
@@ -413,10 +414,6 @@ run:
       status = true;
     }
   }
-
-or:
-  @sensor.event
-  
   
 instruction-code:
 f01: ld status, f02
@@ -428,6 +425,22 @@ f06: ld sensor, f07
 f07: gt thr2, f08
 f08: bz end, f09
 f09: st status, end
+
+or:
+  @sensor.event
+  if (sensor>thr1) {
+    if (sensor>thr2) {
+      status = false;
+    }   
+  } else {
+    status = false;
+  }
+
+f01: gt thr1, f02
+f02: bz f05, f03
+f03: gt thr2, f04
+f04: bz end, f05
+f05: stne status, end
 
 key-sensor: {
   name: 'sensor',
