@@ -31,6 +31,8 @@
     cb: <callback>,
   }
 
+  VM call callback cb when a physical input changes and ACC = input value
+
   output
   identifier = pin<<24|value
   key -> {
@@ -280,23 +282,13 @@ pin: physical input mapped on a pin
 
 pseudo-code:
   @pin.event
-  if (pin>0) {
-    status = true;
-  } else {
-    status = false;
-  }
-  
-or:
-  @pin.event
-  status = (pin>0);
+  status = event.value;
 
 instruction code:
-f01: ld24 pin, f02
-f02: eqi 1, f03
-f03: st status, end
+f01: st status, end
 
-key-sensor: {
-  name: 'sensor',
+key-In: {
+  name: 'In',
   code: phyin,
   value: pin<<24,
   cb: key-f01,
@@ -309,18 +301,6 @@ key-status: {
 }
 key-f01: {
   name: 'f01',
-  code: ld,
-  value: key-sensor,
-  cb: key-f02,
-}
-key-f02: {
-  name: 'f02',
-  code: eqi,
-  value: 1,
-  cb: key-f03,
-}
-key-f03: {
-  name: 'f03',
   code: st,
   value: key-status,
   cb: end,
@@ -334,20 +314,11 @@ thr1: variable
 
 pseudo-code:
   @sensor.event
-  if (sensor>thr) {
-    status = true;
-  } else {
-    status = false;
-  }
-  
-or:
-  @sensor.event
-  status = (sensor>thr);
+  status = (event.value>thr);
 
 instruction code:
-f01: ld sensor, f02
-f02: lt thr, f03
-f03: st status, end
+f01: gt thr, f02
+f02: st status, end
 
 key-sensor: {
   name: 'sensor',
@@ -369,18 +340,12 @@ key-status: {
 }
 key-f01: {
   name: 'f01',
-  code: ld,
-  value: key-sensor,
+  code: gt,
+  value: 0,
   cb: key-f02,
 }
 key-f02: {
   name: 'f02',
-  code: eqi,
-  value: 0,
-  cb: key-f03,
-}
-key-f03: {
-  name: 'f03',
   code: st,
   value: key-status,
   cb: end,
@@ -393,18 +358,9 @@ status: variable
 
 pseudo-code:
   @status.event
-  if (status != 0) {
-    led = true;
-  } else {
-    led = false;
-  }
-
-or:
-  @status.event
-  led = (status != 0);
+  led = (status.value != 0);
 
 instruction-code:
-f01: ld status, f02
 f02: eqi 0, f03
 f03: st led, end
 
@@ -422,18 +378,12 @@ key-status: {
 }
 key-f01: {
   name: 'f01',
-  code: ld,
-  value: key-status,
+  code: eqi,
+  value: 0,
   cb: key-f02,
 }
 key-f02: {
   name: 'f02',
-  code: eqi,
-  value: 0,
-  cb: key-f03,
-}
-key-f03: {
-  name: 'f03',
   code: st,
   value: key-led,
   cb: end,
@@ -464,6 +414,10 @@ run:
     }
   }
 
+or:
+  @sensor.event
+  
+  
 instruction-code:
 f01: ld status, f02
 f02: bz f6, f03

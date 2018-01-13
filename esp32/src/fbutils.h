@@ -33,6 +33,7 @@ public:
   uint32_t value;
   String cb;
   bool ev;
+  uint32_t ev_value;
   bool wb;
 };
 

@@ -178,10 +178,12 @@ void VM_readIn(void) {
       uint32_t mask = (1 << 24) - 1;
       value = digitalRead(pin) & mask;
       if ((IoEntryVec[i].value & mask) != value) {
-        IoEntryVec[i].value = (IoEntryVec[i].value & (~mask)) | value;
+        value = (IoEntryVec[i].value & (~mask)) | value;
+        IoEntryVec[i].value = value;
         DEBUG_VM("VM_readIn: %s, %d, %d\n", IoEntryVec[i].name.c_str(), value,
                  IoEntryVec[i].value);
         IoEntryVec[i].ev = true;
+        IoEntryVec[i].ev_value = value;
       }
     } break;
     case kRadioIn: {
@@ -196,6 +198,7 @@ void VM_readIn(void) {
           DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
           IoEntryVec[i].value = value;
           IoEntryVec[i].ev = true;
+          IoEntryVec[i].ev_value = value;
         }
       }
     } break;
@@ -206,13 +209,14 @@ void VM_readIn(void) {
   }
 }
 
-uint8_t VM_findEvent(void) {
+uint8_t VM_findEvent(uint32_t *ev_value) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   /* loop over data elements looking for events */
   while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
     if (IoEntryVec[i].ev == true) {
       IoEntryVec[i].ev = false;
+      *ev_value = IoEntryVec[i].ev_value;
       idx = i;
     }
     i++;
@@ -257,13 +261,14 @@ void VM_writeOut(void) {
 
 void VM_run(void) {
   VM_readIn();
-  uint8_t id = VM_findEvent();
+  uint32_t ev_value;
+  uint8_t id = VM_findEvent(&ev_value);
   if (id != 0xFF) {
     String key_stm = IoEntryVec[id].cb;
 
     vm_context_t ctx;
     ctx.V = 0;
-    ctx.ACC = 0;
+    ctx.ACC = ev_value;
     DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
     Serial.printf("Heap: %d\n", ESP.getFreeHeap());
     while (key_stm.length() != 0) {
