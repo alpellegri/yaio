@@ -13,7 +13,6 @@
 static uint32_t t247_last = 0;
 
 void Timers_Service(void) {
-  // get time
   uint32_t current = getTime();
   uint32_t t247 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
 
@@ -29,8 +28,7 @@ void Timers_Service(void) {
         uint32_t _time = 60 * (entry.value >> 24) + (entry.value & 0xFF);
         if (_time == t247) {
           // action
-          DEBUG_VM(">>> Action on timer %s at time %d\n", entry.name.c_str(),
-                   t247);
+          DEBUG_VM("Timers %s at time %d\n", entry.name.c_str(), t247);
           entry.ev = true;
         }
       }

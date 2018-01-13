@@ -18,7 +18,6 @@ static Ticker RFRcvTimer;
 static RCSwitch mySwitch = RCSwitch();
 static uint32_t RadioCode;
 static uint32_t RadioCodeLast;
-static bool RF_StatusEnable = false;
 
 uint8_t RF_checkRadioCodeDB(uint32_t code) {
   uint8_t i = 0;
@@ -74,7 +73,6 @@ uint8_t RF_checkRadioCodeTxDB(uint32_t code) {
 void RF_Send(uint32_t data, uint8_t bits) { mySwitch.send(data, bits); }
 
 void RF_Enable(void) {
-  RF_StatusEnable = true;
   RadioCode = 0;
   RadioCodeLast = 0;
   Serial.println(F("RF Enable"));
@@ -82,7 +80,6 @@ void RF_Enable(void) {
 }
 
 void RF_Disable(void) {
-  RF_StatusEnable = false;
   Serial.println(F("RF Disable"));
   mySwitch.disableReceive();
 }
