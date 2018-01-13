@@ -28,21 +28,21 @@ enum {
 
 class IoEntry {
 public:
+  uint8_t code;
+  bool ev;
+  bool wb;
   String key;
   String name;
-  uint8_t code;
   uint32_t value;
   String cb;
-  bool ev;
   uint32_t ev_value;
-  bool wb;
 };
 
 class FunctionEntry {
 public:
+  uint8_t code;
   String key; // firebase key
   String name;
-  uint8_t code;
   String value;
   String cb;  // firebase key
 };

@@ -107,8 +107,8 @@
   key -> {
     owner: <owner>,
     name: <name>,
-    code: logout,
-    value: kmessage, // it is a number
+    code: message,
+    value: kmessage, // it is a string
     cb: <callback>,
   }
 

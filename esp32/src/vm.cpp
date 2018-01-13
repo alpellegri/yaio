@@ -18,6 +18,7 @@ typedef struct {
   uint32_t V;
   uint32_t ACC;
   const char *cb;
+  const char *ev_name;
 } vm_context_t;
 
 typedef struct {
@@ -309,6 +310,7 @@ void VM_run(void) {
     vm_context_t ctx;
     ctx.V = 0;
     ctx.ACC = ev_value;
+    ctx.ev_name = IoEntryVec[id].name.c_str();
     DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
     Serial.printf("Heap: %d\n", ESP.getFreeHeap());
     while (key_stm.length() != 0) {
