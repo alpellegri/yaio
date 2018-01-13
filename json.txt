@@ -428,28 +428,12 @@ f07: gt thr2, f08
 f08: bz end, f09
 f09: st status, end
 
-the following code write the output variable status the proper condition is
-satisfied, that is not efficient. Using a special function stne (store if not
-equal) this can be avoided. The code starts with testing against the ACC where
-is stored the calling event value.
-This allows to reduce the number of the instructions to 5 and saving RAM and
-CPU load on device.
-
-or:
-  @sensor.event
-  if (sensor>thr1) {
-    if (sensor>thr2) {
-      status = true;
-    }   
-  } else {
-    status = false;
-  }
-
-f01: gt thr1, f02
-f02: bz f05, f03
-f03: gt thr2, f04
-f04: bz end, f05
-f05: stne status, end
+// the following code write the output variable status the proper condition is
+// satisfied, that is not efficient. Using a special function stne (store if not
+// equal) this can be avoided. The code starts with testing against the ACC where
+// is stored the calling event value.
+// This allows to reduce the number of the instructions to 5 and saving RAM and
+// CPU load on device.
 
 key-sensor: {
   name: 'sensor',
