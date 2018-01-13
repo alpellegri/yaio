@@ -13,7 +13,7 @@
 #include "fcm.h"
 #include "fota.h"
 #include "timesrv.h"
-#include "function.h"
+#include "vm.h"
 #include "rf.h"
 #include "timers.h"
 

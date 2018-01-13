@@ -24,7 +24,7 @@ typedef struct {
   void (*read)(vm_context_t &ctx, const char *value);
   const char *(*exec)(vm_context_t &ctx, const char *key_value);
   void (*write)(vm_context_t &ctx, const char *key_value);
-} itlb_t;
+} vm_itlb_t;
 
 void VM_readIn(void) {
   uint32_t value;
@@ -56,7 +56,7 @@ void VM_readIn(void) {
     case kInt: {
       value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
-        DEBUG_VM("get failed: kInt");
+        DEBUG_VM("get failed: kInt\n");
       } else {
         if ((IoEntryVec[i].value) != value) {
           DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
@@ -143,7 +143,7 @@ void vm_read24(vm_context_t &ctx, const char *value) {
 }
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_readi value=%s\n", key_value);
+  DEBUG_VM("vm_read value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   ctx.V = IoEntryVec[id].value;
 }
@@ -166,7 +166,7 @@ const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
 }
 
 const char *vm_exec_stne(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  DEBUG_VM("vm_exec_stne value=%s\n", key_value);
   ctx.cond = true;
   return ctx.cb;
 }
@@ -177,8 +177,20 @@ const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
   return ctx.cb;
 }
 
-const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
+const char *vm_exec_lte(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC < ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_gt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC > ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_gte(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_gt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC > ctx.V);
   return ctx.cb;
 }
@@ -245,7 +257,7 @@ void vm_write24(vm_context_t &ctx, const char *key_value) {
   }
 }
 
-itlb_t VM_pipe[] = {
+vm_itlb_t VM_pipe[] = {
     /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
     /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
     /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
@@ -260,6 +272,8 @@ itlb_t VM_pipe[] = {
     /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_readi, vm_exec_dly, vm_write0},
     /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
+    /* 14: lte  */ {vm_read, vm_exec_lte, vm_write0},
+    /* 15: gte  */ {vm_read, vm_exec_gte, vm_write0},
 };
 
 const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {

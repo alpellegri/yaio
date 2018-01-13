@@ -9,7 +9,6 @@
 #include "fblog.h"
 #include "fbm.h"
 #include "fbutils.h"
-#include "function.h"
 #include "rf.h"
 #include "timesrv.h"
 

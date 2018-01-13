@@ -1,5 +1,5 @@
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#ifndef VM_H
+#define VM_H
 
 #include <Arduino.h>
 

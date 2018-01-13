@@ -11,9 +11,10 @@
 #include "fbm.h"
 #include "fcm.h"
 #include "fota.h"
-#include "rf.h"
 #include "timesrv.h"
-#include "function.h"
+#include "vm.h"
+#include "rf.h"
+#include "timers.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH

@@ -177,7 +177,19 @@ const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
   return ctx.cb;
 }
 
+const char *vm_exec_lte(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC < ctx.V);
+  return ctx.cb;
+}
+
 const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_gt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC > ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_gte(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_exec_gt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC > ctx.V);
   return ctx.cb;
@@ -260,6 +272,8 @@ vm_itlb_t VM_pipe[] = {
     /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_readi, vm_exec_dly, vm_write0},
     /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
+    /* 14: lte  */ {vm_read, vm_exec_lte, vm_write0},
+    /* 15: gte  */ {vm_read, vm_exec_gte, vm_write0},
 };
 
 const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
