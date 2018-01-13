@@ -21,25 +21,6 @@ static RCSwitch mySwitch = RCSwitch();
 static uint32_t RadioCode;
 static uint32_t RadioCodeLast;
 
-uint8_t RF_checkRadioCodeDB(uint32_t code) {
-  uint8_t i = 0;
-  uint8_t idx = 0xFF;
-
-  uint8_t len = FB_getIoEntryLen();
-
-  Serial.printf_P(PSTR("RF_CheckRadioCodeDB: code %06X\n"), code);
-  while ((i < len) && (idx == 0xFF)) {
-    IoEntry entry = FB_getIoEntry(i);
-    if ((code == entry.value) && (entry.code == kRadioIn)) {
-      Serial.printf_P(PSTR("radio code found in table %06X\n"), entry.value);
-      idx = i;
-    }
-    i++;
-  }
-
-  return idx;
-}
-
 #if 0
 void RF_executeIoEntryDB(uint8_t idx) {
   if (FB_getIoEntry(idx).cb.length() != 0) {
@@ -127,13 +108,39 @@ void RF_Loop() {
   }
 }
 
+uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
+  uint8_t i = 0;
+  uint8_t id = 0xFF;
+
+  uint8_t len = FB_getIoEntryLen();
+
+  Serial.printf_P(PSTR("RF_CheckRadioCodeDB: code %06X\n"), radioid);
+  while ((i < len) && (id == 0xFF)) {
+    IoEntry entry = FB_getIoEntry(i);
+    if ((radioid == entry.value) && (entry.code == kRadioIn)) {
+      Serial.printf_P(PSTR("radio code found in table %06X\n"), entry.value);
+      id = i;
+    }
+    i++;
+  }
+
+  return id;
+}
+
 /* main function task */
 void RF_Service(void) {
-  uint32_t code = RF_GetRadioCode();
-  if (code != 0) {
-    uint8_t id = RF_checkRadioCodeDB(code);
+  uint32_t radioid = RF_GetRadioCode();
+  if (radioid != 0) {
+    uint8_t id = RF_checkRadioInCodeDB(radioid);
     if (id != 0xFF) {
       IoEntryVec[id].ev = true;
+    } else {
+      for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
+        if (IoEntryVec[i].code == kRadioRx) {
+          IoEntryVec[i].value = radioid;
+          IoEntryVec[i].ev = true;
+        }
+      }
     }
   }
 }

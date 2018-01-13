@@ -74,17 +74,17 @@
   }
   configuration: mask
 
-  At start VM read all radiomach from DB and store them to RAM.
+  At start VM read all radioin from DB and store them to RAM.
   if (radio & mask) == mask an event is 
   VM call callback cb when (radio & mask) == mask
   and ACC = radio & ~mask
 
-* radin is a logical value.
+* radiorx is a logical value.
   key -> {
     owner: <owner>,
     name: <radio>,
     code: radiorx,
-    value: 0, // not used
+    value: 0,
     cb: <callback>,
   }
 

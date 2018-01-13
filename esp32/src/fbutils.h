@@ -9,17 +9,18 @@
 #define NUM_IO_FUNCTION_MAX 20
 
 enum {
-  kPhyIn = 0,
-  kPhyOut,
-  kLogIn,
-  kLogOut,
-  kRadioIn,
-  kRadioOut,
-  kRadioElem,
-  kTimer,
-  kBool,
-  kInt,
-  kFloat,
+  /* 00 */ kPhyIn = 0,
+  /* 01 */ kPhyOut,
+  /* 02 */ kLogIn,
+  /* 03 */ kLogOut,
+  /* 04 */ kRadioIn,
+  /* 05 */ kRadioOut,
+  /* 06 */ kRadioElem,
+  /* 07 */ kTimer,
+  /* 08 */ kBool,
+  /* 09 */ kInt,
+  /* 10 */ kFloat,
+  /* 11 */ kRadioRx,
 };
 
 // template class std::basic_string<char>;
