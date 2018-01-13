@@ -26,160 +26,6 @@ typedef struct {
   void (*write)(vm_context_t &ctx, const char *key_value);
 } itlb_t;
 
-void vm_read0(vm_context_t &ctx, const char *value) {
-  DEBUG_VM("vm_read0 value=%s\n", value);
-}
-
-void vm_readi(vm_context_t &ctx, const char *value) {
-  DEBUG_VM("vm_readi value=%s\n", value);
-  ctx.V = atoi(value);
-}
-
-void vm_read24(vm_context_t &ctx, const char *value) {
-  DEBUG_VM("vm_read24 value=%s\n", value);
-  uint8_t id = FB_getIoEntryIdx(value);
-  uint32_t mask = (1 << 24) - 1;
-  ctx.V = IoEntryVec[id].value & mask;
-}
-
-void vm_read(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_read value=%s\n", key_value);
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  ctx.V = IoEntryVec[id].value;
-}
-
-const char *vm_exec_ex0(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_ex0 value=%s\n", key_value);
-  ctx.ACC = 0;
-  return ctx.cb;
-}
-
-const char *vm_exec_ldi(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_ldi value=%s\n", key_value);
-  ctx.ACC = ctx.V;
-  return ctx.cb;
-}
-
-const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_st value=%s\n", key_value);
-  return ctx.cb;
-}
-
-const char *vm_exec_stne(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_st value=%s\n", key_value);
-  ctx.cond = true;
-  return ctx.cb;
-}
-
-const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
-  ctx.ACC = (ctx.ACC < ctx.V);
-  return ctx.cb;
-}
-
-const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
-  ctx.ACC = (ctx.ACC > ctx.V);
-  return ctx.cb;
-}
-
-const char *vm_exec_eq(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_eq value=%s\n", key_value);
-  ctx.ACC = (ctx.ACC == ctx.V);
-  return ctx.cb;
-}
-
-const char *vm_exec_bz(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_bz value=%s\n", key_value);
-  if (ctx.ACC == 0) {
-    return key_value;
-  }
-  return ctx.cb;
-}
-
-const char *vm_exec_bnz(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_bnz value=%s\n", key_value);
-  if (ctx.ACC != 0) {
-    return key_value;
-  }
-  return ctx.cb;
-}
-
-const char *vm_exec_dly(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_dly value=%s\n", key_value);
-  return ctx.cb;
-}
-
-void vm_write0(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_write0 value=%s\n", key_value);
-}
-
-void vm_write(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_write value=%s\n", key_value);
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  IoEntryVec[id].value = ctx.ACC;
-  IoEntryVec[id].wb = true;
-}
-
-void vm_cwrite(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_cwrite value=%s\n", key_value);
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  if ((ctx.cond == true) && (IoEntryVec[id].value != ctx.ACC)) {
-    ctx.cond = false;
-    IoEntryVec[id].value = ctx.ACC;
-    IoEntryVec[id].wb = true;
-  }
-}
-
-void vm_write24(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_write24 value=%s\n", key_value);
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  uint32_t mask = (1 << 24) - 1;
-  uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
-  IoEntryVec[id].value = value;
-  IoEntryVec[id].wb = true;
-}
-
-itlb_t VM_pipe[] = {
-    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
-    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
-    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
-    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
-    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
-    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
-    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
-    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
-    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
-    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
-    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
-    /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
-    /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
-};
-
-const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
-  uint32_t code = stm.code;
-  String &value = stm.value;
-
-  /* decode-read */
-  DEBUG_VM("VM_pipe read\n");
-  VM_pipe[code].read(ctx, value.c_str());
-  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
-
-  /* decode-execute */
-  DEBUG_VM("VM_pipe exec\n");
-  ctx.cb = stm.cb.c_str();
-  const char *key_stm = VM_pipe[code].exec(ctx, value.c_str());
-  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
-
-  /* decode-write */
-  DEBUG_VM("VM_pipe write\n");
-  VM_pipe[code].write(ctx, value.c_str());
-  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
-
-  return key_stm;
-}
-
 void VM_readIn(void) {
   uint32_t value;
 
@@ -243,19 +89,23 @@ uint8_t VM_findEvent(uint32_t *ev_value) {
   return idx;
 }
 
+void VM_writeOutPhyOut(uint32_t value) {
+  uint32_t mask = (1 << 24) - 1;
+  uint8_t pin = value >> 24;
+  value &= mask;
+  value = !!value;
+  DEBUG_VM("VM_writeOutPhyOut: kPhyOut %d, %d\n", pin, value);
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, value);
+}
+
 void VM_writeOut(void) {
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     if (IoEntryVec[i].wb == true) {
       switch (IoEntryVec[i].code) {
       case kPhyOut: {
-        uint32_t mask = (1 << 24) - 1;
-        uint8_t pin = IoEntryVec[i].value >> 24;
-        pinMode(pin, OUTPUT);
-        uint32_t value = IoEntryVec[i].value & mask;
-        DEBUG_VM("VM_writeOut: kPhyOut %d, %d\n", pin, value);
-        digitalWrite(pin, value);
-        IoEntryVec[i].wb = false;
+        DEBUG_VM("VM_writeOut: kPhyOut error\n");
       } break;
       case kBool:
       case kInt: {
@@ -267,7 +117,6 @@ void VM_writeOut(void) {
         } else {
           IoEntryVec[i].wb = false;
         }
-
       } break;
       default:
         // DEBUG_VM("VM_writeOut: error\n");
@@ -275,6 +124,167 @@ void VM_writeOut(void) {
       }
     }
   }
+}
+
+void vm_read0(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_read0 value=%s\n", value);
+}
+
+void vm_readi(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_readi value=%s\n", value);
+  ctx.V = atoi(value);
+}
+
+void vm_read24(vm_context_t &ctx, const char *value) {
+  uint8_t id = FB_getIoEntryIdx(value);
+  uint32_t mask = (1 << 24) - 1;
+  ctx.V = IoEntryVec[id].value & mask;
+  DEBUG_VM("vm_read24 key=%s, name=%s, value=%s\n", value, IoEntryVec[id].name,
+           ctx.V);
+}
+
+void vm_read(vm_context_t &ctx, const char *key_value) {
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  ctx.V = IoEntryVec[id].value;
+  DEBUG_VM("vm_read key=%s, name=%s, value=%s\n", key_value,
+           IoEntryVec[id].name, ctx.V);
+}
+
+const char *vm_exec_ex0(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_ex0 value=%s\n", key_value);
+  ctx.ACC = 0;
+  return ctx.cb;
+}
+
+const char *vm_exec_ldi(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_ldi value=%s\n", key_value);
+  ctx.ACC = ctx.V;
+  return ctx.cb;
+}
+
+const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  return ctx.cb;
+}
+
+const char *vm_exec_stne(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  ctx.cond = true;
+  return ctx.cb;
+}
+
+const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC < ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC > ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_eq(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_eq value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC == ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_bz(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_bz value=%s\n", key_value);
+  if (ctx.ACC == 0) {
+    return key_value;
+  }
+  return ctx.cb;
+}
+
+const char *vm_exec_bnz(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_bnz value=%s\n", key_value);
+  if (ctx.ACC != 0) {
+    return key_value;
+  }
+  return ctx.cb;
+}
+
+const char *vm_exec_dly(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_dly value=%s\n", key_value);
+  delay(ctx.ACC);
+  return ctx.cb;
+}
+
+void vm_write0(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write0 value=%s\n", key_value);
+}
+
+void vm_write(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  IoEntryVec[id].value = ctx.ACC;
+  IoEntryVec[id].wb = true;
+}
+
+void vm_cwrite(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_cwrite value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  if ((ctx.cond == true) && (IoEntryVec[id].value != ctx.ACC)) {
+    ctx.cond = false;
+    IoEntryVec[id].value = ctx.ACC;
+    IoEntryVec[id].wb = true;
+  }
+}
+
+void vm_write24(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write24 value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  uint32_t mask = (1 << 24) - 1;
+  uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
+  if (IoEntryVec[id].code == kPhyOut) {
+    VM_writeOutPhyOut(value);
+  } else {
+    IoEntryVec[id].value = value;
+    IoEntryVec[id].wb = true;
+  }
+}
+
+itlb_t VM_pipe[] = {
+    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
+    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
+    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
+    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
+    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
+    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
+    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
+    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
+    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
+    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
+    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* 12: dly  */ {vm_readi, vm_exec_dly, vm_write0},
+    /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
+};
+
+const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
+  uint32_t code = stm.code;
+  String &value = stm.value;
+
+  /* decode-read */
+  DEBUG_VM("VM_pipe read\n");
+  VM_pipe[code].read(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+
+  /* decode-execute */
+  DEBUG_VM("VM_pipe exec\n");
+  ctx.cb = stm.cb.c_str();
+  const char *key_stm = VM_pipe[code].exec(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+
+  /* decode-write */
+  DEBUG_VM("VM_pipe write\n");
+  VM_pipe[code].write(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+
+  return key_stm;
 }
 
 void VM_run(void) {
@@ -293,13 +303,13 @@ void VM_run(void) {
       uint8_t id_stm = FB_getFunctionIdx(key_stm.c_str());
       FunctionEntry &stm = FunctionVec[id_stm];
 
-      DEBUG_VM("VM_run start name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
-               ctx.V);
+      DEBUG_VM("VM_run start name=%s, code=%d, ACC=%d V=%d\n", stm.name.c_str(),
+               stm.code, ctx.ACC, ctx.V);
       /* decode */
       key_stm = String(VM_decode(ctx, stm));
 
-      DEBUG_VM("VM_run stop name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
-               ctx.V);
+      DEBUG_VM("VM_run stop name=%s, code=%d, ACC=%d V=%d\n", stm.name.c_str(),
+               stm.code, ctx.ACC, ctx.V);
     }
     VM_writeOut();
     DEBUG_VM("VM_run stop <<<<<<<<<<<<<\n");

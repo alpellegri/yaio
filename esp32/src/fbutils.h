@@ -9,16 +9,16 @@
 #define NUM_IO_FUNCTION_MAX 20
 
 enum {
-  /* 00 */ kPhyIn = 0,
-  /* 01 */ kPhyOut,
-  /* 02 */ kLogIn,
-  /* 03 */ kLogOut,
-  /* 04 */ kRadioIn,
-  /* 05 */ kRadioOut,
-  /* 06 */ kRadioElem,
-  /* 07 */ kTimer,
-  /* 08 */ kBool,
-  /* 09 */ kInt,
+  /*  0 */ kPhyIn = 0,
+  /*  1 */ kPhyOut,
+  /*  2 */ kLogIn,
+  /*  3 */ kLogOut,
+  /*  4 */ kRadioIn,
+  /*  5 */ kRadioOut,
+  /*  6 */ kRadioElem,
+  /*  7 */ kTimer,
+  /*  8 */ kBool,
+  /*  9 */ kInt,
   /* 10 */ kFloat,
   /* 11 */ kRadioRx,
 };
