@@ -261,6 +261,7 @@ void VM_run(void) {
     ctx.V = 0;
     ctx.ACC = 0;
     DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
+    Serial.printf("Heap: %d\n", ESP.getFreeHeap());
     while (key_stm.length() != 0) {
       uint8_t id_stm = FB_getFunctionIdx(key_stm.c_str());
       FunctionEntry &stm = FunctionVec[id_stm];
