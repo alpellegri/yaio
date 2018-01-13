@@ -8,6 +8,7 @@
 #include "fbm.h"
 #include "fbutils.h"
 #include "rf.h"
+#include "timers.h"
 #include <FirebaseArduino.h>
 
 #define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
@@ -163,6 +164,9 @@ const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
 
 void VM_readIn(void) {
   uint32_t value;
+
+  RF_Service();
+  Timers_Service();
 
   /* loop over data elements looking for events */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {

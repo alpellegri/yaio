@@ -13,6 +13,8 @@
 #include "rf.h"
 #include "timesrv.h"
 
+#define RFRX 15
+
 static Ticker RFRcvTimer;
 
 static RCSwitch mySwitch = RCSwitch();
@@ -76,7 +78,7 @@ void RF_Enable(void) {
   RadioCode = 0;
   RadioCodeLast = 0;
   Serial.println(F("RF Enable"));
-  mySwitch.enableReceive(15);
+  mySwitch.enableReceive(RFRX);
 }
 
 void RF_Disable(void) {

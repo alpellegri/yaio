@@ -105,8 +105,6 @@ bool STA_Task(void) {
       if (TimeService() == true) {
         FbmService();
         yield();
-        RF_Task();
-        yield();
         VM_run();
         yield();
         FcmService();
