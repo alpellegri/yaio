@@ -9,17 +9,18 @@
 #define NUM_IO_FUNCTION_MAX 20
 
 enum {
-  kPhyIn = 0,
-  kPhyOut,
-  kLogIn,
-  kLogOut,
-  kRadioIn,
-  kRadioOut,
-  kRadioElem,
-  kTimer,
-  kBool,
-  kInt,
-  kFloat,
+  /*  0 */ kPhyIn = 0,
+  /*  1 */ kPhyOut,
+  /*  2 */ kLogIn,
+  /*  3 */ kLogOut,
+  /*  4 */ kRadioIn,
+  /*  5 */ kRadioOut,
+  /*  6 */ kRadioElem,
+  /*  7 */ kTimer,
+  /*  8 */ kBool,
+  /*  9 */ kInt,
+  /* 10 */ kFloat,
+  /* 11 */ kRadioRx,
 };
 
 // template class std::basic_string<char>;
@@ -32,6 +33,7 @@ public:
   uint32_t value;
   String cb;
   bool ev;
+  uint32_t ev_value;
   bool wb;
 };
 

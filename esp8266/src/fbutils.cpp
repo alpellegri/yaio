@@ -35,8 +35,10 @@ void FB_addIoEntryDB(String key, String name, uint8_t code, String value,
     entry.name = name;
     entry.code = code;
     entry.value = atoi(value.c_str());
+    // TODO: can be done a setup here
     entry.cb = cb;
     entry.ev = false;
+    entry.ev_value = 0;
     entry.wb = false;
     IoEntryVec.push_back(entry);
   }

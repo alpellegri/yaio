@@ -136,18 +136,16 @@ void vm_readi(vm_context_t &ctx, const char *value) {
 }
 
 void vm_read24(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_readi24 value=%s\n", value);
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
   ctx.V = IoEntryVec[id].value & mask;
-  DEBUG_VM("vm_read24 key=%s, name=%s, value=%s\n", value, IoEntryVec[id].name,
-           ctx.V);
 }
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_readi value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   ctx.V = IoEntryVec[id].value;
-  DEBUG_VM("vm_read key=%s, name=%s, value=%s\n", key_value,
-           IoEntryVec[id].name, ctx.V);
 }
 
 const char *vm_exec_ex0(vm_context_t &ctx, const char *key_value) {
