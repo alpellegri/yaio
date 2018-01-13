@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <vector>
 
 #include "fbconf.h"
 #include "fbm.h"
@@ -11,8 +10,156 @@
 #include "rf.h"
 #include <FirebaseArduino.h>
 
-extern std::vector<IoEntry> IoEntryVec;
-extern std::vector<FunctionEntry> FunctionVec;
+#define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
+
+typedef struct {
+  uint32_t V;
+  uint32_t ACC;
+  const char *cb;
+} vm_context_t;
+
+typedef struct {
+  void (*read)(vm_context_t &ctx, const char *value);
+  const char *(*exec)(vm_context_t &ctx, const char *key_value);
+  void (*write)(vm_context_t &ctx, const char *key_value);
+} itlb_t;
+
+void vm_read0(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_read0 value=%s\n", value);
+}
+
+void vm_readi(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_readi value=%s\n", value);
+  ctx.V = atoi(value);
+}
+
+void vm_read24(vm_context_t &ctx, const char *value) {
+  DEBUG_VM("vm_read24 value=%s\n", value);
+  uint8_t id = FB_getIoEntryIdx(value);
+  uint32_t mask = (1 << 24) - 1;
+  ctx.V = IoEntryVec[id].value & mask;
+}
+
+void vm_read(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_read value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  ctx.V = IoEntryVec[id].value;
+}
+
+const char *vm_exec_ex0(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_ex0 value=%s\n", key_value);
+  ctx.ACC = 0;
+  return ctx.cb;
+}
+
+const char *vm_exec_ldi(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_ldi value=%s\n", key_value);
+  ctx.ACC = ctx.V;
+  return ctx.cb;
+}
+
+const char *vm_exec_st(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  return ctx.cb;
+}
+
+const char *vm_exec_lt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC < ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_gt(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC > ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_eq(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_eq value=%s\n", key_value);
+  ctx.ACC = (ctx.ACC == ctx.V);
+  return ctx.cb;
+}
+
+const char *vm_exec_bz(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_bz value=%s\n", key_value);
+  if (ctx.ACC == 0) {
+    return key_value;
+  }
+  return ctx.cb;
+}
+
+const char *vm_exec_bnz(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_bnz value=%s\n", key_value);
+  if (ctx.ACC != 0) {
+    return key_value;
+  }
+  return ctx.cb;
+}
+
+const char *vm_exec_dly(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_exec_dly value=%s\n", key_value);
+  return ctx.cb;
+}
+
+void vm_write0(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write0 value=%s\n", key_value);
+}
+
+void vm_write(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  IoEntryVec[id].value = ctx.ACC;
+  IoEntryVec[id].wb = true;
+}
+
+void vm_write24(vm_context_t &ctx, const char *key_value) {
+  DEBUG_VM("vm_write24 value=%s\n", key_value);
+  uint8_t id = FB_getIoEntryIdx(key_value);
+  uint32_t mask = (1 << 24) - 1;
+  uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
+  IoEntryVec[id].value = value;
+  IoEntryVec[id].wb = true;
+}
+
+itlb_t VM_pipe[] = {
+    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
+    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
+    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
+    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
+    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
+    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
+    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
+    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
+    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
+    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
+    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
+};
+
+const char *VM_decode(vm_context_t &ctx, FunctionEntry &stm) {
+  uint32_t code = stm.code;
+  String &value = stm.value;
+
+  /* decode-read */
+  DEBUG_VM("VM_pipe read\n");
+  VM_pipe[code].read(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+
+  /* decode-execute */
+  DEBUG_VM("VM_pipe exec\n");
+  ctx.cb = stm.cb.c_str();
+  const char *key_stm = VM_pipe[code].exec(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+
+  /* decode-write */
+  DEBUG_VM("VM_pipe write\n");
+  VM_pipe[code].write(ctx, value.c_str());
+  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+
+  return key_stm;
+}
 
 void VM_readIn(void) {
   uint32_t value;
@@ -21,30 +168,35 @@ void VM_readIn(void) {
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     switch (IoEntryVec[i].code) {
     case kPhyIn: {
-      Serial.printf("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
+      // DEBUG_VM("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
       uint8_t pin = IoEntryVec[i].value >> 24;
       pinMode(pin, INPUT);
       uint32_t mask = (1 << 24) - 1;
       value = digitalRead(pin) & mask;
       if ((IoEntryVec[i].value & mask) != value) {
         IoEntryVec[i].value = (IoEntryVec[i].value & (~mask)) | value;
+        DEBUG_VM("VM_readIn: %s, %d, %d\n", IoEntryVec[i].name.c_str(), value,
+                 IoEntryVec[i].value);
         IoEntryVec[i].ev = true;
       }
     } break;
+    case kRadioIn: {
+    } break;
+    case kBool:
     case kInt: {
       value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
-        Serial.print(F("get failed: kInt"));
-        Serial.println(Firebase.error());
+        DEBUG_VM("get failed: kInt");
       } else {
         if ((IoEntryVec[i].value) != value) {
+          DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
           IoEntryVec[i].value = value;
           IoEntryVec[i].ev = true;
         }
       }
     } break;
     default:
-      // Serial.printf("VM_readIn: error\n");
+      // DEBUG_VM("VM_readIn: error\n");
       break;
     }
   }
@@ -69,130 +221,59 @@ void VM_writeOut(void) {
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     if (IoEntryVec[i].wb == true) {
-      IoEntryVec[i].wb = false;
+      switch (IoEntryVec[i].code) {
+      case kPhyOut: {
+        uint32_t mask = (1 << 24) - 1;
+        uint8_t pin = IoEntryVec[i].value >> 24;
+        pinMode(pin, OUTPUT);
+        uint32_t value = IoEntryVec[i].value & mask;
+        DEBUG_VM("VM_writeOut: kPhyOut %d, %d\n", pin, value);
+        digitalWrite(pin, value);
+        IoEntryVec[i].wb = false;
+      } break;
+      case kBool:
+      case kInt: {
+        uint32_t value = IoEntryVec[i].value;
+        DEBUG_VM("VM_writeOut: kInt %d\n", value);
+        Firebase.setInt(kgraph + "/" + IoEntryVec[i].key + "/value", value);
+        if (Firebase.failed() == true) {
+          DEBUG_VM("set failed: kInt\n");
+        } else {
+          IoEntryVec[i].wb = false;
+        }
+
+      } break;
+      default:
+        // DEBUG_VM("VM_writeOut: error\n");
+        break;
+      }
     }
-    if (IoEntryVec[i].code == kPhyOut) {
-      uint8_t pin = IoEntryVec[i].value >> 24;
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, IoEntryVec[i].value);
-    }
   }
-}
-
-typedef struct {
-  uint32_t (*read)(String value);
-  uint32_t (*exec)(uint32_t acc, uint32_t v, String key_value, String &key);
-  void (*write)(String key_value, uint32_t acc);
-} itlb_t;
-
-uint32_t vm_read0(String value) { return 0; }
-
-uint32_t vm_readi(String value) { return atoi(value.c_str()); }
-
-uint32_t vm_read24(String value) { return atoi(value.c_str()) & (1 << 24 - 1); }
-
-uint32_t vm_read(String key_value) {
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  return IoEntryVec[id].value;
-}
-
-uint32_t vm_exec_ex0(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return 0;
-}
-
-uint32_t vm_exec_ldi(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return v;
-}
-
-uint32_t vm_exec_st(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return acc;
-}
-
-uint32_t vm_exec_lt(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return v < acc;
-}
-
-uint32_t vm_exec_gt(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return v > acc;
-}
-
-uint32_t vm_exec_eq(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return v == acc;
-}
-
-uint32_t vm_exec_bz(uint32_t acc, uint32_t v, String key_value, String &key) {
-  if (acc == 0) {
-    key == key_value;
-  }
-  return acc;
-}
-
-uint32_t vm_exec_bnz(uint32_t acc, uint32_t v, String key_value, String &key) {
-  if (acc != 0) {
-    key == key_value;
-  }
-  return acc;
-}
-
-uint32_t vm_exec_dly(uint32_t acc, uint32_t v, String key_value, String &key) {
-  return acc;
-}
-
-void vm_write0(String key_value, uint32_t acc) {}
-
-void vm_write(String key_value, uint32_t acc) {
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  IoEntryVec[id].value = acc;
-}
-
-void vm_write24(String key_value, uint32_t acc) {
-  uint8_t id = FB_getIoEntryIdx(key_value);
-  uint32_t mask = (1 << 24) - 1;
-  IoEntryVec[id].value = (IoEntryVec[id].value & (~mask)) | (acc & mask);
-}
-
-itlb_t VM_itlb[] = {
-    /* ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
-    /* ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
-    /* ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
-    /* ld   */ {vm_read, vm_exec_ldi, vm_write0},
-    /* st24 */ {vm_read0, vm_exec_st, vm_write24},
-    /* st   */ {vm_read0, vm_exec_st, vm_write},
-    /* lt   */ {vm_read, vm_exec_lt, vm_write0},
-    /* gt   */ {vm_read, vm_exec_gt, vm_write0},
-    /* eqi  */ {vm_readi, vm_exec_eq, vm_write0},
-    /* eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* bz   */ {vm_read0, vm_exec_bz, vm_write0},
-    /* bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
-    /* dly  */ {vm_read, vm_exec_dly, vm_write0},
-};
-
-uint32_t VM_decode(uint32_t ACC, FunctionEntry &stm) {
-  /* decode-read */
-  uint32_t V = VM_itlb[stm.code].read(stm.value);
-  /* decode-execute */
-  String key = stm.cb;
-  ACC = VM_itlb[stm.code].exec(ACC, V, stm.value, key);
-  /* decode-write */
-  VM_itlb[stm.code].write(stm.value, ACC);
-
-  return ACC;
 }
 
 void VM_run(void) {
   VM_readIn();
   uint8_t id = VM_findEvent();
   if (id != 0xFF) {
-    Serial.printf("VM_run event: %d\n", id);
     String key_stm = IoEntryVec[id].cb;
-    uint32_t ACC = 0;
+
+    vm_context_t ctx;
+    ctx.V = 0;
+    ctx.ACC = 0;
+    DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
     while (key_stm.length() != 0) {
-      /* fetch */
-      uint8_t id_stm = FB_getFunctionIdx(key_stm);
+      uint8_t id_stm = FB_getFunctionIdx(key_stm.c_str());
       FunctionEntry &stm = FunctionVec[id_stm];
+
+      DEBUG_VM("VM_run start name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
+               ctx.V);
       /* decode */
-      ACC = VM_decode(ACC, stm);
+      key_stm = String(VM_decode(ctx, stm));
+
+      DEBUG_VM("VM_run stop name=%s, ACC=%d V=%d\n", stm.name.c_str(), ctx.ACC,
+               ctx.V);
     }
     VM_writeOut();
+    DEBUG_VM("VM_run stop <<<<<<<<<<<<<\n");
   }
 }

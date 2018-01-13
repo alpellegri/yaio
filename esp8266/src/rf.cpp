@@ -127,3 +127,16 @@ void RF_Loop() {
     }
   }
 }
+
+/* main function task */
+bool RF_Task(void) {
+  bool ret = true;
+  uint32_t code = RF_GetRadioCode();
+  if (code != 0) {
+    uint8_t id = RF_checkRadioCodeDB(code);
+    if (id != 0xFF) {
+      IoEntryVec[id].ev = true;
+    }
+  }
+  return ret;
+}

@@ -3,9 +3,10 @@
 
 #include <Arduino.h>
 #include <string>
+#include <vector>
 
-#define NUM_IO_ENTRY_MAX 10
-#define NUM_IO_FUNCTION_MAX 10
+#define NUM_IO_ENTRY_MAX 20
+#define NUM_IO_FUNCTION_MAX 20
 
 enum {
   kPhyIn = 0,
@@ -43,6 +44,9 @@ public:
   String cb;  // firebase key
 };
 
+extern std::vector<IoEntry> IoEntryVec;
+extern std::vector<FunctionEntry> FunctionVec;
+
 extern void FB_deinitIoEntryDB(void);
 extern void FB_deinitFunctionDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);
@@ -62,7 +66,7 @@ extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);
 
 extern void FB_dumpIoEntry(void);
 extern void FB_dumpFunctions(void);
-extern uint8_t FB_getIoEntryIdx(String &key);
-extern uint8_t FB_getFunctionIdx(String &key);
+extern uint8_t FB_getIoEntryIdx(const char *key);
+extern uint8_t FB_getFunctionIdx(const char *key);
 
 #endif
