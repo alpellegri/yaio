@@ -12,9 +12,10 @@
 #include "fbm.h"
 #include "fcm.h"
 #include "fota.h"
-#include "rf.h"
 #include "timesrv.h"
 #include "function.h"
+#include "rf.h"
+#include "timers.h"
 
 #define LED 13
 #define LED_OFF LOW
@@ -104,8 +105,6 @@ bool STA_Task(void) {
     } else {
       if (TimeService() == true) {
         FbmService();
-        yield();
-        RF_Task();
         yield();
         VM_run();
         yield();

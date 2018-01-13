@@ -129,8 +129,7 @@ void RF_Loop() {
 }
 
 /* main function task */
-bool RF_Task(void) {
-  bool ret = true;
+void RF_Service(void) {
   uint32_t code = RF_GetRadioCode();
   if (code != 0) {
     uint8_t id = RF_checkRadioCodeDB(code);
@@ -138,5 +137,4 @@ bool RF_Task(void) {
       IoEntryVec[id].ev = true;
     }
   }
-  return ret;
 }
