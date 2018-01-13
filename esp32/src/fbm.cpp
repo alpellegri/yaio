@@ -124,68 +124,6 @@ String FBM_getResetReason(void) {
   return ret;
 }
 
-#define FBM_LOGIC_QUEUE_LEN 3
-typedef struct {
-  uint8_t func;
-  uint8_t value;
-  uint8_t src_idx;
-} FbmFuncSrvQueque_t;
-
-static uint8_t FbmLogicQuequeWrPos = 0;
-static uint8_t FbmLogicQuequeRdPos = 0;
-static FbmFuncSrvQueque_t FbmLogicQueque[FBM_LOGIC_QUEUE_LEN];
-
-void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
-  FbmLogicQueque[FbmLogicQuequeWrPos].src_idx = src_idx;
-  FbmLogicQueque[FbmLogicQuequeWrPos].func = port;
-  FbmLogicQueque[FbmLogicQuequeWrPos].value = value;
-  FbmLogicQuequeWrPos++;
-  if (FbmLogicQuequeWrPos >= FBM_LOGIC_QUEUE_LEN) {
-    FbmLogicQuequeWrPos = 0;
-  }
-  if (FbmLogicQuequeWrPos == FbmLogicQuequeRdPos) {
-    Serial.println(F("FbmLogicQueque overrun"));
-  }
-}
-
-/* function mapping requests
- * port=0: value=1 -> arm alarm / value=0 -> disarm alarm
- * port=1: value=1 -> notify
- */
-static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
-  bool ret = false;
-  if (port == 0) {
-    Firebase.setBool((kcontrol + F("/alarm")), value);
-    if (Firebase.failed()) {
-    } else {
-      ret = true;
-    }
-  } else if (port == 1) {
-    String str = String(F("Event triggered on: ")) +
-                 FB_getIoEntryNameById(src_idx) + String(F(" !!!"));
-    fblog_log(str, status_alarm);
-    ret = true;
-  } else {
-    ret = true;
-  }
-
-  return ret;
-}
-
-void FbmLogicSrv() {
-  if (FbmLogicQuequeWrPos != FbmLogicQuequeRdPos) {
-    bool ret = FbmLogicAction(FbmLogicQueque[FbmLogicQuequeRdPos].src_idx,
-                              FbmLogicQueque[FbmLogicQuequeRdPos].func,
-                              FbmLogicQueque[FbmLogicQuequeRdPos].value);
-    if (ret == true) {
-      FbmLogicQuequeRdPos++;
-      if (FbmLogicQuequeRdPos >= FBM_LOGIC_QUEUE_LEN) {
-        FbmLogicQuequeRdPos = 0;
-      }
-    }
-  }
-}
-
 /* main function task */
 bool FbmService(void) {
   bool ret = false;
@@ -329,9 +267,6 @@ bool FbmService(void) {
         yield();
       }
     }
-
-    // call function service
-    FbmLogicSrv();
   } break;
 
   case 4:

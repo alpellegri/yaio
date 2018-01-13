@@ -21,6 +21,7 @@ enum {
   /*  9 */ kInt,
   /* 10 */ kFloat,
   /* 11 */ kRadioRx,
+  /* 12 */ kMessaging,
 };
 
 // template class std::basic_string<char>;
