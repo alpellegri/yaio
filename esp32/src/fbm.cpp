@@ -32,9 +32,6 @@ DHT dht(DHTPIN, DHTTYPE);
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
-static bool status_alarm = false;
-static bool status_alarm_last = false;
-static bool control_alarm = false;
 static uint32_t control_time;
 static uint32_t control_time_last;
 
@@ -185,7 +182,6 @@ bool FbmService(void) {
 
       Serial.println(F("Node is up!"));
       RF_Disable();
-      status_alarm = false;
       control_time_last = 0;
       boot_sm = 21;
     }
@@ -209,8 +205,8 @@ bool FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
-      // Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
-      //               ESP.getFreeHeap());
+      Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
+                      ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       control_time = Firebase.getInt(kcontrol + F("/time"));

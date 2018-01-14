@@ -31,9 +31,6 @@ DHT dht(DHTPIN, DHTTYPE);
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
-static bool status_alarm = false;
-static bool status_alarm_last = false;
-static bool control_alarm = false;
 static uint32_t control_time;
 static uint32_t control_time_last;
 
@@ -49,79 +46,7 @@ static float temperature_data;
 
 static uint32_t fbm_update_timer_last;
 
-/**
- * The target IP address to send the magic packet to.
- */
-static IPAddress computer_ip(192, 168, 1, 255);
-
-/**
- * The targets MAC address to send the packet to
- */
-static byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
-
 String FBM_getResetReason() { return ESP.getResetReason(); }
-
-#define FBM_LOGIC_QUEUE_LEN 3
-typedef struct {
-  uint8_t func;
-  uint8_t value;
-  uint8_t src_idx;
-} FbmFuncSrvQueque_t;
-
-static uint8_t FbmLogicQuequeWrPos = 0;
-static uint8_t FbmLogicQuequeRdPos = 0;
-static FbmFuncSrvQueque_t FbmLogicQueque[FBM_LOGIC_QUEUE_LEN];
-
-void FbmLogicReq(uint8_t src_idx, uint8_t port, bool value) {
-  FbmLogicQueque[FbmLogicQuequeWrPos].src_idx = src_idx;
-  FbmLogicQueque[FbmLogicQuequeWrPos].func = port;
-  FbmLogicQueque[FbmLogicQuequeWrPos].value = value;
-  FbmLogicQuequeWrPos++;
-  if (FbmLogicQuequeWrPos >= FBM_LOGIC_QUEUE_LEN) {
-    FbmLogicQuequeWrPos = 0;
-  }
-  if (FbmLogicQuequeWrPos == FbmLogicQuequeRdPos) {
-    Serial.println(F("FbmLogicQueque overrun"));
-  }
-}
-
-/* function mapping requests
- * port=0: value=1 -> arm alarm / value=0 -> disarm alarm
- * port=1: value=1 -> notify
- */
-static bool FbmLogicAction(uint32_t src_idx, uint8_t port, bool value) {
-  bool ret = false;
-  if (port == 0) {
-    Firebase.setBool((kcontrol + F("/alarm")), value);
-    if (Firebase.failed()) {
-    } else {
-      ret = true;
-    }
-  } else if (port == 1) {
-    String str = String(F("Event triggered on: ")) +
-                 FB_getIoEntryNameById(src_idx) + String(F(" !!!"));
-    fblog_log(str, status_alarm);
-    ret = true;
-  } else {
-    ret = true;
-  }
-
-  return ret;
-}
-
-void FbmLogicSrv() {
-  if (FbmLogicQuequeWrPos != FbmLogicQuequeRdPos) {
-    bool ret = FbmLogicAction(FbmLogicQueque[FbmLogicQuequeRdPos].src_idx,
-                              FbmLogicQueque[FbmLogicQuequeRdPos].func,
-                              FbmLogicQueque[FbmLogicQuequeRdPos].value);
-    if (ret == true) {
-      FbmLogicQuequeRdPos++;
-      if (FbmLogicQuequeRdPos >= FBM_LOGIC_QUEUE_LEN) {
-        FbmLogicQuequeRdPos = 0;
-      }
-    }
-  }
-}
 
 /* main function task */
 bool FbmService(void) {
@@ -184,7 +109,6 @@ bool FbmService(void) {
 
       Serial.println(F("Node is up!"));
       RF_Disable();
-      status_alarm = false;
       control_time_last = 0;
       boot_sm = 21;
     }
@@ -208,8 +132,8 @@ bool FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
-      // Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
-      //               ESP.getFreeHeap());
+      Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
+                      ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       control_time = Firebase.getInt(kcontrol + F("/time"));
@@ -266,9 +190,6 @@ bool FbmService(void) {
         yield();
       }
     }
-
-    // call function service
-    FbmLogicSrv();
   } break;
 
   case 4:
