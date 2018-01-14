@@ -33,7 +33,7 @@ public:
   bool wb;
   String key;
   String name;
-  uint32_t value;
+  String value;
   String cb;
   uint32_t ev_value;
 };

@@ -14,7 +14,7 @@ static const char _kstartup[] PROGMEM = "startup";
 static const char _kcontrol[] PROGMEM = "control";
 static const char _kstatus[] PROGMEM = "status";
 static const char _kfunctions[] PROGMEM = "Functions";
-static const char _kmessaging[] PROGMEM = "fcmtoken";
+static const char _kfcmtoken[] PROGMEM = "fcmtoken";
 static const char _kgraph[] PROGMEM = "graph";
 static const char _klogs[] PROGMEM = "logs";
 
@@ -22,7 +22,7 @@ String kstartup;
 String kcontrol;
 String kstatus;
 String kfunctions;
-String kmessaging;
+String kfcmtoken;
 String kgraph;
 String klogs;
 String knodesubpath;
@@ -36,7 +36,7 @@ void FbconfInit(void) {
       prefix_user + String(F("root/")) + knodesubpath + String(F("/"));
   String prefix_data = prefix_user + String(F("data/"));
 
-  kmessaging = prefix_user + String(FPSTR(_kmessaging));
+  kfcmtoken = prefix_user + String(FPSTR(_kfcmtoken));
 
   kstartup = prefix_node + String(FPSTR(_kstartup));
   kcontrol = prefix_node + String(FPSTR(_kcontrol));
@@ -49,7 +49,7 @@ void FbconfInit(void) {
   Serial.println(kcontrol);
   Serial.println(kstatus);
   Serial.println(kfunctions);
-  Serial.println(kmessaging);
+  Serial.println(kfcmtoken);
   Serial.println(kgraph);
   Serial.println(klogs);
 }
@@ -59,10 +59,10 @@ bool FbmUpdateRadioCodes(void) {
   yield();
 
   if (ret == true) {
-    Serial.println(kmessaging);
-    FirebaseObject ref = Firebase.get(kmessaging);
+    Serial.println(kfcmtoken);
+    FirebaseObject ref = Firebase.get(kfcmtoken);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kmessaging"));
+      Serial.print(F("get failed: kfcmtoken"));
       Serial.println(Firebase.error());
       ret = false;
     } else {

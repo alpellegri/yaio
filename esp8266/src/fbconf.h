@@ -7,7 +7,7 @@ extern String kstartup;
 extern String kcontrol;
 extern String kstatus;
 extern String kfunctions;
-extern String kmessaging;
+extern String kfcmtoken;
 extern String kgraph;
 extern String klogs;
 

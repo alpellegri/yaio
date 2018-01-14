@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "fbconf.h"
+#include "fblog.h"
 #include "fbm.h"
 #include "fbutils.h"
 #include "rf.h"
@@ -18,6 +19,7 @@ typedef struct {
   uint32_t V;
   uint32_t ACC;
   const char *cb;
+  const char *ev_name;
 } vm_context_t;
 
 typedef struct {
@@ -27,8 +29,6 @@ typedef struct {
 } vm_itlb_t;
 
 void VM_readIn(void) {
-  uint32_t value;
-
   RF_Service();
   Timers_Service();
 
@@ -37,15 +37,16 @@ void VM_readIn(void) {
     switch (IoEntryVec[i].code) {
     case kPhyIn: {
       // DEBUG_VM("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
-      uint8_t pin = IoEntryVec[i].value >> 24;
+      uint32_t v = atoi(IoEntryVec[i].value.c_str());
+      uint8_t pin = v >> 24;
       pinMode(pin, INPUT);
       uint32_t mask = (1 << 24) - 1;
-      value = digitalRead(pin) & mask;
-      if ((IoEntryVec[i].value & mask) != value) {
-        value = (IoEntryVec[i].value & (~mask)) | value;
+      uint32_t value = digitalRead(pin) & mask;
+      if ((v & mask) != value) {
+        value = (v & (~mask)) | value;
         IoEntryVec[i].value = value;
-        DEBUG_VM("VM_readIn: %s, %d, %d\n", IoEntryVec[i].name.c_str(), value,
-                 IoEntryVec[i].value);
+        DEBUG_VM("VM_readIn: %s, %d, %s\n", IoEntryVec[i].name.c_str(), value,
+                 IoEntryVec[i].value.c_str());
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
       }
@@ -54,11 +55,13 @@ void VM_readIn(void) {
     } break;
     case kBool:
     case kInt: {
-      value = Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
+      uint32_t value =
+          Firebase.getInt(kgraph + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
         DEBUG_VM("get failed: kInt\n");
       } else {
-        if ((IoEntryVec[i].value) != value) {
+        uint32_t v = atoi(IoEntryVec[i].value.c_str());
+        if (v != value) {
           DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
           IoEntryVec[i].value = value;
           IoEntryVec[i].ev = true;
@@ -94,9 +97,15 @@ void VM_writeOutPhyOut(uint32_t value) {
   uint8_t pin = value >> 24;
   value &= mask;
   value = !!value;
-  DEBUG_VM("VM_writeOutPhyOut: kPhyOut %d, %d\n", pin, value);
+  DEBUG_VM("VM_writeOutPhyOut: %d, %d\n", pin, value);
   pinMode(pin, OUTPUT);
   digitalWrite(pin, value);
+}
+
+void VM_writeOutMessage(vm_context_t &ctx, String value) {
+  DEBUG_VM("VM_writeOutMessage: %s\n", value.c_str());
+  String message = value + " " + ctx.ev_name;
+  fblog_log(message, true);
 }
 
 void VM_writeOut(void) {
@@ -109,7 +118,7 @@ void VM_writeOut(void) {
       } break;
       case kBool:
       case kInt: {
-        uint32_t value = IoEntryVec[i].value;
+        uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_VM("VM_writeOut: kInt %d\n", value);
         Firebase.setInt(kgraph + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
@@ -117,6 +126,11 @@ void VM_writeOut(void) {
         } else {
           IoEntryVec[i].wb = false;
         }
+      } break;
+      case kMessaging: {
+        // DEBUG_VM("VM_writeOut: kMessaging %s\n", IoEntryVec[i].value.c_str());
+        // fblog_log(IoEntryVec[i].value, true);
+        // IoEntryVec[i].wb = false;
       } break;
       default:
         // DEBUG_VM("VM_writeOut: error\n");
@@ -139,13 +153,15 @@ void vm_read24(vm_context_t &ctx, const char *value) {
   DEBUG_VM("vm_readi24 value=%s\n", value);
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
-  ctx.V = IoEntryVec[id].value & mask;
+  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  ctx.V = v & mask;
 }
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_read value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  ctx.V = IoEntryVec[id].value;
+  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  ctx.V = v;
 }
 
 const char *vm_exec_ex0(vm_context_t &ctx, const char *key_value) {
@@ -230,14 +246,20 @@ void vm_write0(vm_context_t &ctx, const char *key_value) {
 void vm_write(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_write value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  IoEntryVec[id].value = ctx.ACC;
-  IoEntryVec[id].wb = true;
+  if (IoEntryVec[id].code == kMessaging) {
+    /**/
+    VM_writeOutMessage(ctx, IoEntryVec[id].value);
+  } else {
+    IoEntryVec[id].value = ctx.ACC;
+    IoEntryVec[id].wb = true;
+  }
 }
 
 void vm_cwrite(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_cwrite value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  if ((ctx.cond == true) && (IoEntryVec[id].value != ctx.ACC)) {
+  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  if ((ctx.cond == true) && (v != ctx.ACC)) {
     ctx.cond = false;
     IoEntryVec[id].value = ctx.ACC;
     IoEntryVec[id].wb = true;
@@ -248,7 +270,8 @@ void vm_write24(vm_context_t &ctx, const char *key_value) {
   DEBUG_VM("vm_write24 value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
-  uint32_t value = (IoEntryVec[id].value & (~mask)) | (ctx.ACC & mask);
+  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  uint32_t value = (v & (~mask)) | (ctx.ACC & mask);
   if (IoEntryVec[id].code == kPhyOut) {
     VM_writeOutPhyOut(value);
   } else {
@@ -308,7 +331,10 @@ void VM_run(void) {
 
     vm_context_t ctx;
     ctx.V = 0;
+    /* init ACC with event value */
     ctx.ACC = ev_value;
+    /* keep the event name */
+    ctx.ev_name = IoEntryVec[id].name.c_str();
     DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
     Serial.printf("Heap: %d\n", ESP.getFreeHeap());
     while (key_stm.length() != 0) {

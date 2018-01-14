@@ -103,18 +103,18 @@
   }
   configuration: mask
 
-* notify is a logical values
+* notify is a logical output
   key -> {
     owner: <owner>,
     name: <name>,
     code: message,
-    value: kmessage, // it is a string
+    value: <message>, // it is a string
     cb: <callback>,
   }
 
 * variables are input/output and may have a callback
   These entities are defined into a database.
-  Variable are read periodically or at event and copyed into local
+  Variable are read periodically or at event and copied into local
   type: {bool, int, float}
 
   generic definition

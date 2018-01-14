@@ -25,7 +25,8 @@ void Timers_Service(void) {
       // test in range
       if (entry.code == kTimer) {
         // convert is to 24_7 time
-        uint32_t _time = 60 * (entry.value >> 24) + (entry.value & 0xFF);
+        uint32_t v = atoi(entry.value.c_str());
+        uint32_t _time = 60 * (v >> 24) + (v & 0xFF);
         if (_time == t247) {
           // action
           DEBUG_VM("Timers %s at time %d\n", entry.name.c_str(), t247);

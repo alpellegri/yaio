@@ -34,7 +34,7 @@ void FB_addIoEntryDB(String key, String name, uint8_t code, String value,
     entry.key = key;
     entry.name = name;
     entry.code = code;
-    entry.value = atoi(value.c_str());
+    entry.value = value;
     // TODO: can be done a setup here
     entry.cb = cb;
     entry.ev = false;
@@ -96,8 +96,9 @@ uint8_t FB_getFunctionIdx(const char *key) {
 void FB_dumpIoEntry(void) {
   Serial.println(F("FB_dumpIoEntry"));
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    Serial.printf_P(PSTR("%d: %s, %s, %d, %s\n"), i, IoEntryVec[i].key.c_str(),
-                    IoEntryVec[i].name.c_str(), IoEntryVec[i].code,
+    Serial.printf_P(PSTR("%d: key=%s, name=%s, code=%d, value=%s, cb=%s\n"), i,
+                    IoEntryVec[i].key.c_str(), IoEntryVec[i].name.c_str(),
+                    IoEntryVec[i].code, IoEntryVec[i].value.c_str(),
                     IoEntryVec[i].cb.c_str());
   }
 }
@@ -105,8 +106,9 @@ void FB_dumpIoEntry(void) {
 void FB_dumpFunctions(void) {
   Serial.println(F("FB_dumpFunctions"));
   for (uint8_t i = 0; i < FunctionVec.size(); ++i) {
-    Serial.printf_P(PSTR("%d: %s, %s, %d, %s\n"), i, FunctionVec[i].key.c_str(),
-                    FunctionVec[i].name.c_str(), FunctionVec[i].code,
+    Serial.printf_P(PSTR("%d: key=%s, name=%s, code=%d, value=%s, cb=%s\n"), i,
+                    FunctionVec[i].key.c_str(), FunctionVec[i].name.c_str(),
+                    FunctionVec[i].code, FunctionVec[i].value.c_str(),
                     FunctionVec[i].cb.c_str());
   }
 }
