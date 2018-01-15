@@ -263,7 +263,6 @@ class _EntryDialogState extends State<EntryDialog> {
                           .where((el) => el.code == _selectedType.index)
                           .toList();
                       _ioMenu.forEach((e) => print(e.name));
-                      print(kEntryId2Name[_selectedType]);
                       _selectedEntry = null;
                     });
                   },

@@ -8,9 +8,11 @@ const String kStringRadioIn = 'RadioIn';
 const String kStringRadioOut = 'RadioOut';
 const String kStringRadioElem = 'RadioElem';
 const String kStringTimer = 'Timer';
-const String kStringBool = 'bool';
-const String kStringInt = 'int';
-const String kStringFloat = 'float';
+const String kStringBool = 'Bool';
+const String kStringInt = 'Int';
+const String kStringFloat = 'Float';
+const String kStringRadioRx = 'RadioRx';
+const String kStringMessaging = 'Messaging';
 
 enum DataCode {
   PhyIn,
@@ -24,6 +26,8 @@ enum DataCode {
   Bool,
   Int,
   Float,
+  RadioRx,
+  Messaging,
 }
 
 const Map<DataCode, String> kEntryId2Name = const {
@@ -38,6 +42,8 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.Bool: kStringBool,
   DataCode.Int: kStringInt,
   DataCode.Float: kStringFloat,
+  DataCode.RadioRx: kStringRadioRx,
+  DataCode.Messaging: kStringMessaging,
 };
 
 const Map<String, DataCode> kEntryName2Id = const {
@@ -52,6 +58,8 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringBool: DataCode.Bool,
   kStringInt: DataCode.Int,
   kStringFloat: DataCode.Float,
+  kStringRadioRx: DataCode.RadioRx,
+  kStringMessaging: DataCode.Messaging,
 };
 
 class IoEntry {

@@ -30,7 +30,7 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'PIN: ${entry.getPin()}',
+                      'TYPE: ${kEntryId2Name[DataCode.values[entry.code]]}',
                       textScaleFactor: 0.7,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -170,17 +170,36 @@ class EntryDialog extends StatefulWidget {
 
 class _EntryDialogState extends State<EntryDialog> {
   final IoEntry entry;
+  final DatabaseReference _functionRef =
+      FirebaseDatabase.instance.reference().child(getFunctionsRef());
+  List<FunctionEntry> _functionList = new List();
 
   final TextEditingController _controllerName = new TextEditingController();
+  final TextEditingController _controllerType = new TextEditingController();
   final TextEditingController _controllerPort = new TextEditingController();
   final TextEditingController _controllerValue = new TextEditingController();
+  FunctionEntry _selectedFunction;
+  StreamSubscription<Event> _onFunctionAddSub;
 
   _EntryDialogState(this.entry) {
+    _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
     if (entry.value != null) {
       _controllerName.text = entry.name;
+      _controllerType.text = entry.code.toString();
       _controllerPort.text = entry.getPin().toString();
       _controllerValue.text = entry.getValue().toString();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onFunctionAddSub.cancel();
   }
 
   @override
@@ -198,6 +217,12 @@ class _EntryDialogState extends State<EntryDialog> {
                 ),
               ),
               new TextField(
+                controller: _controllerType,
+                decoration: new InputDecoration(
+                  hintText: 'type',
+                ),
+              ),
+              new TextField(
                 controller: _controllerPort,
                 decoration: new InputDecoration(
                   hintText: 'pin',
@@ -209,6 +234,27 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'value',
                 ),
               ),
+              (_functionList.length > 0)
+                  ? new ListTile(
+                      title: const Text('Function Call'),
+                      trailing: new DropdownButton<FunctionEntry>(
+                        hint: const Text('select a function'),
+                        value: _selectedFunction,
+                        onChanged: (FunctionEntry newValue) {
+                          print(newValue.name);
+                          setState(() {
+                            _selectedFunction = newValue;
+                          });
+                        },
+                        items: _functionList.map((FunctionEntry entry) {
+                          return new DropdownMenuItem<FunctionEntry>(
+                            value: entry,
+                            child: new Text(entry.name),
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  : new Text('Functions not declared yet'),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -242,5 +288,16 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
+  }
+
+  void _onFunctionAdded(Event event) {
+    FunctionEntry funcEntry =
+        new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
+    setState(() {
+      _functionList.add(funcEntry);
+      if (entry.cb == funcEntry.key) {
+        _selectedFunction = funcEntry;
+      }
+    });
   }
 }

@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'home.dart';
 import 'setup.dart';
 import 'node_setup.dart';
-import 'radiocode.dart';
-import 'timer.dart';
 import 'data_io.dart';
-import 'digital_io.dart';
-import 'logical_io.dart';
 import 'functions.dart';
 import 'log_history.dart';
 import 'chart_history.dart';
@@ -19,16 +15,9 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Setup.routeName: (BuildContext context) => new Setup(title: 'Device'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'Node Setup'),
-  DataIO.routeName: (BuildContext context) => new DataIO(title: 'data IO'),
-  DigitalIO.routeName: (BuildContext context) =>
-      new DigitalIO(title: 'Digital IO'),
-  LogicalIO.routeName: (BuildContext context) =>
-      new LogicalIO(title: 'Logical IO'),
-  RadioCode.routeName: (BuildContext context) =>
-      new RadioCode(title: 'Radio Code'),
+  DataIO.routeName: (BuildContext context) => new DataIO(title: 'Data IO'),
   Functions.routeName: (BuildContext context) =>
       new Functions(title: 'Functions'),
-  Timer.routeName: (BuildContext context) => new Timer(title: 'Timer'),
   LogHistory.routeName: (BuildContext context) =>
       new LogHistory(title: 'Log History'),
   ChartHistory.routeName: (BuildContext context) =>
@@ -79,44 +68,12 @@ class _MyDrawerState extends State<MyDrawer> {
                 ..pushNamed(DataIO.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.label_outline),
-            title: new Text('Digital IO'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(DigitalIO.routeName);
-            }),
-        new ListTile(
-            leading: new Icon(Icons.label_outline),
-            title: new Text('Logical IO'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(LogicalIO.routeName);
-            }),
-        new ListTile(
-            leading: new Icon(Icons.settings_input_antenna),
-            title: new Text('Radio Code'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(RadioCode.routeName);
-            }),
-        new ListTile(
             leading: new Icon(Icons.functions),
             title: new Text('Functions'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
                 ..pushNamed(Functions.routeName);
-            }),
-        new ListTile(
-            leading: new Icon(Icons.alarm),
-            title: new Text('Timer'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Timer.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.message),

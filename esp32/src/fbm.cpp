@@ -47,16 +47,6 @@ static float temperature_data;
 
 static uint32_t fbm_update_timer_last;
 
-/**
- * The target IP address to send the magic packet to.
- */
-static IPAddress computer_ip(192, 168, 1, 255);
-
-/**
- * The targets MAC address to send the packet to
- */
-static byte mac[] = {0xD0, 0x50, 0x99, 0x5E, 0x4B, 0x0E};
-
 String verbose_print_reset_reason(RESET_REASON reason) {
   String result;
   switch (reason) {
