@@ -39,7 +39,7 @@ class ListItem extends StatelessWidget {
                     ),
                     new Text(
                       'VALUE: ${entry.getValue()}',
-                      textScaleFactor: 0.7,
+                      textScaleFactor: 0.8,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -71,16 +71,16 @@ class DataIO extends StatefulWidget {
 
 class _DataIOState extends State<DataIO> {
   List<IoEntry> entryList = new List();
-  DatabaseReference _graphRef;
+  DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
   _DataIOState() {
-    _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onAddSubscription = _graphRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _graphRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _graphRef.onChildRemoved.listen(_onEntryRemoved);
+    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -125,7 +125,7 @@ class _DataIOState extends State<DataIO> {
 
   void _onEntryAdded(Event event) {
     setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_graphRef, event.snapshot));
+      entryList.add(new IoEntry.fromSnapshot(_dataRef, event.snapshot));
     });
   }
 
@@ -134,7 +134,7 @@ class _DataIOState extends State<DataIO> {
         entryList.singleWhere((el) => el.key == event.snapshot.key);
     setState(() {
       entryList[entryList.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_graphRef, event.snapshot);
+          new IoEntry.fromSnapshot(_dataRef, event.snapshot);
     });
   }
 
@@ -154,7 +154,7 @@ class _DataIOState extends State<DataIO> {
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry(_graphRef);
+    final IoEntry entry = new IoEntry(_dataRef);
     _openEntryDialog(entry);
   }
 }

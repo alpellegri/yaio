@@ -2,8 +2,8 @@ const String kControlRef = 'control';
 const String kStatusRef = 'status';
 const String kStartupRef = 'startup';
 const String kFcmTokenRef = 'fcmtoken';
-const String kFunctionsRef = 'Functions';
-const String kGraphRef = 'graph';
+const String kDataRef = 'data';
+const String kFunctionsRef = 'function';
 const String kLogsReportsRef = 'logs/Reports';
 const String kTHRef = 'logs/TH';
 

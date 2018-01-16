@@ -203,13 +203,13 @@ class _EntryDialogState extends State<EntryDialog> {
   IoEntry _selectedEntry;
 
   List<IoEntry> entryIoList = new List();
-  DatabaseReference _graphRef;
+  DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
 
   _EntryDialogState(this.entry, this.functionList) {
     print('EntryDialogState');
-    _graphRef = FirebaseDatabase.instance.reference().child(getGraphRef());
-    _onAddSubscription = _graphRef.onChildAdded.listen(_onGraphEntryAdded);
+    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _onAddSubscription = _dataRef.onChildAdded.listen(_onGraphEntryAdded);
 
     selectTypeMenu.add(kEntryId2Name[DataCode.PhyOut]);
     selectTypeMenu.add(kEntryId2Name[DataCode.LogOut]);
@@ -348,7 +348,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   void _onGraphEntryAdded(Event event) {
     print('_onGraphEntryAdded');
-    IoEntry ioEntry = new IoEntry.fromSnapshot(_graphRef, event.snapshot);
+    IoEntry ioEntry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
     setState(() {
       entryIoList.add(ioEntry);
       if (entry.value == ioEntry.key) {

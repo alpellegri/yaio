@@ -16,14 +16,14 @@ String _nodeConfigJson;
 
 String dUserRef;
 String dRootRef;
-String dDataRef;
+String dObjRef;
 String dNodeSubPath;
 String dControlRef;
 String dStatusRef;
 String dStartupRef;
 String dFcmTokenRef;
+String dDataRef;
 String dFunctionsRef;
-String dGraphRef;
 String dLogsReportsRef;
 String dTHRef;
 
@@ -53,21 +53,21 @@ Future<String> signInWithGoogle() async {
 void updateUserRef() {
   dUserRef = 'users/${getFirebaseUser().uid}';
   dRootRef = '$dUserRef/root';
-  dDataRef = '$dUserRef/data';
+  dObjRef = '$dUserRef/obj';
 }
 
 void updateNodeRef(Map config) {
   print(config);
   dNodeSubPath = '${config['domain']}/${config['nodename']}';
   String prefixNode = '$dRootRef/$dNodeSubPath';
-  String prefixData = '$dDataRef';
+  String prefixData = '$dObjRef';
 
   dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
   dControlRef = '$prefixNode/$kControlRef';
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
+  dDataRef = '$prefixData/$kDataRef';
   dFunctionsRef = '$prefixData/$kFunctionsRef';
-  dGraphRef = '$prefixData/$kGraphRef';
   dLogsReportsRef = '$prefixData/$kLogsReportsRef';
   dTHRef = '$prefixData/$kTHRef';
 }
@@ -156,8 +156,8 @@ String getFunctionsRef() {
   return dFunctionsRef;
 }
 
-String getGraphRef() {
-  return dGraphRef;
+String getDataRef() {
+  return dDataRef;
 }
 
 String getLogsReportsRef() {
