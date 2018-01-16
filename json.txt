@@ -9,7 +9,7 @@
     name: <name>,   // it is a string
     code: <type>,   // it is a enum
     value: <value>, // it is dynamic: a string or a number
-    cb: <callback>, // it is a string representing the key of the database
+    cb: <callback>, // optional, it is a string representing the key of the database
   }
   type: {phyin, phyout, timer, login, logout, bool, int, float}
 
@@ -28,7 +28,7 @@
     name: <name>,
     code: phyin,
     value: <identifier>, // it is a number
-    cb: <callback>,
+    cb: <callback>, // optional
   }
 
   VM call callback cb when a physical input changes and ACC = input value
@@ -40,28 +40,30 @@
     name: <name>,
     code: phyout,
     value: <identifier>, // it is a number
-    cb: <callback>,
+    cb: <callback>, // optional
   }
 
 * timer is a logical value.
-  it variable describing the time in a day or a week.
-  Time is represent a tick (a minute) inside a day (24*60=1440 ticks) or a week
-  (7*24*60=34560 ticks) time is a modulo number.
+  it variable describing the time in a week.
+  Time is represent a tick (a minute) inside  a week (7*24*60=34560 ticks) time is a modulo number.
   in case of modulo-day 1439+1 overflow to 0, in case of modulo-week 34559+1 overflow to 0.
   The idea is to use this as a base for event generation. When its value change a callback may be
   called.
-  
+    
   key -> {
     owner: <owner>,
     name: <namer>,
     code: timer,
     value: <configuration>, // it is an number
-    cb: <callback>,
+    cb: <callback>, // optional
   }
-  hour: (5bits)
-  minutes: (6bits)
-  map: weekday bitmap (7bits)
-  configuration: map<<11|hour<<6|minutes (18bits)
+  mtime: 60*hour+minutes (11bits)
+  mask: weekday bitmap (7bits)
+  configuration: OUT<<18 | mask<<11 | mtime (19bits)
+  
+  wd = ticks%1440 -> represent the week day
+  therefore if (1<<wd & mask) callback is called and ACC is set with OUT value (ACC = OUT)
+
   
   At start VM read all timers from DB and store them to RAM. VM generates callbacks when timer value
   is reached
@@ -72,7 +74,7 @@
     name: <radio>,
     code: radioin,
     value: <configuration>, // it is a number
-    cb: <callback>,
+    cb: <callback>, // optional
   }
   configuration: mask
 
@@ -87,7 +89,7 @@
     name: <radio>,
     code: radiorx,
     value: 0,
-    cb: <callback>,
+    cb: <callback>, // optional
   }
 
   VM call callback cb when a radio is received and no match happened
@@ -99,7 +101,7 @@
     name: <radio>,
     code: radioout,
     value: <configuration>, // it is a number
-    cb: <callback>,
+    cb: <callback>, // optional
   }
   configuration: mask
 
@@ -109,7 +111,7 @@
     name: <name>,
     code: message,
     value: <message>, // it is a string
-    cb: <callback>,
+    cb: <callback>, // optional
   }
 
 * variables are input/output and may have a callback
@@ -123,6 +125,7 @@
     name: <name>,   // it is a string
     code: <type>,   // it is a number (enum)
     value: <value>, // it is a number
+    cb: <callback>, // optional
     subscriber: {   // this is an array
       <node>: <callback>,
       ...,
@@ -130,22 +133,26 @@
     },
   }
 
-2. Function Definitions
-   ====================
+2. Program Definition
+   ==================
 
-These entities (data and functions) are defined into a database.
+These entities are defined into a database.
 
-Functions run into a simple virtual machine VM.
+Program run into a simple virtual machine VM.
 
 * functions: execute a statement of a program, can call other statement
 
   key -> {
+    owner: <node>,  // it is a string
     name: <name>,   // it is a string
-    code: <instr>,  // it is a enum
-    value: <arg>,   // it is a string. depending on the instruction can be an integer or a string
-    cb: <callback>, // it is a string representing the key of the database
+    p: [<array>],   // it is an array.
   }
 
+  array-element -> {
+    code: <instr>,  // it is a enum
+    value: <arg>,   // it is a string. depending on the instruction can be an integer or a string
+  }
+  
   instr: {
     ex0, // exception, illegal op-code 0
     ldi, // load immediate arg value into ACC (this involves a fetch from DB)
@@ -181,27 +188,24 @@ typedef struct {
 
   if (entry.ev == true) {
     entry.ev = false;
-    key_stm = entry.cb
+    key_prog = entry.cb
   }
 
 2. VM-fetch
-  entry_stm act as a program counter
+  key_prog is the entry point of the program
   
-  if (key_stm != null) {
-    stm = lookup(key_stm)
+  if (key_prog != null) {
+    prog = lookup(key_prog)
   }
 
-  stm = {
-    name: <name>,
+  prog_el = {
     code: <instr>,
     value: <arg>,
-    cb: <callback>,
   }
-  code = stm.code
  
 3. VM-decode
 
-  decode(stm.code, value)
+  decode(prog_el.code, prog_el.value)
 
   load data
   execute
@@ -210,7 +214,7 @@ typedef struct {
   pipeline definition:
   typedef struct {
     void (*read)(vm_context_t &ctx, const char *value);
-    const char* (*exec)(vm_context_t &ctx, const char *key_value);
+    uint8_t (*exec)(vm_context_t &ctx, const char *key_value);
     void (*write)(vm_context_t &ctx, char *key_value);
   } itlb_t;
 
@@ -220,7 +224,7 @@ if instruction is immediate then:
   
 if instruction is not immediate, value represent a key of the DB:
   // fetch
-  vm_pipe[code].read(ctx, stm.value)
+  vm_pipe[code].read(ctx, *value)
 
   // immediate value
   void vm_readi(ctx, const char *value) {
@@ -235,16 +239,15 @@ if instruction is not immediate, value represent a key of the DB:
 
 3.2 VM-decode-execution
 
-  key_stm = vm_pipe[code].exec(ctx, stm.value)
+  pc = vm_pipe[code].exec(ctx, value)
 
-  execute <instr> against the tuple {ACC, V, stm.value}
-  key_stm = <instr>(ACC, V, stm.value)
-  key_stm is an output because an instruction is able to change the execution flow
+  execute <instr> against the tuple {ACC, V, value}
+  inc = <instr>(ACC, V, value)
+  inc is an output incrementer because an instruction is able to change the execution flow
   
 3.3 VM-decode-write
 
   vm_pipe[code].write(ctx, stm.value);
-  stm = stm.cb; // move on the next element
   
   data = lookup(stm.value)
   data.value = ACC
@@ -274,6 +277,8 @@ itlb_t VM_pipe[] = {
     /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
     /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
     /* 13: stne */ {vm_read, vm_exec_dly, vm_write0},
+    /* 14: halt */ {vm_read0, vm_exec_halt, vm_write0},
+    /* 15: jmp  */ {vm_read0, vm_exec_jmp, vm_write0},
 };
 
 A1.1 example simple boolean trigger
@@ -286,25 +291,24 @@ pseudo-code:
   status = event.value;
 
 instruction code:
-f01: st status, end
+0: st status, end
 
-key-In: {
+key-In -> {
   name: 'In',
   code: phyin,
   value: pin<<24,
-  cb: key-f01,
+  cb: key-prog,
 }
-key-status: {
+key-status -> {
   name: 'status',
   code: bool,
   value: 0,
-  cb: end,
 }
-key-f01: {
-  name: 'f01',
-  code: st,
-  value: key-status,
-  cb: end,
+key-prog -> {
+  name: 'prog',
+  p: [
+    { code: st, value: key-status }
+  ]
 }
 
 A1.2 example simple sensor trigger
@@ -318,38 +322,31 @@ pseudo-code:
   status = (event.value>thr);
 
 instruction code:
-f01: gt thr, f02
-f02: st status, end
+0: gt thr, f02
+1: st status, end
 
-key-sensor: {
+key-sensor -> {
   name: 'sensor',
   code: phyin,
   value: pin<<24,
-  cb: key-f01,
+  cb: key-prog,
 }
-key-thr1: {
+key-thr1 -> {
   name: 'thr1',
   code: var,
   value: 90,
-  cb: end,
 }
-key-status: {
+key-status -> {
   name: 'status',
   code: bool,
   value: 0,
-  cb: end,
 }
-key-f01: {
-  name: 'f01',
-  code: gt,
-  value: 0,
-  cb: key-f02,
-}
-key-f02: {
-  name: 'f02',
-  code: st,
-  value: key-status,
-  cb: end,
+key-prog: {
+  name: 'prog',
+  p: [
+    { code: gt, value: 0 },
+    { code: st, value: key-status }
+  ]
 
 A2. example led on/off depending by a variable
    ===========================================
@@ -362,32 +359,26 @@ pseudo-code:
   led = (status.value != 0);
 
 instruction-code:
-f02: eqi 0, f03
-f03: st led, end
+0: eqi 0, f03
+1: st led, end
 
-key-led: {
+key-led -> {
   name: 'led',
   code: phyout,
   value: pin<<24,
-  cb: end,
 }
-key-status: {
+key-status -> {
   name: 'status',
   code: bool,
   value: 0,
-  cb: key-f01,
+  cb: key-prog,
 }
-key-f01: {
-  name: 'f01',
-  code: eqi,
-  value: 0,
-  cb: key-f02,
-}
-key-f02: {
-  name: 'f02',
-  code: st,
-  value: key-led,
-  cb: end,
+key-prog -> {
+  name: 'prog',
+  p: [
+    { code: eqi, value: 0 },
+    { code: st, value: key-led }
+  ]
 }
 
 A3. example sensor trigger with hysteresis switching a relay
@@ -418,15 +409,16 @@ run:
   }
   
 instruction-code:
-f01: ld status, f02
-f02: bz f6, f03
-f03: ld sensor, f04
-f04: gt thr1, f05
-f05: bnz end, f09
-f06: ld sensor, f07
-f07: gt thr2, f08
-f08: bz end, f09
-f09: st status, end
+0: ld status
+1: bz 6
+2: ld sensor
+3: gt thr1
+4: bnz end
+5: jmp 9
+6: ld sensor
+7: gt thr2
+8: bz end
+9: st status
 
 // the following code write the output variable status the proper condition is
 // satisfied, that is not efficient. Using a special function stne (store if not
@@ -435,102 +427,43 @@ f09: st status, end
 // This allows to reduce the number of the instructions to 5 and saving RAM and
 // CPU load on device.
 
-key-sensor: {
+key-sensor -> {
   name: 'sensor',
   code: phyin,
   value: pin<<24,
-  cb: key-f01,
+  cb: key-prog,
 }
-key-status: {
+key-status -> {
   name: 'status',
   code: bool,
   value: 0, // only the init value
-  cb: end,
 }
-key-thr1: {
+key-thr1 -> {
   name: 'thr1',
   code: int,
   value: 90,
-  cb: end,
 }
-key-thr2: {
+key-thr2 -> {
   name: 'thr2',
   code: int,
   value: 110,
-  cb: end,
 }
-key-f01: {
-  name: 'f01',
-  code: ld,
-  value: key-status,
-  cb: key-f02,
+key-prog -> {
+  name: 'prog',
+  p: [
+    { code: ld, value: key-status },
+    { code: bz, value: 6 },
+    { code: ld, value: key-sensor },
+    { code: gt, value: key-thr1 },
+    { code: bnz, value: end },
+    { code: jmp, value: 9 },
+    { code: ld, value: key-sensor },
+    { code: lt, value: key-thr2 },
+    { code: bz, value: end },
+    { code: st, value: key-status },
+    { code: st, value: key-led }
+  ]
 }
-key-f02: {
-  name: 'f02',
-  code: bz,
-  value: key-f06,
-  cb: key-f03,
-}
-key-f03: {
-  name: 'f03',
-  code: ld,
-  value: key-sensor,
-  cb: key-f04,
-}
-key-f04: {
-  name: 'f04',
-  code: gt,
-  value: key-thr1,
-  cb: key-f05,
-}
-key-f05: {
-  name: 'f05',
-  code: bnz,
-  value: end,
-  cb: key-f09,
-}
-key-f06: {
-  name: 'f06',
-  code: ld,
-  value: key-sensor,
-  cb: key-f07,
-}
-key-f07: {
-  name: 'f07',
-  code: lt,
-  value: key-thr2,
-  cb: key-f08,
-}
-key-f08: {
-  name: 'f08',
-  code: bz,
-  value: end,
-  cb: key-f09,
-}
-key-f09: {
-  name: 'f09',
-  code: st,
-  value: key-status,
-  cb: key-f10,
-}
-key-f10: {
-  name: 'f10',
-  code: st,
-  value: key-led,
-  cb: end,
-}
-
-diagram
-:)f01~ld)--:)f02~bz)--:)f03~ld)--:)f04~gt)--:)f05~bnz)--:)f09~st
-status      f06   |    v          thr1       end      | status
-                  |                                   |
-                  +--:)f06~ld)--:)f07~gt)--:)f08~bz)--+
-                     v          thr2       end
-
-diagram
-v->(f01: ld status)->(f02: bz f06)->(f03: ld v)->(f04: gt thr1)->(f05: bnz end)->(f09: st status)->(f10: st led)->end
-                              |                                               |
-                              +---->(f06: ld v)->(f07: gt thr2)->(f08: bz)----+
 
 A4. example radio code and alarm
    =============================
@@ -538,7 +471,7 @@ A4. example radio code and alarm
 sensor: radioin input
 id: radiorx input
 alarm-status: variable
-last-radio: variable
+rx-radio: variable
 
 pseudo-code:
   @id.event
@@ -548,62 +481,49 @@ pseudo-code:
     }
   }
   if (id == true) {
-    last-radio = id;
+    rx-radio = id;
   }
 
-key-sensor: {
+key-sensor -> {
   name: 'sensor',
   code: radioin,
-  value: 0xffaaff, // configuration
-  cb: key-f01,
+  value: 0xffaaff, // example configuration
+  cb: key-prog1,
 }
-key-id: {
+key-id -> {
   name: 'id',
   code: radiorx,
   value: 0,
-  cb: key-f04,
+  cb: key-prog2,
 }
-key-unknown-radio: {
-  name: 'unknown-radio',
+key-rx-radio -> {
+  name: 'rx-radio',
   code: int,
   value: 0,
-  cb: end,
 }
-key-notify: {
+key-notify -> {
   name: 'notify',
   code: logout,
   value: kmessage,
-  cb: end,
 }
-key-alarm-status: {
+key-alarm-status -> {
   name: 'alarm-status',
   code: bool,
   value: 0, // only the init value
-  cb: end,
 }
-key-f01: {
-  name: 'f01',
-  code: ld,
-  value: key-alarm-status,
-  cb: key-f02,
+key-prog1 -> {
+  name: 'prog1',
+  p: [
+    { code: ld, value: key-alarm-status },
+    { code: bz, value: end },
+    { code: st, value: key-notify }
+  ]
 }
-key-f02: {
-  name: 'f02',
-  code: bz,
-  value: end,
-  cb: key-f03,
-}
-key-f03: {
-  name: 'f03',
-  code: st,
-  value: key-notify,
-  cb: end,
-}
-key-f04: {
-  name: 'f06',
-  code: st,
-  value: key-unknown-radio,
-  cb: end,
+key-prog2 -> {
+  name: 'prog2',
+    p: [
+    { code: st, value: key-rx-radio }
+  ]
 }
 
 A5. timer control led
@@ -621,39 +541,26 @@ pseudo-code:
     led = false;
   }
 
-key-timer1: {
+key-timer1 -> {
   name: <name>,
   code: int,
-  value: 0*60+0,
-  cb: key-f01,
+  value: 1*2^18 + mask*2^11 + 0*60+0, // on config
+  cb: key-prog,
 }
-key-timer2: {
+key-timer2 -> {
   name: <name>,
   code: int,
-  value: 0*60+1,
-  cb: key-f02,
+  value:  0*2^18 + mask*2^11 + 0*60+1, // off config
+  cb: key-prog,
 }
-key-led: {
+key-led -> {
   name: 'led',
   code: phyout,
   value: pin<<24,
-  cb: end,
 }
-key-f01: {
-  name: 'f01',
-  code: ldi,
-  value: 1,
-  cb: key-f03,
-}
-key-f02: {
-  name: 'f02',
-  code: ldi,
-  value: 0,
-  cb: key-f03,
-}
-key-f03: {
-  name: 'f03',
-  code: st,
-  value: key-led,
-  cb: end,
+key-prog -> {
+  name: 'prog',
+  p: [
+    { code: st, value: key-led }
+  ]
 }

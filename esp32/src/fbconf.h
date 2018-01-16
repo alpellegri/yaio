@@ -6,9 +6,9 @@
 extern String kstartup;
 extern String kcontrol;
 extern String kstatus;
-extern String kfunctions;
 extern String kfcmtoken;
-extern String kgraph;
+extern String kdata;
+extern String kexec;
 extern String klogs;
 
 void FbconfInit(void);
