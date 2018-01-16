@@ -39,7 +39,7 @@ class ListItem extends StatelessWidget {
                     ),
                     new Text(
                       'VALUE: ${entry.getValue()}',
-                      textScaleFactor: 0.8,
+                      textScaleFactor: 0.9,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
