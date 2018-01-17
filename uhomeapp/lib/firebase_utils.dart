@@ -152,7 +152,7 @@ String getFcmTokenRef() {
   return dFcmTokenRef;
 }
 
-String getFunctionsRef() {
+String getExecRef() {
   return dExecRef;
 }
 

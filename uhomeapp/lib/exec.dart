@@ -26,34 +26,9 @@ class ExecListItem extends StatelessWidget {
                   children: [
                     new Text(
                       '${entry.name}',
-                      textScaleFactor: 1.3,
-                      textAlign: TextAlign.left,
-                    ),
-                    /*
-                    new Text(
-                      'action name: ${entry.actionName}',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
                     ),
-                    new Text(
-                      'type ID: ${entry.idType}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    new Text(
-                      'delay: ${entry.delay.toString()}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),*/
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -86,7 +61,7 @@ class _ExecState extends State<Exec> {
   StreamSubscription<Event> _onRemoveSubscription;
 
   _ExecState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getFunctionsRef());
+    _entryRef = FirebaseDatabase.instance.reference().child(getExecRef());
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);

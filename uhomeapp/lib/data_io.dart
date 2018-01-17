@@ -31,7 +31,7 @@ class ListItem extends StatelessWidget {
                     ),
                     new Text(
                       'TYPE: ${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textScaleFactor: 0.7,
+                      textScaleFactor: 0.8,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -171,22 +171,22 @@ class EntryDialog extends StatefulWidget {
 class _EntryDialogState extends State<EntryDialog> {
   final IoEntry entry;
   final DatabaseReference _execRef =
-      FirebaseDatabase.instance.reference().child(getFunctionsRef());
+      FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
-  final TextEditingController _controllerPort = new TextEditingController();
+  final TextEditingController _controllerPin = new TextEditingController();
   final TextEditingController _controllerValue = new TextEditingController();
   ExecEntry _selectedExec;
-  StreamSubscription<Event> _onFunctionAddSub;
+  StreamSubscription<Event> _onExecAddSub;
 
   _EntryDialogState(this.entry) {
-    _onFunctionAddSub = _execRef.onChildAdded.listen(_onFunctionAdded);
+    _onExecAddSub = _execRef.onChildAdded.listen(_onExecAdded);
     if (entry.value != null) {
       _controllerName.text = entry.name;
       _controllerType.text = entry.code.toString();
-      _controllerPort.text = entry.getPin().toString();
+      _controllerPin.text = entry.getPin().toString();
       _controllerValue.text = entry.getValue().toString();
     }
   }
@@ -199,7 +199,7 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   void dispose() {
     super.dispose();
-    _onFunctionAddSub.cancel();
+    _onExecAddSub.cancel();
   }
 
   @override
@@ -223,7 +223,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 ),
               ),
               new TextField(
-                controller: _controllerPort,
+                controller: _controllerPin,
                 decoration: new InputDecoration(
                   hintText: 'pin',
                 ),
@@ -236,12 +236,11 @@ class _EntryDialogState extends State<EntryDialog> {
               ),
               (_execList.length > 0)
                   ? new ListTile(
-                      title: const Text('Function Call'),
+                      title: const Text('Exec Call'),
                       trailing: new DropdownButton<ExecEntry>(
-                        hint: const Text('select a function'),
+                        hint: const Text('select an exec'),
                         value: _selectedExec,
                         onChanged: (ExecEntry newValue) {
-                          print(newValue.name);
                           setState(() {
                             _selectedExec = newValue;
                           });
@@ -254,7 +253,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         }).toList(),
                       ),
                     )
-                  : new Text('Functions not declared yet'),
+                  : new Text('Exec not declared yet'),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -271,7 +270,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.code = DataCode.PhyOut.index;
-                  entry.setPin(int.parse(_controllerPort.text));
+                  entry.setPin(int.parse(_controllerPin.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
@@ -290,11 +289,12 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 
-  void _onFunctionAdded(Event event) {
-    ExecEntry execEntry =
-        new ExecEntry.fromSnapshot(_execRef, event.snapshot);
+  void _onExecAdded(Event event) {
+    ExecEntry execEntry = new ExecEntry.fromSnapshot(_execRef, event.snapshot);
     setState(() {
       _execList.add(execEntry);
+      print(entry.cb);
+      print(execEntry.key);
       if (entry.cb == execEntry.key) {
         _selectedExec = execEntry;
       }
