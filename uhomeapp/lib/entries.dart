@@ -185,7 +185,7 @@ class ExecEntry {
         key = snapshot.key,
         owner = snapshot.value['owner'],
         name = snapshot.value['name'],
-  cb = snapshot.value['cb'];
+        cb = snapshot.value['cb'];
 
   setOwner(String _owner) {
     owner = _owner;
