@@ -3,7 +3,7 @@ const String kStatusRef = 'status';
 const String kStartupRef = 'startup';
 const String kFcmTokenRef = 'fcmtoken';
 const String kDataRef = 'data';
-const String kFunctionsRef = 'exec';
+const String kExecRef = 'exec';
 const String kLogsReportsRef = 'logs/Reports';
 const String kTHRef = 'logs/TH';
 

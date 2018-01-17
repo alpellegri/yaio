@@ -170,19 +170,19 @@ class EntryDialog extends StatefulWidget {
 
 class _EntryDialogState extends State<EntryDialog> {
   final IoEntry entry;
-  final DatabaseReference _functionRef =
+  final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getFunctionsRef());
-  List<FunctionEntry> _functionList = new List();
+  List<ExecEntry> _execList = new List();
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
   final TextEditingController _controllerPort = new TextEditingController();
   final TextEditingController _controllerValue = new TextEditingController();
-  FunctionEntry _selectedFunction;
+  ExecEntry _selectedExec;
   StreamSubscription<Event> _onFunctionAddSub;
 
   _EntryDialogState(this.entry) {
-    _onFunctionAddSub = _functionRef.onChildAdded.listen(_onFunctionAdded);
+    _onFunctionAddSub = _execRef.onChildAdded.listen(_onFunctionAdded);
     if (entry.value != null) {
       _controllerName.text = entry.name;
       _controllerType.text = entry.code.toString();
@@ -234,20 +234,20 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'value',
                 ),
               ),
-              (_functionList.length > 0)
+              (_execList.length > 0)
                   ? new ListTile(
                       title: const Text('Function Call'),
-                      trailing: new DropdownButton<FunctionEntry>(
+                      trailing: new DropdownButton<ExecEntry>(
                         hint: const Text('select a function'),
-                        value: _selectedFunction,
-                        onChanged: (FunctionEntry newValue) {
+                        value: _selectedExec,
+                        onChanged: (ExecEntry newValue) {
                           print(newValue.name);
                           setState(() {
-                            _selectedFunction = newValue;
+                            _selectedExec = newValue;
                           });
                         },
-                        items: _functionList.map((FunctionEntry entry) {
-                          return new DropdownMenuItem<FunctionEntry>(
+                        items: _execList.map((ExecEntry entry) {
+                          return new DropdownMenuItem<ExecEntry>(
                             value: entry,
                             child: new Text(entry.name),
                           );
@@ -291,12 +291,12 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 
   void _onFunctionAdded(Event event) {
-    FunctionEntry funcEntry =
-        new FunctionEntry.fromSnapshot(_functionRef, event.snapshot);
+    ExecEntry execEntry =
+        new ExecEntry.fromSnapshot(_execRef, event.snapshot);
     setState(() {
-      _functionList.add(funcEntry);
-      if (entry.cb == funcEntry.key) {
-        _selectedFunction = funcEntry;
+      _execList.add(execEntry);
+      if (entry.cb == execEntry.key) {
+        _selectedExec = execEntry;
       }
     });
   }

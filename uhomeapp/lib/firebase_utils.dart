@@ -23,7 +23,7 @@ String dStatusRef;
 String dStartupRef;
 String dFcmTokenRef;
 String dDataRef;
-String dFunctionsRef;
+String dExecRef;
 String dLogsReportsRef;
 String dTHRef;
 
@@ -67,7 +67,7 @@ void updateNodeRef(Map config) {
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
   dDataRef = '$prefixData/$kDataRef';
-  dFunctionsRef = '$prefixData/$kFunctionsRef';
+  dExecRef = '$prefixData/$kExecRef';
   dLogsReportsRef = '$prefixData/$kLogsReportsRef';
   dTHRef = '$prefixData/$kTHRef';
 }
@@ -153,7 +153,7 @@ String getFcmTokenRef() {
 }
 
 String getFunctionsRef() {
-  return dFunctionsRef;
+  return dExecRef;
 }
 
 String getDataRef() {
@@ -183,8 +183,6 @@ Map<String, Object> _startupDefault = {
 Map<String, Object> _statusDefault = {
   'alarm': false,
   'heap': 0,
-  'humidity': 0,
-  'temperature': 0,
   'time': 0,
 };
 

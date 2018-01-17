@@ -3,7 +3,7 @@ import 'home.dart';
 import 'setup.dart';
 import 'node_setup.dart';
 import 'data_io.dart';
-import 'functions.dart';
+import 'exec.dart';
 import 'log_history.dart';
 import 'chart_history.dart';
 import 'firebase_utils.dart';
@@ -16,8 +16,8 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'Node Setup'),
   DataIO.routeName: (BuildContext context) => new DataIO(title: 'Data IO'),
-  Functions.routeName: (BuildContext context) =>
-      new Functions(title: 'Functions'),
+  Exec.routeName: (BuildContext context) =>
+      new Exec(title: 'Exec'),
   LogHistory.routeName: (BuildContext context) =>
       new LogHistory(title: 'Log History'),
   ChartHistory.routeName: (BuildContext context) =>
@@ -69,11 +69,11 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.functions),
-            title: new Text('Functions'),
+            title: new Text('Exec'),
             onTap: () {
               Navigator.of(context)
                 ..pop()
-                ..pushNamed(Functions.routeName);
+                ..pushNamed(Exec.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.message),

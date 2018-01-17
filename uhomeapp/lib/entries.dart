@@ -136,7 +136,7 @@ enum Instruction {
   dly, // delay in ms
 }
 
-class FunctionEntry {
+class _FunctionEntry {
   DatabaseReference reference;
   String key;
   String owner;
@@ -145,9 +145,9 @@ class FunctionEntry {
   String value;
   String cb;
 
-  FunctionEntry(DatabaseReference ref) : reference = ref;
+  _FunctionEntry(DatabaseReference ref) : reference = ref;
 
-  FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
+  _FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
       : reference = ref,
         key = snapshot.key,
         owner = snapshot.value['owner'],
@@ -167,6 +167,34 @@ class FunctionEntry {
       'code': code,
       'value': value,
       'cb': cb,
+    };
+  }
+}
+
+class ExecEntry {
+  DatabaseReference reference;
+  String key;
+  String owner;
+  String name;
+  String cb;
+
+  ExecEntry(DatabaseReference ref) : reference = ref;
+
+  ExecEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
+      : reference = ref,
+        key = snapshot.key,
+        owner = snapshot.value['owner'],
+        name = snapshot.value['name'],
+  cb = snapshot.value['cb'];
+
+  setOwner(String _owner) {
+    owner = _owner;
+  }
+
+  toJson() {
+    return {
+      'owner': owner,
+      'name': name,
     };
   }
 }
