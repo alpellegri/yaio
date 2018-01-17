@@ -82,7 +82,7 @@ class IoEntry {
     name = snapshot.value['name'];
     code = snapshot.value['code'];
     value = snapshot.value['value'];
-    cb = snapshot.value['func'];
+    cb = snapshot.value['cb'];
   }
 
   int getPin() {
@@ -136,39 +136,13 @@ enum Instruction {
   dly, // delay in ms
 }
 
-class _FunctionEntry {
-  DatabaseReference reference;
-  String key;
-  String owner;
-  String name;
+class InstrEntry {
   int code;
   String value;
-  String cb;
 
-  _FunctionEntry(DatabaseReference ref) : reference = ref;
-
-  _FunctionEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot)
-      : reference = ref,
-        key = snapshot.key,
-        owner = snapshot.value['owner'],
-        code = snapshot.value['code'],
-        value = snapshot.value['value'],
-        name = snapshot.value['name'],
-        cb = snapshot.value['cb'];
-
-  setOwner(String _owner) {
-    owner = _owner;
-  }
-
-  toJson() {
-    return {
-      'owner': owner,
-      'name': name,
-      'code': code,
-      'value': value,
-      'cb': cb,
-    };
-  }
+  InstrEntry.fromSnapshot(DataSnapshot snapshot)
+      : code = snapshot.value['code'],
+        value = snapshot.value['value'];
 }
 
 class ExecEntry {

@@ -125,7 +125,10 @@ class _DataIOState extends State<DataIO> {
 
   void _onEntryAdded(Event event) {
     setState(() {
-      entryList.add(new IoEntry.fromSnapshot(_dataRef, event.snapshot));
+      IoEntry entry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
+      print(entry.name);
+      print(entry.cb);
+      entryList.add(entry);
     });
   }
 
@@ -293,8 +296,6 @@ class _EntryDialogState extends State<EntryDialog> {
     ExecEntry execEntry = new ExecEntry.fromSnapshot(_execRef, event.snapshot);
     setState(() {
       _execList.add(execEntry);
-      print(entry.cb);
-      print(execEntry.key);
       if (entry.cb == execEntry.key) {
         _selectedExec = execEntry;
       }
