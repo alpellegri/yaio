@@ -137,12 +137,12 @@ enum Instruction {
 }
 
 class InstrEntry {
-  int code;
-  String value;
+  int i;
+  String v;
 
-  InstrEntry.fromSnapshot(DataSnapshot snapshot)
-      : code = snapshot.value['code'],
-        value = snapshot.value['value'];
+  InstrEntry(DataSnapshot snapshot)
+      : i = snapshot.value['i'],
+        v = snapshot.value['v'];
 }
 
 class ExecEntry {
@@ -151,6 +151,7 @@ class ExecEntry {
   String owner;
   String name;
   String cb;
+  List<InstrEntry> p;
 
   ExecEntry(DatabaseReference ref) : reference = ref;
 
@@ -159,7 +160,10 @@ class ExecEntry {
         key = snapshot.key,
         owner = snapshot.value['owner'],
         name = snapshot.value['name'],
-        cb = snapshot.value['cb'];
+        cb = snapshot.value['cb'],
+        p = snapshot.value['p'] {
+    // p.forEach((e) => print('$e.i $e.v'));
+  }
 
   setOwner(String _owner) {
     owner = _owner;
