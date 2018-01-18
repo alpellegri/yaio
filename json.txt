@@ -149,8 +149,8 @@ Program run into a simple virtual machine VM.
   }
 
   array-element -> {
-    code: <instr>,  // it is a enum
-    value: <arg>,   // it is a string. depending on the instruction can be an integer or a string
+    i: <instr>,  // it is a enum
+    v: <arg>,   // it is a string. depending on the instruction can be an integer or a string
   }
   
   instr: {
@@ -199,8 +199,8 @@ typedef struct {
   }
 
   prog_el = {
-    code: <instr>,
-    value: <arg>,
+    i: <instr>,
+    v: <arg>,
   }
  
 3. VM-decode
@@ -307,7 +307,7 @@ key-status -> {
 key-prog -> {
   name: 'prog',
   p: [
-    { code: st, value: key-status }
+    { i: st, v: key-status }
   ]
 }
 
@@ -344,8 +344,8 @@ key-status -> {
 key-prog: {
   name: 'prog',
   p: [
-    { code: gt, value: 0 },
-    { code: st, value: key-status }
+    { i: gt, v: 0 },
+    { i: st, v: key-status }
   ]
 
 A2. example led on/off depending by a variable
@@ -376,8 +376,8 @@ key-status -> {
 key-prog -> {
   name: 'prog',
   p: [
-    { code: eqi, value: 0 },
-    { code: st, value: key-led }
+    { i: eqi, v: 0 },
+    { i: st, v: key-led }
   ]
 }
 
@@ -451,17 +451,17 @@ key-thr2 -> {
 key-prog -> {
   name: 'prog',
   p: [
-    { code: ld, value: key-status },
-    { code: bz, value: 6 },
-    { code: ld, value: key-sensor },
-    { code: gt, value: key-thr1 },
-    { code: bnz, value: end },
-    { code: jmp, value: 9 },
-    { code: ld, value: key-sensor },
-    { code: lt, value: key-thr2 },
-    { code: bz, value: end },
-    { code: st, value: key-status },
-    { code: st, value: key-led }
+    { i: ld, v: key-status },
+    { i: bz, v: 6 },
+    { i: ld, v: key-sensor },
+    { i: gt, v: key-thr1 },
+    { i: bnz, v: end },
+    { i: jmp, v: 9 },
+    { i: ld, v: key-sensor },
+    { i: lt, v: key-thr2 },
+    { i: bz, v: end },
+    { i: st, v: key-status },
+    { i: st, v: key-led }
   ]
 }
 
@@ -514,9 +514,9 @@ key-alarm-status -> {
 key-prog1 -> {
   name: 'prog1',
   p: [
-    { code: ld, value: key-alarm-status },
-    { code: bz, value: end },
-    { code: st, value: key-notify }
+    { i: ld, v: key-alarm-status },
+    { i: bz, v: end },
+    { i: st, v: key-notify }
   ]
 }
 key-prog2 -> {
@@ -561,6 +561,6 @@ key-led -> {
 key-prog -> {
   name: 'prog',
   p: [
-    { code: st, value: key-led }
+    { i: st, v: key-led }
   ]
 }
