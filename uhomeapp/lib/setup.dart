@@ -543,8 +543,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   }
 
   void _changePreferences() {
-    print('_savePreferences');
-    print('_isNeedCreate $_isNeedCreate');
     savePreferencesDN(_ctrlDomainName, _ctrlNodeName);
     if (_isNeedCreate == true) {
       DatabaseReference ref;
