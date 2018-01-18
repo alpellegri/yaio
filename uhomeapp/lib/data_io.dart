@@ -126,8 +126,6 @@ class _DataIOState extends State<DataIO> {
   void _onEntryAdded(Event event) {
     setState(() {
       IoEntry entry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
-      print(entry.name);
-      print(entry.cb);
       entryList.add(entry);
     });
   }
