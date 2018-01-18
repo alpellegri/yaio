@@ -154,18 +154,25 @@ Program run into a simple virtual machine VM.
   }
   
   instr: {
-    ex0, // exception, illegal op-code 0
-    ldi, // load immediate arg value into ACC (this involves a fetch from DB)
-    ld,  // load arg value into ACC (this involves a fetch from DB)
-    st,  // store arg value into ACC (this involves a write back to DB)
-    lt,  // if ACC is less than arg, then ACC=1, else ACC=0
-    gt,  // if ACC is grater than arg, then ACC=1, else ACC=0
-    eqi, // if ACC is equal to immediate arg value, then ACC=1, else ACC=0
-    eq,  // if ACC is equal to arg, then ACC=1, else ACC=0
-    bz,  // branch if ACC is zero
-    bnz, // branch if ACC is not zero
-    dly, // delay in ms
-  }
+    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
+    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
+    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
+    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
+    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
+    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
+    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
+    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
+    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
+    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
+    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
+    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
+    /* 12: dly  */ {vm_readi, vm_exec_dly, vm_write0},
+    /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
+    /* 14: lte  */ {vm_read, vm_exec_lte, vm_write0},
+    /* 15: gte  */ {vm_read, vm_exec_gte, vm_write0},
+    /* 16: halt */ {vm_read0, vm_exec_halt, vm_write0},
+    /* 17: jmp  */ {vm_read0, vm_exec_jmp, vm_write0},
+}
 
 * VM execution model
 At startup, the VM initializes its runtime environment copying all DB entities.
@@ -192,20 +199,23 @@ typedef struct {
   }
 
 2. VM-fetch
-  key_prog is the entry point of the program
+  key_prog is the entry point of a program
   
   if (key_prog != null) {
     prog = lookup(key_prog)
   }
 
-  prog_el = {
+  array-element = {
     i: <instr>,
     v: <arg>,
   }
  
 3. VM-decode
 
-  decode(prog_el.code, prog_el.value)
+  pc = 0;
+  while (pc < prog_array.size()) {
+   pc = decode(pc, prog_array[pc].code, prog_array[pc].value)
+  }
 
   load data
   execute
@@ -214,7 +224,7 @@ typedef struct {
   pipeline definition:
   typedef struct {
     void (*read)(vm_context_t &ctx, const char *value);
-    uint8_t (*exec)(vm_context_t &ctx, const char *key_value);
+    uint8_t (*exec)(uint8_t pc, vm_context_t &ctx, const char *key_value);
     void (*write)(vm_context_t &ctx, char *key_value);
   } itlb_t;
 
@@ -238,11 +248,12 @@ if instruction is not immediate, value represent a key of the DB:
   }
 
 3.2 VM-decode-execution
+  pc is the index of the array-element to be executed. No branch instructions will increment pc by one. 
+  
+  pc = vm_pipe[code].exec(pc, ctx, value)
 
-  pc = vm_pipe[code].exec(ctx, value)
-
-  execute <instr> against the tuple {ACC, V, value}
-  inc = <instr>(ACC, V, value)
+  execute <instr> against the tuple {pc, ACC, V, value}
+  pc = <instr>(pc, ACC, V, value)
   inc is an output incrementer because an instruction is able to change the execution flow
   
 3.3 VM-decode-write
@@ -261,25 +272,6 @@ if instruction is not immediate, value represent a key of the DB:
 4. VM-write-back
 All variable have to contain an indication flag (data.wb == true) are asked to be written back to
 the DB
-
-itlb_t VM_pipe[] = {
-    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
-    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
-    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
-    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
-    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
-    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
-    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
-    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
-    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
-    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
-    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
-    /* 12: dly  */ {vm_read, vm_exec_dly, vm_write0},
-    /* 13: stne */ {vm_read, vm_exec_dly, vm_write0},
-    /* 14: halt */ {vm_read0, vm_exec_halt, vm_write0},
-    /* 15: jmp  */ {vm_read0, vm_exec_jmp, vm_write0},
-};
 
 A1.1 example simple boolean trigger
     ===============================
