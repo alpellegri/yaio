@@ -45,7 +45,7 @@ class ProgListItem extends StatelessWidget {
 class ExecProg extends StatefulWidget {
   ExecProg({Key key, this.title}) : super(key: key);
 
-  static const String routeName = '/exec';
+  static const String routeName = '/exec_prog';
 
   final String title;
 

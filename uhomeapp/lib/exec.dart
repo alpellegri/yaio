@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
+import 'exec_prog.dart';
 
 class ExecListItem extends StatelessWidget {
   final ExecEntry entry;
@@ -212,10 +213,24 @@ class _EntryDialogState extends State<EntryDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              new TextField(
-                controller: _controllerName,
-                decoration: new InputDecoration(
-                  hintText: 'Name',
+              new ListTile(
+                title: new TextField(
+                  controller: _controllerName,
+                  decoration: new InputDecoration(
+                    hintText: 'Name',
+                  ),
+                ),
+                trailing: new ButtonTheme.bar(
+                  child: new ButtonBar(
+                    children: <Widget>[
+                      new FlatButton(
+                        child: const Text('PROGRAM'),
+                        onPressed: () {
+                          Navigator.of(context)..pushNamed(ExecProg.routeName);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               (execList.length > 0)
