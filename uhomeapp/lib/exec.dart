@@ -225,9 +225,16 @@ class _EntryDialogState extends State<EntryDialog> {
                       new FlatButton(
                         child: const Text('PROGRAM'),
                         onPressed: () {
-                          Navigator.of(context)
+                          /*Navigator.of(context)
                             ..pop()
-                            ..pushNamed(ExecProg.routeName);
+                            ..pushNamed(ExecProg.routeName);*/
+                          Navigator.of(context).pop();
+                          Navigator.push(
+                              context,
+                              new MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    new ExecProg(),
+                              ));
                         },
                       ),
                     ],
@@ -284,4 +291,17 @@ class _EntryDialogState extends State<EntryDialog> {
               }),
         ]);
   }
+}
+
+class ContaPage extends StatelessWidget {
+  ContaPage(this.color);
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => new Scaffold(
+        appBar: new AppBar(
+          backgroundColor: color,
+        ),
+      );
 }

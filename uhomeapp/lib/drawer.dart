@@ -48,49 +48,37 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: new Icon(Icons.home),
             title: new Text('Home'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Home.routeName);
+              Navigator.of(context).pushNamed(Home.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.developer_board),
             title: new Text('Device'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Setup.routeName);
+              Navigator.of(context).pushNamed(Setup.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.label_outline),
             title: new Text('Data IO'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(DataIO.routeName);
+              Navigator.of(context).pushNamed(DataIO.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.functions),
             title: new Text('Exec'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Exec.routeName);
+              Navigator.of(context).pushNamed(Exec.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.message),
             title: new Text('Log History'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(LogHistory.routeName);
+              Navigator.of(context).pushNamed(LogHistory.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.timeline),
             title: new Text('Chart History'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(ChartHistory.routeName);
+              Navigator.of(context).pushNamed(ChartHistory.routeName);
             }),
       ]),
     );

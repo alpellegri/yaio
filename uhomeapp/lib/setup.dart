@@ -487,8 +487,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                       new FlatButton(
                         child: const Text('CONFIGURE'),
                         onPressed: () {
-                          Navigator.of(context)
-                            ..pushNamed(NodeSetup.routeName);
+                          Navigator.of(context).pushNamed(NodeSetup.routeName);
                         },
                       ),
                     ],
