@@ -5,10 +5,10 @@ import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 
-class ExecListItem extends StatelessWidget {
+class ProgListItem extends StatelessWidget {
   final ExecEntry entry;
 
-  ExecListItem(this.entry);
+  ProgListItem(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +29,6 @@ class ExecListItem extends StatelessWidget {
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
-                    new Text(
-                      'a',
-                      textScaleFactor: 0.8,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    new Text(
-                      'b',
-                      textScaleFactor: 0.9,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -58,43 +42,30 @@ class ExecListItem extends StatelessWidget {
   }
 }
 
-class Exec extends StatefulWidget {
-  Exec({Key key, this.title}) : super(key: key);
+class ExecProg extends StatefulWidget {
+  ExecProg({Key key, this.title}) : super(key: key);
 
   static const String routeName = '/exec';
 
   final String title;
 
   @override
-  _ExecState createState() => new _ExecState();
+  _ExecProgState createState() => new _ExecProgState();
 }
 
-class _ExecState extends State<Exec> {
+class _ExecProgState extends State<ExecProg> {
   List<ExecEntry> entryList = new List();
-  DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
-
-  _ExecState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getExecRef());
-    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
-  }
+  _ExecProgState() {}
 
   @override
   void initState() {
     super.initState();
-    print('_ExecState');
+    print('_ExecProgState');
   }
 
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
-    _onEditSubscription.cancel();
-    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -111,7 +82,7 @@ class _ExecState extends State<Exec> {
         itemBuilder: (buildContext, index) {
           return new InkWell(
               onTap: () => _openEntryDialog(entryList[index]),
-              child: new ExecListItem(entryList[index]));
+              child: new ProgListItem(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -122,29 +93,6 @@ class _ExecState extends State<Exec> {
     );
   }
 
-  void _onEntryAdded(Event event) {
-    setState(() {
-      entryList.add(new ExecEntry.fromSnapshot(_entryRef, event.snapshot));
-    });
-  }
-
-  void _onEntryEdited(Event event) {
-    ExecEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList[entryList.indexOf(oldValue)] =
-          new ExecEntry.fromSnapshot(_entryRef, event.snapshot);
-    });
-  }
-
-  void _onEntryRemoved(Event event) {
-    ExecEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList.remove(oldValue);
-    });
-  }
-
   void _openEntryDialog(ExecEntry entry) {
     showDialog(
       context: context,
@@ -153,8 +101,7 @@ class _ExecState extends State<Exec> {
   }
 
   void _onFloatingActionButtonPressed() {
-    ExecEntry entry = new ExecEntry(_entryRef);
-    _openEntryDialog(entry);
+    // _openEntryDialog(entry);
   }
 }
 
