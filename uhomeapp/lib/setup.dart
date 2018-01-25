@@ -480,14 +480,15 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           title: const Text('Selected Device'),
           subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
           trailing: (_isNeedCreate == true)
-              ? (const Text(''))
+              ? null
               : (new ButtonTheme.bar(
                   child: new ButtonBar(
                     children: <Widget>[
                       new FlatButton(
                         child: const Text('CONFIGURE'),
                         onPressed: () {
-                          Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                          Navigator.of(context)
+                            ..pushNamed(NodeSetup.routeName);
                         },
                       ),
                     ],

@@ -178,7 +178,6 @@ class _EntryDialogState extends State<EntryDialog> {
   var _selectedNextList;
 
   List<IoEntry> entryIoList = new List();
-  DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
 
   _EntryDialogState(this.entry, this.execList) {
@@ -226,7 +225,9 @@ class _EntryDialogState extends State<EntryDialog> {
                       new FlatButton(
                         child: const Text('PROGRAM'),
                         onPressed: () {
-                          Navigator.of(context)..pushNamed(ExecProg.routeName);
+                          Navigator.of(context)
+                            ..pop()
+                            ..pushNamed(ExecProg.routeName);
                         },
                       ),
                     ],
