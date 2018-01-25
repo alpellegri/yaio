@@ -182,8 +182,6 @@ class _EntryDialogState extends State<EntryDialog> {
 
   _EntryDialogState(this.entry, this.execList) {
     print('EntryDialogState');
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
-    _onAddSubscription = _dataRef.onChildAdded.listen(_onDataEntryAdded);
 
     _controllerName.text = entry?.name;
     if (entry.cb != null) {
@@ -204,7 +202,6 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
   }
 
   @override
@@ -270,13 +267,5 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
-  }
-
-  void _onDataEntryAdded(Event event) {
-    print('_onDataEntryAdded');
-    IoEntry ioEntry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
-    setState(() {
-      entryIoList.add(ioEntry);
-    });
   }
 }
