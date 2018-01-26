@@ -264,7 +264,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         _isPreferencesReady = true;
       });
 
-      print(getRootRef());
+      print('getRootRef: ${getRootRef()}');
       _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
       _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
       if (map.isNotEmpty) {

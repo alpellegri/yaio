@@ -51,18 +51,23 @@ Future<String> signInWithGoogle() async {
 }
 
 void updateUserRef() {
+  print('updateUserRef');
   dUserRef = 'users/${getFirebaseUser().uid}';
   dRootRef = '$dUserRef/root';
   dObjRef = '$dUserRef/obj';
+  dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
+  print('dUserRef: $dUserRef');
+  print('dRootRef: $dRootRef');
+  print('dObjRef: $dObjRef');
+  print('dFcmTokenRef: $dFcmTokenRef');
 }
 
 void updateNodeRef(Map config) {
-  print(config);
+  print('updateNodeRef: $config');
   dNodeSubPath = '${config['domain']}/${config['nodename']}';
   String prefixNode = '$dRootRef/$dNodeSubPath';
   String prefixData = '$dObjRef';
 
-  dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
   dControlRef = '$prefixNode/$kControlRef';
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
@@ -79,6 +84,7 @@ String getNodeSubPath() {
 Future<Map> loadPreferences() async {
   _prefs = await SharedPreferences.getInstance();
   _nodeConfigJson = _prefs.getString('node_config_json');
+  print('loadPreferences: $_nodeConfigJson');
 
   updateUserRef();
   if (_nodeConfigJson != null) {
