@@ -160,14 +160,15 @@ class _EntryDialogState extends State<EntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    bool isImmediate = kOpCodeIsImmediate[OpCode.values[entry.i]];
     return new AlertDialog(
-        title: new Text('Edit program line'),
+        title: new Text('Edit Op Code'),
         content: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               new ListTile(
-                title: const Text('Action'),
+                title: const Text('OpCode'),
                 trailing: new DropdownButton<int>(
                   hint: const Text('action'),
                   value: _selectedOpCode,
@@ -181,11 +182,18 @@ class _EntryDialogState extends State<EntryDialog> {
                     return new DropdownMenuItem<int>(
                       value: entry,
                       child: new Text(kOpCode2Name[OpCode.values[entry]]),
-                      // child: new Text('ale'),
                     );
                   }).toList(),
                 ),
-              )
+              ),
+              (isImmediate == true)
+                  ? (new TextField(
+                      controller: _controllerValue,
+                      decoration: new InputDecoration(
+                        hintText: 'value',
+                      ),
+                    ))
+                  : (new Text('not immediate')),
             ]),
         actions: <Widget>[
           new FlatButton(
