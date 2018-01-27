@@ -162,6 +162,27 @@ enum OpCode {
   jmp,
 }
 
+const Map<OpCode, bool> kOpCodeIsImmediate = const {
+  OpCode.ex0: true,
+  OpCode.ldi: true,
+  OpCode.ld24: false,
+  OpCode.ld: false,
+  OpCode.st24: false,
+  OpCode.st: false,
+  OpCode.lt: false,
+  OpCode.gt: false,
+  OpCode.eqi: true,
+  OpCode.eq: false,
+  OpCode.bz: true,
+  OpCode.bnz: true,
+  OpCode.dly: true,
+  OpCode.stne: false,
+  OpCode.lte: false,
+  OpCode.gte: false,
+  OpCode.jmp: true,
+  OpCode.halt: true,
+};
+
 const Map<OpCode, String> kOpCode2Name = const {
   OpCode.ex0: kOpCodeStringex0,
   OpCode.ldi: kOpCodeStringldi,

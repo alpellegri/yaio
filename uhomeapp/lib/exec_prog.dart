@@ -6,12 +6,31 @@ import 'entries.dart';
 import 'firebase_utils.dart';
 
 class ExecProgListItem extends StatelessWidget {
+  final int pc;
   final InstrEntry entry;
+  final List<IoEntry> entryIoList;
 
-  ExecProgListItem(this.entry);
+  ExecProgListItem(this.pc, this.entry, this.entryIoList);
 
   @override
   Widget build(BuildContext context) {
+    bool isImmediate = kOpCodeIsImmediate[OpCode.values[entry.i]];
+    String value;
+    print('isImmediate: $isImmediate');
+    if (isImmediate == false) {
+      // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
+      value = 'not yet defined';
+      print(entry.v);
+      entryIoList.forEach((el) {
+        // print('key: ${el.key}, name: ${el.name}');
+        if (el.key == entry.v) {
+          value = el.name;
+        }
+      });
+    } else {
+      value = entry.v;
+    }
+    print(value);
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
       child: new Row(
@@ -25,7 +44,7 @@ class ExecProgListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      '${kOpCode2Name[OpCode.values[entry.i]]} value: ${entry.v}',
+                      '$pc: ${kOpCode2Name[OpCode.values[entry.i]]} $value',
                       textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                     ),
@@ -55,6 +74,9 @@ class ExecProg extends StatefulWidget {
 
 class _ExecProgState extends State<ExecProg> {
   final List<InstrEntry> prog;
+  List<IoEntry> entryIoList = new List();
+  DatabaseReference _dataRef;
+  StreamSubscription<Event> _onAddSubscription;
 
   _ExecProgState(this.prog);
 
@@ -62,6 +84,14 @@ class _ExecProgState extends State<ExecProg> {
   void initState() {
     super.initState();
     print('_ExecProgState');
+    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onAddSubscription.cancel();
   }
 
   @override
@@ -69,16 +99,15 @@ class _ExecProgState extends State<ExecProg> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-        // title: new Text(widget.title),
-      ),
+          // title: new Text(widget.title),
+          ),
       body: new ListView.builder(
         shrinkWrap: true,
-        reverse: true,
         itemCount: prog.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
               onTap: () => _openEntryDialog(prog[index]),
-              child: new ExecProgListItem(prog[index]));
+              child: new ExecProgListItem(index, prog[index], entryIoList));
         },
       ),
     );
@@ -89,6 +118,14 @@ class _ExecProgState extends State<ExecProg> {
       context: context,
       child: new EntryDialog(entry),
     );
+  }
+
+  void _onEntryAdded(Event event) {
+    print('_onEntryAdded');
+    setState(() {
+      IoEntry entry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
+      entryIoList.add(entry);
+    });
   }
 }
 
@@ -109,30 +146,16 @@ class _EntryDialogState extends State<EntryDialog> {
   List<int> _opCodeMenu = new List<int>();
   IoEntry _selectedEntry;
 
-  List<IoEntry> entryIoList = new List();
-  DatabaseReference _dataRef;
-  StreamSubscription<Event> _onAddSubscription;
-
   _EntryDialogState(this.entry) {
     print('EntryDialogState');
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
-    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
   }
 
   @override
   void initState() {
     super.initState();
     _selectedOpCode = entry.i;
-    OpCode.values.toList().forEach((f) =>
-        _opCodeMenu.add(f.index)
-    );
+    OpCode.values.toList().forEach((f) => _opCodeMenu.add(f.index));
     _opCodeMenu.forEach((e) => print(e));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _onAddSubscription.cancel();
   }
 
   @override
@@ -181,13 +204,5 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
-  }
-
-  void _onEntryAdded(Event event) {
-    print('_onEntryAdded');
-    setState(() {
-      IoEntry entry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
-      entryIoList.add(entry);
-    });
   }
 }
