@@ -173,20 +173,20 @@ const Map<OpCode, String> kOpCode2Name = const {
   OpCode.dly: kOpCodeStringdly,
 };
 
-const Map<String, OpCode> kEntryName2Id = const {
-  kOpCodeStringPhyIn: OpCode.PhyIn,
-  kOpCodeStringPhyOut: OpCode.PhyOut,
-  kOpCodeStringLogIn: OpCode.LogIn,
-  kOpCodeStringLogOut: OpCode.LogOut,
-  kOpCodeStringRadioIn: OpCode.RadioIn,
-  kOpCodeStringRadioOut: OpCode.RadioOut,
-  kOpCodeStringRadioElem: OpCode.RadioElem,
-  kOpCodeStringTimer: OpCode.Timer,
-  kOpCodeStringBool: OpCode.Bool,
-  kOpCodeStringInt: OpCode.Int,
-  kOpCodeStringFloat: OpCode.Float,
-  kOpCodeStringRadioRx: OpCode.RadioRx,
-  kOpCodeStringMessaging: OpCode.Messaging,
+const Map<String, OpCode> kName2Opcode = const {
+  kOpCodeStringex0: OpCode.ex0,
+  kOpCodeStringldi: OpCode.ldi,
+  kOpCodeStringld24: OpCode.ld24,
+  kOpCodeStringld: OpCode.ld,
+  kOpCodeStringst24: OpCode.st24,
+  kOpCodeStringst: OpCode.st,
+  kOpCodeStringlt: OpCode.lt,
+  kOpCodeStringgt: OpCode.gt,
+  kOpCodeStringeqi: OpCode.eqi,
+  kOpCodeStringeq: OpCode.eq,
+  kOpCodeStringbz: OpCode.bz,
+  kOpCodeStringbnz: OpCode.bnz,
+  kOpCodeStringdly: OpCode.dly,
 };
 
 
