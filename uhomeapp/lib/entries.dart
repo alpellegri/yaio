@@ -135,6 +135,10 @@ const String kOpCodeStringeq = 'eq';
 const String kOpCodeStringbz = 'bz';
 const String kOpCodeStringbnz = 'bnz';
 const String kOpCodeStringdly = 'dly';
+const String kOpCodeStringstne = 'stne';
+const String kOpCodeStringlte = 'lte';
+const String kOpCodeStringgte = 'gte';
+const String kOpCodeStringjmp = 'jmp';
 
 enum OpCode {
   ex0,
@@ -171,6 +175,10 @@ const Map<OpCode, String> kOpCode2Name = const {
   OpCode.bz: kOpCodeStringbz,
   OpCode.bnz: kOpCodeStringbnz,
   OpCode.dly: kOpCodeStringdly,
+  OpCode.stne: kOpCodeStringstne,
+  OpCode.lte: kOpCodeStringlte,
+  OpCode.gte: kOpCodeStringgte,
+  OpCode.jmp: kOpCodeStringjmp,
 };
 
 const Map<String, OpCode> kName2Opcode = const {
@@ -187,6 +195,10 @@ const Map<String, OpCode> kName2Opcode = const {
   kOpCodeStringbz: OpCode.bz,
   kOpCodeStringbnz: OpCode.bnz,
   kOpCodeStringdly: OpCode.dly,
+  kOpCodeStringstne: OpCode.stne,
+  kOpCodeStringlte: OpCode.lte,
+  kOpCodeStringgte: OpCode.gte,
+  kOpCodeStringjmp: OpCode.jmp,
 };
 
 
