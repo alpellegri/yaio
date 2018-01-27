@@ -292,16 +292,3 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 }
-
-class ContaPage extends StatelessWidget {
-  ContaPage(this.color);
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => new Scaffold(
-        appBar: new AppBar(
-          backgroundColor: color,
-        ),
-      );
-}
