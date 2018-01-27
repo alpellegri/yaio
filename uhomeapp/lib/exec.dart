@@ -233,7 +233,7 @@ class _EntryDialogState extends State<EntryDialog> {
                               context,
                               new MaterialPageRoute(
                                 builder: (BuildContext context) =>
-                                    new ExecProg(),
+                                    new ExecProg(p: entry.p),
                               ));
                         },
                       ),
