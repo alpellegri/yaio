@@ -116,7 +116,7 @@ class _ExecProgState extends State<ExecProg> {
   void _openEntryDialog(InstrEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(entry),
+      child: new EntryDialog(entry, entryIoList),
     );
   }
 
@@ -131,22 +131,24 @@ class _ExecProgState extends State<ExecProg> {
 
 class EntryDialog extends StatefulWidget {
   final InstrEntry entry;
+  final List<IoEntry> entryIoList;
 
-  EntryDialog(this.entry);
+  EntryDialog(this.entry, this.entryIoList);
 
   @override
-  _EntryDialogState createState() => new _EntryDialogState(entry);
+  _EntryDialogState createState() => new _EntryDialogState(entry, entryIoList);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerValue = new TextEditingController();
   final InstrEntry entry;
+  final List<IoEntry> entryIoList;
 
   int _selectedOpCode;
   List<int> _opCodeMenu = new List<int>();
   IoEntry _selectedEntry;
 
-  _EntryDialogState(this.entry) {
+  _EntryDialogState(this.entry, this.entryIoList) {
     print('EntryDialogState');
   }
 
@@ -155,12 +157,25 @@ class _EntryDialogState extends State<EntryDialog> {
     super.initState();
     _selectedOpCode = entry.i;
     OpCode.values.toList().forEach((f) => _opCodeMenu.add(f.index));
-    _opCodeMenu.forEach((e) => print(e));
+    // _opCodeMenu.forEach((e) => print(e));
   }
 
   @override
   Widget build(BuildContext context) {
     bool isImmediate = kOpCodeIsImmediate[OpCode.values[entry.i]];
+    print('isImmediate: $isImmediate');
+    if (isImmediate == false) {
+      // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
+      entryIoList.forEach((el) {
+        // print('key: ${el.key}, name: ${el.name}');
+        if (el.key == entry.v) {
+          _selectedEntry = el;
+        }
+      });
+    } else {
+      _controllerValue.text = entry.v.toString();
+    }
+
     return new AlertDialog(
         title: new Text('Edit Op Code'),
         content: new Column(
@@ -193,7 +208,24 @@ class _EntryDialogState extends State<EntryDialog> {
                         hintText: 'value',
                       ),
                     ))
-                  : (new Text('not immediate')),
+                  : new ListTile(
+                      title: const Text('Data'),
+                      trailing: new DropdownButton<IoEntry>(
+                        hint: const Text('data'),
+                        value: _selectedEntry,
+                        onChanged: (IoEntry newValue) {
+                          setState(() {
+                            _selectedEntry = newValue;
+                          });
+                        },
+                        items: entryIoList.map((IoEntry entry) {
+                          return new DropdownMenuItem<IoEntry>(
+                            value: entry,
+                            child: new Text(entry.name),
+                          );
+                        }).toList(),
+                      ),
+                    ),
             ]),
         actions: <Widget>[
           new FlatButton(
