@@ -125,7 +125,9 @@ class IoEntry {
 enum Instruction {
   ex0, // exception, illegal op-code 0
   ldi, // load immediate arg value into ACC (this involves a fetch from DB)
+  ld24, // load arg value into ACC (this involves a fetch from DB)
   ld, // load arg value into ACC (this involves a fetch from DB)
+  st24, // store arg value into ACC (this involves a write back to DB)
   st, // store arg value into ACC (this involves a write back to DB)
   lt, // if ACC is less than arg, then ACC=1, else ACC=0
   gt, // if ACC is grater than arg, then ACC=1, else ACC=0
@@ -134,15 +136,18 @@ enum Instruction {
   bz, // branch if ACC is zero
   bnz, // branch if ACC is not zero
   dly, // delay in ms
+  stne,
+  lte,
+  gte,
+  halt,
+  jmp,
 }
 
 class InstrEntry {
   int i;
   String v;
 
-  InstrEntry(DataSnapshot snapshot)
-      : i = snapshot.value['i'],
-        v = snapshot.value['v'];
+  InstrEntry(this.i, this.v);
 }
 
 class ExecEntry {
@@ -151,7 +156,7 @@ class ExecEntry {
   String owner;
   String name;
   String cb;
-  List<InstrEntry> p;
+  List<InstrEntry> p = new List<InstrEntry>();
 
   ExecEntry(DatabaseReference ref) : reference = ref;
 
@@ -160,9 +165,10 @@ class ExecEntry {
         key = snapshot.key,
         owner = snapshot.value['owner'],
         name = snapshot.value['name'],
-        cb = snapshot.value['cb'],
-        p = snapshot.value['p'] {
-    // p.forEach((e) => print('$e.i $e.v'));
+        cb = snapshot.value['cb']{
+    print('ExecEntry.fromSnapshot');
+    snapshot.value['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
+    print('size: ${p.length}');
   }
 
   setOwner(String _owner) {

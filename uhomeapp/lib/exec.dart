@@ -206,6 +206,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // entry.p.forEach((e) => print(e));
     return new AlertDialog(
         title: new Text('Edit a Function'),
         content: new Column(
@@ -233,7 +234,7 @@ class _EntryDialogState extends State<EntryDialog> {
                               context,
                               new MaterialPageRoute(
                                 builder: (BuildContext context) =>
-                                    new ExecProg(p: entry.p),
+                                    new ExecProg(prog: entry.p),
                               ));
                         },
                       ),
