@@ -16,11 +16,9 @@ class ExecProgListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isImmediate = kOpCodeIsImmediate[OpCode.values[entry.i]];
     String value;
-    print('isImmediate: $isImmediate');
     if (isImmediate == false) {
       // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
       value = 'not yet defined';
-      print(entry.v);
       entryIoList.forEach((el) {
         // print('key: ${el.key}, name: ${el.name}');
         if (el.key == entry.v) {
@@ -30,7 +28,6 @@ class ExecProgListItem extends StatelessWidget {
     } else {
       value = entry.v;
     }
-    print(value);
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
       child: new Row(
