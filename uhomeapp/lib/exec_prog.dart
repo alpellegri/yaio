@@ -174,7 +174,7 @@ class _EntryDialogState extends State<EntryDialog> {
     }
 
     return new AlertDialog(
-        title: new Text('Edit Op Code'),
+        title: new Text('Edit'),
         content: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

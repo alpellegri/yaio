@@ -208,7 +208,7 @@ class _EntryDialogState extends State<EntryDialog> {
   Widget build(BuildContext context) {
     // entry.p.forEach((e) => print(e));
     return new AlertDialog(
-        title: new Text('Edit a Function'),
+        title: new Text('Edit'),
         content: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

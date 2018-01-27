@@ -206,7 +206,7 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-        title: new Text('Edit Entry'),
+        title: new Text('Edit'),
         content: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
