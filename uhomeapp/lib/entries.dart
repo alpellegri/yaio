@@ -122,26 +122,73 @@ class IoEntry {
   }
 }
 
-enum Instruction {
-  ex0, // exception, illegal op-code 0
-  ldi, // load immediate arg value into ACC (this involves a fetch from DB)
-  ld24, // load arg value into ACC (this involves a fetch from DB)
-  ld, // load arg value into ACC (this involves a fetch from DB)
-  st24, // store arg value into ACC (this involves a write back to DB)
-  st, // store arg value into ACC (this involves a write back to DB)
-  lt, // if ACC is less than arg, then ACC=1, else ACC=0
-  gt, // if ACC is grater than arg, then ACC=1, else ACC=0
-  eqi, // if ACC is equal to immediate arg value, then ACC=1, else ACC=0
-  eq, // if ACC is equal to arg, then ACC=1, else ACC=0
-  bz, // branch if ACC is zero
-  bnz, // branch if ACC is not zero
-  dly, // delay in ms
+const String kOpCodeStringex0 = 'ex0';
+const String kOpCodeStringldi = 'ldi';
+const String kOpCodeStringld24 = 'ld24';
+const String kOpCodeStringld = 'ld';
+const String kOpCodeStringst24 = 'st24';
+const String kOpCodeStringst = 'st';
+const String kOpCodeStringlt = 'lt';
+const String kOpCodeStringgt = 'gt';
+const String kOpCodeStringeqi = 'eqi';
+const String kOpCodeStringeq = 'eq';
+const String kOpCodeStringbz = 'bz';
+const String kOpCodeStringbnz = 'bnz';
+const String kOpCodeStringdly = 'dly';
+
+enum OpCode {
+  ex0,
+  ldi,
+  ld24,
+  ld,
+  st24,
+  st,
+  lt,
+  gt,
+  eqi,
+  eq,
+  bz,
+  bnz,
+  dly,
   stne,
   lte,
   gte,
   halt,
   jmp,
 }
+
+const Map<OpCode, String> kOpCode2Name = const {
+  OpCode.ex0: kOpCodeStringex0,
+  OpCode.ldi: kOpCodeStringldi,
+  OpCode.ld24: kOpCodeStringld24,
+  OpCode.ld: kOpCodeStringld,
+  OpCode.st24: kOpCodeStringst24,
+  OpCode.st: kOpCodeStringst,
+  OpCode.lt: kOpCodeStringlt,
+  OpCode.gt: kOpCodeStringgt,
+  OpCode.eqi: kOpCodeStringeqi,
+  OpCode.eq: kOpCodeStringeq,
+  OpCode.bz: kOpCodeStringbz,
+  OpCode.bnz: kOpCodeStringbnz,
+  OpCode.dly: kOpCodeStringdly,
+};
+
+const Map<String, OpCode> kEntryName2Id = const {
+  kOpCodeStringPhyIn: OpCode.PhyIn,
+  kOpCodeStringPhyOut: OpCode.PhyOut,
+  kOpCodeStringLogIn: OpCode.LogIn,
+  kOpCodeStringLogOut: OpCode.LogOut,
+  kOpCodeStringRadioIn: OpCode.RadioIn,
+  kOpCodeStringRadioOut: OpCode.RadioOut,
+  kOpCodeStringRadioElem: OpCode.RadioElem,
+  kOpCodeStringTimer: OpCode.Timer,
+  kOpCodeStringBool: OpCode.Bool,
+  kOpCodeStringInt: OpCode.Int,
+  kOpCodeStringFloat: OpCode.Float,
+  kOpCodeStringRadioRx: OpCode.RadioRx,
+  kOpCodeStringMessaging: OpCode.Messaging,
+};
+
 
 class InstrEntry {
   int i;
@@ -165,9 +212,10 @@ class ExecEntry {
         key = snapshot.key,
         owner = snapshot.value['owner'],
         name = snapshot.value['name'],
-        cb = snapshot.value['cb']{
+        cb = snapshot.value['cb'] {
     print('ExecEntry.fromSnapshot');
-    snapshot.value['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
+    snapshot.value['p']
+        .forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
     print('size: ${p.length}');
   }
 
