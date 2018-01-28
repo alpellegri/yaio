@@ -73,7 +73,7 @@ class _ExecProgState extends State<ExecProg> {
   final List<InstrEntry> prog;
   List<IoEntry> entryIoList = new List();
   DatabaseReference _dataRef;
-  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onValueSubscription;
 
   _ExecProgState(this.prog);
 
@@ -82,13 +82,13 @@ class _ExecProgState extends State<ExecProg> {
     super.initState();
     print('_ExecProgState');
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
-    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
+    _onValueSubscription = _dataRef.onValue.listen(_onValueEntry);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
+    _onValueSubscription.cancel();
   }
 
   @override
@@ -117,11 +117,16 @@ class _ExecProgState extends State<ExecProg> {
     );
   }
 
-  void _onEntryAdded(Event event) {
-    print('_onEntryAdded');
-    setState(() {
-      IoEntry entry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
-      entryIoList.add(entry);
+  // read all oneshot
+  void _onValueEntry(Event event) {
+    print('_onValueEntry');
+    Map data = event.snapshot.value;
+    data.forEach((k, v) {
+      // print('key: $k - value: ${v.toString()}');
+      setState(() {
+        IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
+        entryIoList.add(e);
+      });
     });
   }
 }

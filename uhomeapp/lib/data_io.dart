@@ -181,9 +181,11 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerValue = new TextEditingController();
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onExecAddSub;
+  StreamSubscription<Event> _onValueExecSubscription;
 
   _EntryDialogState(this.entry) {
-    _onExecAddSub = _execRef.onChildAdded.listen(_onExecAdded);
+    // _onExecAddSub = _execRef.onChildAdded.listen(_onExecAdded);
+    _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
       _controllerName.text = entry.name;
       _controllerType.text = entry.code.toString();
@@ -201,6 +203,7 @@ class _EntryDialogState extends State<EntryDialog> {
   void dispose() {
     super.dispose();
     _onExecAddSub.cancel();
+    _onValueExecSubscription.cancel();
   }
 
   @override
@@ -290,13 +293,18 @@ class _EntryDialogState extends State<EntryDialog> {
         ]);
   }
 
-  void _onExecAdded(Event event) {
-    ExecEntry execEntry = new ExecEntry.fromSnapshot(_execRef, event.snapshot);
-    setState(() {
-      _execList.add(execEntry);
-      if (entry.cb == execEntry.key) {
-        _selectedExec = execEntry;
-      }
+  void _onValueExec(Event event) {
+    print('_onValueExec');
+    Map data = event.snapshot.value;
+    data.forEach((k, v) {
+      // print('key: $k - value: ${v.toString()}');
+      setState(() {
+        ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
+        _execList.add(e);
+        if (entry.cb == e.key) {
+          _selectedExec = e;
+        }
+      });
     });
   }
 }

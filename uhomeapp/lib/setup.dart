@@ -246,7 +246,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   DatabaseReference _fcmRef;
   bool _nodeNeedUpdate = false;
 
-  DatabaseReference _entryRef;
+  DatabaseReference _rootRef;
   StreamSubscription<Event> _onAddSubscription;
   List<DemoItem<dynamic>> _demoItems;
   Map<String, dynamic> entryMap = new Map<String, dynamic>();
@@ -265,8 +265,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       });
 
       print('getRootRef: ${getRootRef()}');
-      _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
-      _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+      _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
+      _onAddSubscription = _rootRef.onChildAdded.listen(_onEntryAdded);
       if (map.isNotEmpty) {
         setState(() {
           _ctrlDomainName = map['domain'];
