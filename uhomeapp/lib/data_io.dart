@@ -26,7 +26,7 @@ class ListItem extends StatelessWidget {
                   children: [
                     new Text(
                       entry.name,
-                      textScaleFactor: 1.0,
+                      textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                     new Text(

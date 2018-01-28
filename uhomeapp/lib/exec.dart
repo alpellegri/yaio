@@ -31,7 +31,7 @@ class ExecListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'a',
+                      '',
                       textScaleFactor: 0.8,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
@@ -39,7 +39,7 @@ class ExecListItem extends StatelessWidget {
                       ),
                     ),
                     new Text(
-                      'b',
+                      '',
                       textScaleFactor: 0.9,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
