@@ -18,7 +18,10 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
       new NodeSetup(title: 'Node Setup'),
   DataIO.routeName: (BuildContext context) => new DataIO(title: 'Data IO'),
   Exec.routeName: (BuildContext context) => new Exec(title: 'Exec'),
-  ExecProg.routeName: (BuildContext context) => new ExecProg(title: 'ExecProg'),
+  ExecEdit.routeName: (BuildContext context) =>
+      new ExecEdit(title: 'Exec Edit'),
+  ExecProg.routeName: (BuildContext context) =>
+      new ExecProg(title: 'Exec Prog'),
   LogHistory.routeName: (BuildContext context) =>
       new LogHistory(title: 'Log History'),
   ChartHistory.routeName: (BuildContext context) =>

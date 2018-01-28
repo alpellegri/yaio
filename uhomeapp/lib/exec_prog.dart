@@ -96,8 +96,8 @@ class _ExecProgState extends State<ExecProg> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-        // title: new Text(widget.title),
-      ),
+          // title: new Text(widget.title),
+          ),
       body: new ListView.builder(
         shrinkWrap: true,
         itemCount: prog.length,
@@ -115,9 +115,8 @@ class _ExecProgState extends State<ExecProg> {
     );
   }
 
-  void _onFloatingActionButtonPressed() {
+  void _onFloatingActionButtonPressed() {}
 
-  }
   void _openEntryDialog(int index) {
     showDialog(
       context: context,
@@ -192,53 +191,54 @@ class _EntryDialogState extends State<EntryDialog> {
     return new AlertDialog(
         title: new Text('Edit'),
         content: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              new ListTile(
-                title: const Text('OpCode'),
-                trailing: new DropdownButton<int>(
-                  hint: const Text('action'),
-                  value: _selectedOpCode,
-                  onChanged: (int newValue) {
-                    setState(() {
-                      _selectedOpCode = newValue;
-                    });
-                  },
-                  items: _opCodeMenu.map((int entry) {
-                    return new DropdownMenuItem<int>(
-                      value: entry,
-                      child: new Text(kOpCode2Name[OpCode.values[entry]]),
-                    );
-                  }).toList(),
-                ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            new ListTile(
+              title: const Text('OpCode'),
+              trailing: new DropdownButton<int>(
+                hint: const Text('action'),
+                value: _selectedOpCode,
+                onChanged: (int newValue) {
+                  setState(() {
+                    _selectedOpCode = newValue;
+                  });
+                },
+                items: _opCodeMenu.map((int entry) {
+                  return new DropdownMenuItem<int>(
+                    value: entry,
+                    child: new Text(kOpCode2Name[OpCode.values[entry]]),
+                  );
+                }).toList(),
               ),
-              (isImmediate == true)
-                  ? (new TextField(
-                      controller: _controllerValue,
-                      decoration: new InputDecoration(
-                        hintText: 'value',
-                      ),
-                    ))
-                  : new ListTile(
-                      title: const Text('Data'),
-                      trailing: new DropdownButton<IoEntry>(
-                        hint: const Text('data'),
-                        value: _selectedEntry,
-                        onChanged: (IoEntry newValue) {
-                          setState(() {
-                            _selectedEntry = newValue;
-                          });
-                        },
-                        items: entryIoList.map((IoEntry entry) {
-                          return new DropdownMenuItem<IoEntry>(
-                            value: entry,
-                            child: new Text(entry.name),
-                          );
-                        }).toList(),
-                      ),
+            ),
+            (isImmediate == true)
+                ? (new TextField(
+                    controller: _controllerValue,
+                    decoration: new InputDecoration(
+                      hintText: 'value',
                     ),
-            ]),
+                  ))
+                : new ListTile(
+                    title: const Text('Data'),
+                    trailing: new DropdownButton<IoEntry>(
+                      hint: const Text('data'),
+                      value: _selectedEntry,
+                      onChanged: (IoEntry newValue) {
+                        setState(() {
+                          _selectedEntry = newValue;
+                        });
+                      },
+                      items: entryIoList.map((IoEntry entry) {
+                        return new DropdownMenuItem<IoEntry>(
+                          value: entry,
+                          child: new Text(entry.name),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+          ],
+        ),
         actions: <Widget>[
           new FlatButton(
               child: const Text('REMOVE'),

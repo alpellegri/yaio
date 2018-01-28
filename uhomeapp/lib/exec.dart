@@ -61,9 +61,7 @@ class ExecListItem extends StatelessWidget {
 
 class Exec extends StatefulWidget {
   Exec({Key key, this.title}) : super(key: key);
-
   static const String routeName = '/exec';
-
   final String title;
 
   @override
@@ -150,9 +148,18 @@ class _ExecState extends State<Exec> {
   void _openEntryDialog(ExecEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(entry, entryList),
+      child: new EntryDialog(entry),
     ).then<Null>((value) {
-      print(value);
+      if (value == true) {
+        // Navigator.of(context).pushNamed(ExecEdit.routeName);
+        // Navigator.of(context).pop();
+        Navigator.push(
+            context,
+            new MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  new ExecEdit(entry: entry, execList: entryList),
+            ));
+      }
     });
   }
 
@@ -163,16 +170,55 @@ class _ExecState extends State<Exec> {
 }
 
 class EntryDialog extends StatefulWidget {
-  final ExecEntry entry;
-  final List<ExecEntry> execList;
+  ExecEntry entry;
 
-  EntryDialog(this.entry, this.execList);
+  EntryDialog(this.entry);
 
   @override
-  _EntryDialogState createState() => new _EntryDialogState(entry, execList);
+  _EntryDialogState createState() => new _EntryDialogState(entry);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
+  ExecEntry entry;
+
+  _EntryDialogState(this.entry);
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(title: new Text('Select'), actions: <Widget>[
+      new FlatButton(
+          child: const Text('REMOVE'),
+          onPressed: () {
+            entry.reference.child(entry.key).remove();
+            Navigator.pop(context, false);
+          }),
+      new FlatButton(
+          child: const Text('EDIT'),
+          onPressed: () {
+            Navigator.pop(context, true);
+          }),
+      new FlatButton(
+          child: const Text('DISCARD'),
+          onPressed: () {
+            Navigator.pop(context, false);
+          }),
+    ]);
+  }
+}
+
+class ExecEdit extends StatefulWidget {
+  static const String routeName = '/exec_edit';
+  final String title;
+  final ExecEntry entry;
+  final List<ExecEntry> execList;
+
+  ExecEdit({Key key, this.title, this.entry, this.execList}) : super(key: key);
+
+  @override
+  _ExecEditState createState() => new _ExecEditState(entry, execList);
+}
+
+class _ExecEditState extends State<ExecEdit> {
   final TextEditingController _controllerName = new TextEditingController();
   final ExecEntry entry;
   List<ExecEntry> execList;
@@ -181,7 +227,7 @@ class _EntryDialogState extends State<EntryDialog> {
 
   List<IoEntry> entryIoList = new List();
 
-  _EntryDialogState(this.entry, this.execList) {
+  _ExecEditState(this.entry, this.execList) {
     print('EntryDialogState');
 
     _controllerName.text = entry?.name;
@@ -197,64 +243,94 @@ class _EntryDialogState extends State<EntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    // entry.p.forEach((e) => print(e));
-    return new AlertDialog(
-        title: new Text('Edit'),
-        content: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              new ListTile(
-                title: new TextField(
-                  controller: _controllerName,
-                  decoration: new InputDecoration(
-                    hintText: 'Name',
-                  ),
-                ),
-                trailing: new ButtonTheme.bar(
-                  child: new ButtonBar(
-                    children: <Widget>[
-                      new FlatButton(
-                        child: const Text('PROGRAM'),
-                        onPressed: () {
-                          /*Navigator.of(context)
-                            ..pop()
-                            ..pushNamed(ExecProg.routeName);*/
-                          Navigator.of(context).pop();
-                          Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    new ExecProg(prog: entry.p),
-                              ));
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+    return new Scaffold(
+      drawer: drawer,
+      appBar: new AppBar(
+        // title: new Text(widget.title),
+      ),
+      body: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          new ListTile(
+            title: new TextField(
+              controller: _controllerName,
+              decoration: new InputDecoration(
+                hintText: 'Name',
               ),
-              (execList.length > 0)
-                  ? new ListTile(
-                      title: const Text('Next Exec'),
-                      trailing: new DropdownButton<ExecEntry>(
-                        hint: const Text('Select an Exec'),
-                        value: _selectedNext,
-                        onChanged: (ExecEntry newValue) {
-                          setState(() {
-                            _selectedNext = newValue;
-                          });
-                        },
-                        items: execList.map((ExecEntry entry) {
-                          return new DropdownMenuItem<ExecEntry>(
-                            value: entry,
-                            child: new Text(entry.name),
-                          );
-                        }).toList(),
-                      ),
-                    )
-                  : new Text('Functions not declared yet'),
-            ]),
-        actions: <Widget>[
+            ),
+          ),
+          (execList.length > 0)
+              ? new ListTile(
+                  title: const Text('Next Exec'),
+                  trailing: new DropdownButton<ExecEntry>(
+                    hint: const Text('Select'),
+                    value: _selectedNext,
+                    onChanged: (ExecEntry newValue) {
+                      setState(() {
+                        _selectedNext = newValue;
+                      });
+                    },
+                    items: execList.map((ExecEntry entry) {
+                      return new DropdownMenuItem<ExecEntry>(
+                        value: entry,
+                        child: new Text(entry.name),
+                      );
+                    }).toList(),
+                  ),
+                )
+              : new Text('Functions not declared yet'),
+          new ListTile(
+            trailing: new ButtonTheme.bar(
+              child: new ButtonBar(
+                children: <Widget>[
+                  new FlatButton(
+                      child: const Text('REMOVE'),
+                      onPressed: () {
+                        entry.reference.child(entry.key).remove();
+                        Navigator.pop(context, null);
+                      }),
+                  new FlatButton(
+                    child: const Text('PROGRAM'),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new ExecProg(prog: entry.p),
+                          ));
+                    },
+                  ),
+                  new FlatButton(
+                      child: const Text('SAVE'),
+                      onPressed: () {
+                        setState(() {
+                          entry.name = _controllerName.text;
+                          entry.cb = _selectedNext?.key;
+                          if (entry.key != null) {
+                            entry.reference
+                                .child(entry.key)
+                                .update(entry.toJson());
+                          } else {
+                            print('save on: ${getNodeSubPath()}');
+                            entry.setOwner(getNodeSubPath());
+                            entry.reference.push().set(entry.toJson());
+                          }
+                        });
+                        Navigator.pop(context, null);
+                      }),
+                  new FlatButton(
+                      child: const Text('DISCARD'),
+                      onPressed: () {
+                        Navigator.pop(context, null);
+                      }),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      /*actions: <Widget>[
           new FlatButton(
               child: const Text('REMOVE'),
               onPressed: () {
@@ -282,6 +358,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 Navigator.pop(context, null);
               }),
-        ]);
+        ],*/
+    );
   }
 }
