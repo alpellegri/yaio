@@ -86,7 +86,6 @@ class IoEntry {
   }
 
   IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    print(value.toString());
     reference = ref;
     key = k;
     owner = v['owner'];
@@ -256,25 +255,23 @@ class ExecEntry {
   ExecEntry(DatabaseReference ref) : reference = ref;
 
   ExecEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    print('ExecEntry.fromSnapshot');
     reference = ref;
     key = snapshot.key;
     owner = snapshot.value['owner'];
     name = snapshot.value['name'];
     snapshot.value['p']
         .forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
-    print('size: ${p.length}');
+    // print('size: ${p.length}');
     cb = snapshot.value['cb'];
   }
 
   ExecEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    print('ExecEntry.fromMap');
     reference = ref;
     key = k;
     owner = v['owner'];
     name = v['name'];
     v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
-    print('size: ${p.length}');
+    // print('size: ${p.length}');
     if (v.containsValue('cb') == true) {
       cb = v['cb'];
     }

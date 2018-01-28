@@ -103,17 +103,17 @@ class _ExecProgState extends State<ExecProg> {
         itemCount: prog.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(prog[index]),
+              onTap: () => _openEntryDialog(index),
               child: new ExecProgListItem(index, prog[index], entryIoList));
         },
       ),
     );
   }
 
-  void _openEntryDialog(InstrEntry entry) {
+  void _openEntryDialog(int index) {
     showDialog(
       context: context,
-      child: new EntryDialog(entry, entryIoList),
+      child: new EntryDialog(index, prog, entryIoList),
     );
   }
 
@@ -132,52 +132,55 @@ class _ExecProgState extends State<ExecProg> {
 }
 
 class EntryDialog extends StatefulWidget {
-  final InstrEntry entry;
+  final int index;
+  final List<InstrEntry> prog;
   final List<IoEntry> entryIoList;
 
-  EntryDialog(this.entry, this.entryIoList);
+  EntryDialog(this.index, this.prog, this.entryIoList);
 
   @override
-  _EntryDialogState createState() => new _EntryDialogState(entry, entryIoList);
+  _EntryDialogState createState() =>
+      new _EntryDialogState(index, prog, entryIoList);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
-  final TextEditingController _controllerValue = new TextEditingController();
-  final InstrEntry entry;
+  final int index;
+  final List<InstrEntry> prog;
   final List<IoEntry> entryIoList;
 
+  final TextEditingController _controllerValue = new TextEditingController();
+  bool isImmediate;
   int _selectedOpCode;
   List<int> _opCodeMenu = new List<int>();
   IoEntry _selectedEntry;
 
-  _EntryDialogState(this.entry, this.entryIoList) {
+  _EntryDialogState(this.index, this.prog, this.entryIoList) {
     print('EntryDialogState');
   }
 
   @override
   void initState() {
     super.initState();
-    _selectedOpCode = entry.i;
+    _selectedOpCode = prog[index].i;
     OpCode.values.toList().forEach((f) => _opCodeMenu.add(f.index));
     // _opCodeMenu.forEach((e) => print(e));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    bool isImmediate = kOpCodeIsImmediate[OpCode.values[entry.i]];
+    isImmediate = kOpCodeIsImmediate[OpCode.values[prog[index].i]];
     print('isImmediate: $isImmediate');
     if (isImmediate == false) {
       // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
       entryIoList.forEach((el) {
         // print('key: ${el.key}, name: ${el.name}');
-        if (el.key == entry.v) {
+        if (el.key == prog[index].v) {
           _selectedEntry = el;
         }
       });
     } else {
-      _controllerValue.text = entry.v.toString();
+      _controllerValue.text = prog[index].v.toString();
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return new AlertDialog(
         title: new Text('Edit'),
         content: new Column(
@@ -195,7 +198,6 @@ class _EntryDialogState extends State<EntryDialog> {
                     });
                   },
                   items: _opCodeMenu.map((int entry) {
-                    print(kOpCode2Name[OpCode.values[entry]]);
                     return new DropdownMenuItem<int>(
                       value: entry,
                       child: new Text(kOpCode2Name[OpCode.values[entry]]),
@@ -233,11 +235,16 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('REMOVE'),
               onPressed: () {
+                prog.removeAt(index);
                 Navigator.pop(context, null);
               }),
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
+                prog[index].i = _selectedOpCode;
+                prog[index].v = (isImmediate == true)
+                    ? int.parse(_controllerValue.text)
+                    : _selectedEntry.key;
                 Navigator.pop(context, null);
               }),
           new FlatButton(
