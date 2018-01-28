@@ -126,7 +126,7 @@ class IoEntry {
     owner = _owner;
   }
 
-  toJson() {
+  Map toJson() {
     return {
       'owner': owner,
       'name': name,
@@ -312,7 +312,7 @@ class LogEntry {
             snapshot.value["time"] * 1000),
         message = snapshot.value["msg"];
 
-  toJson() {
+  Map toJson() {
     return {
       'message': message,
       'date': dateTime.millisecondsSinceEpoch,
@@ -352,7 +352,7 @@ class THEntry {
     return time;
   }
 
-  toJson() {
+  Map toJson() {
     return {
       't': t,
       'h': h,
