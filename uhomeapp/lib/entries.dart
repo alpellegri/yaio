@@ -263,9 +263,10 @@ class ExecEntry {
     key = snapshot.key;
     owner = snapshot.value['owner'];
     name = snapshot.value['name'];
-    snapshot.value['p']
-        .forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
-    // print('size: ${p.length}');
+    if (snapshot.value['p'] != null) {
+      snapshot.value['p']
+          .forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
+    }
     cb = snapshot.value['cb'];
   }
 
@@ -275,8 +276,9 @@ class ExecEntry {
     key = k;
     owner = v['owner'];
     name = v['name'];
-    v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
-    // print('size: ${p.length}');
+    if (v.value['p'] != null) {
+      v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
+    }
     if (v.containsValue('cb') == true) {
       cb = v['cb'];
     }
