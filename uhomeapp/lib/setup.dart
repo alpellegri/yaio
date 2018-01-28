@@ -525,12 +525,9 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   }
 
   void _onEntryAdded(Event event) {
-    print('_onEntryAdded');
-
     setState(() {
       entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
     });
-
     print(_nodeNeedUpdate);
     if (_nodeNeedUpdate == true) {
       var domain = event.snapshot.key;

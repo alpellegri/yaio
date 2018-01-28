@@ -96,8 +96,8 @@ class _ExecProgState extends State<ExecProg> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-          // title: new Text(widget.title),
-          ),
+        // title: new Text(widget.title),
+      ),
       body: new ListView.builder(
         shrinkWrap: true,
         itemCount: prog.length,
@@ -107,9 +107,17 @@ class _ExecProgState extends State<ExecProg> {
               child: new ExecProgListItem(index, prog[index], entryIoList));
         },
       ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: _onFloatingActionButtonPressed,
+        tooltip: 'add',
+        child: new Icon(Icons.add),
+      ),
     );
   }
 
+  void _onFloatingActionButtonPressed() {
+
+  }
   void _openEntryDialog(int index) {
     showDialog(
       context: context,
@@ -243,9 +251,9 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 prog[index].i = _selectedOpCode;
                 prog[index].v = (isImmediate == true)
-                    ? int.parse(_controllerValue.text)
+                    ? _controllerValue.text
                     : _selectedEntry.key;
-                Navigator.pop(context, null);
+                Navigator.pop(context, prog);
               }),
           new FlatButton(
               child: const Text('DISCARD'),

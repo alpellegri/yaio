@@ -124,6 +124,7 @@ class _ExecState extends State<Exec> {
   }
 
   void _onEntryAdded(Event event) {
+    print('_onEntryAdded ${event.snapshot.value.toString()}');
     setState(() {
       entryList.add(new ExecEntry.fromSnapshot(_entryRef, event.snapshot));
     });
@@ -150,7 +151,9 @@ class _ExecState extends State<Exec> {
     showDialog(
       context: context,
       child: new EntryDialog(entry, entryList),
-    );
+    ).then<Null>((value) {
+      print(value);
+    });
   }
 
   void _onFloatingActionButtonPressed() {
@@ -173,12 +176,10 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerName = new TextEditingController();
   final ExecEntry entry;
   List<ExecEntry> execList;
-
   ExecEntry _selectedNext;
   var _selectedNextList;
 
   List<IoEntry> entryIoList = new List();
-  StreamSubscription<Event> _onAddSubscription;
 
   _EntryDialogState(this.entry, this.execList) {
     print('EntryDialogState');
@@ -192,16 +193,6 @@ class _EntryDialogState extends State<EntryDialog> {
         entry.cb = null;
       }
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -279,6 +270,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   if (entry.key != null) {
                     entry.reference.child(entry.key).update(entry.toJson());
                   } else {
+                    print('save on: ${getNodeSubPath()}');
                     entry.setOwner(getNodeSubPath());
                     entry.reference.push().set(entry.toJson());
                   }

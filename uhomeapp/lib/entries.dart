@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 
 const String kStringPhyIn = 'PhyIn';
@@ -76,6 +77,7 @@ class IoEntry {
   IoEntry(DatabaseReference ref) : reference = ref;
 
   IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
+    print('IoEntry.fromSnapshot');
     reference = ref;
     key = snapshot.key;
     owner = snapshot.value['owner'];
@@ -86,6 +88,7 @@ class IoEntry {
   }
 
   IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
+    print('IoEntry.fromMap');
     reference = ref;
     key = k;
     owner = v['owner'];
@@ -255,6 +258,7 @@ class ExecEntry {
   ExecEntry(DatabaseReference ref) : reference = ref;
 
   ExecEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
+    print('ExecEntry.fromSnapshot');
     reference = ref;
     key = snapshot.key;
     owner = snapshot.value['owner'];
@@ -266,6 +270,7 @@ class ExecEntry {
   }
 
   ExecEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
+    print('ExecEntry.fromMap');
     reference = ref;
     key = k;
     owner = v['owner'];
@@ -281,11 +286,14 @@ class ExecEntry {
     owner = _owner;
   }
 
-  toJson() {
-    return {
-      'owner': owner,
-      'name': name,
-    };
+  Map toJson() {
+    print('ExecEntry.toJson');
+    Map map = new Map();
+    map['owner'] = owner;
+    map['name'] = name;
+    map['p'] = p;
+    map['cb'] = cb;
+    return map;
   }
 }
 
