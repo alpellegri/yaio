@@ -42,7 +42,7 @@ class ExecProgListItem extends StatelessWidget {
                   children: [
                     new Text(
                       '$pc: ${kOpCode2Name[OpCode.values[entry.i]]} $value',
-                      textScaleFactor: 1.0,
+                      textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                   ],
