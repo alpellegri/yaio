@@ -330,35 +330,6 @@ class _ExecEditState extends State<ExecEdit> {
           ),
         ],
       ),
-      /*actions: <Widget>[
-          new FlatButton(
-              child: const Text('REMOVE'),
-              onPressed: () {
-                entry.reference.child(entry.key).remove();
-                Navigator.pop(context, null);
-              }),
-          new FlatButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                setState(() {
-                  entry.name = _controllerName.text;
-                  entry.cb = _selectedNext?.key;
-                  if (entry.key != null) {
-                    entry.reference.child(entry.key).update(entry.toJson());
-                  } else {
-                    print('save on: ${getNodeSubPath()}');
-                    entry.setOwner(getNodeSubPath());
-                    entry.reference.push().set(entry.toJson());
-                  }
-                });
-                Navigator.pop(context, null);
-              }),
-          new FlatButton(
-              child: const Text('DISCARD'),
-              onPressed: () {
-                Navigator.pop(context, null);
-              }),
-        ],*/
     );
   }
 }
