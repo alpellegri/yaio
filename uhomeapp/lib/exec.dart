@@ -98,6 +98,10 @@ class _ExecState extends State<Exec> {
 
   @override
   Widget build(BuildContext context) {
+    /* entryList.forEach((e) {
+      print('>> ${e.name.toString()}');
+      e.p.forEach((f) => print('>> ${f.i.toString()} ${f.v.toString()}'));
+    });*/
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -298,7 +302,9 @@ class _ExecEditState extends State<ExecEdit> {
                           new MaterialPageRoute(
                             builder: (BuildContext context) =>
                                 new ExecProg(prog: entry.p),
-                          ));
+                          )).then((value) {
+                            print('hello: ${value.toString()}');
+                      });
                     },
                   ),
                   new FlatButton(

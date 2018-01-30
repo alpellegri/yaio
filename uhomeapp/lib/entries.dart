@@ -77,7 +77,7 @@ class IoEntry {
   IoEntry(DatabaseReference ref) : reference = ref;
 
   IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    print('IoEntry.fromSnapshot');
+    // print('IoEntry.fromSnapshot');
     reference = ref;
     key = snapshot.key;
     owner = snapshot.value['owner'];
@@ -88,7 +88,7 @@ class IoEntry {
   }
 
   IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    print('IoEntry.fromMap');
+    // print('IoEntry.fromMap');
     reference = ref;
     key = k;
     owner = v['owner'];
@@ -258,7 +258,7 @@ class ExecEntry {
   ExecEntry(DatabaseReference ref) : reference = ref;
 
   ExecEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    print('ExecEntry.fromSnapshot');
+    // print('ExecEntry.fromSnapshot');
     reference = ref;
     key = snapshot.key;
     owner = snapshot.value['owner'];
@@ -271,7 +271,7 @@ class ExecEntry {
   }
 
   ExecEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    print('ExecEntry.fromMap');
+    // print('ExecEntry.fromMap');
     reference = ref;
     key = k;
     owner = v['owner'];
