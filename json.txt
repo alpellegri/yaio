@@ -57,12 +57,12 @@
     value: <configuration>, // it is an number
     cb: <callback>, // optional
   }
-  mtime: 60*hour+minutes (11bits)
+  mtime: minutes
+  htime: hours
   mask: weekday bitmap (7bits)
-  configuration: OUT<<18 | mask<<11 | mtime (19bits)
+  configuration: OUT<<23 | mask<<16 | htime<<8 | mtime
   
-  wd = ticks%1440 -> represent the week day
-  therefore if (1<<wd & mask) callback is called and ACC is set with OUT value (ACC = OUT)
+  therefore if (1<<wday & mask) callback is called and ACC is set with OUT value (ACC = OUT)
 
   
   At start VM read all timers from DB and store them to RAM. VM generates callbacks when timer value

@@ -6,7 +6,7 @@ const String kStringPhyOut = 'PhyOut';
 const String kStringLogIn = 'LogIn';
 const String kStringLogOut = 'LogOut';
 const String kStringRadioIn = 'RadioIn';
-const String kStringRadioOut = 'RadioOut';
+const String kStringRadioOut = 'RadioTx';
 const String kStringRadioElem = 'RadioElem';
 const String kStringTimer = 'Timer';
 const String kStringBool = 'Bool';
@@ -21,7 +21,7 @@ enum DataCode {
   LogIn,
   LogOut,
   RadioIn,
-  RadioOut,
+  RadioTx,
   RadioElem,
   Timer,
   Bool,
@@ -37,7 +37,7 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.LogIn: kStringLogIn,
   DataCode.LogOut: kStringLogOut,
   DataCode.RadioIn: kStringRadioIn,
-  DataCode.RadioOut: kStringRadioOut,
+  DataCode.RadioTx: kStringRadioOut,
   DataCode.RadioElem: kStringRadioElem,
   DataCode.Timer: kStringTimer,
   DataCode.Bool: kStringBool,
@@ -53,7 +53,7 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringLogIn: DataCode.LogIn,
   kStringLogOut: DataCode.LogOut,
   kStringRadioIn: DataCode.RadioIn,
-  kStringRadioOut: DataCode.RadioOut,
+  kStringRadioOut: DataCode.RadioTx,
   kStringRadioElem: DataCode.RadioElem,
   kStringTimer: DataCode.Timer,
   kStringBool: DataCode.Bool,
