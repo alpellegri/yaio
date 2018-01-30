@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
-import 'chart_history.dart';
 import 'const.dart';
 
 class Home extends StatefulWidget {
@@ -38,7 +37,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     print('_MyHomePageState');
-
     _controlTimeoutCnt = 0;
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
     _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
@@ -58,7 +56,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    String alarmButton;
     if (_connected == false) {
       return new Scaffold(
           drawer: drawer,

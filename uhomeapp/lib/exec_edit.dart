@@ -296,7 +296,7 @@ class _EntryDialogState extends State<EntryDialog> {
   void initState() {
     super.initState();
     _selectedOpCode = prog[index].i;
-    OpCode.values.toList().forEach((f) => _opCodeMenu.add(f.index));
+    OpCode.values.toList().forEach((e) => _opCodeMenu.add(e.index));
     // _opCodeMenu.forEach((e) => print(e));
     isImmediate = kOpCodeIsImmediate[OpCode.values[prog[index].i]];
     print('isImmediate: $isImmediate');

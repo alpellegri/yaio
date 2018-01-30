@@ -174,17 +174,17 @@ class _EntryDialogState extends State<EntryDialog> {
   final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
+  int _selectedType;
+  List<int> _opTypeMenu = new List<int>();
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
   final TextEditingController _controllerPin = new TextEditingController();
   final TextEditingController _controllerValue = new TextEditingController();
   ExecEntry _selectedExec;
-  StreamSubscription<Event> _onExecAddSub;
   StreamSubscription<Event> _onValueExecSubscription;
 
   _EntryDialogState(this.entry) {
-    // _onExecAddSub = _execRef.onChildAdded.listen(_onExecAdded);
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
       _controllerName.text = entry.name;
@@ -197,12 +197,12 @@ class _EntryDialogState extends State<EntryDialog> {
   @override
   void initState() {
     super.initState();
+    DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
   }
 
   @override
   void dispose() {
     super.dispose();
-    _onExecAddSub.cancel();
     _onValueExecSubscription.cancel();
   }
 
@@ -220,10 +220,22 @@ class _EntryDialogState extends State<EntryDialog> {
                   hintText: 'name',
                 ),
               ),
-              new TextField(
-                controller: _controllerType,
-                decoration: new InputDecoration(
-                  hintText: 'type',
+              new ListTile(
+                title: const Text('Type'),
+                trailing: new DropdownButton<int>(
+                  hint: const Text('type'),
+                  value: _selectedType,
+                  onChanged: (int newValue) {
+                    setState(() {
+                      _selectedType = newValue;
+                    });
+                  },
+                  items: _opTypeMenu.map((int entry) {
+                    return new DropdownMenuItem<int>(
+                      value: entry,
+                      child: new Text(kEntryId2Name[DataCode.values[entry]]),
+                    );
+                  }).toList(),
                 ),
               ),
               new TextField(
@@ -297,7 +309,7 @@ class _EntryDialogState extends State<EntryDialog> {
     print('_onValueExec');
     Map data = event.snapshot.value;
     data.forEach((k, v) {
-      // print('key: $k - value: ${v.toString()}');
+      print('key: $k - value: ${v.toString()}');
       setState(() {
         ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
         _execList.add(e);

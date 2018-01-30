@@ -276,7 +276,7 @@ class ExecEntry {
     key = k;
     owner = v['owner'];
     name = v['name'];
-    if (v.value['p'] != null) {
+    if (v['p'] != null) {
       v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
     }
     if (v.containsValue('cb') == true) {
