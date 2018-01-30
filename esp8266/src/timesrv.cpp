@@ -6,6 +6,11 @@
 
 bool time_init = false;
 
+uint8_t getWeekDay(void) {
+  time_t now = time(nullptr);
+  return localtime(&now)->tm_wday;
+}
+
 uint32_t getTime(void) {
   time_t now = time(nullptr);
   return (uint32_t)now;
