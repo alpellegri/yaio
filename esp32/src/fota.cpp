@@ -39,7 +39,9 @@ static FOTA_StateMachine_t state = FOTA_Sm_IDLE;
 static FOTA_StateMachine_t state_last = FOTA_Sm_IDLE;
 
 static String addr;
-static char digest_MD5[32];
+// static char digest_MD5[32];
+#define DIGEST_MD5_SIZE 32
+static char *digest_MD5 = NULL;
 static uint8_t http_fail_cnt;
 
 void FOTA_Init(void) {
@@ -87,11 +89,12 @@ bool FOTAService(void) {
         // file found at server
         if (httpCode == HTTP_CODE_OK) {
           int size = http.getSize();
-          if (size == 32) {
+          if (size == DIGEST_MD5_SIZE) {
             Serial.printf_P(PSTR("md5file size %d\n"), size);
             String payload = http.getString();
             Serial.println(payload);
-            memcpy(digest_MD5, payload.c_str(), 32);
+            digest_MD5 = (char *)malloc(DIGEST_MD5_SIZE);
+            memcpy(digest_MD5, payload.c_str(), DIGEST_MD5_SIZE);
             state = FOTA_Sm_CHECK;
           } else {
             Serial.printf_P(PSTR("md5file size error: %d\n"), size);

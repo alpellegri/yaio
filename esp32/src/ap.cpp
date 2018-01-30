@@ -20,7 +20,8 @@ static bool enable_WiFi_Scan = false;
 static uint16_t ap_button = 0x55;
 
 // create sebsocket server
-static WebSocketsServer webSocket = WebSocketsServer(80);
+// static WebSocketsServer webSocket = WebSocketsServer(80);
+static WebSocketsServer *webSocket = NULL;
 static uint8_t port_id;
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
@@ -42,7 +43,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
   case WStype_CONNECTED: {
     /* disable wifi scan when locally connected */
     enable_WiFi_Scan = false;
-    IPAddress ip = webSocket.remoteIP(num);
+    IPAddress ip = webSocket->remoteIP(num);
     Serial.printf_P(PSTR("[%u] Connected from %d.%d.%d.%d url: %s\n"), num,
                     ip[0], ip[1], ip[2], ip[3], payload);
     port_id = num;
@@ -102,8 +103,9 @@ bool AP_Setup(void) {
     Serial.println(F("AP mode enabled"));
     Serial.print(F("IP address: "));
     Serial.println(myIP);
-    webSocket.begin();
-    webSocket.onEvent(webSocketEvent);
+    webSocket = new WebSocketsServer(80);
+    webSocket->begin();
+    webSocket->onEvent(webSocketEvent);
   }
 
   return ret;
@@ -123,7 +125,9 @@ bool AP_Loop(void) {
 #endif
 
   /* websocket only in mode 0 */
-  webSocket.loop();
+  if (webSocket != NULL) {
+    webSocket->loop();
+  }
 }
 
 /* main function task */

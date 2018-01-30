@@ -12,7 +12,7 @@
 #include "rf.h"
 #include "timesrv.h"
 
-#define RFRX 13 // D7
+#define RFRX 13
 
 static Ticker RFRcvTimer;
 
