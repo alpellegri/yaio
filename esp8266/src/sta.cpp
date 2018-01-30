@@ -67,7 +67,6 @@ bool STA_Setup(void) {
     SPIFFS.begin();
     File f = SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("r+")).c_str());
     if (!f) {
-      FbconfInit();
       fota_mode = false;
     } else {
       fota_mode = true;

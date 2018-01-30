@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <FirebaseArduino.h>
 #include <ArduinoJson.h>
+#include <FirebaseArduino.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -19,47 +19,83 @@ static const char _kfcmtoken[] PROGMEM = "fcmtoken";
 static const char _kdata[] PROGMEM = "data";
 static const char _klogs[] PROGMEM = "logs";
 
-String kstartup;
-String kcontrol;
-String kstatus;
-String kexec;
-String kfcmtoken;
-String kdata;
-String klogs;
-String knodesubpath;
-
-String FB_getNodeSubPath(void) { return knodesubpath; }
-
-void FbconfInit(void) {
+void FbSetPath_fcmtoken(String &path){
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  knodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  path = prefix_user + String(FPSTR(_kfcmtoken));
+}
+
+void FbSetPath_startup(String &path){
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_node =
-      prefix_user + String(F("root/")) + knodesubpath + String(F("/"));
+      prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
+  path = prefix_node + String(FPSTR(_kstartup));
+}
+
+void FbSetPath_control(String &path){
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_node =
+      prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
+  path = prefix_node + String(FPSTR(_kcontrol));
+}
+
+void FbSetPath_status(String &path){
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_node =
+      prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
+  path = prefix_node + String(FPSTR(_kstatus));
+}
+
+void FbSetPath_exec(String &path){
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_kexec));
+}
 
-  kfcmtoken = prefix_user + String(FPSTR(_kfcmtoken));
+void FbSetPath_data(String &path){
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_kdata));
+}
 
-  kstartup = prefix_node + String(FPSTR(_kstartup));
-  kcontrol = prefix_node + String(FPSTR(_kcontrol));
-  kstatus = prefix_node + String(FPSTR(_kstatus));
+void FbSetPath_logs(String &path){
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_klogs));
+}
 
-  kexec = prefix_data + String(FPSTR(_kexec));
-  kdata = prefix_data + String(FPSTR(_kdata));
-  klogs = prefix_data + String(FPSTR(_klogs));
-  Serial.println(kstartup);
-  Serial.println(kcontrol);
-  Serial.println(kstatus);
-  Serial.println(kfcmtoken);
-  Serial.println(kexec);
-  Serial.println(kdata);
-  Serial.println(klogs);
+void dump_path(void) {
+  String path;
+  FbSetPath_fcmtoken(path);
+  Serial.println(path);
+  FbSetPath_startup(path);
+  Serial.println(path);
+  FbSetPath_control(path);
+  Serial.println(path);
+  FbSetPath_status(path);
+  Serial.println(path);
+  FbSetPath_exec(path);
+  Serial.println(path);
+  FbSetPath_data(path);
+  Serial.println(path);
+  FbSetPath_logs(path);
+  Serial.println(path);
 }
 
 bool FbmUpdateRadioCodes(void) {
   bool ret = true;
-  yield();
+
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String path;
 
   if (ret == true) {
+    String kfcmtoken;
+    FbSetPath_fcmtoken(kfcmtoken);
     Serial.println(kfcmtoken);
     FirebaseObject ref = Firebase.get(kfcmtoken);
     if (Firebase.failed() == true) {
@@ -82,6 +118,8 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
+    String kexec;
+    FbSetPath_exec(kexec);
     Serial.println(kexec);
     FirebaseObject ref = Firebase.get(kexec);
     if (Firebase.failed() == true) {
@@ -96,7 +134,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == FB_getNodeSubPath()) {
+        if (nestedObject["owner"] == nodesubpath) {
           FB_addProgDB(i->key, i->value);
         }
       }
@@ -104,6 +142,8 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
+    String kdata;
+    FbSetPath_data(kdata);
     Serial.println(kdata);
     FirebaseObject ref = Firebase.get(kdata);
     if (Firebase.failed() == true) {
@@ -118,7 +158,7 @@ bool FbmUpdateRadioCodes(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == FB_getNodeSubPath()) {
+        if (nestedObject["owner"] == nodesubpath) {
           String key = i->key;
           String name = nestedObject["name"];
           uint8_t code = nestedObject["code"];

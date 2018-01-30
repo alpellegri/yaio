@@ -55,6 +55,8 @@ void VM_readIn(void) {
     } break;
     case kBool:
     case kInt: {
+      String kdata;
+      FbSetPath_data(kdata);
       uint32_t value =
           Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
@@ -120,6 +122,8 @@ void VM_writeOut(void) {
       case kInt: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_VM("VM_writeOut: kInt %d\n", value);
+        String kdata;
+        FbSetPath_data(kdata);
         Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
           DEBUG_VM("set failed: kInt\n");

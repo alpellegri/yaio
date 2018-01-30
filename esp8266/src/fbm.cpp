@@ -60,12 +60,15 @@ bool FbmService(void) {
     String firebase_url = EE_GetFirebaseUrl();
     String firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
+    dump_path();
     boot_sm = 1;
     yield();
   } break;
 
   // firebase control/status init
   case 1: {
+    String kstartup;
+    FbSetPath_startup(kstartup);
     FirebaseObject fbobject = Firebase.get(kstartup);
     if (Firebase.failed()) {
       Serial.println(F("get failed: kstartup"));
@@ -114,6 +117,8 @@ bool FbmService(void) {
   } break;
 
   case 21: {
+    String kcontrol;
+    FbSetPath_control(kcontrol);
     Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
       Serial.print(F("set failed: kcontrol/reboot"));
@@ -134,6 +139,8 @@ bool FbmService(void) {
                       ESP.getFreeHeap());
       fbm_update_last = time_now;
 
+      String kcontrol;
+      FbSetPath_control(kcontrol);
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
         Serial.print(F("get failed: kcontrol/time"));
@@ -179,6 +186,8 @@ bool FbmService(void) {
           status["heap"] = ESP.getFreeHeap();
           status["time"] = time_now;
           yield();
+          String kstatus;
+          FbSetPath_status(kstatus);
           Firebase.set(kstatus, JsonVariant(status));
           if (Firebase.failed()) {
             Serial.print(F("set failed: kstatus"));
