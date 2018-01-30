@@ -184,7 +184,11 @@ class _EntryDialogState extends State<EntryDialog> {
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
 
-  _EntryDialogState(this.entry) {
+  _EntryDialogState(this.entry);
+
+  @override
+  void initState() {
+    super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
       _controllerName.text = entry.name;
@@ -192,12 +196,8 @@ class _EntryDialogState extends State<EntryDialog> {
       _controllerPin.text = entry.getPin().toString();
       _controllerValue.text = entry.getValue().toString();
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
     DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
+    _selectedType = entry.code;
   }
 
   @override
@@ -223,7 +223,7 @@ class _EntryDialogState extends State<EntryDialog> {
               new ListTile(
                 title: const Text('Type'),
                 trailing: new DropdownButton<int>(
-                  hint: const Text('type'),
+                  hint: const Text('select'),
                   value: _selectedType,
                   onChanged: (int newValue) {
                     setState(() {

@@ -26,8 +26,11 @@ class _ExecEditState extends State<ExecEdit> {
 
   List<IoEntry> entryIoList = new List();
 
-  _ExecEditState(this.entry, this.execList) {
-    print('_ExecEditState');
+  _ExecEditState(this.entry, this.execList);
+
+  @override
+  void initState() {
+    super.initState();
     _controllerName.text = entry?.name;
     if (entry.cb != null) {
       _selectedNextList = execList.where((el) => el.key == entry.cb);
@@ -37,6 +40,11 @@ class _ExecEditState extends State<ExecEdit> {
         entry.cb = null;
       }
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -288,9 +296,7 @@ class _EntryDialogState extends State<EntryDialog> {
   List<int> _opCodeMenu = new List<int>();
   IoEntry _selectedEntry;
 
-  _EntryDialogState(this.index, this.prog, this.entryIoList) {
-    print('EntryDialogState');
-  }
+  _EntryDialogState(this.index, this.prog, this.entryIoList);
 
   @override
   void initState() {

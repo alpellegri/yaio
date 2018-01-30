@@ -75,17 +75,15 @@ class _ExecState extends State<Exec> {
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
-  _ExecState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getExecRef());
-    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
-  }
+  _ExecState();
 
   @override
   void initState() {
     super.initState();
-    print('_ExecState');
+    _entryRef = FirebaseDatabase.instance.reference().child(getExecRef());
+    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -126,7 +124,7 @@ class _ExecState extends State<Exec> {
   }
 
   void _onEntryAdded(Event event) {
-    print('_onEntryAdded ${event.snapshot.value.toString()}');
+    print('_onEntryAdded');
     setState(() {
       entryList.add(new ExecEntry.fromSnapshot(_entryRef, event.snapshot));
     });
