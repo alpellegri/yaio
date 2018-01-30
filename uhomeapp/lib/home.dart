@@ -69,21 +69,6 @@ class _HomeState extends State<Home> {
             value: null,
           ));
     } else {
-      if (_status["alarm"] == true) {
-        if (_control["alarm"] == true) {
-          alarmButton = "DEACTIVATE";
-        } else {
-          alarmButton = "DISARMING";
-          _nodeUpdate(kNodeIdle);
-        }
-      } else {
-        if (_control["alarm"] == false) {
-          alarmButton = "ACTIVATE";
-        } else {
-          alarmButton = "ARMING";
-          _nodeUpdate(kNodeIdle);
-        }
-      }
       DateTime current = new DateTime.now();
       DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_startup['time'].toString()) * 1000);
@@ -105,58 +90,6 @@ class _HomeState extends State<Home> {
                         ? (new Icon(Icons.sync_problem, color: Colors.red[200]))
                         : (new Icon(Icons.sync, color: Colors.green[200])),
                     title: const Text('Device Status'),
-                  ),
-                  new ListTile(
-                    leading: (_status['alarm'] == true)
-                        ? (new Icon(Icons.lock_outline, color: Colors.red[200]))
-                        : (new Icon(Icons.lock_open, color: Colors.green[200])),
-                    title: const Text('Alarm Status'),
-                    subtitle:
-                        new Text('${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
-                    trailing: new ButtonTheme.bar(
-                      // make buttons use the appropriate styles for cards
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: new Text(alarmButton),
-                            onPressed: () {
-                              _control['alarm'] = !_control['alarm'];
-                              DateTime now = new DateTime.now();
-                              _control['time'] =
-                                  now.millisecondsSinceEpoch ~/ 1000;
-                              _controlRef.set(_control);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            new Card(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new ListTile(
-                    leading: const Icon(Icons.show_chart),
-                    title: const Text('Temperature / Humidity'),
-                    subtitle: new Text(
-                        '${_status["temperature"]}°C / ${_status["humidity"]}%'),
-                    trailing: new ButtonTheme.bar(
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: const Text('SHOW'),
-                            onPressed: () {
-                              Navigator.of(context)
-                                ..pushNamed(ChartHistory.routeName);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ],
               ),

@@ -253,7 +253,7 @@ class _ExecProgState extends State<ExecProg> {
 
   // read all oneshot
   void _onValueIoEntry(Event event) {
-    print('_onValueEntry');
+    print('_onValueIoEntry');
     Map data = event.snapshot.value;
     data.forEach((k, v) {
       // print('key: $k - value: ${v.toString()}');
