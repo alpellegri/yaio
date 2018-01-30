@@ -12,27 +12,24 @@
 #include "rf.h"
 #include "timesrv.h"
 
-#define RFRX 15
-
 static Ticker RFRcvTimer;
 
-static RCSwitch mySwitch = RCSwitch();
+static RCSwitch mySwitchTx = RCSwitch();
+static RCSwitch mySwitchRx = RCSwitch();
 static uint32_t RadioCode;
 static uint32_t RadioCodeLast;
 
-void RF_Send(uint32_t data, uint8_t bits) { mySwitch.send(data, bits); }
-
-void RF_Enable(void) {
-  RadioCode = 0;
-  RadioCodeLast = 0;
-  Serial.println(F("RF Enable"));
-  mySwitch.enableReceive(RFRX);
+void RF_SetRxPin(uint8_t pin) {
+  Serial.printf_P(PSTR("RF_SetRxPin %d\n"), pin);
+  mySwitchRx.enableReceive(pin);
 }
 
-void RF_Disable(void) {
-  Serial.println(F("RF Disable"));
-  mySwitch.disableReceive();
+void RF_SetTxPin(uint8_t pin) {
+  Serial.printf_P(PSTR("RF_SetTxPin %d\n"), pin);
+  mySwitchTx.enableTransmit(pin);
 }
+
+void RF_Send(uint32_t data, uint8_t bits) { mySwitchTx.send(data, bits); }
 
 uint32_t RF_GetRadioCode(void) {
   RadioCodeLast = RadioCode;
@@ -48,11 +45,11 @@ void ICACHE_RAM_ATTR RF_Unmask(void) {
 }
 
 void RF_Loop() {
-  if (mySwitch.available()) {
+  if (mySwitchRx.available()) {
 
     noInterrupts();
-    uint32_t value = (uint32_t)mySwitch.getReceivedValue();
-    mySwitch.resetAvailable();
+    uint32_t value = (uint32_t)mySwitchRx.getReceivedValue();
+    mySwitchRx.resetAvailable();
     interrupts();
 
     if (value == 0) {

@@ -97,7 +97,8 @@ bool AP_Setup(void) {
     WiFi.mode(WIFI_AP_STA);
 
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
-    WiFi.softAP(String(FPSTR(ap_ssid)).c_str(), String(FPSTR(ap_password)).c_str());
+    WiFi.softAP(String(FPSTR(ap_ssid)).c_str(),
+                String(FPSTR(ap_password)).c_str());
 
     IPAddress myIP = WiFi.softAPIP();
     Serial.println(F("AP mode enabled"));

@@ -15,7 +15,7 @@ enum {
   /*  2 */ kLogIn,
   /*  3 */ kLogOut,
   /*  4 */ kRadioIn,
-  /*  5 */ kRadioOut,
+  /*  5 */ kRadioTx,
   /*  6 */ kRadioElem,
   /*  7 */ kTimer,
   /*  8 */ kBool,

@@ -108,7 +108,6 @@ bool FbmService(void) {
       }
 
       Serial.println(F("Node is up!"));
-      RF_Disable();
       control_time_last = 0;
       boot_sm = 21;
     }
@@ -120,7 +119,6 @@ bool FbmService(void) {
       Serial.print(F("set failed: kcontrol/reboot"));
       Serial.println(Firebase.error());
     } else {
-      RF_Enable();
       dht.begin();
       boot_sm = 3;
     }
