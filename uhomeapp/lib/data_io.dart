@@ -240,7 +240,7 @@ class _EntryDialogState extends State<EntryDialog> {
               ),
               (_execList.length > 0)
                   ? new ListTile(
-                      title: const Text('Exec Call'),
+                      title: const Text('Call'),
                       trailing: new DropdownButton<ExecEntry>(
                         hint: const Text('select an exec'),
                         value: _selectedExec,

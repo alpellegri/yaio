@@ -5,6 +5,133 @@ import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 
+class ExecEdit extends StatefulWidget {
+  static const String routeName = '/exec_edit';
+  final String title;
+  final ExecEntry entry;
+  final List<ExecEntry> execList;
+
+  ExecEdit({Key key, this.title, this.entry, this.execList}) : super(key: key);
+
+  @override
+  _ExecEditState createState() => new _ExecEditState(entry, execList);
+}
+
+class _ExecEditState extends State<ExecEdit> {
+  final TextEditingController _controllerName = new TextEditingController();
+  final ExecEntry entry;
+  List<ExecEntry> execList;
+  ExecEntry _selectedNext;
+  var _selectedNextList;
+
+  List<IoEntry> entryIoList = new List();
+
+  _ExecEditState(this.entry, this.execList) {
+    print('_ExecEditState');
+    _controllerName.text = entry?.name;
+    if (entry.cb != null) {
+      _selectedNextList = execList.where((el) => el.key == entry.cb);
+      if (_selectedNextList.length == 1) {
+        _selectedNext = execList.singleWhere((el) => el.key == entry.cb);
+      } else {
+        entry.cb = null;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      drawer: drawer,
+      appBar: new AppBar(
+          // title: new Text(widget.title),
+          ),
+      body: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          new ListTile(
+            title: new TextField(
+              controller: _controllerName,
+              decoration: new InputDecoration(
+                hintText: 'Name',
+              ),
+            ),
+          ),
+          (execList.length > 0)
+              ? new ListTile(
+                  title: const Text('Call'),
+                  trailing: new DropdownButton<ExecEntry>(
+                    hint: const Text('Select'),
+                    value: _selectedNext,
+                    onChanged: (ExecEntry newValue) {
+                      setState(() {
+                        _selectedNext = newValue;
+                      });
+                    },
+                    items: execList.map((ExecEntry entry) {
+                      return new DropdownMenuItem<ExecEntry>(
+                        value: entry,
+                        child: new Text(entry.name),
+                      );
+                    }).toList(),
+                  ),
+                )
+              : new Text('Functions not declared yet'),
+          new ListTile(
+            trailing: new ButtonTheme.bar(
+              child: new ButtonBar(
+                children: <Widget>[
+                  new FlatButton(
+                      child: const Text('REMOVE'),
+                      onPressed: () {
+                        entry.reference.child(entry.key).remove();
+                        Navigator.pop(context, null);
+                      }),
+                  new FlatButton(
+                    child: const Text('PROGRAM'),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new ExecProg(prog: entry.p),
+                          ));
+                    },
+                  ),
+                  new FlatButton(
+                      child: const Text('SAVE'),
+                      onPressed: () {
+                        setState(() {
+                          entry.name = _controllerName.text;
+                          entry.cb = _selectedNext?.key;
+                          if (entry.key != null) {
+                            entry.reference
+                                .child(entry.key)
+                                .update(entry.toJson());
+                          } else {
+                            print('save on: ${getNodeSubPath()}');
+                            entry.setOwner(getNodeSubPath());
+                            entry.reference.push().set(entry.toJson());
+                          }
+                        });
+                        Navigator.pop(context, null);
+                      }),
+                  new FlatButton(
+                      child: const Text('DISCARD'),
+                      onPressed: () {
+                        Navigator.pop(context, null);
+                      }),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ExecProgListItem extends StatelessWidget {
   final int pc;
   final InstrEntry entry;
@@ -82,7 +209,7 @@ class _ExecProgState extends State<ExecProg> {
     super.initState();
     print('_ExecProgState');
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
-    _onValueSubscription = _dataRef.onValue.listen(_onValueEntry);
+    _onValueSubscription = _dataRef.onValue.listen(_onValueIoEntry);
   }
 
   @override
@@ -125,7 +252,7 @@ class _ExecProgState extends State<ExecProg> {
   }
 
   // read all oneshot
-  void _onValueEntry(Event event) {
+  void _onValueIoEntry(Event event) {
     print('_onValueEntry');
     Map data = event.snapshot.value;
     data.forEach((k, v) {
