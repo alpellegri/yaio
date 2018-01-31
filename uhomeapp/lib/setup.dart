@@ -200,7 +200,7 @@ class CollapsibleBody extends StatelessWidget {
         new FlatButton(
             onPressed: onSave,
             // textTheme: ButtonTextTheme.accent,
-            child: const Text('SAVE')),
+            child: const Text('SELECT')),
       ])),
     ]);
   }

@@ -97,17 +97,6 @@ class _ExecEditState extends State<ExecEdit> {
                         Navigator.pop(context, null);
                       }),
                   new FlatButton(
-                    child: const Text('PROGRAM'),
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                new ExecProg(prog: entry.p),
-                          ));
-                    },
-                  ),
-                  new FlatButton(
                       child: const Text('SAVE'),
                       onPressed: () {
                         setState(() {
@@ -125,6 +114,17 @@ class _ExecEditState extends State<ExecEdit> {
                         });
                         Navigator.pop(context, null);
                       }),
+                  new FlatButton(
+                    child: const Text('PROGRAM'),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new ExecProg(prog: entry.p),
+                          ));
+                    },
+                  ),
                   new FlatButton(
                       child: const Text('DISCARD'),
                       onPressed: () {
@@ -163,26 +163,26 @@ class ExecProgListItem extends StatelessWidget {
     } else {
       value = entry.v;
     }
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+    // '$pc: ${kOpCode2Name[OpCode.values[entry.i]]} $value'
+    return new Container(
+      padding: const EdgeInsets.all(2.0),
       child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           new Expanded(
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Column(
-                  children: [
-                    new Text(
-                      '$pc: ${kOpCode2Name[OpCode.values[entry.i]]} $value',
-                      textScaleFactor: 1.2,
-                      textAlign: TextAlign.left,
+              children: [
+                new Container(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: new Text(
+                    '$pc',
+                    style: new TextStyle(
+                      color: Colors.grey[500],
                     ),
-                  ],
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  ),
+                ),
+                new Text(
+                  '${kOpCode2Name[OpCode.values[entry.i]]}, $value',
                 ),
               ],
             ),
@@ -233,15 +233,21 @@ class _ExecProgState extends State<ExecProg> {
       appBar: new AppBar(
           // title: new Text(widget.title),
           ),
-      body: new ListView.builder(
-        shrinkWrap: true,
-        itemCount: prog.length,
-        itemBuilder: (buildContext, index) {
-          return new InkWell(
-              onTap: () => _openEntryDialog(index),
-              child: new ExecProgListItem(index, prog[index], entryIoList));
-        },
-      ),
+      body: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            new ListView.builder(
+              shrinkWrap: true,
+              itemCount: prog.length,
+              itemBuilder: (buildContext, index) {
+                return new InkWell(
+                    onTap: () => _openEntryDialog(index),
+                    child:
+                        new ExecProgListItem(index, prog[index], entryIoList));
+              },
+            ),
+          ]),
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
