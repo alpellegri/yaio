@@ -138,7 +138,7 @@ class _DataIOState extends State<DataIO> {
     String owner = event.snapshot.value["owner"];
     if (owner == getOwner()) {
       IoEntry oldValue =
-      entryList.singleWhere((el) => el.key == event.snapshot.key);
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
         entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
             _dataRef, event.snapshot.key, event.snapshot.value);
@@ -150,7 +150,7 @@ class _DataIOState extends State<DataIO> {
     String owner = event.snapshot.value["owner"];
     if (owner == getOwner()) {
       IoEntry oldValue =
-      entryList.singleWhere((el) => el.key == event.snapshot.key);
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
         entryList.remove(oldValue);
       });
@@ -250,12 +250,14 @@ class _EntryDialogState extends State<EntryDialog> {
               ),
               new TextField(
                 controller: _controllerPin,
+                keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'pin',
                 ),
               ),
               new TextField(
                 controller: _controllerValue,
+                keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
                 ),
@@ -296,6 +298,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.code = _selectedType;
+                  entry.cb = _selectedExec.key;
                   entry.setPin(int.parse(_controllerPin.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {

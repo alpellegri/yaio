@@ -163,7 +163,7 @@ class ExecProgListItem extends StatelessWidget {
     } else {
       value = entry.v;
     }
-    // '$pc: ${kOpCode2Name[OpCode.values[entry.i]]} $value'
+
     return new Container(
       padding: const EdgeInsets.all(2.0),
       child: new Row(
@@ -256,7 +256,46 @@ class _ExecProgState extends State<ExecProg> {
     );
   }
 
-  void _onFloatingActionButtonPressed() {}
+  Future<Null> _onFloatingActionButtonPressed() async {
+    final TextEditingController ctrl = new TextEditingController(text: '');
+    await showDialog<Null>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      child: new AlertDialog(
+        title: new Text('Select line number'),
+        content: new SingleChildScrollView(
+          child: new ListBody(
+            children: <Widget>[
+              new TextField(
+                controller: ctrl,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'line',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop(ctrl.text);
+            },
+          ),
+        ],
+      ),
+    ).then((e) {
+      if (e != '') {
+        int index = int.parse(e);
+        if (index < prog.length) {
+          prog.insert(index, new InstrEntry(0, '0'));
+        } else {
+          prog.add(new InstrEntry(0, '0'));
+        }
+      }
+    });
+  }
 
   void _openEntryDialog(int index) {
     showDialog(
@@ -357,6 +396,7 @@ class _EntryDialogState extends State<EntryDialog> {
             (isImmediate == true)
                 ? (new TextField(
                     controller: _controllerValue,
+                    keyboardType: TextInputType.number,
                     decoration: new InputDecoration(
                       hintText: 'value',
                     ),
