@@ -140,8 +140,8 @@ const String kOpCodeStringdly = 'dly';
 const String kOpCodeStringstne = 'stne';
 const String kOpCodeStringlte = 'lte';
 const String kOpCodeStringgte = 'gte';
-const String kOpCodeStringjmp = 'jmp';
 const String kOpCodeStringhalt = 'halt';
+const String kOpCodeStringjmp = 'jmp';
 
 enum OpCode {
   ex0,
@@ -181,8 +181,8 @@ const Map<OpCode, bool> kOpCodeIsImmediate = const {
   OpCode.stne: false,
   OpCode.lte: false,
   OpCode.gte: false,
-  OpCode.jmp: true,
   OpCode.halt: true,
+  OpCode.jmp: true,
 };
 
 const Map<OpCode, String> kOpCode2Name = const {
@@ -202,8 +202,8 @@ const Map<OpCode, String> kOpCode2Name = const {
   OpCode.stne: kOpCodeStringstne,
   OpCode.lte: kOpCodeStringlte,
   OpCode.gte: kOpCodeStringgte,
-  OpCode.jmp: kOpCodeStringjmp,
   OpCode.halt: kOpCodeStringhalt,
+  OpCode.jmp: kOpCodeStringjmp,
 };
 
 const Map<String, OpCode> kName2Opcode = const {
@@ -223,8 +223,8 @@ const Map<String, OpCode> kName2Opcode = const {
   kOpCodeStringstne: OpCode.stne,
   kOpCodeStringlte: OpCode.lte,
   kOpCodeStringgte: OpCode.gte,
-  kOpCodeStringjmp: OpCode.jmp,
   kOpCodeStringhalt: OpCode.halt,
+  kOpCodeStringjmp: OpCode.jmp,
 };
 
 class InstrEntry {
