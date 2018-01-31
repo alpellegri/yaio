@@ -92,10 +92,10 @@ class IoEntry {
     return value >> shift;
   }
 
-  setPin(int port) {
+  setPin(int pin) {
     value ??= 0;
     value = value & mask;
-    value = port << shift | value;
+    value = pin << shift | value;
   }
 
   int getValue() {
@@ -103,10 +103,10 @@ class IoEntry {
     return value & mask;
   }
 
-  setValue(int value) {
+  setValue(int v) {
     value ??= 0;
     int port = value >> shift;
-    value = (port << shift) | (value & mask);
+    value = (port << shift) | (v & mask);
   }
 
   setOwner(String _owner) {

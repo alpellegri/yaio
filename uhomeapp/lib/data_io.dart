@@ -298,7 +298,8 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.name = _controllerName.text;
                 try {
                   entry.code = _selectedType;
-                  entry.cb = _selectedExec.key;
+                  entry.cb = _selectedExec?.key;
+                  print('${_controllerPin.text} ${_controllerValue.text}');
                   entry.setPin(int.parse(_controllerPin.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
@@ -307,7 +308,9 @@ class _EntryDialogState extends State<EntryDialog> {
                     entry.setOwner(getNodeSubPath());
                     entry.reference.push().set(entry.toJson());
                   }
-                } catch (exception, stackTrace) {}
+                } catch (exception, stackTrace) {
+                  print('bug');
+                }
                 Navigator.pop(context, null);
               }),
           new FlatButton(
