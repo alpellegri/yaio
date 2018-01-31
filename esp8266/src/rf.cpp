@@ -83,8 +83,7 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
     IoEntry entry = FB_getIoEntry(i);
     uint32_t v = atoi(entry.value.c_str());
     if ((radioid == v) && (entry.code == kRadioIn)) {
-      Serial.printf_P(PSTR("radio code found in table %06X\n"),
-                      entry.value.c_str());
+      Serial.printf_P(PSTR("radio code found in table %06X\n"), radioid);
       id = i;
     }
     i++;
