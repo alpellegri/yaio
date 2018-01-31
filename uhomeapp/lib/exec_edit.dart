@@ -339,7 +339,7 @@ class _EntryDialogState extends State<EntryDialog> {
   final List<IoEntry> entryIoList;
 
   final TextEditingController _controllerValue = new TextEditingController();
-  bool isImmediate;
+  bool _isImmediate;
   int _selectedOpCode;
   List<int> _opCodeMenu = new List<int>();
   IoEntry _selectedEntry;
@@ -352,9 +352,9 @@ class _EntryDialogState extends State<EntryDialog> {
     _selectedOpCode = prog[index].i;
     OpCode.values.toList().forEach((e) => _opCodeMenu.add(e.index));
     // _opCodeMenu.forEach((e) => print(e));
-    isImmediate = kOpCodeIsImmediate[OpCode.values[prog[index].i]];
-    print('isImmediate: $isImmediate');
-    if (isImmediate == false) {
+    _isImmediate = kOpCodeIsImmediate[OpCode.values[prog[index].i]];
+    print('isImmediate: $_isImmediate');
+    if (_isImmediate == false) {
       // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
       entryIoList.forEach((el) {
         // print('key: ${el.key}, name: ${el.name}');
@@ -383,6 +383,8 @@ class _EntryDialogState extends State<EntryDialog> {
                 onChanged: (int newValue) {
                   setState(() {
                     _selectedOpCode = newValue;
+                    _isImmediate =
+                        kOpCodeIsImmediate[OpCode.values[_selectedOpCode]];
                   });
                 },
                 items: _opCodeMenu.map((int entry) {
@@ -393,7 +395,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 }).toList(),
               ),
             ),
-            (isImmediate == true)
+            (_isImmediate == true)
                 ? (new TextField(
                     controller: _controllerValue,
                     keyboardType: TextInputType.number,
@@ -432,7 +434,7 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 prog[index].i = _selectedOpCode;
-                prog[index].v = (isImmediate == true)
+                prog[index].v = (_isImmediate == true)
                     ? _controllerValue.text
                     : _selectedEntry.key;
                 Navigator.pop(context, prog);
