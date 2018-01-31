@@ -20,7 +20,6 @@ static bool enable_WiFi_Scan = false;
 static uint16_t ap_button = 0x55;
 
 // create sebsocket server
-// static WebSocketsServer webSocket = WebSocketsServer(80);
 static WebSocketsServer *webSocket = NULL;
 static uint8_t port_id;
 

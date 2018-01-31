@@ -124,27 +124,37 @@ class _DataIOState extends State<DataIO> {
   }
 
   void _onEntryAdded(Event event) {
-    setState(() {
-      IoEntry entry = new IoEntry.fromSnapshot(_dataRef, event.snapshot);
-      entryList.add(entry);
-    });
+    String owner = event.snapshot.value["owner"];
+    if (owner == getOwner()) {
+      setState(() {
+        IoEntry entry = new IoEntry.fromMap(
+            _dataRef, event.snapshot.key, event.snapshot.value);
+        entryList.add(entry);
+      });
+    }
   }
 
   void _onEntryEdited(Event event) {
-    IoEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList[entryList.indexOf(oldValue)] =
-          new IoEntry.fromSnapshot(_dataRef, event.snapshot);
-    });
+    String owner = event.snapshot.value["owner"];
+    if (owner == getOwner()) {
+      IoEntry oldValue =
+      entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
+            _dataRef, event.snapshot.key, event.snapshot.value);
+      });
+    }
   }
 
   void _onEntryRemoved(Event event) {
-    IoEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList.remove(oldValue);
-    });
+    String owner = event.snapshot.value["owner"];
+    if (owner == getOwner()) {
+      IoEntry oldValue =
+      entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList.remove(oldValue);
+      });
+    }
   }
 
   void _openEntryDialog(IoEntry entry) {
@@ -309,14 +319,30 @@ class _EntryDialogState extends State<EntryDialog> {
     print('_onValueExec');
     Map data = event.snapshot.value;
     data.forEach((k, v) {
-      print('key: $k - value: ${v.toString()}');
-      setState(() {
-        ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
-        _execList.add(e);
-        if (entry.cb == e.key) {
-          _selectedExec = e;
-        }
-      });
+      // print('key: $k - value: ${v.toString()}');
+      // filter only relative to the domain
+      String owner = v["owner"];
+      if (owner == getOwner()) {
+        setState(() {
+          ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
+          _execList.add(e);
+          if (entry.cb == e.key) {
+            _selectedExec = e;
+          }
+        });
+      }
     });
+  }
+}
+
+class NormalWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new Text(''),
+        ]);
   }
 }

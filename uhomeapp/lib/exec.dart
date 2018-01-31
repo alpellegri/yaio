@@ -124,27 +124,36 @@ class _ExecState extends State<Exec> {
   }
 
   void _onEntryAdded(Event event) {
-    print('_onEntryAdded');
-    setState(() {
-      entryList.add(new ExecEntry.fromSnapshot(_entryRef, event.snapshot));
-    });
+    String owner = event.snapshot.value["owner"];
+    if (owner == getOwner()) {
+      setState(() {
+        entryList.add(new ExecEntry.fromMap(
+            _entryRef, event.snapshot.key, event.snapshot.value));
+      });
+    }
   }
 
   void _onEntryEdited(Event event) {
-    ExecEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList[entryList.indexOf(oldValue)] =
-          new ExecEntry.fromSnapshot(_entryRef, event.snapshot);
-    });
+    String owner = event.snapshot.value["owner"];
+    if (owner == getOwner()) {
+      ExecEntry oldValue =
+      entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList[entryList.indexOf(oldValue)] = new ExecEntry.fromMap(
+            _entryRef, event.snapshot.key, event.snapshot.value);
+      });
+    }
   }
 
   void _onEntryRemoved(Event event) {
-    ExecEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList.remove(oldValue);
-    });
+    String owner = event.snapshot.value["owner"];
+    if (owner == getOwner()) {
+      ExecEntry oldValue =
+      entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList.remove(oldValue);
+      });
+    }
   }
 
   void _openEntryDialog(ExecEntry entry) {

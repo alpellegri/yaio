@@ -76,17 +76,6 @@ class IoEntry {
 
   IoEntry(DatabaseReference ref) : reference = ref;
 
-  IoEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    // print('IoEntry.fromSnapshot');
-    reference = ref;
-    key = snapshot.key;
-    owner = snapshot.value['owner'];
-    name = snapshot.value['name'];
-    code = snapshot.value['code'];
-    value = snapshot.value['value'];
-    cb = snapshot.value['cb'];
-  }
-
   IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
     // print('IoEntry.fromMap');
     reference = ref;
@@ -256,19 +245,6 @@ class ExecEntry {
   List<InstrEntry> p = new List<InstrEntry>();
 
   ExecEntry(DatabaseReference ref) : reference = ref;
-
-  ExecEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    // print('ExecEntry.fromSnapshot');
-    reference = ref;
-    key = snapshot.key;
-    owner = snapshot.value['owner'];
-    name = snapshot.value['name'];
-    if (snapshot.value['p'] != null) {
-      snapshot.value['p']
-          .forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
-    }
-    cb = snapshot.value['cb'];
-  }
 
   ExecEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
     // print('ExecEntry.fromMap');

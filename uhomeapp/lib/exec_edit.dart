@@ -265,10 +265,13 @@ class _ExecProgState extends State<ExecProg> {
     Map data = event.snapshot.value;
     data.forEach((k, v) {
       // print('key: $k - value: ${v.toString()}');
-      setState(() {
-        IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
-        entryIoList.add(e);
-      });
+      String owner = v["owner"];
+      if (owner == getOwner()) {
+        setState(() {
+          IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
+          entryIoList.add(e);
+        });
+      }
     });
   }
 }

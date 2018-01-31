@@ -26,6 +26,7 @@ String dDataRef;
 String dExecRef;
 String dLogsReportsRef;
 String dTHRef;
+String dDomain;
 
 FirebaseUser getFirebaseUser() {
   return _user;
@@ -75,10 +76,19 @@ void updateNodeRef(Map config) {
   dExecRef = '$prefixData/$kExecRef';
   dLogsReportsRef = '$prefixData/$kLogsReportsRef';
   dTHRef = '$prefixData/$kTHRef';
+  dDomain = config['domain'];
 }
 
 String getNodeSubPath() {
   return dNodeSubPath;
+}
+
+String getOwner() {
+  return dNodeSubPath;
+}
+
+String getDomain() {
+  return dDomain;
 }
 
 Future<Map> loadPreferences() async {
