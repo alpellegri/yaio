@@ -171,7 +171,6 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   FB_dumpIoEntry();
-  // FB_dumpFunctions();
   FB_dumpProg();
 
   return ret;

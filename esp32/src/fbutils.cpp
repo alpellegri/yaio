@@ -35,9 +35,11 @@ void FB_addIoEntryDB(String key, String name, uint8_t code, String value,
     entry.code = code;
     entry.value = value;
     if (code == kRadioRx) {
-      RF_SetRxPin(atoi(value.c_str()));
+      uint8_t pin = atoi(value.c_str()) >> 24;
+      RF_SetRxPin(pin);
     } else if (code == kRadioTx) {
-      RF_SetTxPin(atoi(value.c_str()));
+      uint8_t pin = atoi(value.c_str()) >> 24;
+      RF_SetTxPin(pin);
     }
     // TODO: can be done a setup here
     entry.cb = cb;

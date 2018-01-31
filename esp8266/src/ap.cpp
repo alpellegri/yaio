@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "ee.h"
-#include "rf.h"
 #include "sta.h"
 
 #define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
