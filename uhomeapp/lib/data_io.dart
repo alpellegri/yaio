@@ -299,7 +299,6 @@ class _EntryDialogState extends State<EntryDialog> {
                 try {
                   entry.code = _selectedType;
                   entry.cb = _selectedExec?.key;
-                  print('${_controllerPin.text} ${_controllerValue.text}');
                   entry.setPin(int.parse(_controllerPin.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
