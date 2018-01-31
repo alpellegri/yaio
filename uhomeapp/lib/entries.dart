@@ -84,9 +84,7 @@ class IoEntry {
     name = v['name'];
     code = v['code'];
     value = v['value'];
-    if (v.containsValue('cb') == true) {
-      cb = v['cb'];
-    }
+    cb = v['cb'];
   }
 
   int getPin() {
@@ -255,9 +253,7 @@ class ExecEntry {
     if (v['p'] != null) {
       v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
     }
-    if (v.containsValue('cb') == true) {
-      cb = v['cb'];
-    }
+    cb = v['cb'];
   }
 
   setOwner(String _owner) {
