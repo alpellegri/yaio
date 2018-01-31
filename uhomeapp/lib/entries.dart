@@ -260,13 +260,19 @@ class ExecEntry {
     owner = _owner;
   }
 
-  Map toJson() {
+  Map<String, dynamic> toJson() {
     print('ExecEntry.toJson');
-    Map map = new Map();
-    map['owner'] = owner;
+    Map<String, dynamic> map = new Map<String, dynamic>();
     map['name'] = name;
-    map['p'] = p;
-    map['cb'] = cb;
+    map['owner'] = owner;
+    List list = new List();
+    if (p.length > 0) {
+      p.forEach((e) {
+        list.add({'i': e.i, 'v': e.v});
+      });
+      map['p'] = list;
+    }
+
     return map;
   }
 }
