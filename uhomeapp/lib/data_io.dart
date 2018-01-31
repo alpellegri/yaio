@@ -295,7 +295,7 @@ class _EntryDialogState extends State<EntryDialog> {
               onPressed: () {
                 entry.name = _controllerName.text;
                 try {
-                  entry.code = DataCode.PhyOut.index;
+                  entry.code = _selectedType;
                   entry.setPin(int.parse(_controllerPin.text));
                   entry.setValue(int.parse(_controllerValue.text));
                   if (entry.key != null) {
