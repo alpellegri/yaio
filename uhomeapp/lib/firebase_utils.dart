@@ -51,9 +51,11 @@ Future<String> signInWithGoogle() async {
 }
 
 void updateUserRef() {
+  print('updateUserRef');
   dUserRef = 'users/${getFirebaseUser().uid}';
   dRootRef = '$dUserRef/root';
   dDataRef = '$dUserRef/data';
+  dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
 }
 
 void updateNodeRef(Map config) {

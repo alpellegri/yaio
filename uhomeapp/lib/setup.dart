@@ -200,7 +200,7 @@ class CollapsibleBody extends StatelessWidget {
         new FlatButton(
             onPressed: onSave,
             // textTheme: ButtonTextTheme.accent,
-            child: const Text('SAVE')),
+            child: const Text('SELECT')),
       ])),
     ]);
   }
@@ -246,7 +246,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   DatabaseReference _fcmRef;
   bool _nodeNeedUpdate = false;
 
-  DatabaseReference _entryRef;
+  DatabaseReference _rootRef;
   StreamSubscription<Event> _onAddSubscription;
   List<DemoItem<dynamic>> _demoItems;
   Map<String, dynamic> entryMap = new Map<String, dynamic>();
@@ -264,9 +264,9 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         _isPreferencesReady = true;
       });
 
-      print(getRootRef());
-      _entryRef = FirebaseDatabase.instance.reference().child(getRootRef());
-      _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+      print('getRootRef: ${getRootRef()}');
+      _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
+      _onAddSubscription = _rootRef.onChildAdded.listen(_onEntryAdded);
       if (map.isNotEmpty) {
         setState(() {
           _ctrlDomainName = map['domain'];
@@ -480,14 +480,14 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           title: const Text('Selected Device'),
           subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
           trailing: (_isNeedCreate == true)
-              ? (const Text(''))
+              ? null
               : (new ButtonTheme.bar(
                   child: new ButtonBar(
                     children: <Widget>[
                       new FlatButton(
                         child: const Text('CONFIGURE'),
                         onPressed: () {
-                          Navigator.of(context)..pushNamed(NodeSetup.routeName);
+                          Navigator.of(context).pushNamed(NodeSetup.routeName);
                         },
                       ),
                     ],
@@ -525,12 +525,9 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   }
 
   void _onEntryAdded(Event event) {
-    print('_onEntryAdded');
-
     setState(() {
       entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
     });
-
     print(_nodeNeedUpdate);
     if (_nodeNeedUpdate == true) {
       var domain = event.snapshot.key;
@@ -543,8 +540,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   }
 
   void _changePreferences() {
-    print('_savePreferences');
-    print('_isNeedCreate $_isNeedCreate');
     savePreferencesDN(_ctrlDomainName, _ctrlNodeName);
     if (_isNeedCreate == true) {
       DatabaseReference ref;
