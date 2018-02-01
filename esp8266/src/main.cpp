@@ -28,6 +28,7 @@ void setup() {
   Serial.print(F("SW version: "));
   Serial.println(VERS_getVersion());
   Serial.println(F("Node starting..."));
+  Serial.printf_P(PSTR("Heap: %d\n"), ESP.getFreeHeap());
 
   mode = 0;
   if (mode == 0) {

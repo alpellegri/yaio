@@ -27,7 +27,7 @@
 #define FBM_UPDATE_MONITOR_SLOW (5)
 #define FBM_MONITOR_TIMERS (15)
 
-DHT dht(DHTPIN, DHTTYPE);
+DHT *dht;
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
@@ -124,7 +124,8 @@ bool FbmService(void) {
       Serial.print(F("set failed: kcontrol/reboot"));
       Serial.println(Firebase.error());
     } else {
-      dht.begin();
+      dht = new DHT(DHTPIN, DHTTYPE);
+      dht->begin();
       boot_sm = 3;
     }
   } break;
@@ -141,6 +142,17 @@ bool FbmService(void) {
 
       String kcontrol;
       FbSetPath_control(kcontrol);
+      float h = dht->readHumidity();
+      float t = dht->readTemperature();
+      Serial.printf_P(PSTR("t: %f - h: %f\n"), t, h);
+      if (isnan(h) || isnan(t)) {
+        ht_monitor_run = false;
+      } else {
+        ht_monitor_run = true;
+        humidity_data = h;
+        temperature_data = t;
+      }
+      yield();
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
         Serial.print(F("get failed: kcontrol/time"));
