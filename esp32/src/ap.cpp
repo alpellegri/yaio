@@ -7,6 +7,8 @@
 #include "ee.h"
 #include "sta.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
@@ -32,10 +34,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
   case WStype_DISCONNECTED:
     /* try to enable wifi scan when locally diconnected */
     enable_WiFi_Scan = EE_LoadData();
-    Serial.print(F("["));
-    Serial.print(num);
-    Serial.print(F("]"));
-    Serial.println(F(" Disconnected!"));
+    DEBUG_PRINT("[%d] disconnected!\n", num);
     ESP.restart();
     break;
 
@@ -43,14 +42,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     /* disable wifi scan when locally connected */
     enable_WiFi_Scan = false;
     IPAddress ip = webSocket->remoteIP(num);
-    Serial.printf_P(PSTR("[%u] Connected from %d.%d.%d.%d url: %s\n"), num,
-                    ip[0], ip[1], ip[2], ip[3], payload);
+    DEBUG_PRINT("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1],
+                ip[2], ip[3], payload);
     port_id = num;
   } break;
 
   case WStype_TEXT:
     len = strlen((char *)payload);
-    Serial.printf_P(PSTR("[%u] get Text (%d): %s\n"), num, len, payload);
+    DEBUG_PRINT("[%u] get Text (%d): %s\n", num, len, payload);
 
     if (len != 0) {
       // save to epprom
@@ -60,9 +59,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     break;
 
   case WStype_ERROR:
-    Serial.print(F("["));
-    Serial.print(num);
-    Serial.print(F(" Error!"));
+    DEBUG_PRINT("[%d] error!\n", num);
     break;
 
   default:
@@ -88,7 +85,7 @@ bool AP_Setup(void) {
 
   if (enable_WiFi_Scan == false) {
     port_id = 0xFF;
-    Serial.println(F("Connecting mode AP"));
+    DEBUG_PRINT("Connecting mode AP\n");
 
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
@@ -100,9 +97,8 @@ bool AP_Setup(void) {
                 String(FPSTR(ap_password)).c_str());
 
     IPAddress myIP = WiFi.softAPIP();
-    Serial.println(F("AP mode enabled"));
-    Serial.print(F("IP address: "));
-    Serial.println(myIP);
+    DEBUG_PRINT("AP mode enabled\n");
+    // DEBUG_PRINT("IP address: %d\n", myIP.c_str());
     webSocket = new WebSocketsServer(80);
     webSocket->begin();
     webSocket->onEvent(webSocketEvent);
@@ -119,7 +115,7 @@ bool AP_Loop(void) {
     ap_button = in;
     if (in == false) {
       EE_EraseData();
-      Serial.printf("EEPROM erased\n");
+      DEBUG_PRINT("EEPROM erased\n");
     }
   }
 #endif
@@ -136,13 +132,13 @@ bool AP_Task(void) {
   String str;
 
   if (enable_WiFi_Scan == true) {
-    Serial.println(F("networks scan"));
+    DEBUG_PRINT("networks scan\n");
     if (ap_task_cnt-- == 0) {
       ap_task_cnt = 10;
       int n = WiFi.scanNetworks();
-      Serial.println(F("scan done"));
+      DEBUG_PRINT("scan done\n");
       if (n == 0) {
-        Serial.println(F("no networks found"));
+        DEBUG_PRINT("no networks found\n");
         ESP.restart();
       } else {
         String sta_ssid = EE_GetSSID();
@@ -152,7 +148,7 @@ bool AP_Task(void) {
           int test = WiFi.SSID(i).compareTo(sta_ssid);
           Serial.println(WiFi.SSID(i));
           if (test == 0) {
-            Serial.print(F("network found: "));
+            DEBUG_PRINT("network found: ");
             Serial.println(WiFi.SSID(i));
             ret = false;
             i = n; // exit for

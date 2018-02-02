@@ -9,6 +9,8 @@
 #include "fbutils.h"
 #include "rf.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 std::vector<IoEntry> IoEntryVec;
 std::vector<ProgEntry> ProgVec;
 
@@ -59,8 +61,8 @@ void FB_addProgDB(String key, JsonObject &obj) {
   ProgEntry entry;
   entry.key = key;
   entry.name = obj["name"].asString();
-  Serial.printf("FB_addProgDB: key=%s, name=%s\n", entry.key.c_str(),
-                entry.name.c_str());
+  DEBUG_PRINT("FB_addProgDB: key=%s, name=%s\n", entry.key.c_str(),
+              entry.name.c_str());
 
   JsonArray &nest = obj["p"].asArray();
   for (uint32_t i = 0; i < nest.size(); ++i) {
@@ -106,22 +108,22 @@ uint8_t FB_getProgIdx(const char *key) {
 }
 
 void FB_dumpIoEntry(void) {
-  Serial.println(F("FB_dumpIoEntry"));
+  DEBUG_PRINT("FB_dumpIoEntry");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    Serial.printf_P(PSTR("%d: key=%s, name=%s, code=%d, value=%s, cb=%s\n"), i,
-                    IoEntryVec[i].key.c_str(), IoEntryVec[i].name.c_str(),
-                    IoEntryVec[i].code, IoEntryVec[i].value.c_str(),
-                    IoEntryVec[i].cb.c_str());
+    DEBUG_PRINT("%d: key=%s, name=%s, code=%d, value=%s, cb=%s\n", i,
+        IoEntryVec[i].key.c_str(), IoEntryVec[i].name.c_str(),
+        IoEntryVec[i].code, IoEntryVec[i].value.c_str(),
+        IoEntryVec[i].cb.c_str());
   }
 }
 
 void FB_dumpProg(void) {
-  Serial.println(F("FB_dumpProg"));
+  DEBUG_PRINT("FB_dumpProg");
   for (uint8_t i = 0; i < ProgVec.size(); ++i) {
-    Serial.printf_P(PSTR("%d: key=%s, name=%s\n"), i, ProgVec[i].key.c_str(),
+    DEBUG_PRINT("%d: key=%s, name=%s\n", i, ProgVec[i].key.c_str(),
                     ProgVec[i].name.c_str());
     for (uint8_t j = 0; j < ProgVec[i].funcvec.size(); j++) {
-      Serial.printf_P(PSTR("%d: code=%d, value=%s\n"), j,
+      DEBUG_PRINT("%d: code=%d, value=%s\n", j,
                       ProgVec[i].funcvec[j].code,
                       ProgVec[i].funcvec[j].value.c_str());
     }

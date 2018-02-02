@@ -11,6 +11,8 @@
 #include "fcm.h"
 #include "rf.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 static const char _kstartup[] PROGMEM = "startup";
 static const char _kcontrol[] PROGMEM = "control";
 static const char _kstatus[] PROGMEM = "status";
@@ -72,19 +74,19 @@ void FbSetPath_logs(String &path){
 void dump_path(void) {
   String path;
   FbSetPath_fcmtoken(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_startup(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_control(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_status(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_exec(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_data(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_logs(path);
-  Serial.println(path);
+  DEBUG_PRINT("%s\n", path.c_str());
 }
 
 bool FbmUpdateRadioCodes(void) {
@@ -96,10 +98,10 @@ bool FbmUpdateRadioCodes(void) {
   if (ret == true) {
     String kfcmtoken;
     FbSetPath_fcmtoken(kfcmtoken);
-    Serial.println(kfcmtoken);
+    DEBUG_PRINT("%s\n", kfcmtoken.c_str());
     FirebaseObject ref = Firebase.get(kfcmtoken);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kfcmtoken"));
+      DEBUG_PRINT("get failed: kfcmtoken");
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -120,10 +122,10 @@ bool FbmUpdateRadioCodes(void) {
   if (ret == true) {
     String kexec;
     FbSetPath_exec(kexec);
-    Serial.println(kexec);
+    DEBUG_PRINT("%s\n", kexec.c_str());
     FirebaseObject ref = Firebase.get(kexec);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kexec"));
+      DEBUG_PRINT("get failed: kexec");
       Serial.println(Firebase.error());
       ret = false;
     } else {
@@ -144,10 +146,10 @@ bool FbmUpdateRadioCodes(void) {
   if (ret == true) {
     String kdata;
     FbSetPath_data(kdata);
-    Serial.println(kdata);
+    DEBUG_PRINT("%s\n", kdata.c_str());
     FirebaseObject ref = Firebase.get(kdata);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kdata"));
+      DEBUG_PRINT("get failed: kdata");
       Serial.println(Firebase.error());
       ret = false;
     } else {

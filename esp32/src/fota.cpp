@@ -12,6 +12,8 @@
 #include "fota.h"
 #include "vers.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
 
@@ -75,8 +77,7 @@ bool FOTAService(void) {
                          String(F("/o/")) + VERS_HW_VER +
                          String(FPSTR(md5file_name)) + String(F("?alt=media"));
     addr = String(F("https://")) + String(FPSTR(storage_host)) + md5file_url;
-    Serial.print(F("FOTA_Sm_GET_MD5 "));
-    Serial.println(addr);
+    DEBUG_PRINT("FOTA_Sm_GET_MD5 %s\n", addr.c_str());
     http.setReuse(true);
 
     bool res = http.begin(addr);
@@ -85,32 +86,32 @@ bool FOTAService(void) {
       // httpCode will be negative on error
       if (httpCode > 0) {
         // HTTP header has been send and Server response header has been handled
-        Serial.printf_P(PSTR("[HTTP] GET... code: %d\n"), httpCode);
+        DEBUG_PRINT("[HTTP] GET... code: %d\n", httpCode);
         // file found at server
         if (httpCode == HTTP_CODE_OK) {
           int size = http.getSize();
           if (size == DIGEST_MD5_SIZE) {
-            Serial.printf_P(PSTR("md5file size %d\n"), size);
+            DEBUG_PRINT("md5file size %d\n", size);
             String payload = http.getString();
             Serial.println(payload);
             digest_MD5 = (char *)malloc(DIGEST_MD5_SIZE);
             memcpy(digest_MD5, payload.c_str(), DIGEST_MD5_SIZE);
             state = FOTA_Sm_CHECK;
           } else {
-            Serial.printf_P(PSTR("md5file size error: %d\n"), size);
+            DEBUG_PRINT("md5file size error: %d\n", size);
             state = FOTA_Sm_ERROR;
           }
         } else {
-          Serial.printf_P(PSTR("md5file httpCode error: %d\n"), httpCode);
+          DEBUG_PRINT("md5file httpCode error: %d\n", httpCode);
           state = FOTA_Sm_ERROR;
         }
       } else {
-        Serial.printf_P(PSTR("[HTTP] GET... failed, error: %s\n"),
-                        http.errorToString(httpCode).c_str());
+        DEBUG_PRINT("[HTTP] GET... failed, error: %s\n",
+                    http.errorToString(httpCode).c_str());
         state = FOTA_Sm_ERROR;
       }
     } else {
-      Serial.printf_P(PSTR("[HTTP] begin... failed, error: %s\n"), res);
+      DEBUG_PRINT("[HTTP] begin... failed, error: %s\n", res);
       state = FOTA_Sm_ERROR;
     }
   } break;
@@ -120,8 +121,7 @@ bool FOTAService(void) {
                       VERS_HW_VER + String(FPSTR(file_name)) +
                       String(F("?alt=media"));
     addr = String(F("https://")) + String(FPSTR(storage_host)) + file_url;
-    Serial.print(F("FOTA_Sm_CHECK "));
-    Serial.println(addr);
+    DEBUG_PRINT("FOTA_Sm_CHECK %s\n", addr.c_str());
     bool res = http.begin(addr);
     if (res == true) {
       int httpCode = http.GET();
@@ -129,9 +129,9 @@ bool FOTAService(void) {
       if (httpCode > 0) {
         http.end();
         // HTTP header has been send and Server response header has been handled
-        Serial.printf_P(PSTR("[HTTP] GET... code: %d\n"), httpCode);
+        DEBUG_PRINT("[HTTP] GET... code: %d\n", httpCode);
         int size = http.getSize();
-        Serial.printf_P(PSTR("file size %d\n"), size);
+        DEBUG_PRINT("file size %d\n", size);
 
         block = 0;
         num_blocks = (size + block_size - 1) / block_size;
@@ -143,7 +143,7 @@ bool FOTAService(void) {
           state = FOTA_Sm_ERROR;
         }
       } else {
-        Serial.printf_P(PSTR("file httpCode error: %d\n"), httpCode);
+        DEBUG_PRINT("file httpCode error: %d\n", httpCode);
         state = FOTA_Sm_ERROR;
       }
     } else {
@@ -191,8 +191,8 @@ bool FOTAService(void) {
         if (fail == false) {
           Update.write(buffer, pos);
 
-          Serial.printf_P(PSTR("[%03d]: %02d%% -- %d\r"), block,
-                          100 * block / num_blocks, ESP.getFreeHeap());
+          DEBUG_PRINT("[%03d]: %02d%% -- %d\r", block, 100 * block / num_blocks,
+                      ESP.getFreeHeap());
 
           block++;
           if (block < num_blocks) {
@@ -200,7 +200,7 @@ bool FOTAService(void) {
             state = FOTA_Sm_GET_BLOCK;
           } else {
             if (!Update.end()) {
-              Serial.println(F("Update Error"));
+              DEBUG_PRINT("Update Error\n");
             }
             state = FOTA_Sm_COMPLETE;
           }
@@ -208,31 +208,30 @@ bool FOTAService(void) {
           state = FOTA_Sm_ERROR;
         }
       } else {
-        Serial.printf_P(PSTR("[HTTP] GET... failed, error: %s\n"),
-                        http.errorToString(httpCode).c_str());
+        DEBUG_PRINT("[HTTP] GET... failed, error: %s\n",
+                    http.errorToString(httpCode).c_str());
         state = FOTA_Sm_ERROR;
       }
     } else {
-      Serial.printf_P(PSTR("begin error @ %d\n"), block);
+      DEBUG_PRINT("begin error @ %d\n", block);
       state = FOTA_Sm_ERROR;
     }
   } break;
 
   case FOTA_Sm_ERROR: {
     if (http_fail_cnt++ < 20) {
-      Serial.print(F("retry "));
-      Serial.println(http_fail_cnt);
+      DEBUG_PRINT("retry %d\n", http_fail_cnt);
       state = state_last;
     } else {
       /* give-up */
-      Serial.println(F("retry give-up"));
+      DEBUG_PRINT("retry give-up\n");
       Serial.flush();
       ESP.restart();
     }
   } break;
 
   case FOTA_Sm_COMPLETE: {
-    Serial.println(F("closing connection"));
+    DEBUG_PRINT("closing connection\n");
     Serial.flush();
     free(buffer);
     /* restar node anycase */

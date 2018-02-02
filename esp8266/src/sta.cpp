@@ -16,6 +16,8 @@
 #include "rf.h"
 #include "timers.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
 #define LED_ON LOW
@@ -34,8 +36,8 @@ bool STA_Setup(void) {
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
 
-  Serial.println(F("Connecting mode STA"));
-  Serial.println(F("Configuration parameters:"));
+  DEBUG_PRINT("Connecting mode STA\n");
+  DEBUG_PRINT("Configuration parameters:\n");
 
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
@@ -44,24 +46,22 @@ bool STA_Setup(void) {
 
   String sta_ssid = EE_GetSSID();
   String sta_password = EE_GetPassword();
-  Serial.print(F("sta_ssid: "));
-  Serial.println(sta_ssid);
-  Serial.print(F("sta_password: "));
-  Serial.println(sta_password);
-  Serial.println(F("trying to connect..."));
+  DEBUG_PRINT("sta_ssid: %s\n", sta_ssid.c_str());
+  DEBUG_PRINT("sta_password: %s\n", sta_password.c_str());
+  DEBUG_PRINT("trying to connect...\n");
 
   TimeSetup();
 
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
   while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
-    Serial.print(F("."));
+    DEBUG_PRINT(".");
     delay(500);
   }
   Serial.println();
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.print(F("connected: "));
+    DEBUG_PRINT("connected:\n");
     Serial.println(WiFi.localIP());
 
     SPIFFS.begin();
@@ -70,7 +70,7 @@ bool STA_Setup(void) {
       fota_mode = false;
     } else {
       fota_mode = true;
-      Serial.println(F("file open "));
+      DEBUG_PRINT("file open\n");
       SPIFFS.remove(String(FPSTR("/fota.req")).c_str());
       FOTA_UpdateReq();
     }
@@ -79,7 +79,7 @@ bool STA_Setup(void) {
   }
 
   if (sts != true) {
-    Serial.println(F("not connected to router"));
+    DEBUG_PRINT("not connected to router\n");
     ESP.restart();
     ret = false;
   }
@@ -112,7 +112,7 @@ bool STA_Task(void) {
       }
     }
   } else {
-    Serial.println(F("WiFi.status != WL_CONNECTED"));
+    DEBUG_PRINT("WiFi.status != WL_CONNECTED\n");
   }
 
   return ret;

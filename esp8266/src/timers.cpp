@@ -8,7 +8,7 @@
 #include "fbutils.h"
 #include "timesrv.h"
 
-#define DEBUG_VM(fmt, ...) Serial.printf(PSTR(fmt), ##__VA_ARGS__)
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 static uint32_t t247_last = 0;
 
@@ -36,7 +36,7 @@ void Timers_Service(void) {
           // check week day
           uint8_t wday_mask = ((v >> 16) & 0xFF);
           if (((1 << wday) & wday_mask) != 0) {
-            DEBUG_VM("Timers %s at time %d\n", entry.name.c_str(), t247);
+            DEBUG_PRINT("Timers %s at time %d\n", entry.name.c_str(), t247);
             entry.ev = true;
           }
         }

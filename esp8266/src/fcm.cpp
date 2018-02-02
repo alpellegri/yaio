@@ -6,6 +6,8 @@
 #include "ee.h"
 #include "fcm.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define FCM_SERVICE_TIMEOUT (5 * 1000)
 #define FCM_NUM_REGIDS_MAX (5)
 
@@ -116,10 +118,10 @@ void FcmService(void) {
   case Fcm_Sm_CONNECT: {
     uint32_t retVal = fcm_client.connect(String(FPSTR(FcmServer)).c_str(), 80);
     if (retVal == 1) {
-      Serial.println(F("fcm connect Connected with server!"));
+      DEBUG_PRINT("fcm connect Connected with server!\n");
       fcm_sts = Fcm_Sm_SEND;
     } else {
-      Serial.println(F("fcm connect error"));
+      DEBUG_PRINT("fcm connect error\n");
       fcm_sts = Fcm_Sm_CLOSE;
     }
   } break;
@@ -137,7 +139,7 @@ void FcmService(void) {
   } break;
 
   case Fcm_Sm_RECEIVE: {
-    Serial.println(F("fcm http wait..."));
+    DEBUG_PRINT("fcm http wait...\n");
     /* close at timeout or communication complete */
     if (((curr_time - FcmServiceStamp) > FCM_SERVICE_TIMEOUT) ||
         (FcmServiceRxStop == true)) {

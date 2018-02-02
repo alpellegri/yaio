@@ -3,6 +3,8 @@
 
 #include "timesrv.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 bool time_init = false;
 
 uint8_t getWeekDay(void) {
@@ -22,11 +24,10 @@ bool TimeService(void) {
     struct tm timeinfo;
     time_init = getLocalTime(&timeinfo, 0);
     if (time_init == false) {
-      Serial.println(F("wait for NTP..."));
+      DEBUG_PRINT("wait for NTP...\n");
     } else {
       uint32_t current = getTime();
-      Serial.print(F("UTC time: "));
-      Serial.println(current);
+      DEBUG_PRINT("UTC time: %d\n", current);
     }
   }
   return time_init;

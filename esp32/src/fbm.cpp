@@ -21,6 +21,8 @@
 #include "vm.h"
 #include <rom/rtc.h>
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define DHTPIN 21
 #define DHTTYPE DHT22
 
@@ -135,8 +137,8 @@ bool FbmService(void) {
     FbSetPath_startup(kstartup);
     FirebaseObject fbobject = Firebase.get(kstartup);
     if (Firebase.failed()) {
-      Serial.println(F("get failed: kstartup"));
-      Serial.printf("%s\n", kstartup.c_str());
+      DEBUG_PRINT("get failed: kstartup\n");
+      DEBUG_PRINT("%s\n", kstartup.c_str());
       Serial.print(Firebase.error());
     } else {
       JsonVariant variant = fbobject.getJsonVariant();
@@ -150,15 +152,15 @@ bool FbmService(void) {
         Firebase.set(kstartup, JsonVariant(object));
         if (Firebase.failed()) {
           bootcnt--;
-          Serial.println(F("set failed: kstartup"));
+          DEBUG_PRINT("set failed: kstartup\n");
           Serial.println(Firebase.error());
         } else {
           boot_sm = 2;
-          Serial.println(F("firebase: configured!"));
+          DEBUG_PRINT("firebase: configured!\n");
           yield();
         }
       } else {
-        Serial.println(F("parseObject() failed"));
+        DEBUG_PRINT("parseObject() failed\n");
       }
     }
   } break;
@@ -174,7 +176,7 @@ bool FbmService(void) {
         fblog_log(str, true);
       }
 
-      Serial.println(F("Node is up!"));
+      DEBUG_PRINT("Node is up!\n");
       control_time_last = 0;
       boot_sm = 21;
     }
@@ -185,7 +187,7 @@ bool FbmService(void) {
     FbSetPath_control(kcontrol);
     Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
-      Serial.print(F("set failed: kcontrol/reboot"));
+      DEBUG_PRINT("set failed: kcontrol/reboot");
       Serial.println(Firebase.error());
     } else {
       dht = new DHT(DHTPIN, DHTTYPE);
@@ -200,15 +202,14 @@ bool FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
-      Serial.printf_P(PSTR("boot_sm: %d - Heap: %d\n"), boot_sm,
-                      ESP.getFreeHeap());
+      DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       String kcontrol;
       FbSetPath_control(kcontrol);
       float h = dht->readHumidity();
       float t = dht->readTemperature();
-      Serial.printf_P(PSTR("t: %f - h: %f\n"), t, h);
+      DEBUG_PRINT("t: %f - h: %f\n", t, h);
       if (isnan(h) || isnan(t)) {
         ht_monitor_run = false;
       } else {
@@ -219,7 +220,7 @@ bool FbmService(void) {
       yield();
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
-        Serial.print(F("get failed: kcontrol/time"));
+        DEBUG_PRINT("get failed: kcontrol/time\n");
         Serial.println(Firebase.error());
       } else {
         if (control_time != control_time_last) {
@@ -235,7 +236,7 @@ bool FbmService(void) {
 
           FirebaseObject fbobject = Firebase.get(kcontrol);
           if (Firebase.failed() == true) {
-            Serial.println(F("get failed: kcontrol"));
+            DEBUG_PRINT("get failed: kcontrol\n");
             Serial.print(Firebase.error());
           } else {
             JsonVariant variant = fbobject.getJsonVariant();
@@ -253,7 +254,7 @@ bool FbmService(void) {
                 boot_sm = 2;
               }
             } else {
-              Serial.println(F("parseObject() failed"));
+              DEBUG_PRINT("parseObject() failed\n");
             }
           }
 
@@ -267,7 +268,7 @@ bool FbmService(void) {
           FbSetPath_status(kstatus);
           Firebase.set(kstatus, JsonVariant(status));
           if (Firebase.failed()) {
-            Serial.print(F("set failed: kstatus"));
+            DEBUG_PRINT("set failed: kstatus\n");
             Serial.println(Firebase.error());
           }
         }

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <FirebaseArduino.h>
 #include <Ticker.h>
 
 #include <stdio.h>
@@ -10,9 +11,8 @@
 #include "fbutils.h"
 #include "rf.h"
 #include "timers.h"
-#include <FirebaseArduino.h>
 
-#define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 typedef struct {
   bool cond;
@@ -40,7 +40,7 @@ void VM_readIn(void) {
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     switch (IoEntryVec[i].code) {
     case kPhyIn: {
-      // DEBUG_VM("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
+      DEBUG_PRINT("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint8_t pin = v >> 24;
       pinMode(pin, INPUT);
@@ -49,7 +49,7 @@ void VM_readIn(void) {
       if ((v & mask) != value) {
         value = (v & (~mask)) | value;
         IoEntryVec[i].value = value;
-        DEBUG_VM("VM_readIn: %s, %d, %s\n", IoEntryVec[i].name.c_str(), value,
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].name.c_str(), value,
                  IoEntryVec[i].value.c_str());
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
@@ -59,25 +59,28 @@ void VM_readIn(void) {
     } break;
     case kBool:
     case kInt: {
-      String kdata;
-      FbSetPath_data(kdata);
-      uint32_t value =
-          Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
-      if (Firebase.failed() == true) {
-        DEBUG_VM("get failed: kInt\n");
-        UpdateDataFault = true;
-      } else {
-        uint32_t v = atoi(IoEntryVec[i].value.c_str());
-        if (v != value) {
-          DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
-          IoEntryVec[i].value = value;
-          IoEntryVec[i].ev = true;
-          IoEntryVec[i].ev_value = value;
+      if (VM_UpdateDataPending == true) {
+        DEBUG_PRINT("get: kInt\n");
+        String kdata;
+        FbSetPath_data(kdata);
+        uint32_t value =
+            Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
+        if (Firebase.failed() == true) {
+          DEBUG_PRINT("get failed: kInt %s\n", IoEntryVec[i].name.c_str());
+          UpdateDataFault = true;
+        } else {
+          uint32_t v = atoi(IoEntryVec[i].value.c_str());
+          if (v != value) {
+            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
+            IoEntryVec[i].value = value;
+            IoEntryVec[i].ev = true;
+            IoEntryVec[i].ev_value = value;
+          }
         }
       }
     } break;
     default:
-      // DEBUG_VM("VM_readIn: error\n");
+      // DEBUG_PRINT("VM_readIn: error\n");
       break;
     }
   }
@@ -105,13 +108,13 @@ void VM_writeOutPhyOut(uint32_t value) {
   uint8_t pin = value >> 24;
   value &= mask;
   value = !!value;
-  DEBUG_VM("VM_writeOutPhyOut: %d, %d\n", pin, value);
+  DEBUG_PRINT("VM_writeOutPhyOut: %d, %d\n", pin, value);
   pinMode(pin, OUTPUT);
   digitalWrite(pin, value);
 }
 
 void VM_writeOutMessage(vm_context_t &ctx, String value) {
-  DEBUG_VM("VM_writeOutMessage: %s\n", value.c_str());
+  DEBUG_PRINT("VM_writeOutMessage: %s\n", value.c_str());
   String message = value + " " + ctx.ev_name;
   fblog_log(message, true);
 }
@@ -122,28 +125,28 @@ void VM_writeOut(void) {
     if (IoEntryVec[i].wb == true) {
       switch (IoEntryVec[i].code) {
       case kPhyOut: {
-        DEBUG_VM("VM_writeOut: kPhyOut error\n");
+        DEBUG_PRINT("VM_writeOut: kPhyOut error\n");
       } break;
       case kBool:
       case kInt: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
-        DEBUG_VM("VM_writeOut: kInt %d\n", value);
+        DEBUG_PRINT("VM_writeOut: kInt %d\n", value);
         String kdata;
         FbSetPath_data(kdata);
         Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_VM("set failed: kInt\n");
+          DEBUG_PRINT("set failed: kInt\n");
         } else {
           IoEntryVec[i].wb = false;
         }
       } break;
       case kMessaging: {
-        // DEBUG_VM("VM_writeOut: kMessaging %s\n",
+        // DEBUG_PRINT("VM_writeOut: kMessaging %s\n",
         // IoEntryVec[i].value.c_str()); fblog_log(IoEntryVec[i].value, true);
         // IoEntryVec[i].wb = false;
       } break;
       default:
-        // DEBUG_VM("VM_writeOut: error\n");
+        // DEBUG_PRINT("VM_writeOut: error\n");
         break;
       }
     }
@@ -151,16 +154,16 @@ void VM_writeOut(void) {
 }
 
 void vm_read0(vm_context_t &ctx, const char *value) {
-  DEBUG_VM("vm_read0 value=%s\n", value);
+  DEBUG_PRINT("vm_read0 value=%s\n", value);
 }
 
 void vm_readi(vm_context_t &ctx, const char *value) {
-  DEBUG_VM("vm_readi value=%s\n", value);
+  DEBUG_PRINT("vm_readi value=%s\n", value);
   ctx.V = atoi(value);
 }
 
 void vm_read24(vm_context_t &ctx, const char *value) {
-  DEBUG_VM("vm_readi24 value=%s\n", value);
+  DEBUG_PRINT("vm_readi24 value=%s\n", value);
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t v = atoi(IoEntryVec[id].value.c_str());
@@ -168,67 +171,67 @@ void vm_read24(vm_context_t &ctx, const char *value) {
 }
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_read value=%s\n", key_value);
+  DEBUG_PRINT("vm_read value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t v = atoi(IoEntryVec[id].value.c_str());
   ctx.V = v;
 }
 
 uint8_t vm_exec_ex0(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_ex0 value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_ex0 value=%s\n", key_value);
   ctx.ACC = 0;
   return pc + 1;
 }
 
 uint8_t vm_exec_ldi(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_ldi value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_ldi value=%s\n", key_value);
   ctx.ACC = ctx.V;
   return pc + 1;
 }
 
 uint8_t vm_exec_st(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_st value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_st value=%s\n", key_value);
   return pc + 1;
 }
 
 uint8_t vm_exec_stne(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_stne value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_stne value=%s\n", key_value);
   ctx.cond = true;
   return pc + 1;
 }
 
 uint8_t vm_exec_lt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_lt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC < ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_lte(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_lt value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_lt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC < ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_gt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_gt value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_gt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC > ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_gte(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_gt value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_gt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC > ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_eq(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_eq value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_eq value=%s\n", key_value);
   ctx.ACC = (ctx.ACC == ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_bz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_bz value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_bz value=%s\n", key_value);
   if (ctx.ACC == 0) {
     return atoi(key_value);
   }
@@ -236,7 +239,7 @@ uint8_t vm_exec_bz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
 }
 
 uint8_t vm_exec_bnz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_bnz value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_bnz value=%s\n", key_value);
   if (ctx.ACC != 0) {
     return atoi(key_value);
   }
@@ -244,28 +247,28 @@ uint8_t vm_exec_bnz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
 }
 
 uint8_t vm_exec_jmp(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_jmp value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_jmp value=%s\n", key_value);
   return atoi(key_value);
 }
 
 uint8_t vm_exec_dly(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_dly value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_dly value=%s\n", key_value);
   delay(ctx.ACC);
   return pc + 1;
 }
 
 uint8_t vm_exec_halt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_exec_hlt value=%s\n", key_value);
+  DEBUG_PRINT("vm_exec_hlt value=%s\n", key_value);
   ctx.halt = true;
   return pc;
 }
 
 void vm_write0(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_write0 value=%s\n", key_value);
+  DEBUG_PRINT("vm_write0 value=%s\n", key_value);
 }
 
 void vm_write(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_write value=%s\n", key_value);
+  DEBUG_PRINT("vm_write value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   if (IoEntryVec[id].code == kMessaging) {
     /**/
@@ -277,7 +280,7 @@ void vm_write(vm_context_t &ctx, const char *key_value) {
 }
 
 void vm_cwrite(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_cwrite value=%s\n", key_value);
+  DEBUG_PRINT("vm_cwrite value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t v = atoi(IoEntryVec[id].value.c_str());
   if ((ctx.cond == true) && (v != ctx.ACC)) {
@@ -288,7 +291,7 @@ void vm_cwrite(vm_context_t &ctx, const char *key_value) {
 }
 
 void vm_write24(vm_context_t &ctx, const char *key_value) {
-  DEBUG_VM("vm_write24 value=%s\n", key_value);
+  DEBUG_PRINT("vm_write24 value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
   uint32_t v = atoi(IoEntryVec[id].value.c_str());
@@ -327,19 +330,19 @@ uint8_t VM_decode(uint8_t pc, vm_context_t &ctx, FuncEntry &stm) {
   String &value = stm.value;
 
   /* decode-read */
-  DEBUG_VM("VM_pipe read\n");
+  DEBUG_PRINT("VM_pipe read\n");
   VM_pipe[code].read(ctx, value.c_str());
-  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+  DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
 
   /* decode-execute */
-  DEBUG_VM("VM_pipe exec\n");
+  DEBUG_PRINT("VM_pipe exec\n");
   pc = VM_pipe[code].exec(pc, ctx, value.c_str());
-  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+  DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
 
   /* decode-write */
-  DEBUG_VM("VM_pipe write\n");
+  DEBUG_PRINT("VM_pipe write\n");
   VM_pipe[code].write(ctx, value.c_str());
-  DEBUG_VM("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+  DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
 
   return pc;
 }
@@ -359,8 +362,8 @@ void VM_run(void) {
 
     /* keep the event name */
     ctx.ev_name = IoEntryVec[id].name.c_str();
-    DEBUG_VM("VM_run start >>>>>>>>>>>>\n");
-    Serial.printf("Heap: %d\n", ESP.getFreeHeap());
+    DEBUG_PRINT("VM_run start >>>>>>>>>>>>\n");
+    DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
     if (key.length() != 0) {
       uint8_t id_prog = FB_getProgIdx(key.c_str());
       ProgEntry &prog = ProgVec[id_prog];
@@ -368,16 +371,16 @@ void VM_run(void) {
 
       uint8_t pc = 0;
       while (pc < funcvec.size()) {
-        DEBUG_VM("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc, funcvec[pc].code,
-                 ctx.ACC, ctx.V);
+        DEBUG_PRINT("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc,
+                 funcvec[pc].code, ctx.ACC, ctx.V);
         /* decode */
         pc = VM_decode(pc, ctx, funcvec[pc]);
 
-        DEBUG_VM("VM_run stop [%d] code=%d, ACC=%d V=%d\n", pc, funcvec[pc].code,
-                 ctx.ACC, ctx.V);
+        DEBUG_PRINT("VM_run stop [%d] code=%d, ACC=%d V=%d\n", pc,
+                 funcvec[pc].code, ctx.ACC, ctx.V);
       }
     }
     VM_writeOut();
-    DEBUG_VM("VM_run stop <<<<<<<<<<<<<\n");
+    DEBUG_PRINT("VM_run stop <<<<<<<<<<<<<\n");
   }
 }

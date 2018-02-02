@@ -12,6 +12,8 @@
 #include "rf.h"
 #include "timesrv.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 static Ticker RFRcvTimer;
 
 static RCSwitch mySwitchTx = RCSwitch();
@@ -20,12 +22,12 @@ static uint32_t RadioCode;
 static uint32_t RadioCodeLast;
 
 void RF_SetRxPin(uint8_t pin) {
-  Serial.printf_P(PSTR("RF_SetRxPin %d\n"), pin);
+  DEBUG_PRINT("RF_SetRxPin %d\n", pin);
   mySwitchRx.enableReceive(pin);
 }
 
 void RF_SetTxPin(uint8_t pin) {
-  Serial.printf_P(PSTR("RF_SetTxPin %d\n"), pin);
+  DEBUG_PRINT("RF_SetTxPin %d\n", pin);
   mySwitchTx.enableTransmit(pin);
 }
 
@@ -53,7 +55,7 @@ void RF_Loop() {
     interrupts();
 
     if (value == 0) {
-      Serial.print(F("Unknown encoding"));
+      DEBUG_PRINT("Unknown encoding\n");
     } else {
       // Serial.printf(">>%x\n", value);
       // Serial.print(" / ");
@@ -62,11 +64,11 @@ void RF_Loop() {
       // Serial.print("Protocol: ");
       // Serial.println(mySwitch.getReceivedProtocol());
       if (value != RadioCodeLast) {
-        Serial.printf_P(PSTR("radio code: %06X\n"), value);
+        DEBUG_PRINT("radio code: %06X\n", value);
         RadioCode = value;
         RFRcvTimer.attach_ms(1000, RF_Unmask);
       } else {
-        Serial.println(F("."));
+        DEBUG_PRINT(".\n");
       }
     }
   }
@@ -78,12 +80,12 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
 
   uint8_t len = FB_getIoEntryLen();
 
-  Serial.printf_P(PSTR("RF_CheckRadioCodeDB: code %06X\n"), radioid);
+  DEBUG_PRINT("RF_CheckRadioCodeDB: code %06X\n", radioid);
   while ((i < len) && (id == 0xFF)) {
     IoEntry entry = FB_getIoEntry(i);
     uint32_t v = atoi(entry.value.c_str());
     if ((radioid == v) && (entry.code == kRadioIn)) {
-      Serial.printf_P(PSTR("radio code found in table %06X\n"), radioid);
+      DEBUG_PRINT("radio code found in table %06X\n", radioid);
       id = i;
     }
     i++;
