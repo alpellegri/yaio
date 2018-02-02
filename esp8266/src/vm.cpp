@@ -28,9 +28,13 @@ typedef struct {
   void (*write)(vm_context_t &ctx, const char *key_value);
 } vm_itlb_t;
 
+bool VM_UpdateDataPending;
+void VM_UpdateDataReq(void) { VM_UpdateDataPending = true; }
+
 void VM_readIn(void) {
   RF_Service();
   Timers_Service();
+  bool UpdateDataFault = false;
 
   /* loop over data elements looking for events */
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
@@ -61,6 +65,7 @@ void VM_readIn(void) {
           Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
       if (Firebase.failed() == true) {
         DEBUG_VM("get failed: kInt\n");
+        UpdateDataFault = true;
       } else {
         uint32_t v = atoi(IoEntryVec[i].value.c_str());
         if (v != value) {
@@ -76,6 +81,7 @@ void VM_readIn(void) {
       break;
     }
   }
+  VM_UpdateDataPending = UpdateDataFault;
 }
 
 uint8_t VM_findEvent(uint32_t *ev_value) {

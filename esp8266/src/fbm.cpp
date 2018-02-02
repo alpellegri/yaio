@@ -18,6 +18,7 @@
 #include "timers.h"
 #include "timesrv.h"
 #include "vers.h"
+#include "vm.h"
 
 #define DHTPIN D6
 #define DHTTYPE DHT22
@@ -161,6 +162,7 @@ bool FbmService(void) {
         if (control_time != control_time_last) {
           control_time_last = control_time;
           fbm_monitor_last = time_now;
+          VM_UpdateDataReq();
           fbm_monitor_run = true;
         }
         if (fbm_monitor_run == true) {
