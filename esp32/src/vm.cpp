@@ -40,7 +40,7 @@ void VM_readIn(void) {
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     switch (IoEntryVec[i].code) {
     case kPhyIn: {
-      DEBUG_PRINT("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
+      // DEBUG_PRINT("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint8_t pin = v >> 24;
       pinMode(pin, INPUT);
