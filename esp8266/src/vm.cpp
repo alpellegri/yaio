@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <FirebaseArduino.h>
 #include <Ticker.h>
 
 #include <stdio.h>
@@ -10,9 +11,8 @@
 #include "fbutils.h"
 #include "rf.h"
 #include "timers.h"
-#include <FirebaseArduino.h>
 
-#define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
+#define DEBUG_VM(fmt, ...) Serial.printf(PSTR(fmt), ##__VA_ARGS__)
 
 typedef struct {
   bool cond;
@@ -59,20 +59,23 @@ void VM_readIn(void) {
     } break;
     case kBool:
     case kInt: {
-      String kdata;
-      FbSetPath_data(kdata);
-      uint32_t value =
-          Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
-      if (Firebase.failed() == true) {
-        DEBUG_VM("get failed: kInt\n");
-        UpdateDataFault = true;
-      } else {
-        uint32_t v = atoi(IoEntryVec[i].value.c_str());
-        if (v != value) {
-          DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
-          IoEntryVec[i].value = value;
-          IoEntryVec[i].ev = true;
-          IoEntryVec[i].ev_value = value;
+      if (VM_UpdateDataPending == true) {
+        DEBUG_VM("get: kInt\n");
+        String kdata;
+        FbSetPath_data(kdata);
+        uint32_t value =
+            Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
+        if (Firebase.failed() == true) {
+          DEBUG_VM("get failed: kInt %s\n", IoEntryVec[i].name.c_str());
+          UpdateDataFault = true;
+        } else {
+          uint32_t v = atoi(IoEntryVec[i].value.c_str());
+          if (v != value) {
+            DEBUG_VM("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
+            IoEntryVec[i].value = value;
+            IoEntryVec[i].ev = true;
+            IoEntryVec[i].ev_value = value;
+          }
         }
       }
     } break;
@@ -368,13 +371,13 @@ void VM_run(void) {
 
       uint8_t pc = 0;
       while (pc < funcvec.size()) {
-        DEBUG_VM("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc, funcvec[pc].code,
-                 ctx.ACC, ctx.V);
+        DEBUG_VM("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc,
+                 funcvec[pc].code, ctx.ACC, ctx.V);
         /* decode */
         pc = VM_decode(pc, ctx, funcvec[pc]);
 
-        DEBUG_VM("VM_run stop [%d] code=%d, ACC=%d V=%d\n", pc, funcvec[pc].code,
-                 ctx.ACC, ctx.V);
+        DEBUG_VM("VM_run stop [%d] code=%d, ACC=%d V=%d\n", pc,
+                 funcvec[pc].code, ctx.ACC, ctx.V);
       }
     }
     VM_writeOut();

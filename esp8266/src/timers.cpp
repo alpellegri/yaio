@@ -8,7 +8,7 @@
 #include "fbutils.h"
 #include "timesrv.h"
 
-#define DEBUG_VM(...) Serial.printf(__VA_ARGS__)
+#define DEBUG_VM(fmt, ...) Serial.printf(PSTR(fmt), ##__VA_ARGS__)
 
 static uint32_t t247_last = 0;
 
