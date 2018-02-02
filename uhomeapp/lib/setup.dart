@@ -161,32 +161,35 @@ class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody({
     this.margin: EdgeInsets.zero,
     this.child,
+    this.isEditMode,
     this.onSelect,
     this.onCancel,
     this.onAdd,
+    this.onRemove,
   });
 
   final EdgeInsets margin;
   final Widget child;
+  final bool isEditMode;
   final VoidCallback onSelect;
   final VoidCallback onCancel;
   final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
-    return new Column(children: <Widget>[
-      new Container(
-          margin: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 0.0) -
-              margin,
-          child: new Center(
-              child: new DefaultTextStyle(
-                  style: textTheme.caption.copyWith(fontSize: 15.0),
-                  child: child))),
-      new ButtonTheme.bar(
+    var widget;
+    if (isEditMode == false) {
+      widget = new ButtonTheme.bar(
           child: new ButtonBar(children: <Widget>[
+        new FlatButton(
+            onPressed: onRemove,
+            child: const Text(
+              'REMOVE',
+            )),
         new FlatButton(
             onPressed: onAdd,
             child: const Text(
@@ -201,7 +204,31 @@ class CollapsibleBody extends StatelessWidget {
             onPressed: onSelect,
             // textTheme: ButtonTextTheme.accent,
             child: const Text('SELECT')),
-      ])),
+      ]));
+    } else {
+      widget = new ButtonTheme.bar(
+          child: new ButtonBar(children: <Widget>[
+        new FlatButton(
+            onPressed: onCancel,
+            child: const Text(
+              'CANCEL',
+            )),
+        new FlatButton(
+            onPressed: onSelect,
+            // textTheme: ButtonTextTheme.accent,
+            child: const Text('SAVE')),
+      ]));
+    }
+
+    return new Column(children: <Widget>[
+      new Container(
+          margin: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 0.0) -
+              margin,
+          child: new Center(
+              child: new DefaultTextStyle(
+                  style: textTheme.caption.copyWith(fontSize: 15.0),
+                  child: child))),
+      widget,
     ]);
   }
 }
@@ -224,7 +251,7 @@ class DemoItem<T> {
   final ValueToString<T> valueToString;
   T value;
   bool isExpanded = false;
-  bool isModeEdit = false;
+  bool isEditMode = false;
 
   ExpansionPanelHeaderBuilder get headerBuilder {
     return (BuildContext context, bool isExpanded) {
@@ -248,6 +275,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
   DatabaseReference _rootRef;
   StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditedSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
   List<DemoItem<dynamic>> _demoItems;
   Map<String, dynamic> entryMap = new Map<String, dynamic>();
   bool _isPreferencesReady = false;
@@ -267,6 +296,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       print('getRootRef: ${getRootRef()}');
       _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
       _onAddSubscription = _rootRef.onChildAdded.listen(_onEntryAdded);
+      _onEditedSubscription = _rootRef.onChildChanged.listen(_onEntryEdited);
+      _onRemoveSubscription = _rootRef.onChildRemoved.listen(_onEntryRemoved);
       if (map.isNotEmpty) {
         setState(() {
           _ctrlDomainName = map['domain'];
@@ -309,13 +340,13 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
               void close() {
                 setState(() {
                   item.isExpanded = false;
-                  item.isModeEdit = false;
+                  item.isEditMode = false;
                 });
               }
 
               void add() {
                 setState(() {
-                  item.isModeEdit = true;
+                  item.isEditMode = true;
                 });
               }
 
@@ -334,7 +365,23 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   onAdd: () {
                     add();
                   },
-                  child: (item.isModeEdit == true)
+                  onRemove: () {
+                    if (_isNeedCreate == false) {
+                      print(item.value);
+                      DatabaseReference ref;
+                      ref = FirebaseDatabase.instance
+                          .reference()
+                          .child(getRootRef());
+                      ref.child(item.value).remove();
+                    }
+                    setState(() {
+                      _ctrlDomainName = '';
+                      _ctrlNodeName = '';
+                    });
+                    close();
+                  },
+                  isEditMode: item.isEditMode,
+                  child: (item.isEditMode == true)
                       ? (new TextFormField(
                           controller: item.textController,
                           decoration: new InputDecoration(
@@ -374,13 +421,13 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
               void close() {
                 setState(() {
                   item.isExpanded = false;
-                  item.isModeEdit = false;
+                  item.isEditMode = false;
                 });
               }
 
               void add() {
                 setState(() {
-                  item.isModeEdit = true;
+                  item.isEditMode = true;
                 });
               }
 
@@ -400,7 +447,24 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   onAdd: () {
                     add();
                   },
-                  child: (item.isModeEdit == true)
+                  onRemove: () {
+                    print(item.value);
+                    if (_isNeedCreate == false) {
+                      print(item.value);
+                      DatabaseReference ref;
+                      ref = FirebaseDatabase.instance
+                          .reference()
+                          .child(getRootRef())
+                          .child(_ctrlDomainName);
+                      ref.child(item.value).remove();
+                    }
+                    setState(() {
+                      _ctrlNodeName = '';
+                    });
+                    close();
+                  },
+                  isEditMode: item.isEditMode,
+                  child: (item.isEditMode == true)
                       ? (new TextFormField(
                           controller: item.textController,
                           decoration: new InputDecoration(
@@ -439,6 +503,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   void dispose() {
     super.dispose();
     _onAddSubscription.cancel();
+    _onEditedSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -501,11 +567,17 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   bool _update() {
     bool ret = true;
     var keyList = entryMap.keys.toList();
-    _demoItems[0].query = keyList;
+    setState(() {
+      _demoItems[0].query = keyList;
+    });
     var keyValue = _demoItems[0].value;
+    print('domain: $keyValue');
     if (keyList.contains(keyValue)) {
       keyList = entryMap[keyValue].keys.toList();
-      _demoItems[1].query = keyList;
+      print('nodes: $keyList');
+      setState(() {
+        _demoItems[1].query = keyList;
+      });
       keyValue = _demoItems[1].value;
       ret = !keyList.contains(keyValue);
     }
@@ -526,6 +598,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
   void _onEntryAdded(Event event) {
     setState(() {
+      print(event.snapshot.key);
       entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
     });
     print(_nodeNeedUpdate);
@@ -537,6 +610,23 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         _nodeUpdate('$domain/$node/');
       });
     }
+  }
+
+  void _onEntryEdited(Event event) {
+    print('_onEntryEdited');
+    _update();
+    /*IoEntry oldValue =
+        entryList.singleWhere((el) => el.key == event.snapshot.key);
+    setState(() {
+      entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
+          _dataRef, event.snapshot.key, event.snapshot.value);
+    });*/
+  }
+
+  void _onEntryRemoved(Event event) {
+    setState(() {
+      entryMap.remove(event.snapshot.key);
+    });
   }
 
   void _changePreferences() {
