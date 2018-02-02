@@ -367,7 +367,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   },
                   onRemove: () {
                     if (_isNeedCreate == false) {
-                      print(item.value);
                       DatabaseReference ref;
                       ref = FirebaseDatabase.instance
                           .reference()
@@ -448,9 +447,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                     add();
                   },
                   onRemove: () {
-                    print(item.value);
                     if (_isNeedCreate == false) {
-                      print(item.value);
                       DatabaseReference ref;
                       ref = FirebaseDatabase.instance
                           .reference()
