@@ -571,10 +571,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       _demoItems[0].query = keyList;
     });
     var keyValue = _demoItems[0].value;
-    print('domain: $keyValue');
     if (keyList.contains(keyValue)) {
       keyList = entryMap[keyValue].keys.toList();
-      print('nodes: $keyList');
       setState(() {
         _demoItems[1].query = keyList;
       });
@@ -614,13 +612,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
   void _onEntryEdited(Event event) {
     print('_onEntryEdited');
-    _update();
-    /*IoEntry oldValue =
-        entryList.singleWhere((el) => el.key == event.snapshot.key);
-    setState(() {
-      entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
-          _dataRef, event.snapshot.key, event.snapshot.value);
-    });*/
+    entryMap[event.snapshot.key] = event.snapshot.value;
   }
 
   void _onEntryRemoved(Event event) {
