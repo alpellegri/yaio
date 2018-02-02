@@ -161,14 +161,14 @@ class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody({
     this.margin: EdgeInsets.zero,
     this.child,
-    this.onSave,
+    this.onSelect,
     this.onCancel,
     this.onAdd,
   });
 
   final EdgeInsets margin;
   final Widget child;
-  final VoidCallback onSave;
+  final VoidCallback onSelect;
   final VoidCallback onCancel;
   final VoidCallback onAdd;
 
@@ -198,7 +198,7 @@ class CollapsibleBody extends StatelessWidget {
               'CANCEL',
             )),
         new FlatButton(
-            onPressed: onSave,
+            onPressed: onSelect,
             // textTheme: ButtonTextTheme.accent,
             child: const Text('SELECT')),
       ])),
@@ -322,7 +322,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
               return new Form(
                   child: new Builder(builder: (BuildContext context) {
                 return new CollapsibleBody(
-                  onSave: () {
+                  onSelect: () {
                     Form.of(context).save();
                     _ctrlDomainName = item.value;
                     close();
@@ -387,7 +387,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
               return new Form(
                   child: new Builder(builder: (BuildContext context) {
                 return new CollapsibleBody(
-                  onSave: () {
+                  onSelect: () {
                     Form.of(context).save();
                     _ctrlNodeName = item.value;
                     _changePreferences();
