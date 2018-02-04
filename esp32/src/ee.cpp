@@ -78,7 +78,6 @@ bool EE_LoadData(void) {
 
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
-
   // Test if parsing succeeds.
   if (root.success() == 1) {
     const char *ssid = root[FPSTR("ssid")];
@@ -98,13 +97,13 @@ bool EE_LoadData(void) {
       ee_uid = String(uid);
       ee_domain = String(domain);
       ee_nodename = String(nodename);
-      DEBUG_PRINT("EEPROM ok");
+      DEBUG_PRINT("EEPROM ok\n");
       ret = true;
     } else {
-      DEBUG_PRINT("EEPROM content not ok");
+      DEBUG_PRINT("EEPROM content not ok\n");
     }
   } else {
-    DEBUG_PRINT("parseObject() failed");
+    DEBUG_PRINT("parseObject() failed\n");
   }
 
   return ret;

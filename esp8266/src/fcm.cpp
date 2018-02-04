@@ -101,7 +101,7 @@ static String FcmPostMsg(void) {
   http += F("Accept: */");
   http += F("*\r\n");
   http += F("Content-Type:application/json\r\n");
-  http += "Authorization:key=" + fcm_server_key + F("\r\n");
+  http += String(F("Authorization:key=")) + fcm_server_key + F("\r\n");
   http += F("Content-Length: ");
   http += String(json.length());
   http += F("\r\n\r\n");
