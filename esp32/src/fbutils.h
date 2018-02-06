@@ -60,8 +60,7 @@ extern void FB_deinitProgDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);
 extern uint8_t FB_getIoEntryLen(void);
 
-extern void FB_addIoEntryDB(String key, String name, uint8_t code, String value,
-                     String cb);
+extern void FB_addIoEntryDB(String key, JsonObject &obj);
 extern String &FB_getIoEntryNameById(uint8_t i);
 
 extern void FB_addProgDB(String key, JsonObject &obj);

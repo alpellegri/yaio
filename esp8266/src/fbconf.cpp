@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <FirebaseArduino.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include "firebase.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fbutils.h"
@@ -99,20 +99,19 @@ bool FbmUpdateRadioCodes(void) {
     String kfcmtoken;
     FbSetPath_fcmtoken(kfcmtoken);
     DEBUG_PRINT("%s\n", kfcmtoken.c_str());
-    FirebaseObject ref = Firebase.get(kfcmtoken);
+    String json = Firebase.getJSON(kfcmtoken);
     if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kfcmtoken");
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("get failed: kfcmtoken\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
       FcmResetRegIDsDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        // Serial.println(i->key);
         JsonObject &nestedObject = i->value;
-        String id = i->value.asString();
+        String id = i->value.as<String>();
         Serial.println(id);
         FcmAddRegIDsDB(id);
       }
@@ -123,16 +122,15 @@ bool FbmUpdateRadioCodes(void) {
     String kexec;
     FbSetPath_exec(kexec);
     DEBUG_PRINT("%s\n", kexec.c_str());
-    FirebaseObject ref = Firebase.get(kexec);
+    String json = Firebase.getJSON(kexec);
     if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kexec");
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("get failed: kexec\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
       FB_deinitProgDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -147,26 +145,20 @@ bool FbmUpdateRadioCodes(void) {
     String kdata;
     FbSetPath_data(kdata);
     DEBUG_PRINT("%s\n", kdata.c_str());
-    FirebaseObject ref = Firebase.get(kdata);
+    String json = Firebase.getJSON(kdata);
     if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kdata");
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("get failed: kdata\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
       FB_deinitIoEntryDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
         if (nestedObject["owner"] == nodesubpath) {
-          String key = i->key;
-          String name = nestedObject["name"];
-          uint8_t code = nestedObject["code"];
-          String value = nestedObject["value"];
-          String cb = nestedObject["cb"];
-          FB_addIoEntryDB(key, name, code, value, cb);
+          FB_addIoEntryDB(i->key, i->value);
         }
       }
     }

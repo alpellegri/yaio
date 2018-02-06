@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include <FirebaseArduino.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include "firebase.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fcm.h"
@@ -25,5 +25,7 @@ void fblog_log(String message, boolean fcm_notify) {
   }
   String klogs;
   FbSetPath_logs(klogs);
-  Firebase.push((klogs + F("/Reports")), JsonVariant(log));
+  String data;
+  log.printTo(data);
+  Firebase.pushJSON((klogs + F("/Reports")), data);
 }

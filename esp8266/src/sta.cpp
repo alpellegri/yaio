@@ -107,8 +107,6 @@ bool STA_Task(void) {
         yield();
         VM_run();
         yield();
-        FcmService();
-        yield();
       }
     }
   } else {

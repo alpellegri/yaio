@@ -2,11 +2,11 @@
 #include <WiFiUDP.h>
 
 #include <DHT.h>
-#include <FirebaseArduino.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include "firebase.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fblog.h"
@@ -135,25 +135,24 @@ bool FbmService(void) {
   case 1: {
     String kstartup;
     FbSetPath_startup(kstartup);
-    FirebaseObject fbobject = Firebase.get(kstartup);
+    String json = Firebase.getJSON(kstartup);
     if (Firebase.failed()) {
       DEBUG_PRINT("get failed: kstartup\n");
-      DEBUG_PRINT("%s\n", kstartup.c_str());
-      Serial.print(Firebase.error());
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      JsonVariant variant = fbobject.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& object = jsonBuffer.parseObject(json);
       if (object.success()) {
         bootcnt = object["bootcnt"];
         object["bootcnt"] = ++bootcnt;
         object["time"] = getTime();
         object["version"] = String(VERS_getVersion());
         yield();
-        Firebase.set(kstartup, JsonVariant(object));
+        Firebase.updateJSON(kstartup, JsonVariant(object));
         if (Firebase.failed()) {
           bootcnt--;
-          DEBUG_PRINT("set failed: kstartup\n");
-          Serial.println(Firebase.error());
+          DEBUG_PRINT("update failed: kstartup\n");
+          DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
           boot_sm = 2;
           DEBUG_PRINT("firebase: configured!\n");
@@ -188,7 +187,7 @@ bool FbmService(void) {
     Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
       DEBUG_PRINT("set failed: kcontrol/reboot");
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
       dht = new DHT(DHTPIN, DHTTYPE);
       dht->begin();
@@ -221,7 +220,7 @@ bool FbmService(void) {
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
         DEBUG_PRINT("get failed: kcontrol/time\n");
-        Serial.println(Firebase.error());
+        DEBUG_PRINT("%s\n", Firebase.error().c_str());
       } else {
         if (control_time != control_time_last) {
           control_time_last = control_time;
@@ -234,13 +233,13 @@ bool FbmService(void) {
             fbm_monitor_run = false;
           }
 
-          FirebaseObject fbobject = Firebase.get(kcontrol);
+          String json = Firebase.getJSON(kcontrol);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("get failed: kcontrol\n");
-            Serial.print(Firebase.error());
+            DEBUG_PRINT("%s\n", Firebase.error().c_str());
           } else {
-            JsonVariant variant = fbobject.getJsonVariant();
-            JsonObject &object = variant.as<JsonObject>();
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject& object = jsonBuffer.parseObject(json);
             if (object.success()) {
               // control_alarm = object["alarm"];
               control_time = object["time"];
@@ -266,10 +265,10 @@ bool FbmService(void) {
           yield();
           String kstatus;
           FbSetPath_status(kstatus);
-          Firebase.set(kstatus, JsonVariant(status));
+          Firebase.setJSON(kstatus, JsonVariant(status));
           if (Firebase.failed()) {
             DEBUG_PRINT("set failed: kstatus\n");
-            Serial.println(Firebase.error());
+            DEBUG_PRINT("%s\n", Firebase.error().c_str());
           }
         }
         yield();

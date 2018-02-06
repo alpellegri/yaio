@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include <FirebaseArduino.h>
 #include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include "firebase.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"

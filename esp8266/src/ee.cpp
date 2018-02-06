@@ -78,6 +78,7 @@ bool EE_LoadData(void) {
 
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
+
   // Test if parsing succeeds.
   if (root.success() == 1) {
     const char *ssid = root[FPSTR("ssid")];

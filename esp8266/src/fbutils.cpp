@@ -28,23 +28,22 @@ ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
 
 uint8_t FB_getProgLen(void) { return ProgVec.size(); }
 
-void FB_addIoEntryDB(String key, String name, uint8_t code, String value,
-                     String cb) {
+void FB_addIoEntryDB(String key, JsonObject &obj) {
   if (IoEntryVec.size() < NUM_IO_ENTRY_MAX) {
     IoEntry entry;
     entry.key = key;
-    entry.name = name;
-    entry.code = code;
-    entry.value = value;
-    if (code == kRadioRx) {
-      uint8_t pin = atoi(value.c_str()) >> 24;
+    entry.name = obj["name"].as<String>();
+    entry.code = obj["code"].as<uint8_t>();
+    entry.value = obj["value"].as<String>();
+    if (entry.code == kRadioRx) {
+      uint8_t pin = atoi(entry.value.c_str()) >> 24;
       RF_SetRxPin(pin);
-    } else if (code == kRadioTx) {
-      uint8_t pin = atoi(value.c_str()) >> 24;
+    } else if (entry.code == kRadioTx) {
+      uint8_t pin = atoi(entry.value.c_str()) >> 24;
       RF_SetTxPin(pin);
     }
+    entry.cb = obj["cb"].as<String>();
     // TODO: can be done a setup here
-    entry.cb = cb;
     entry.ev = false;
     entry.ev_value = 0;
     entry.wb = false;
@@ -60,16 +59,16 @@ String &FB_getIoEntryNameById(uint8_t i) {
 void FB_addProgDB(String key, JsonObject &obj) {
   ProgEntry entry;
   entry.key = key;
-  entry.name = obj["name"].asString();
+  entry.name = obj["name"].as<String>();
   DEBUG_PRINT("FB_addProgDB: key=%s, name=%s\n", entry.key.c_str(),
               entry.name.c_str());
 
-  JsonArray &nest = obj["p"].asArray();
+  JsonArray &nest = obj["p"].as<JsonArray>();
   for (uint32_t i = 0; i < nest.size(); ++i) {
     FuncEntry fentry;
     fentry.code = nest[i]["i"].as<int>();
-    if (nest[i]["v"].asString()) {
-      fentry.value = nest[i]["v"].asString();
+    if (nest[i]["v"].as<String>()) {
+      fentry.value = nest[i]["v"].as<String>();
     }
     entry.funcvec.push_back(fentry);
   }
