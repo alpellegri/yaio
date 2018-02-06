@@ -1,4 +1,15 @@
 {
+  "users": {
+    "alovelace": {
+      "name": "Ada Lovelace",
+      "contacts": { "ghopper": true },
+    },
+    "ghopper": { ... },
+    "eclarke": { ... }
+  }
+}
+
+{
   // Chats contains only meta info about each conversation
   // stored under the chats's unique ID
   "chats": {
