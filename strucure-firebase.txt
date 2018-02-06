@@ -6,6 +6,17 @@
     },
     "ghopper": { ... },
     "eclarke": { ... }
+  },
+  "groups": {
+    "techpioneers": {
+      "name": "Historical Tech Pioneers",
+      "members": {
+        "alovelace": true,
+        "ghopper": true,
+        "eclarke": true
+      }
+    },
+    ...
   }
 }
 
