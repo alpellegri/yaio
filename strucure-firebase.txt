@@ -1,5 +1,5 @@
 {
-  "users": {
+  "nodes": {
     "alovelace": {
       "name": "Ada Lovelace",
       "contacts": { "ghopper": true },
@@ -7,7 +7,7 @@
     "ghopper": { ... },
     "eclarke": { ... }
   },
-  "groups": {
+  "domains": {
     "techpioneers": {
       "name": "Historical Tech Pioneers",
       "members": {
@@ -21,7 +21,7 @@
 }
 
 {
-  // Chats contains only meta info about each conversation
+  // Chats contains only meta info about each conversation (domain)
   // stored under the chats's unique ID
   "chats": {
     "one": {
@@ -33,7 +33,7 @@
     "three": { ... }
   },
 
-  // Conversation members are easily accessible
+  // Conversation (domain) members are easily accessible
   // and stored by chat conversation ID
   "members": {
     // we'll talk about indices like this below
