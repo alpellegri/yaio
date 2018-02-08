@@ -67,9 +67,9 @@ class IoEntry {
   static const int shift = 24;
   static const int mask = (1 << shift) - 1;
   DatabaseReference reference;
+  bool exist = false;
   String key;
   String owner;
-  String name;
   int code;
   int value;
   String cb;
@@ -79,9 +79,9 @@ class IoEntry {
   IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
     // print('IoEntry.fromMap');
     reference = ref;
+    exist = true;
     key = k;
     owner = v['owner'];
-    name = v['name'];
     code = v['code'];
     value = v['value'];
     cb = v['cb'];
@@ -114,9 +114,9 @@ class IoEntry {
   }
 
   Map toJson() {
+    exist = true;
     return {
       'owner': owner,
-      'name': name,
       'code': code,
       'value': value,
       'cb': cb,
@@ -236,9 +236,9 @@ class InstrEntry {
 
 class ExecEntry {
   DatabaseReference reference;
+  bool exist = false;
   String key;
   String owner;
-  String name;
   String cb;
   List<InstrEntry> p = new List<InstrEntry>();
 
@@ -247,9 +247,9 @@ class ExecEntry {
   ExecEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
     // print('ExecEntry.fromMap');
     reference = ref;
+    exist = true;
     key = k;
     owner = v['owner'];
-    name = v['name'];
     if (v['p'] != null) {
       v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
     }
@@ -262,8 +262,8 @@ class ExecEntry {
 
   Map<String, dynamic> toJson() {
     print('ExecEntry.toJson');
+    exist = true;
     Map<String, dynamic> map = new Map<String, dynamic>();
-    map['name'] = name;
     map['owner'] = owner;
     List list = new List();
     if (p.length > 0) {

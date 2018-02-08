@@ -123,7 +123,7 @@ bool FbmService(void) {
     FbSetPath_control(kcontrol);
     Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
-      DEBUG_PRINT("set failed: kcontrol/reboot");
+      DEBUG_PRINT("set failed: kcontrol/reboot\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
       dht = new DHT(DHTPIN, DHTTYPE);

@@ -26,7 +26,7 @@ class ExecListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      '${entry.name}',
+                      '${entry.key}',
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),

@@ -31,7 +31,7 @@ class _ExecEditState extends State<ExecEdit> {
   @override
   void initState() {
     super.initState();
-    _controllerName.text = entry?.name;
+    _controllerName.text = entry?.key;
     if (entry.cb != null) {
       _selectedNextList = execList.where((el) => el.key == entry.cb);
       if (_selectedNextList.length == 1) {
@@ -80,12 +80,12 @@ class _ExecEditState extends State<ExecEdit> {
                     items: execList.map((ExecEntry entry) {
                       return new DropdownMenuItem<ExecEntry>(
                         value: entry,
-                        child: new Text(entry.name),
+                        child: new Text(entry.key),
                       );
                     }).toList(),
                   ),
                 )
-              : new Text('Functions not declared yet'),
+              : new Text(''),
           new ListTile(
             trailing: new ButtonTheme.bar(
               child: new ButtonBar(
@@ -93,24 +93,21 @@ class _ExecEditState extends State<ExecEdit> {
                   new FlatButton(
                       child: const Text('REMOVE'),
                       onPressed: () {
-                        entry.reference.child(entry.key).remove();
+                        print(entry.reference);
+                        if (entry.exist == true) {
+                          entry.reference.child(entry.key).remove();
+                        }
                         Navigator.pop(context, null);
                       }),
                   new FlatButton(
                       child: const Text('SAVE'),
                       onPressed: () {
                         setState(() {
-                          entry.name = _controllerName.text;
+                          entry.key = _controllerName.text;
                           entry.cb = _selectedNext?.key;
-                          if (entry.key != null) {
-                            entry.reference
-                                .child(entry.key)
-                                .update(entry.toJson());
-                          } else {
-                            print('save on: ${getNodeSubPath()}');
-                            entry.setOwner(getNodeSubPath());
-                            entry.reference.push().set(entry.toJson());
-                          }
+                          print('save on: ${getNodeSubPath()}');
+                          entry.setOwner(getNodeSubPath());
+                          entry.reference.child(entry.key).set(entry.toJson());
                         });
                         Navigator.pop(context, null);
                       }),
@@ -149,20 +146,8 @@ class ExecProgListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isImmediate = kOpCodeIsImmediate[OpCode.values[entry.i]];
     String value;
-    if (isImmediate == false) {
-      // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
-      value = 'not yet defined';
-      entryIoList.forEach((el) {
-        // print('key: ${el.key}, name: ${el.name}');
-        if (el.key == entry.v) {
-          value = el.name;
-        }
-      });
-    } else {
-      value = entry.v;
-    }
+    value = entry.v;
 
     return new Container(
       padding: const EdgeInsets.all(2.0),
@@ -308,16 +293,18 @@ class _ExecProgState extends State<ExecProg> {
   void _onValueIoEntry(Event event) {
     print('_onValueIoEntry');
     Map data = event.snapshot.value;
-    data.forEach((k, v) {
-      // print('key: $k - value: ${v.toString()}');
-      String owner = v["owner"];
-      if (owner == getOwner()) {
-        setState(() {
-          IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
-          entryIoList.add(e);
-        });
-      }
-    });
+    if (data != null) {
+      data.forEach((k, v) {
+        // print('key: $k - value: ${v.toString()}');
+        String owner = v["owner"];
+        if (owner == getOwner()) {
+          setState(() {
+            IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
+            entryIoList.add(e);
+          });
+        }
+      });
+    }
   }
 }
 
@@ -416,7 +403,7 @@ class _EntryDialogState extends State<EntryDialog> {
                       items: entryIoList.map((IoEntry entry) {
                         return new DropdownMenuItem<IoEntry>(
                           value: entry,
-                          child: new Text(entry.name),
+                          child: new Text(entry.key),
                         );
                       }).toList(),
                     ),

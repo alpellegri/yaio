@@ -49,7 +49,7 @@ void VM_readIn(void) {
       if ((v & mask) != value) {
         value = (v & (~mask)) | value;
         IoEntryVec[i].value = value;
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].name.c_str(), value,
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
                  IoEntryVec[i].value.c_str());
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
@@ -59,6 +59,7 @@ void VM_readIn(void) {
     } break;
     case kBool:
     case kInt: {
+      // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
       if (VM_UpdateDataPending == true) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
@@ -66,12 +67,12 @@ void VM_readIn(void) {
         uint32_t value =
             Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("get failed: kInt %s\n", IoEntryVec[i].name.c_str());
+          DEBUG_PRINT("get failed: kInt %s\n", IoEntryVec[i].key.c_str());
           UpdateDataFault = true;
         } else {
           uint32_t v = atoi(IoEntryVec[i].value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].name.c_str(), value);
+            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(), value);
             IoEntryVec[i].value = value;
             IoEntryVec[i].ev = true;
             IoEntryVec[i].ev_value = value;
@@ -361,7 +362,7 @@ void VM_run(void) {
     ctx.halt = false;
 
     /* keep the event name */
-    ctx.ev_name = IoEntryVec[id].name.c_str();
+    ctx.ev_name = IoEntryVec[id].key.c_str();
     DEBUG_PRINT("VM_run start >>>>>>>>>>>>\n");
     DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
     if (key.length() != 0) {

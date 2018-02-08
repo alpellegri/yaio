@@ -6,7 +6,6 @@
   definition
   key -> {
     owner: <owner>, // it is a string
-    name: <name>,   // it is a string
     code: <type>,   // it is a enum
     value: <value>, // it is dynamic: a string or a number
     cb: <callback>, // optional, it is a string representing the key of the database
@@ -25,7 +24,6 @@
   identifier = pin<<24
   key -> {
     owner: <owner>,
-    name: <name>,
     code: phyin,
     value: <identifier>, // it is a number
     cb: <callback>, // optional
@@ -37,7 +35,6 @@
   identifier = pin<<24|value
   key -> {
     owner: <owner>,
-    name: <name>,
     code: phyout,
     value: <identifier>, // it is a number
     cb: <callback>, // optional
@@ -52,7 +49,6 @@
     
   key -> {
     owner: <owner>,
-    name: <namer>,
     code: timer,
     value: <configuration>, // it is an number
     cb: <callback>, // optional
@@ -71,7 +67,6 @@
 * radioin is a logical value.
   key -> {
     owner: <owner>,
-    name: <radio>,
     code: radioin,
     value: <configuration>, // it is a number
     cb: <callback>, // optional
@@ -86,7 +81,6 @@
 * radiorx is a logical value.
   key -> {
     owner: <owner>,
-    name: <radio>,
     code: radiorx,
     value: 0,
     cb: <callback>, // optional
@@ -98,7 +92,6 @@
 * radioout is a logical value.
   key -> {
     owner: <owner>,
-    name: <radio>,
     code: radioout,
     value: <configuration>, // it is a number
     cb: <callback>, // optional
@@ -108,7 +101,6 @@
 * notify is a logical output
   key -> {
     owner: <owner>,
-    name: <name>,
     code: message,
     value: <message>, // it is a string
     cb: <callback>, // optional
@@ -122,7 +114,6 @@
   generic definition
   key -> {
     owner: <node>,  // it is a string
-    name: <name>,   // it is a string
     code: <type>,   // it is a number (enum)
     value: <value>, // it is a number
     cb: <callback>, // optional
@@ -144,7 +135,6 @@ Program run into a simple virtual machine VM.
 
   key -> {
     owner: <node>,  // it is a string
-    name: <name>,   // it is a string
     p: [<array>],   // it is an array.
   }
 
@@ -286,18 +276,15 @@ instruction code:
 0: st status, end
 
 key-In -> {
-  name: 'In',
   code: phyin,
   value: pin<<24,
   cb: key-prog,
 }
 key-status -> {
-  name: 'status',
   code: bool,
   value: 0,
 }
 key-prog -> {
-  name: 'prog',
   p: [
     { i: st, v: key-status }
   ]
@@ -318,23 +305,19 @@ instruction code:
 1: st status, end
 
 key-sensor -> {
-  name: 'sensor',
   code: phyin,
   value: pin<<24,
   cb: key-prog,
 }
 key-thr1 -> {
-  name: 'thr1',
   code: var,
   value: 90,
 }
 key-status -> {
-  name: 'status',
   code: bool,
   value: 0,
 }
 key-prog: {
-  name: 'prog',
   p: [
     { i: gt, v: 0 },
     { i: st, v: key-status }
@@ -355,18 +338,15 @@ instruction-code:
 1: st led, end
 
 key-led -> {
-  name: 'led',
   code: phyout,
   value: pin<<24,
 }
 key-status -> {
-  name: 'status',
   code: bool,
   value: 0,
   cb: key-prog,
 }
 key-prog -> {
-  name: 'prog',
   p: [
     { i: eqi, v: 0 },
     { i: st, v: key-led }
@@ -420,23 +400,19 @@ instruction-code:
 // CPU load on device.
 
 key-sensor -> {
-  name: 'sensor',
   code: phyin,
   value: pin<<24,
   cb: key-prog,
 }
 key-status -> {
-  name: 'status',
   code: bool,
   value: 0, // only the init value
 }
 key-thr1 -> {
-  name: 'thr1',
   code: int,
   value: 90,
 }
 key-thr2 -> {
-  name: 'thr2',
   code: int,
   value: 110,
 }
@@ -476,39 +452,39 @@ pseudo-code:
     rx-radio = id;
   }
 
-key-sensor -> {
-  name: 'sensor',
+key-PIR-Code -> {
   code: radioin,
   value: 0xffaaff, // example configuration
   cb: key-prog1,
 }
-key-id -> {
-  name: 'id',
+key-RxConfconf -> {
   code: radiorx,
   value: 0,
   cb: key-prog2,
 }
 key-rx-radio -> {
-  name: 'rx-radio',
   code: int,
   value: 0,
 }
-key-notify -> {
-  name: 'notify',
+key-notify-message -> {
   code: logout,
   value: kmessage,
 }
-key-alarm-status -> {
-  name: 'alarm-status',
+key-alarm-active -> {
   code: bool,
   value: 0, // only the init value
 }
 key-prog1 -> {
   name: 'prog1',
   p: [
-    { i: ld, v: key-alarm-status },
+    { i: ld, v: key-alarm-active },
     { i: bz, v: end },
-    { i: st, v: key-notify }
+    { i: st, v: key-notify-message }
+    { i: ldi, v: 0 }
+    { i: st24, v: key-led }
+    { i: dly, v: 300 }
+    { i: ldi, v: 0 }
+    { i: st24, v: key-led }
   ]
 }
 key-prog2 -> {
@@ -534,24 +510,20 @@ pseudo-code:
   }
 
 key-timer1 -> {
-  name: <name>,
   code: int,
   value: 1*2^18 + mask*2^11 + 0*60+0, // on config
   cb: key-prog,
 }
 key-timer2 -> {
-  name: <name>,
   code: int,
   value:  0*2^18 + mask*2^11 + 0*60+1, // off config
   cb: key-prog,
 }
 key-led -> {
-  name: 'led',
   code: phyout,
   value: pin<<24,
 }
 key-prog -> {
-  name: 'prog',
   p: [
     { i: st, v: key-led }
   ]

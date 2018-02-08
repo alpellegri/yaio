@@ -32,7 +32,6 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
   if (IoEntryVec.size() < NUM_IO_ENTRY_MAX) {
     IoEntry entry;
     entry.key = key;
-    entry.name = obj["name"].as<String>();
     entry.code = obj["code"].as<uint8_t>();
     entry.value = obj["value"].as<String>();
     if (entry.code == kRadioRx) {
@@ -53,15 +52,13 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
 
 String &FB_getIoEntryNameById(uint8_t i) {
   IoEntry &entry = IoEntryVec[i];
-  return entry.name;
+  return entry.key;
 }
 
 void FB_addProgDB(String key, JsonObject &obj) {
   ProgEntry entry;
   entry.key = key;
-  entry.name = obj["name"].as<String>();
-  DEBUG_PRINT("FB_addProgDB: key=%s, name=%s\n", entry.key.c_str(),
-              entry.name.c_str());
+  DEBUG_PRINT("FB_addProgDB: key=%s\n", entry.key.c_str());
 
   JsonArray &nest = obj["p"].as<JsonArray>();
   for (uint32_t i = 0; i < nest.size(); ++i) {
@@ -107,24 +104,21 @@ uint8_t FB_getProgIdx(const char *key) {
 }
 
 void FB_dumpIoEntry(void) {
-  DEBUG_PRINT("FB_dumpIoEntry");
+  DEBUG_PRINT("FB_dumpIoEntry\n");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    DEBUG_PRINT("%d: key=%s, name=%s, code=%d, value=%s, cb=%s\n", i,
-        IoEntryVec[i].key.c_str(), IoEntryVec[i].name.c_str(),
-        IoEntryVec[i].code, IoEntryVec[i].value.c_str(),
-        IoEntryVec[i].cb.c_str());
+    DEBUG_PRINT("%d: key=%s, code=%d, value=%s, cb=%s\n", i,
+                IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
+                IoEntryVec[i].value.c_str(), IoEntryVec[i].cb.c_str());
   }
 }
 
 void FB_dumpProg(void) {
-  DEBUG_PRINT("FB_dumpProg");
+  DEBUG_PRINT("FB_dumpProg\n");
   for (uint8_t i = 0; i < ProgVec.size(); ++i) {
-    DEBUG_PRINT("%d: key=%s, name=%s\n", i, ProgVec[i].key.c_str(),
-                    ProgVec[i].name.c_str());
+    DEBUG_PRINT("%d: key=%s\n", i, ProgVec[i].key.c_str());
     for (uint8_t j = 0; j < ProgVec[i].funcvec.size(); j++) {
-      DEBUG_PRINT("%d: code=%d, value=%s\n", j,
-                      ProgVec[i].funcvec[j].code,
-                      ProgVec[i].funcvec[j].value.c_str());
+      DEBUG_PRINT("  %d: code=%d, value=%s\n", j, ProgVec[i].funcvec[j].code,
+                  ProgVec[i].funcvec[j].value.c_str());
     }
   }
 }

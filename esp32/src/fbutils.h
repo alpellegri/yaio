@@ -33,7 +33,6 @@ public:
   bool ev;
   bool wb;
   String key;
-  String name;
   String value;
   String cb;
   uint32_t ev_value;
@@ -48,7 +47,6 @@ public:
 class ProgEntry {
 public:
   String key; // firebase key
-  String name;
   std::vector<FuncEntry> funcvec;
 };
 

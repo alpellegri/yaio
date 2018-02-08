@@ -25,7 +25,7 @@ class ListItem extends StatelessWidget {
                 new Column(
                   children: [
                     new Text(
-                      entry.name,
+                      entry.key,
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
@@ -201,7 +201,7 @@ class _EntryDialogState extends State<EntryDialog> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
-      _controllerName.text = entry.name;
+      _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _controllerPin.text = entry.getPin().toString();
       _controllerValue.text = entry.getValue().toString();
@@ -276,18 +276,18 @@ class _EntryDialogState extends State<EntryDialog> {
                         items: _execList.map((ExecEntry entry) {
                           return new DropdownMenuItem<ExecEntry>(
                             value: entry,
-                            child: new Text(entry.name),
+                            child: new Text(entry.key),
                           );
                         }).toList(),
                       ),
                     )
-                  : new Text('Exec not declared yet'),
+                  : new Text(''),
             ]),
         actions: <Widget>[
           new FlatButton(
               child: const Text('REMOVE'),
               onPressed: () {
-                if (entry.key != null) {
+                if (entry.exist == true) {
                   entry.reference.child(entry.key).remove();
                 }
                 Navigator.pop(context, null);
@@ -295,18 +295,14 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                entry.name = _controllerName.text;
+                entry.key = _controllerName.text;
                 try {
                   entry.code = _selectedType;
                   entry.cb = _selectedExec?.key;
                   entry.setPin(int.parse(_controllerPin.text));
                   entry.setValue(int.parse(_controllerValue.text));
-                  if (entry.key != null) {
-                    entry.reference.child(entry.key).update(entry.toJson());
-                  } else {
-                    entry.setOwner(getNodeSubPath());
-                    entry.reference.push().set(entry.toJson());
-                  }
+                  entry.setOwner(getNodeSubPath());
+                  entry.reference.child(entry.key).set(entry.toJson());
                 } catch (exception, stackTrace) {
                   print('bug');
                 }
@@ -323,20 +319,22 @@ class _EntryDialogState extends State<EntryDialog> {
   void _onValueExec(Event event) {
     print('_onValueExec');
     Map data = event.snapshot.value;
-    data.forEach((k, v) {
-      // print('key: $k - value: ${v.toString()}');
-      // filter only relative to the domain
-      String owner = v["owner"];
-      if (owner == getOwner()) {
-        setState(() {
-          ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
-          _execList.add(e);
-          if (entry.cb == e.key) {
-            _selectedExec = e;
-          }
-        });
-      }
-    });
+    if (data != null) {
+      data.forEach((k, v) {
+        // print('key: $k - value: ${v.toString()}');
+        // filter only relative to the domain
+        String owner = v["owner"];
+        if (owner == getOwner()) {
+          setState(() {
+            ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
+            _execList.add(e);
+            if (entry.cb == e.key) {
+              _selectedExec = e;
+            }
+          });
+        }
+      });
+    }
   }
 }
 
