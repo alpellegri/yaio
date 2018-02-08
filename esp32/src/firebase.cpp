@@ -32,7 +32,7 @@ std::string FirebaseRest::RestApi(RestMethod_t method, const std::string path,
 
   http.setTimeout(3000);
   // http.setReuse(true);
-  http.begin(addr.c_str(), _fingerprint);
+  http.begin(addr.c_str());
   httpCode_ = http.sendRequest(RestMethods[method], (uint8_t *)value.c_str(),
                                value.length());
   result_ = String(F("")).c_str();
