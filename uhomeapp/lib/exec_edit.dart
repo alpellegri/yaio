@@ -242,7 +242,8 @@ class _ExecProgState extends State<ExecProg> {
   }
 
   Future<Null> _onFloatingActionButtonPressed() async {
-    final TextEditingController ctrl = new TextEditingController(text: '');
+    final TextEditingController ctrl =
+        new TextEditingController(text: '${prog.length}');
     await showDialog<Null>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -268,10 +269,16 @@ class _ExecProgState extends State<ExecProg> {
               Navigator.of(context).pop(ctrl.text);
             },
           ),
+          new FlatButton(
+            child: new Text('DISCARD'),
+            onPressed: () {
+              Navigator.of(context).pop(null);
+            },
+          ),
         ],
       ),
     ).then((e) {
-      if (e != '') {
+      if (e != null) {
         int index = int.parse(e);
         if (index < prog.length) {
           prog.insert(index, new InstrEntry(0, '0'));
