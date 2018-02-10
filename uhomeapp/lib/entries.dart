@@ -65,26 +65,30 @@ const Map<String, DataCode> kEntryName2Id = const {
 
 int getMode(int type) {
   int mode;
-  switch (DataCode.values[type]) {
+  if (type != null) {
+    switch (DataCode.values[type]) {
     // integer values with pin8 and value24
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
-    case DataCode.RadioRx:
-    case DataCode.RadioTx:
-      mode = 1;
-      break;
+      case DataCode.PhyIn:
+      case DataCode.PhyOut:
+      case DataCode.RadioRx:
+      case DataCode.RadioTx:
+        mode = 1;
+        break;
     // full integer or floating value
-    case DataCode.RadioIn:
-    case DataCode.Int:
-    case DataCode.Float:
-      mode = 2;
-      break;
+      case DataCode.RadioIn:
+      case DataCode.Int:
+      case DataCode.Float:
+        mode = 2;
+        break;
     // string value
-    case DataCode.Messaging:
-      mode = 3;
-      break;
-    default:
-      mode = 0;
+      case DataCode.Messaging:
+        mode = 3;
+        break;
+      default:
+        mode = 0;
+    }
+  } else {
+    mode = 0;
   }
 
   return mode;

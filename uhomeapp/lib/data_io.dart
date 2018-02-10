@@ -22,7 +22,10 @@ class ListItem extends StatelessWidget {
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                new Column(
+                new Expanded(
+                    child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     new Text(
                       entry.key,
@@ -30,24 +33,25 @@ class ListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      'TYPE: ${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textScaleFactor: 0.8,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    new Text(
-                      'VALUE: ${entry.getValue()}',
-                      textScaleFactor: 0.9,
+                      '${kEntryId2Name[DataCode.values[entry.code]]}',
+                      textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
                     ),
                   ],
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                )),
+                new Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
+                  children: [
+                    new Text(
+                      '${entry.getValue()}',
+                      textScaleFactor: 1.2,
+                      textAlign: TextAlign.right,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -200,18 +204,20 @@ class _EntryDialogState extends State<EntryDialog> {
   void initState() {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
-    _selectedType = entry.code;
     if (entry.value != null) {
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
+      _selectedType = entry.code;
       switch (getMode(_selectedType)) {
         case 1:
           _controllerPin.text = entry.getPin8().toString();
           _controllerValue.text = entry.getValue24().toString();
           break;
         case 2:
-        case 3:
           _controllerValue.text = entry.getValue().toString();
+          break;
+        case 3:
+          _controllerValue.text = entry.getValue();
           break;
         default:
       }
@@ -257,7 +263,8 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new NormalWidget(_selectedType, _controllerPin, _controllerValue),
+              new DynamicWidget(
+                  _selectedType, _controllerPin, _controllerValue),
               (_execList.length > 0)
                   ? new ListTile(
                       title: const Text('Call'),
@@ -344,12 +351,12 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 }
 
-class NormalWidget extends StatelessWidget {
+class DynamicWidget extends StatelessWidget {
   final int type;
   final TextEditingController pin;
   final TextEditingController value;
 
-  NormalWidget(this.type, this.pin, this.value);
+  DynamicWidget(this.type, this.pin, this.value);
 
   @override
   Widget build(BuildContext context) {
@@ -363,14 +370,14 @@ class NormalWidget extends StatelessWidget {
                 controller: pin,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
-                  hintText: 'value',
+                  hintText: 'pin value',
                 ),
               ),
               new TextField(
                 controller: value,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
-                  hintText: 'value',
+                  hintText: 'data value',
                 ),
               ),
             ]);
@@ -407,7 +414,7 @@ class NormalWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new Text('error'),
+              new Text(''),
             ]);
     }
   }
