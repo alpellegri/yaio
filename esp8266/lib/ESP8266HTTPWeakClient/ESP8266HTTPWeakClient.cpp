@@ -849,7 +849,7 @@ bool HTTPWeakClient::connect(void)
 
     DEBUG_HTTPCLIENT("[HTTP-Client] connected to %s:%u\n", _host.c_str(), _port);
 
-#if 1
+#if 0
     if (!_transportTraits->verify(*_tcp, _host.c_str())) {
         DEBUG_HTTPCLIENT("[HTTP-Client] transport level verify failed\n");
         _tcp->stop();
