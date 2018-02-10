@@ -49,7 +49,6 @@ static FOTA_StateMachine_t state = FOTA_Sm_IDLE;
 static FOTA_StateMachine_t state_last = FOTA_Sm_IDLE;
 
 static String addr;
-// static char digest_MD5[32];
 #define DIGEST_MD5_SIZE 32
 static char *digest_MD5 = NULL;
 static uint8_t http_fail_cnt;
