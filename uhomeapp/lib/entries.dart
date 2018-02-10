@@ -87,26 +87,34 @@ class IoEntry {
     cb = v['cb'];
   }
 
-  int getPin() {
+  int getPin8() {
     value ??= 0;
     return value >> shift;
   }
 
-  setPin(int pin) {
+  setPin8(int pin) {
     value ??= 0;
     value = value & mask;
     value = pin << shift | value;
   }
 
-  int getValue() {
+  int getValue24() {
     value ??= 0;
     return value & mask;
   }
 
-  setValue(int v) {
+  setValue24(int v) {
     value ??= 0;
     int port = value >> shift;
     value = (port << shift) | (v & mask);
+  }
+
+  int getValue() {
+    return value;
+  }
+
+  setValue(int v) {
+    value = v;
   }
 
   setOwner(String _owner) {

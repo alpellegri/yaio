@@ -200,14 +200,23 @@ class _EntryDialogState extends State<EntryDialog> {
   void initState() {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
+    _selectedType = entry.code;
     if (entry.value != null) {
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
-      _controllerPin.text = entry.getPin().toString();
-      _controllerValue.text = entry.getValue().toString();
+      switch (getMode(_selectedType)) {
+        case 1:
+          _controllerPin.text = entry.getPin8().toString();
+          _controllerValue.text = entry.getValue24().toString();
+          break;
+        case 2:
+        case 3:
+          _controllerValue.text = entry.getValue().toString();
+          break;
+        default:
+      }
     }
     DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
-    _selectedType = entry.code;
   }
 
   @override
@@ -248,20 +257,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new TextField(
-                controller: _controllerPin,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'pin',
-                ),
-              ),
-              new TextField(
-                controller: _controllerValue,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'value',
-                ),
-              ),
+              new NormalWidget(_selectedType, _controllerPin, _controllerValue),
               (_execList.length > 0)
                   ? new ListTile(
                       title: const Text('Call'),
@@ -299,8 +295,18 @@ class _EntryDialogState extends State<EntryDialog> {
                 try {
                   entry.code = _selectedType;
                   entry.cb = _selectedExec?.key;
-                  entry.setPin(int.parse(_controllerPin.text));
-                  entry.setValue(int.parse(_controllerValue.text));
+                  switch (getMode(_selectedType)) {
+                    case 1:
+                      entry.setPin8(int.parse(_controllerPin.text));
+                      entry.setValue24(int.parse(_controllerValue.text));
+                      break;
+                    case 2:
+                      entry.setValue(int.parse(_controllerValue.text));
+                      break;
+                    case 3:
+                      entry.setValue(int.parse(_controllerValue.text));
+                      break;
+                  }
                   entry.setOwner(getNodeSubPath());
                   entry.reference.child(entry.key).set(entry.toJson());
                 } catch (exception, stackTrace) {
@@ -338,14 +344,94 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 }
 
+int getMode(int type) {
+  int mode;
+  switch (DataCode.values[type]) {
+    case DataCode.PhyIn:
+    case DataCode.PhyOut:
+    case DataCode.RadioRx:
+    case DataCode.RadioTx:
+      mode = 1;
+      break;
+    case DataCode.Int:
+    case DataCode.Float:
+      mode = 2;
+      break;
+    case DataCode.Messaging:
+      mode = 3;
+      break;
+    default:
+      mode = 0;
+  }
+
+  return mode;
+}
+
 class NormalWidget extends StatelessWidget {
+  final int type;
+  final TextEditingController pin;
+  final TextEditingController value;
+
+  NormalWidget(this.type, this.pin, this.value);
+
   @override
   Widget build(BuildContext context) {
-    return new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          new Text(''),
-        ]);
+    switch (getMode(type)) {
+      case 1:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: pin,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+        break;
+      case 2:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+        break;
+      case 3:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: value,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+        break;
+      default:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new Text('error'),
+            ]);
+    }
   }
 }
