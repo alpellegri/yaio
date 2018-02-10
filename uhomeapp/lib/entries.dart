@@ -67,20 +67,20 @@ int getMode(int type) {
   int mode;
   if (type != null) {
     switch (DataCode.values[type]) {
-    // integer values with pin8 and value24
+      // integer values with pin8 and value24
       case DataCode.PhyIn:
       case DataCode.PhyOut:
       case DataCode.RadioRx:
       case DataCode.RadioTx:
         mode = 1;
         break;
-    // full integer or floating value
+      // full integer or floating value
       case DataCode.RadioIn:
       case DataCode.Int:
       case DataCode.Float:
         mode = 2;
         break;
-    // string value
+      // string value
       case DataCode.Messaging:
         mode = 3;
         break;
@@ -99,6 +99,7 @@ class IoEntry {
   static const int mask = (1 << shift) - 1;
   DatabaseReference reference;
   bool exist = false;
+  bool draw = false;
   String key;
   String owner;
   int code;
@@ -115,6 +116,9 @@ class IoEntry {
     code = v['code'];
     value = v['value'];
     cb = v['cb'];
+    if (v['draw'] != null) {
+      draw = v['draw'];
+    }
   }
 
   int getPin8() {
@@ -158,6 +162,7 @@ class IoEntry {
     map['code'] = code;
     map['value'] = value;
     map['cb'] = cb;
+    map['draw'] = draw;
     return map;
   }
 }

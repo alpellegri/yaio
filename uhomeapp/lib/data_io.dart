@@ -80,17 +80,14 @@ class _DataIOState extends State<DataIO> {
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
-  _DataIOState() {
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
-    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryEdited);
-    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
-  }
-
   @override
   void initState() {
     super.initState();
     print('_DigitalIOState');
+    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -103,7 +100,6 @@ class _DataIOState extends State<DataIO> {
 
   @override
   Widget build(BuildContext context) {
-    var query = entryList;
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -112,11 +108,11 @@ class _DataIOState extends State<DataIO> {
       body: new ListView.builder(
         shrinkWrap: true,
         reverse: true,
-        itemCount: query.length,
+        itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(query[index]),
-              child: new ListItem(query[index]));
+              onTap: () => _openEntryDialog(entryList[index]),
+              child: new ListItem(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -190,6 +186,7 @@ class _EntryDialogState extends State<EntryDialog> {
   List<ExecEntry> _execList = new List();
   int _selectedType;
   List<int> _opTypeMenu = new List<int>();
+  bool _checkboxValue = false;
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
@@ -285,6 +282,11 @@ class _EntryDialogState extends State<EntryDialog> {
                       ),
                     )
                   : new Text(''),
+              new Checkbox(value: _checkboxValue, onChanged: (bool value) {
+                setState(() {
+                  _checkboxValue = value;
+                });
+              }),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -299,6 +301,7 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 entry.key = _controllerName.text;
+                entry.draw = _checkboxValue;
                 try {
                   entry.code = _selectedType;
                   entry.cb = _selectedExec?.key;

@@ -4,6 +4,64 @@ import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
+import 'entries.dart';
+
+class ListItem extends StatelessWidget {
+  final IoEntry entry;
+
+  ListItem(this.entry);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+      child: new Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          new Expanded(
+            child: new Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Expanded(
+                    child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    new Text(
+                      entry.key,
+                      textScaleFactor: 1.2,
+                      textAlign: TextAlign.left,
+                    ),
+                    new Text(
+                      '${kEntryId2Name[DataCode.values[entry.code]]}',
+                      textScaleFactor: 1.0,
+                      textAlign: TextAlign.left,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                )),
+                new Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    new Text(
+                      '${entry.getValue()}',
+                      textScaleFactor: 1.2,
+                      textAlign: TextAlign.right,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class Home extends StatefulWidget {
   Home({Key key, this.title}) : super(key: key);
@@ -27,6 +85,12 @@ class _HomeState extends State<Home> {
   StreamSubscription<Event> _statusSub;
   StreamSubscription<Event> _startupSub;
 
+  List<IoEntry> entryList = new List();
+  DatabaseReference _dataRef;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
+
   bool _connected = false;
 
   Map<String, Object> _control;
@@ -44,6 +108,10 @@ class _HomeState extends State<Home> {
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
+    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
+    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryEdited);
+    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -52,6 +120,9 @@ class _HomeState extends State<Home> {
     _controlSub.cancel();
     _statusSub.cancel();
     _startupSub.cancel();
+    _onAddSubscription.cancel();
+    _onEditSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
@@ -87,6 +158,22 @@ class _HomeState extends State<Home> {
                         ? (new Icon(Icons.sync_problem, color: Colors.red[200]))
                         : (new Icon(Icons.sync, color: Colors.green[200])),
                     title: const Text('Device Status'),
+                  ),
+                ],
+              ),
+            ),
+            new Card(
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  new ListView.builder(
+                    shrinkWrap: true,
+                    reverse: true,
+                    itemCount: entryList.length,
+                    itemBuilder: (buildContext, index) {
+                      return new InkWell(child: new ListItem(entryList[index]));
+                    },
                   ),
                 ],
               ),
@@ -176,6 +263,43 @@ class _HomeState extends State<Home> {
               ),
             ),
           ]));
+    }
+  }
+
+  void _onEntryAdded(Event event) {
+    String owner = event.snapshot.value["owner"];
+    bool draw = event.snapshot.value["draw"];
+    if (owner == getOwner() && draw == true) {
+      setState(() {
+        IoEntry entry = new IoEntry.fromMap(
+            _dataRef, event.snapshot.key, event.snapshot.value);
+        entryList.add(entry);
+      });
+    }
+  }
+
+  void _onEntryEdited(Event event) {
+    String owner = event.snapshot.value["owner"];
+    bool draw = event.snapshot.value["draw"];
+    if (owner == getOwner() && draw == true) {
+      IoEntry oldValue =
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
+            _dataRef, event.snapshot.key, event.snapshot.value);
+      });
+    }
+  }
+
+  void _onEntryRemoved(Event event) {
+    String owner = event.snapshot.value["owner"];
+    bool draw = event.snapshot.value["draw"];
+    if (owner == getOwner() && draw == true) {
+      IoEntry oldValue =
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList.remove(oldValue);
+      });
     }
   }
 
