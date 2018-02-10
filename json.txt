@@ -363,19 +363,28 @@ pseudo-code:
 
 init:
   status = false;
-  thr1 = 90
-  thr2 = 110
+  T1 = 90
+  T2 = 110
 
 the following code write the output variable status only when status needs to change.
+
+         .....             ......
+T2      .     .           .
+       .       .         .
+      .         .       .
+T1   .           .     .
+    .             .....
+    OFF  ON       OFF      ON
+	_____---------_________------
 
 run:
   @sensor.event
   if (status == true) {
-    if (sensor<thr1) {
+    if (sensor<T1) {
       status = false;
     }
   } else {
-    if (sensor>thr2) {
+    if (sensor>T2) {
       status = true;
     }
   }
@@ -384,11 +393,11 @@ instruction-code:
 0: ld status
 1: bz 6
 2: ld sensor
-3: gt thr1
+3: gt T1
 4: bnz end
 5: jmp 9
 6: ld sensor
-7: gt thr2
+7: gt T2
 8: bz end
 9: st status
 
@@ -408,11 +417,11 @@ key-status -> {
   code: bool,
   value: 0, // only the init value
 }
-key-thr1 -> {
+key-T1 -> {
   code: int,
   value: 90,
 }
-key-thr2 -> {
+key-T2 -> {
   code: int,
   value: 110,
 }
@@ -422,16 +431,50 @@ key-prog -> {
     { i: ld, v: key-status },
     { i: bz, v: 6 },
     { i: ld, v: key-sensor },
-    { i: gt, v: key-thr1 },
+    { i: gt, v: key-T1 },
     { i: bnz, v: end },
     { i: jmp, v: 9 },
     { i: ld, v: key-sensor },
-    { i: lt, v: key-thr2 },
+    { i: gt, v: key-T2 },
     { i: bz, v: end },
     { i: st, v: key-status },
     { i: st, v: key-led }
   ]
 }
+
+         .....             ......
+T2      .     .           .
+       .       .         .
+      .         .       .
+T1   .           .     .
+    .             .....
+    ON   OFF      ON       OFF
+    -----_________---------______
+
+run:
+  @sensor.event
+  if (status == false) {
+    if (sensor<T1) {
+      status = true;
+    }
+  } else {
+    if (sensor>T2) {
+      status = false;
+    }
+  }
+  
+instruction-code:
+0: ld status
+1: bnz 6
+2: ld sensor
+3: lt T1
+4: bz end
+5: jmp 9
+6: ld sensor
+7: lt T2
+8: bnz end
+9: st status
+
 
 A4. example radio code and alarm
    =============================
