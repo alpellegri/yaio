@@ -63,6 +63,33 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringMessaging: DataCode.Messaging,
 };
 
+int getMode(int type) {
+  int mode;
+  switch (DataCode.values[type]) {
+    // integer values with pin8 and value24
+    case DataCode.PhyIn:
+    case DataCode.PhyOut:
+    case DataCode.RadioRx:
+    case DataCode.RadioTx:
+      mode = 1;
+      break;
+    // full integer or floating value
+    case DataCode.RadioIn:
+    case DataCode.Int:
+    case DataCode.Float:
+      mode = 2;
+      break;
+    // string value
+    case DataCode.Messaging:
+      mode = 3;
+      break;
+    default:
+      mode = 0;
+  }
+
+  return mode;
+}
+
 class IoEntry {
   static const int shift = 24;
   static const int mask = (1 << shift) - 1;
@@ -71,49 +98,52 @@ class IoEntry {
   String key;
   String owner;
   int code;
-  int value;
+  String value;
   String cb;
 
   IoEntry(DatabaseReference ref) : reference = ref;
 
   IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    // print('IoEntry.fromMap');
     reference = ref;
     exist = true;
     key = k;
     owner = v['owner'];
     code = v['code'];
-    value = v['value'];
+    value = (getMode(code) == 3) ? (v['value']) : (v['value'].toString());
     cb = v['cb'];
   }
 
   int getPin8() {
-    value ??= 0;
-    return value >> shift;
+    int iValue = int.parse(value);
+    iValue ??= 0;
+    return iValue >> shift;
   }
 
   setPin8(int pin) {
-    value ??= 0;
-    value = value & mask;
-    value = pin << shift | value;
+    int iValue = int.parse(value);
+    iValue ??= 0;
+    iValue = iValue & mask;
+    value = (pin << shift | iValue).toString();
   }
 
   int getValue24() {
-    value ??= 0;
-    return value & mask;
+    int iValue = int.parse(value);
+    iValue ??= 0;
+    return iValue & mask;
   }
 
   setValue24(int v) {
-    value ??= 0;
-    int port = value >> shift;
-    value = (port << shift) | (v & mask);
+    int iValue = int.parse(value);
+    iValue ??= 0;
+    int port = iValue >> shift;
+    value = ((port << shift) | (v & mask)).toString();
   }
 
-  int getValue() {
+  String getValue() {
     return value;
   }
 
-  setValue(int v) {
+  setValue(String v) {
     value = v;
   }
 
@@ -123,12 +153,12 @@ class IoEntry {
 
   Map toJson() {
     exist = true;
-    return {
-      'owner': owner,
-      'code': code,
-      'value': value,
-      'cb': cb,
-    };
+    Map<String, dynamic> map = new Map<String, dynamic>();
+    map['owner'] = owner;
+    map['code'] = code;
+    map['value'] = (getMode(code) == 3) ? (value) : (int.parse(value));
+    map['cb'] = cb;
+    return map;
   }
 }
 
@@ -280,6 +310,7 @@ class ExecEntry {
       });
       map['p'] = list;
     }
+    map['cb'] = cb;
 
     return map;
   }

@@ -211,7 +211,7 @@ class _EntryDialogState extends State<EntryDialog> {
           break;
         case 2:
         case 3:
-          _controllerValue.text = entry.getValue().toString();
+          _controllerValue.text = entry.getValue();
           break;
         default:
       }
@@ -301,10 +301,8 @@ class _EntryDialogState extends State<EntryDialog> {
                       entry.setValue24(int.parse(_controllerValue.text));
                       break;
                     case 2:
-                      entry.setValue(int.parse(_controllerValue.text));
-                      break;
                     case 3:
-                      entry.setValue(int.parse(_controllerValue.text));
+                      entry.setValue(_controllerValue.text);
                       break;
                   }
                   entry.setOwner(getNodeSubPath());
@@ -342,29 +340,6 @@ class _EntryDialogState extends State<EntryDialog> {
       });
     }
   }
-}
-
-int getMode(int type) {
-  int mode;
-  switch (DataCode.values[type]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
-    case DataCode.RadioRx:
-    case DataCode.RadioTx:
-      mode = 1;
-      break;
-    case DataCode.Int:
-    case DataCode.Float:
-      mode = 2;
-      break;
-    case DataCode.Messaging:
-      mode = 3;
-      break;
-    default:
-      mode = 0;
-  }
-
-  return mode;
 }
 
 class NormalWidget extends StatelessWidget {
