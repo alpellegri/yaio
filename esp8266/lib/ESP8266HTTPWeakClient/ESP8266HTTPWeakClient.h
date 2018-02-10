@@ -29,6 +29,8 @@
 #include <Arduino.h>
 #include <WiFiClient.h>
 
+// #define DEBUG_ESP_HTTP_CLIENT 1
+// #define DEBUG_ESP_PORT Serial
 #ifdef DEBUG_ESP_HTTP_CLIENT
 #ifdef DEBUG_ESP_PORT
 #define DEBUG_HTTPCLIENT(...) DEBUG_ESP_PORT.printf( __VA_ARGS__ )
