@@ -211,7 +211,7 @@ class _EntryDialogState extends State<EntryDialog> {
           break;
         case 2:
         case 3:
-          _controllerValue.text = entry.getValue();
+          _controllerValue.text = entry.getValue().toString();
           break;
         default:
       }
@@ -301,6 +301,8 @@ class _EntryDialogState extends State<EntryDialog> {
                       entry.setValue24(int.parse(_controllerValue.text));
                       break;
                     case 2:
+                      entry.setValue(int.parse(_controllerValue.text));
+                      break;
                     case 3:
                       entry.setValue(_controllerValue.text);
                       break;

@@ -98,7 +98,7 @@ class IoEntry {
   String key;
   String owner;
   int code;
-  String value;
+  dynamic value;
   String cb;
 
   IoEntry(DatabaseReference ref) : reference = ref;
@@ -109,41 +109,37 @@ class IoEntry {
     key = k;
     owner = v['owner'];
     code = v['code'];
-    value = (getMode(code) == 3) ? (v['value']) : (v['value'].toString());
+    value = v['value'];
     cb = v['cb'];
   }
 
   int getPin8() {
-    int iValue = int.parse(value);
-    iValue ??= 0;
-    return iValue >> shift;
+    value ??= 0;
+    return value >> shift;
   }
 
   setPin8(int pin) {
-    int iValue = int.parse(value);
-    iValue ??= 0;
-    iValue = iValue & mask;
-    value = (pin << shift | iValue).toString();
+    value ??= 0;
+    value = value & mask;
+    value = (pin << shift | value);
   }
 
   int getValue24() {
-    int iValue = int.parse(value);
-    iValue ??= 0;
-    return iValue & mask;
+    value ??= 0;
+    return value & mask;
   }
 
   setValue24(int v) {
-    int iValue = int.parse(value);
-    iValue ??= 0;
-    int port = iValue >> shift;
-    value = ((port << shift) | (v & mask)).toString();
+    value ??= 0;
+    int port = value >> shift;
+    value = ((port << shift) | (v & mask));
   }
 
-  String getValue() {
+  dynamic getValue() {
     return value;
   }
 
-  setValue(String v) {
+  setValue(dynamic v) {
     value = v;
   }
 
@@ -156,7 +152,7 @@ class IoEntry {
     Map<String, dynamic> map = new Map<String, dynamic>();
     map['owner'] = owner;
     map['code'] = code;
-    map['value'] = (getMode(code) == 3) ? (value) : (int.parse(value));
+    map['value'] = value;
     map['cb'] = cb;
     return map;
   }
