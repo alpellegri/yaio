@@ -202,6 +202,7 @@ class _EntryDialogState extends State<EntryDialog> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
+      _checkboxValue = entry.draw;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _selectedType = entry.code;
