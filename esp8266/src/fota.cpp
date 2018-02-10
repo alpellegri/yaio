@@ -1,12 +1,16 @@
-
+#include <Arduino.h>
+#if 0
+#include <ESP8266HTTPClient.h>
+#else
 // use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
 #include <ESP8266HTTPWeakClient.h>
+#define HTTPClient HTTPWeakClient
+#endif
 
 #include <ESP8266WiFi.h>
 #include <MD5Builder.h>
 #include <Updater.h>
 #include <WiFiUdp.h>
-#include <pgmspace.h>
 #include <stdlib.h>
 
 #include "ee.h"
@@ -33,7 +37,7 @@ typedef enum {
   FOTA_Sm_ERROR,
 } FOTA_StateMachine_t;
 
-static HTTPWeakClient http;
+static HTTPClient *http;
 
 static const uint16_t block_size = 4 * 1500;
 static uint16_t block;
@@ -82,21 +86,22 @@ bool FOTAService(void) {
                          String(FPSTR(md5file_name)) + String(F("?alt=media"));
     addr = String(F("https://")) + String(FPSTR(storage_host)) + md5file_url;
     DEBUG_PRINT("FOTA_Sm_GET_MD5 %s\n", addr.c_str());
-    http.setReuse(true);
-
-    bool res = http.begin(addr, storage_fingerprint);
+    http = new HTTPClient;
+    http->setReuse(true);
+    http->setTimeout(3000);
+    bool res = http->begin(addr, storage_fingerprint);
     if (res == true) {
-      int httpCode = http.GET();
+      int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {
         // HTTP header has been send and Server response header has been handled
         DEBUG_PRINT("[HTTP] GET... code: %d\n", httpCode);
         // file found at server
         if (httpCode == HTTP_CODE_OK) {
-          int size = http.getSize();
+          int size = http->getSize();
           if (size == DIGEST_MD5_SIZE) {
             DEBUG_PRINT("md5file size %d\n", size);
-            String payload = http.getString();
+            String payload = http->getString();
             Serial.println(payload);
             digest_MD5 = (char *)malloc(DIGEST_MD5_SIZE);
             memcpy(digest_MD5, payload.c_str(), DIGEST_MD5_SIZE);
@@ -111,7 +116,7 @@ bool FOTAService(void) {
         }
       } else {
         DEBUG_PRINT("[HTTP] GET... failed, error: %s\n",
-                    http.errorToString(httpCode).c_str());
+                    http->errorToString(httpCode).c_str());
         state = FOTA_Sm_ERROR;
       }
     } else {
@@ -126,15 +131,15 @@ bool FOTAService(void) {
                       String(F("?alt=media"));
     addr = String(F("https://")) + String(FPSTR(storage_host)) + file_url;
     DEBUG_PRINT("FOTA_Sm_CHECK %s\n", addr.c_str());
-    bool res = http.begin(addr, storage_fingerprint);
+    bool res = http->begin(addr, storage_fingerprint);
     if (res == true) {
-      int httpCode = http.GET();
+      int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {
-        http.end();
+        http->end();
         // HTTP header has been send and Server response header has been handled
         DEBUG_PRINT("[HTTP] GET... code: %d\n", httpCode);
-        int size = http.getSize();
+        int size = http->getSize();
         DEBUG_PRINT("file size %d\n", size);
 
         block = 0;
@@ -156,21 +161,21 @@ bool FOTAService(void) {
   } break;
 
   case FOTA_Sm_GET_BLOCK: {
-    bool res = http.begin(addr, storage_fingerprint);
+    bool res = http->begin(addr, storage_fingerprint);
     if (res == true) {
       String range = "bytes=" + String(block * block_size) + "-" +
                      String(((block + 1) * block_size) - 1);
-      http.addHeader("Range", range);
-      int httpCode = http.GET();
+      http->addHeader("Range", range);
+      int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {
         // HTTP header has been send and Server response header has been handled
         // Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
-        int len = http.getSize();
+        int len = http->getSize();
 
         // get tcp stream
-        WiFiClient *stream = http.getStreamPtr();
+        WiFiClient *stream = http->getStreamPtr();
         uint32_t pos = 0;
         bool run = true;
         bool fail = false;
@@ -183,7 +188,7 @@ bool FOTAService(void) {
               uint16_t c = stream->readBytes(&buffer[pos], size);
               pos += c;
             }
-            if (!http.connected() && (pos < len)) {
+            if (!http->connected() && (pos < len)) {
               run = false;
               fail = true;
             }
@@ -213,7 +218,7 @@ bool FOTAService(void) {
         }
       } else {
         DEBUG_PRINT("[HTTP] GET... failed, error: %s\n",
-                    http.errorToString(httpCode).c_str());
+                    http->errorToString(httpCode).c_str());
         state = FOTA_Sm_ERROR;
       }
     } else {
