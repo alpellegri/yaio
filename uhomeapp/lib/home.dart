@@ -172,7 +172,11 @@ class _HomeState extends State<Home> {
                     reverse: true,
                     itemCount: entryList.length,
                     itemBuilder: (buildContext, index) {
-                      return new InkWell(child: new ListItem(entryList[index]));
+                      return new InkWell(
+                          onTap: () {
+                            _nodeUpdate(kNodeUpdate);
+                          },
+                          child: new ListItem(entryList[index]));
                     },
                   ),
                 ],
