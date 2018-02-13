@@ -6,6 +6,193 @@ import 'firebase_utils.dart';
 import 'const.dart';
 import 'entries.dart';
 
+class EntryDialog extends StatefulWidget {
+  final IoEntry entry;
+
+  EntryDialog(this.entry);
+
+  @override
+  _EntryDialogState createState() => new _EntryDialogState(entry);
+}
+
+class _EntryDialogState extends State<EntryDialog> {
+  final IoEntry entry;
+
+  final TextEditingController _controllerName = new TextEditingController();
+  final TextEditingController _controllerType = new TextEditingController();
+  final TextEditingController _controllerPin = new TextEditingController();
+  final TextEditingController _controllerValue = new TextEditingController();
+
+  _EntryDialogState(this.entry);
+
+  @override
+  void initState() {
+    super.initState();
+    if (entry.value != null) {
+      _controllerName.text = entry.key;
+      _controllerType.text = entry.code.toString();
+      switch (getMode(entry.code)) {
+        case 1:
+          _controllerPin.text = entry.getPin8().toString();
+          _controllerValue.text = entry.getValue24().toString();
+          break;
+        case 2:
+          _controllerValue.text = entry.getValue().toString();
+          break;
+        case 3:
+          _controllerValue.text = entry.getValue();
+          break;
+        case 4:
+          if (entry.getValue() == false) {
+            _controllerValue.text = '0';
+          } else if (entry.getValue() == true) {
+            _controllerValue.text = '1';
+          } else {
+            print('_controllerValue.text error');
+            _controllerValue.text = '0';
+          }
+          break;
+        default:
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+        title: new Text('Edit'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new DynamicEditWidget(
+                  entry.code, _controllerPin, _controllerValue),
+            ]),        actions: <Widget>[
+      new FlatButton(
+          child: const Text('SAVE'),
+          onPressed: () {
+            try {
+              switch (getMode(entry.code)) {
+                case 1:
+                  entry.setPin8(int.parse(_controllerPin.text));
+                  entry.setValue24(int.parse(_controllerValue.text));
+                  break;
+                case 2:
+                  entry.setValue(int.parse(_controllerValue.text));
+                  break;
+                case 3:
+                case 4:
+                  if (_controllerValue.text == '0') {
+                    entry.setValue(false);
+                  } else if (_controllerValue.text == '1') {
+                    entry.setValue(true);
+                  } else {
+                    print('_controllerValue.text error');
+                  }
+                  break;
+              }
+              entry.reference.child(entry.key).set(entry.toJson());
+            } catch (exception, stackTrace) {
+              print('bug');
+            }
+            Navigator.pop(context, null);
+          }),
+      new FlatButton(
+          child: const Text('DISCARD'),
+          onPressed: () {
+            Navigator.pop(context, null);
+          }),
+    ]);
+  }
+}
+
+class DynamicEditWidget extends StatelessWidget {
+  final int type;
+  final TextEditingController pin;
+  final TextEditingController value;
+
+  DynamicEditWidget(this.type, this.pin, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    switch (getMode(type)) {
+      case 1:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: pin,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'pin value',
+                ),
+              ),
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'data value',
+                ),
+              ),
+            ]);
+        break;
+      case 2:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+        break;
+      case 3:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: value,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+      case 4:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+        break;
+      default:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new Text(''),
+            ]);
+    }
+  }
+}
+
 class ListItem extends StatelessWidget {
   final IoEntry entry;
 
@@ -172,11 +359,16 @@ class _HomeState extends State<Home> {
                     reverse: true,
                     itemCount: entryList.length,
                     itemBuilder: (buildContext, index) {
-                      return new InkWell(
-                          onTap: () {
-                            _nodeUpdate(kNodeUpdate);
-                          },
-                          child: new ListItem(entryList[index]));
+                      if (entryList[index].drawWr == true) {
+                        return new InkWell(
+                            onTap: () {
+                              _openEntryDialog(entryList[index]);
+                              _nodeUpdate(kNodeUpdate);
+                            },
+                            child: new ListItem(entryList[index]));
+                      } else {
+                        return new ListItem(entryList[index]);
+                      }
                     },
                   ),
                 ],
@@ -308,6 +500,13 @@ class _HomeState extends State<Home> {
         entryList.remove(oldValue);
       });
     }
+  }
+
+  void _openEntryDialog(IoEntry entry) {
+    showDialog(
+      context: context,
+      child: new EntryDialog(entry),
+    );
   }
 
   bool checkConnected() {

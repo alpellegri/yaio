@@ -273,7 +273,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new DynamicWidget(
+              new DynamicEditWidget(
                   _selectedType, _controllerPin, _controllerValue),
               (_execList.length > 0)
                   ? new ListTile(
@@ -384,12 +384,12 @@ class _EntryDialogState extends State<EntryDialog> {
   }
 }
 
-class DynamicWidget extends StatelessWidget {
+class DynamicEditWidget extends StatelessWidget {
   final int type;
   final TextEditingController pin;
   final TextEditingController value;
 
-  DynamicWidget(this.type, this.pin, this.value);
+  DynamicEditWidget(this.type, this.pin, this.value);
 
   @override
   Widget build(BuildContext context) {
