@@ -57,7 +57,28 @@ void VM_readIn(void) {
     } break;
     case kRadioIn: {
     } break;
-    case kBool:
+    case kBool: {
+      // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
+      if (VM_UpdateDataPending == true) {
+        DEBUG_PRINT("get: kBool\n");
+        String kdata;
+        FbSetPath_data(kdata);
+        bool value =
+            Firebase.getBool(kdata + "/" + IoEntryVec[i].key + "/value");
+        if (Firebase.failed() == true) {
+          DEBUG_PRINT("get failed: kBool %s\n", IoEntryVec[i].key.c_str());
+          UpdateDataFault = true;
+        } else {
+          uint32_t v = atoi(IoEntryVec[i].value.c_str());
+          if (v != value) {
+            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(), value);
+            IoEntryVec[i].value = value;
+            IoEntryVec[i].ev = true;
+            IoEntryVec[i].ev_value = value;
+          }
+        }
+      }
+    } break;
     case kInt: {
       // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
       if (VM_UpdateDataPending == true) {
@@ -128,7 +149,18 @@ void VM_writeOut(void) {
       case kPhyOut: {
         DEBUG_PRINT("VM_writeOut: kPhyOut error\n");
       } break;
-      case kBool:
+      case kBool: {
+        bool value = atoi(IoEntryVec[i].value.c_str());
+        DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
+        String kdata;
+        FbSetPath_data(kdata);
+        Firebase.setBool(kdata + "/" + IoEntryVec[i].key + "/value", value);
+        if (Firebase.failed() == true) {
+          DEBUG_PRINT("set failed: kBool\n");
+        } else {
+          IoEntryVec[i].wb = false;
+        }
+      } break;
       case kInt: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_PRINT("VM_writeOut: kInt %d\n", value);

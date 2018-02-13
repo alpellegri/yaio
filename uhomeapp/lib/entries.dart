@@ -84,6 +84,10 @@ int getMode(int type) {
       case DataCode.Messaging:
         mode = 3;
         break;
+      // string value
+      case DataCode.Bool:
+        mode = 4;
+        break;
       default:
         mode = 0;
     }
@@ -99,7 +103,8 @@ class IoEntry {
   static const int mask = (1 << shift) - 1;
   DatabaseReference reference;
   bool exist = false;
-  bool draw = false;
+  bool drawWr = false;
+  bool drawRd = false;
   String key;
   String owner;
   int code;
@@ -116,8 +121,11 @@ class IoEntry {
     code = v['code'];
     value = v['value'];
     cb = v['cb'];
-    if (v['draw'] != null) {
-      draw = v['draw'];
+    if (v['drawWr'] != null) {
+      drawWr = v['drawWr'];
+    }
+    if (v['drawRd'] != null) {
+      drawRd = v['drawRd'];
     }
   }
 
@@ -162,7 +170,12 @@ class IoEntry {
     map['code'] = code;
     map['value'] = value;
     map['cb'] = cb;
-    map['draw'] = draw;
+    if (drawWr != false) {
+      map['drawWr'] = drawWr;
+    }
+    if (drawRd != false) {
+      map['drawRd'] = drawRd;
+    }
     return map;
   }
 }

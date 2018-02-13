@@ -186,7 +186,8 @@ class _EntryDialogState extends State<EntryDialog> {
   List<ExecEntry> _execList = new List();
   int _selectedType;
   List<int> _opTypeMenu = new List<int>();
-  bool _checkboxValue = false;
+  bool _checkboxValueWr = false;
+  bool _checkboxValueRd = false;
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
@@ -202,7 +203,8 @@ class _EntryDialogState extends State<EntryDialog> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
-      _checkboxValue = entry.draw;
+      _checkboxValueWr = entry.drawWr;
+      _checkboxValueRd = entry.drawRd;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _selectedType = entry.code;
@@ -216,6 +218,16 @@ class _EntryDialogState extends State<EntryDialog> {
           break;
         case 3:
           _controllerValue.text = entry.getValue();
+          break;
+        case 4:
+          if (entry.getValue() == false) {
+            _controllerValue.text = '0';
+          } else if (entry.getValue() == true) {
+            _controllerValue.text = '1';
+          } else {
+            print('_controllerValue.text error');
+            _controllerValue.text = '0';
+          }
           break;
         default:
       }
@@ -283,11 +295,20 @@ class _EntryDialogState extends State<EntryDialog> {
                       ),
                     )
                   : new Text(''),
-              new Checkbox(value: _checkboxValue, onChanged: (bool value) {
-                setState(() {
-                  _checkboxValue = value;
-                });
-              }),
+              new Checkbox(
+                  value: _checkboxValueWr,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _checkboxValueWr = value;
+                    });
+                  }),
+              new Checkbox(
+                  value: _checkboxValueRd,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _checkboxValueRd = value;
+                    });
+                  }),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -302,7 +323,8 @@ class _EntryDialogState extends State<EntryDialog> {
               child: const Text('SAVE'),
               onPressed: () {
                 entry.key = _controllerName.text;
-                entry.draw = _checkboxValue;
+                entry.drawWr = _checkboxValueWr;
+                entry.drawRd = _checkboxValueRd;
                 try {
                   entry.code = _selectedType;
                   entry.cb = _selectedExec?.key;
@@ -315,7 +337,14 @@ class _EntryDialogState extends State<EntryDialog> {
                       entry.setValue(int.parse(_controllerValue.text));
                       break;
                     case 3:
-                      entry.setValue(_controllerValue.text);
+                    case 4:
+                      if (_controllerValue.text == '0') {
+                        entry.setValue(false);
+                      } else if (_controllerValue.text == '1') {
+                        entry.setValue(true);
+                      } else {
+                        print('_controllerValue.text error');
+                      }
                       break;
                   }
                   entry.setOwner(getNodeSubPath());
@@ -407,6 +436,19 @@ class DynamicWidget extends StatelessWidget {
             children: <Widget>[
               new TextField(
                 controller: value,
+                decoration: new InputDecoration(
+                  hintText: 'value',
+                ),
+              ),
+            ]);
+      case 4:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
                 ),
