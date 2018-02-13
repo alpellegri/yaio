@@ -72,42 +72,43 @@ class _EntryDialogState extends State<EntryDialog> {
             children: <Widget>[
               new DynamicEditWidget(
                   entry.code, _controllerPin, _controllerValue),
-            ]),        actions: <Widget>[
-      new FlatButton(
-          child: const Text('SAVE'),
-          onPressed: () {
-            try {
-              switch (getMode(entry.code)) {
-                case 1:
-                  entry.setPin8(int.parse(_controllerPin.text));
-                  entry.setValue24(int.parse(_controllerValue.text));
-                  break;
-                case 2:
-                  entry.setValue(int.parse(_controllerValue.text));
-                  break;
-                case 3:
-                case 4:
-                  if (_controllerValue.text == '0') {
-                    entry.setValue(false);
-                  } else if (_controllerValue.text == '1') {
-                    entry.setValue(true);
-                  } else {
-                    print('_controllerValue.text error');
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                try {
+                  switch (getMode(entry.code)) {
+                    case 1:
+                      entry.setPin8(int.parse(_controllerPin.text));
+                      entry.setValue24(int.parse(_controllerValue.text));
+                      break;
+                    case 2:
+                      entry.setValue(int.parse(_controllerValue.text));
+                      break;
+                    case 3:
+                    case 4:
+                      if (_controllerValue.text == '0') {
+                        entry.setValue(false);
+                      } else if (_controllerValue.text == '1') {
+                        entry.setValue(true);
+                      } else {
+                        print('_controllerValue.text error');
+                      }
+                      break;
                   }
-                  break;
-              }
-              entry.reference.child(entry.key).set(entry.toJson());
-            } catch (exception, stackTrace) {
-              print('bug');
-            }
-            Navigator.pop(context, null);
-          }),
-      new FlatButton(
-          child: const Text('DISCARD'),
-          onPressed: () {
-            Navigator.pop(context, null);
-          }),
-    ]);
+                  entry.reference.child(entry.key).set(entry.toJson());
+                } catch (exception, stackTrace) {
+                  print('bug');
+                }
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
+        ]);
   }
 }
 

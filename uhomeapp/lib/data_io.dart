@@ -63,11 +63,8 @@ class ListItem extends StatelessWidget {
 }
 
 class DataIO extends StatefulWidget {
-  DataIO({Key key, this.title}) : super(key: key);
 
   static const String routeName = '/data_io';
-
-  final String title;
 
   @override
   _DataIOState createState() => new _DataIOState();
@@ -103,7 +100,7 @@ class _DataIOState extends State<DataIO> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-        title: new Text(widget.title),
+        title: new Text('Data IO @ ${getDomain()}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
