@@ -40,6 +40,15 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     } else if (entry.code == kRadioTx) {
       uint8_t pin = atoi(entry.value.c_str()) >> 24;
       RF_SetTxPin(pin);
+    } else if (entry.code == kBool) {
+      if (entry.value == F("false")) {
+        entry.value = F("0");
+      } else if (entry.value == F("true")) {
+        entry.value = F("1");
+      } else {
+        DEBUG_PRINT("kBool error\n");
+        entry.value = F("0");
+      }
     }
     entry.cb = obj["cb"].as<String>();
     // TODO: can be done a setup here
