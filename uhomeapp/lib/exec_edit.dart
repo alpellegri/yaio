@@ -105,8 +105,7 @@ class _ExecEditState extends State<ExecEdit> {
                         setState(() {
                           entry.key = _controllerName.text;
                           entry.cb = _selectedNext?.key;
-                          print('save on: ${getNodeSubPath()}');
-                          entry.setOwner(getNodeSubPath());
+                          entry.setOwner(getOwner());
                           entry.reference.child(entry.key).set(entry.toJson());
                         });
                         Navigator.pop(context, null);

@@ -34,13 +34,17 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.key = key;
     entry.code = obj["code"].as<uint8_t>();
     entry.value = obj["value"].as<String>();
-    if (entry.code == kRadioRx) {
+
+    switch (entry.code) {
+    case kRadioRx: {
       uint8_t pin = atoi(entry.value.c_str()) >> 24;
       RF_SetRxPin(pin);
-    } else if (entry.code == kRadioTx) {
+    } break;
+    case kRadioTx: {
       uint8_t pin = atoi(entry.value.c_str()) >> 24;
       RF_SetTxPin(pin);
-    } else if (entry.code == kBool) {
+    } break;
+    case kBool: {
       if (entry.value == F("false")) {
         entry.value = F("0");
       } else if (entry.value == F("true")) {
@@ -49,7 +53,11 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
         DEBUG_PRINT("kBool error\n");
         entry.value = F("0");
       }
+    } break;
+    default:
+      break;
     }
+
     entry.cb = obj["cb"].as<String>();
     // TODO: can be done a setup here
     entry.ev = false;

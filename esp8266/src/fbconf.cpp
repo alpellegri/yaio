@@ -52,23 +52,23 @@ void FbSetPath_status(String &path) {
 
 void FbSetPath_exec(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String subpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_data = prefix_user + String(F("obj/"));
-  path = prefix_data + String(FPSTR(_kexec));
+  path = prefix_data + String(FPSTR(_kexec)) + String(F("/")) + subpath;
 }
 
 void FbSetPath_data(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
-  path = prefix_data + String(FPSTR(_kdata));
+  path = prefix_data + String(FPSTR(_kdata)) + String(F("/")) + subpath;
 }
 
 void FbSetPath_logs(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
-  path = prefix_data + String(FPSTR(_klogs));
+  path = prefix_data + String(FPSTR(_klogs)) + String(F("/")) + subpath;
 }
 
 void dump_path(void) {
@@ -92,7 +92,7 @@ void dump_path(void) {
 bool FbGetDB(void) {
   bool ret = true;
 
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String owner = EE_GetNodeName();
   String path;
 
   if (ret == true) {
@@ -121,7 +121,7 @@ bool FbGetDB(void) {
   if (ret == true) {
     String kexec;
     FbSetPath_exec(kexec);
-    DEBUG_PRINT("%s\n", kexec.c_str());
+    DEBUG_PRINT("exex path: %s\n", kexec.c_str());
     String json = Firebase.getJSON(kexec);
     if (Firebase.failed() == true) {
       DEBUG_PRINT("get failed: kexec\n");
@@ -134,9 +134,7 @@ bool FbGetDB(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == nodesubpath) {
-          FB_addProgDB(i->key, i->value);
-        }
+        FB_addProgDB(i->key, i->value);
       }
     }
   }
@@ -144,7 +142,7 @@ bool FbGetDB(void) {
   if (ret == true) {
     String kdata;
     FbSetPath_data(kdata);
-    DEBUG_PRINT("%s\n", kdata.c_str());
+    DEBUG_PRINT("data path: %s\n", kdata.c_str());
     String json = Firebase.getJSON(kdata);
     if (Firebase.failed() == true) {
       DEBUG_PRINT("get failed: kdata\n");
@@ -157,7 +155,7 @@ bool FbGetDB(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == nodesubpath) {
+        if (nestedObject["owner"] == owner) {
           FB_addIoEntryDB(i->key, i->value);
         }
       }

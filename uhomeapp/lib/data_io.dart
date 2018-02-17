@@ -344,8 +344,10 @@ class _EntryDialogState extends State<EntryDialog> {
                       }
                       break;
                   }
-                  entry.setOwner(getNodeSubPath());
-                  entry.reference.child(entry.key).set(entry.toJson());
+                  entry.setOwner(getOwner());
+                  if (entry.value != null) {
+                    entry.reference.child(entry.key).set(entry.toJson());
+                  }
                 } catch (exception, stackTrace) {
                   print('bug');
                 }

@@ -464,10 +464,9 @@ class _HomeState extends State<Home> {
   }
 
   void _onEntryAdded(Event event) {
-    String owner = event.snapshot.value["owner"];
     bool drawWr = event.snapshot.value["drawWr"];
     bool drawRd = event.snapshot.value["drawRd"];
-    if ((owner == getOwner()) && ((drawWr == true) || (drawRd == true))) {
+    if (((drawWr == true) || (drawRd == true))) {
       setState(() {
         IoEntry entry = new IoEntry.fromMap(
             _dataRef, event.snapshot.key, event.snapshot.value);
@@ -477,10 +476,9 @@ class _HomeState extends State<Home> {
   }
 
   void _onEntryEdited(Event event) {
-    String owner = event.snapshot.value["owner"];
     bool drawWr = event.snapshot.value["drawWr"];
     bool drawRd = event.snapshot.value["drawRd"];
-    if ((owner == getOwner()) && ((drawWr == true) || (drawRd == true))) {
+    if (((drawWr == true) || (drawRd == true))) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -491,10 +489,9 @@ class _HomeState extends State<Home> {
   }
 
   void _onEntryRemoved(Event event) {
-    String owner = event.snapshot.value["owner"];
     bool drawWr = event.snapshot.value["drawWr"];
     bool drawRd = event.snapshot.value["drawRd"];
-    if ((owner == getOwner()) && ((drawWr == true) || (drawRd == true))) {
+    if (((drawWr == true) || (drawRd == true))) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
