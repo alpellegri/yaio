@@ -276,7 +276,7 @@ class _HomeState extends State<Home> {
   List<IoEntry> entryList = new List();
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditSubscription;
+  StreamSubscription<Event> _onChangedSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
   bool _connected = false;
@@ -298,7 +298,7 @@ class _HomeState extends State<Home> {
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryEdited);
+    _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
     _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
@@ -309,7 +309,7 @@ class _HomeState extends State<Home> {
     _statusSub.cancel();
     _startupSub.cancel();
     _onAddSubscription.cancel();
-    _onEditSubscription.cancel();
+    _onChangedSubscription.cancel();
     _onRemoveSubscription.cancel();
   }
 
@@ -475,7 +475,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void _onEntryEdited(Event event) {
+  void _onEntryChanged(Event event) {
     bool drawWr = event.snapshot.value["drawWr"];
     bool drawRd = event.snapshot.value["drawRd"];
     if (((drawWr == true) || (drawRd == true))) {
