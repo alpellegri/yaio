@@ -183,7 +183,7 @@ String getTHRef() {
 }
 
 Map<String, Object> _controlDefault = {
-  'reboot': false,
+  'reboot': 0,
   'time': -1,
 };
 
