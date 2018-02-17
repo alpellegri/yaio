@@ -89,7 +89,7 @@ void dump_path(void) {
   DEBUG_PRINT("%s\n", path.c_str());
 }
 
-bool FbmUpdateRadioCodes(void) {
+bool FbGetDB(void) {
   bool ret = true;
 
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();

@@ -164,9 +164,9 @@ bool FbmService(void) {
     }
   } break;
 
-  // firebase timer/radio init
+  // firebase init DB
   case 2: {
-    bool res = FbmUpdateRadioCodes();
+    bool res = FbGetDB();
     if (res == true) {
       if (boot_first == false) {
         boot_first = true;

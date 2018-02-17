@@ -10,7 +10,7 @@ extern void FbSetPath_exec(String &path);
 extern void FbSetPath_fcmtoken(String &path);
 extern void FbSetPath_data(String &path);
 extern void FbSetPath_logs(String &path);
-extern bool FbmUpdateRadioCodes(void);
+extern bool FbGetDB(void);
 
 extern void dump_path(void);
 
