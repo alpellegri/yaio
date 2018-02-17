@@ -183,7 +183,6 @@ String getTHRef() {
 }
 
 Map<String, Object> _controlDefault = {
-  'alarm': false,
   'reboot': false,
   'time': -1,
 };
@@ -195,7 +194,6 @@ Map<String, Object> _startupDefault = {
 };
 
 Map<String, Object> _statusDefault = {
-  'alarm': false,
   'heap': 0,
   'time': 0,
 };
