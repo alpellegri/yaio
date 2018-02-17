@@ -7,22 +7,20 @@ import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
 
-class Setup extends StatefulWidget {
-  Setup({Key key, this.title}) : super(key: key);
+class Device extends StatefulWidget {
+  Device({Key key, this.title}) : super(key: key);
 
   static const String routeName = '/setup';
 
   final String title;
 
   @override
-  _SetupState createState() => new _SetupState();
+  _DeviceState createState() => new _DeviceState();
 }
 
-class _SetupState extends State<Setup> {
+class _DeviceState extends State<Device> {
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   bool _connected = false;
-
-  _SetupState() {}
 
   @override
   void initState() {

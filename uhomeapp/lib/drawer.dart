@@ -1,7 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'home.dart';
-import 'setup.dart';
+import 'device.dart';
 import 'node_setup.dart';
 import 'data_io.dart';
 import 'exec.dart';
@@ -14,7 +13,7 @@ final MyDrawer drawer = new MyDrawer();
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Home.routeName: (BuildContext context) => new Home(title: 'Home'),
-  Setup.routeName: (BuildContext context) => new Setup(title: 'Device'),
+  Device.routeName: (BuildContext context) => new Device(title: 'Device'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'Node Setup'),
   DataIO.routeName: (BuildContext context) => new DataIO(),
@@ -58,7 +57,7 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: new Icon(Icons.developer_board),
             title: new Text('Device'),
             onTap: () {
-              Navigator.of(context).pushNamed(Setup.routeName);
+              Navigator.of(context).pushNamed(Device.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.label_outline),
