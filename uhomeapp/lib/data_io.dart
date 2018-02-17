@@ -63,7 +63,6 @@ class ListItem extends StatelessWidget {
 }
 
 class DataIO extends StatefulWidget {
-
   static const String routeName = '/data_io';
 
   @override
@@ -292,20 +291,25 @@ class _EntryDialogState extends State<EntryDialog> {
                       ),
                     )
                   : new Text(''),
-              new Checkbox(
-                  value: _checkboxValueWr,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _checkboxValueWr = value;
-                    });
-                  }),
-              new Checkbox(
+              new ListTile(
+                title: const Text('Dashboard WR'),
+                trailing: new Checkbox(
+                    value: _checkboxValueWr,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _checkboxValueWr = value;
+                      });
+                    }),
+              ),
+        new ListTile(
+            title: const Text('Dashboard RD'),
+            trailing: new Checkbox(
                   value: _checkboxValueRd,
                   onChanged: (bool value) {
                     setState(() {
                       _checkboxValueRd = value;
                     });
-                  }),
+                  }),),
             ]),
         actions: <Widget>[
           new FlatButton(
