@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "firebase.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
 #include "fbutils.h"
+#include "firebase.h"
 #include "rf.h"
 #include "timers.h"
 
@@ -50,7 +50,7 @@ void VM_readIn(void) {
         value = (v & (~mask)) | value;
         IoEntryVec[i].value = value;
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
-                 IoEntryVec[i].value.c_str());
+                    IoEntryVec[i].value.c_str());
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
       }
@@ -71,7 +71,8 @@ void VM_readIn(void) {
         } else {
           uint32_t v = atoi(IoEntryVec[i].value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(), value);
+            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(),
+                        value);
             IoEntryVec[i].value = value;
             IoEntryVec[i].ev = true;
             IoEntryVec[i].ev_value = value;
@@ -93,7 +94,8 @@ void VM_readIn(void) {
         } else {
           uint32_t v = atoi(IoEntryVec[i].value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(), value);
+            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(),
+                        value);
             IoEntryVec[i].value = value;
             IoEntryVec[i].ev = true;
             IoEntryVec[i].ev_value = value;
@@ -405,12 +407,12 @@ void VM_run(void) {
       uint8_t pc = 0;
       while (pc < funcvec.size()) {
         DEBUG_PRINT("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc,
-                 funcvec[pc].code, ctx.ACC, ctx.V);
+                    funcvec[pc].code, ctx.ACC, ctx.V);
         /* decode */
         pc = VM_decode(pc, ctx, funcvec[pc]);
 
         DEBUG_PRINT("VM_run stop [%d] code=%d, ACC=%d V=%d\n", pc,
-                 funcvec[pc].code, ctx.ACC, ctx.V);
+                    funcvec[pc].code, ctx.ACC, ctx.V);
       }
     }
     VM_writeOut();

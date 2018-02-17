@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "firebase.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fbutils.h"
 #include "fcm.h"
+#include "firebase.h"
 #include "rf.h"
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
@@ -21,12 +21,12 @@ static const char _kfcmtoken[] PROGMEM = "fcmtoken";
 static const char _kdata[] PROGMEM = "data";
 static const char _klogs[] PROGMEM = "logs";
 
-void FbSetPath_fcmtoken(String &path){
+void FbSetPath_fcmtoken(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   path = prefix_user + String(FPSTR(_kfcmtoken));
 }
 
-void FbSetPath_startup(String &path){
+void FbSetPath_startup(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_node =
@@ -34,7 +34,7 @@ void FbSetPath_startup(String &path){
   path = prefix_node + String(FPSTR(_kstartup));
 }
 
-void FbSetPath_control(String &path){
+void FbSetPath_control(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_node =
@@ -42,7 +42,7 @@ void FbSetPath_control(String &path){
   path = prefix_node + String(FPSTR(_kcontrol));
 }
 
-void FbSetPath_status(String &path){
+void FbSetPath_status(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_node =
@@ -50,21 +50,21 @@ void FbSetPath_status(String &path){
   path = prefix_node + String(FPSTR(_kstatus));
 }
 
-void FbSetPath_exec(String &path){
+void FbSetPath_exec(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_kexec));
 }
 
-void FbSetPath_data(String &path){
+void FbSetPath_data(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_kdata));
 }
 
-void FbSetPath_logs(String &path){
+void FbSetPath_logs(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
   String prefix_data = prefix_user + String(F("obj/"));
@@ -107,7 +107,7 @@ bool FbmUpdateRadioCodes(void) {
     } else {
       FcmResetRegIDsDB();
       DynamicJsonBuffer jsonBuffer;
-      JsonObject& object = jsonBuffer.parseObject(json);
+      JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -130,7 +130,7 @@ bool FbmUpdateRadioCodes(void) {
     } else {
       FB_deinitProgDB();
       DynamicJsonBuffer jsonBuffer;
-      JsonObject& object = jsonBuffer.parseObject(json);
+      JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
@@ -153,7 +153,7 @@ bool FbmUpdateRadioCodes(void) {
     } else {
       FB_deinitIoEntryDB();
       DynamicJsonBuffer jsonBuffer;
-      JsonObject& object = jsonBuffer.parseObject(json);
+      JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;

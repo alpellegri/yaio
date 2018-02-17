@@ -11,14 +11,14 @@
 #include "fbm.h"
 #include "fcm.h"
 #include "fota.h"
-#include "timesrv.h"
-#include "vm.h"
 #include "rf.h"
 #include "timers.h"
+#include "timesrv.h"
+#include "vm.h"
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
-#define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
+#define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -65,7 +65,8 @@ bool STA_Setup(void) {
     Serial.println(WiFi.localIP());
 
     SPIFFS.begin();
-    File f = SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("r+")).c_str());
+    File f = SPIFFS.open(String(FPSTR("/fota.req")).c_str(),
+                         String(FPSTR("r+")).c_str());
     if (!f) {
       fota_mode = false;
     } else {

@@ -160,9 +160,7 @@ void FirebaseRest::remove(const String &path) {
   String res = RestApi(METHOD_REMOVE, path.c_str(), "").c_str();
 }
 
-bool FirebaseRest::failed() {
-  return httpCode_ != HTTP_CODE_OK;
-}
+bool FirebaseRest::failed() { return httpCode_ != HTTP_CODE_OK; }
 
 String FirebaseRest::error() { return HTTPClient::errorToString(httpCode_); }
 

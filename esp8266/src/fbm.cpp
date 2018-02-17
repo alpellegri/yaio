@@ -6,13 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "firebase.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
 #include "fbutils.h"
 #include "fcm.h"
+#include "firebase.h"
 #include "rf.h"
 #include "sta.h"
 #include "timers.h"
@@ -78,7 +78,7 @@ bool FbmService(void) {
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
       DynamicJsonBuffer jsonBuffer;
-      JsonObject& object = jsonBuffer.parseObject(json);
+      JsonObject &object = jsonBuffer.parseObject(json);
       if (object.success()) {
         bootcnt = object["bootcnt"];
         object["bootcnt"] = ++bootcnt;
@@ -176,7 +176,7 @@ bool FbmService(void) {
             DEBUG_PRINT("%s\n", Firebase.error().c_str());
           } else {
             DynamicJsonBuffer jsonBuffer;
-            JsonObject& object = jsonBuffer.parseObject(json);
+            JsonObject &object = jsonBuffer.parseObject(json);
             if (object.success()) {
               // control_alarm = object["alarm"];
               control_time = object["time"];
