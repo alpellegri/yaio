@@ -9,9 +9,9 @@
 #include "fbm.h"
 #include "fbutils.h"
 #include "firebase.h"
+#include "pht.h"
 #include "rf.h"
 #include "timers.h"
-#include "pht.h"
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
@@ -49,7 +49,7 @@ void VM_readIn(void) {
       uint32_t mask = (1 << 24) - 1;
       uint32_t value = digitalRead(pin) & mask;
       if ((v & mask) != value) {
-        value = (v & (~mask)) | value;
+        value |= (v & (~mask));
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
                     IoEntryVec[i].value.c_str());
         IoEntryVec[i].value = value;
@@ -59,28 +59,30 @@ void VM_readIn(void) {
     } break;
     case kDhtTemperature: {
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
-      uint32_t mask = (1 << 24) - 1;
+      uint32_t mask = (((1 << 16) - 1) << 16);
       uint32_t value = PHT_GetTemperature();
-      if ((v & mask) != value) {
-        value = (v & (~mask)) | value;
+      if ((v & ~mask) != value) {
+        value |= (v & mask);
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
                     IoEntryVec[i].value.c_str());
         IoEntryVec[i].value = value;
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
+        IoEntryVec[i].wb = true;
       }
     } break;
     case kDhtHumidity: {
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
-      uint32_t mask = (1 << 24) - 1;
+      uint32_t mask = (((1 << 16) - 1) << 16);
       uint32_t value = PHT_GetHumidity();
-      if ((v & mask) != value) {
-        value = (v & (~mask)) | value;
+      if ((v & ~mask) != value) {
+        value |= (v & mask);
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
                     IoEntryVec[i].value.c_str());
         IoEntryVec[i].value = value;
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
+        IoEntryVec[i].wb = true;
       }
     } break;
     case kRadioRx: {
@@ -178,6 +180,30 @@ void VM_writeOut(void) {
       switch (IoEntryVec[i].code) {
       case kPhyOut: {
         DEBUG_PRINT("VM_writeOut: kPhyOut error\n");
+      } break;
+      case kDhtTemperature: {
+        uint32_t value = atoi(IoEntryVec[i].value.c_str());
+        DEBUG_PRINT("VM_writeOut: kDhtTemperature %d\n", value);
+        String kdata;
+        FbSetPath_data(kdata);
+        Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
+        if (Firebase.failed() == true) {
+          DEBUG_PRINT("set failed: kDhtTemperature\n");
+        } else {
+          IoEntryVec[i].wb = false;
+        }
+      } break;
+      case kDhtHumidity: {
+        uint32_t value = atoi(IoEntryVec[i].value.c_str());
+        DEBUG_PRINT("VM_writeOut: kDhtHumidity %d\n", value);
+        String kdata;
+        FbSetPath_data(kdata);
+        Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
+        if (Firebase.failed() == true) {
+          DEBUG_PRINT("set failed: kDhtHumidity\n");
+        } else {
+          IoEntryVec[i].wb = false;
+        }
       } break;
       case kBool: {
         bool value = atoi(IoEntryVec[i].value.c_str());

@@ -47,7 +47,7 @@ class ListItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     new Text(
-                      '${entry.getData()}',
+                      '${entry.getData() / 10}',
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.right,
                     ),
@@ -82,7 +82,7 @@ class _DataIOState extends State<DataIO> {
     print('_DigitalIOState');
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
-    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryEdited);
+    _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
     _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
@@ -130,7 +130,8 @@ class _DataIOState extends State<DataIO> {
     }
   }
 
-  void _onEntryEdited(Event event) {
+  void _onEntryChanged(Event event) {
+    print('_onEntryChanged');
     String owner = event.snapshot.value["owner"];
     if (owner == getOwner()) {
       IoEntry oldValue =
@@ -204,7 +205,6 @@ class _EntryDialogState extends State<EntryDialog> {
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _selectedType = entry.code;
-      print('_selectedType $_selectedType');
       switch (getMode(_selectedType)) {
         case 1:
           _controllerPin.text = entry.getPin8().toString();
@@ -341,7 +341,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       entry.setValue24(int.parse(_controllerValue.text));
                       break;
                     case 5:
-                      entry.setValue(0);
                       entry.setBits(31, 8, int.parse(_controllerPin.text));
                       entry.setBits(23, 8, int.parse(_controllerValue.text));
                       break;

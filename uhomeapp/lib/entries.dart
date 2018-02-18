@@ -3,8 +3,8 @@ import 'package:firebase_database/firebase_database.dart';
 
 const String kStringPhyIn = 'PhyIn';
 const String kStringPhyOut = 'PhyOut';
-const String kDhtTemperature = 'DhtTemperature';
-const String kDhtHumidity = 'DhtHumidity';
+const String kDhtTemperature = 'Temperature';
+const String kDhtHumidity = 'Humidity';
 const String kStringRadioRx = 'RadioRx';
 const String kStringRadioMach = 'RadioIn';
 const String kStringRadioTx = 'RadioTx';
