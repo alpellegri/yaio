@@ -89,7 +89,7 @@ void VM_readIn(void) {
     case kRadioRx: {
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint32_t mask = (((1 << 8) - 1) << 24);
-      uint32_t value = RF_GetRadioCode();
+      uint32_t value = RF_GetLastRadioCode();
       if ((v & ~mask) != value) {
         value |= (v & mask);
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,

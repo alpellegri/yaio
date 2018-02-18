@@ -40,6 +40,10 @@ uint32_t RF_GetRadioCode(void) {
   return RadioCodeLast;
 }
 
+uint32_t RF_GetLastRadioCode(void) {
+  return RadioCodeLast;
+}
+
 // avoid receiving multiple code from same telegram
 void ICACHE_RAM_ATTR RF_Unmask(void) {
   RadioCodeLast = 0;
@@ -93,22 +97,12 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
 
 /* main function task */
 void RF_Service(void) {
-#if 0
   uint32_t radioid = RF_GetRadioCode();
   if (radioid != 0) {
     uint8_t id = RF_checkRadioInCodeDB(radioid);
     if (id != 0xFF) {
       IoEntryVec[id].ev = true;
       IoEntryVec[id].ev_value = radioid;
-    } else {
-      for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
-        if (IoEntryVec[i].code == kRadioRx) {
-          IoEntryVec[i].value = radioid;
-          IoEntryVec[i].ev = true;
-          IoEntryVec[i].ev_value = radioid;
-        }
-      }
     }
   }
-#endif
 }
