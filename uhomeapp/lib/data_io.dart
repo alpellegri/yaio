@@ -47,7 +47,7 @@ class ListItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     new Text(
-                      '${entry.getData() / 10}',
+                      '${entry.getData()}',
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.right,
                     ),

@@ -93,6 +93,7 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
 
 /* main function task */
 void RF_Service(void) {
+#if 0
   uint32_t radioid = RF_GetRadioCode();
   if (radioid != 0) {
     uint8_t id = RF_checkRadioInCodeDB(radioid);
@@ -109,4 +110,5 @@ void RF_Service(void) {
       }
     }
   }
+#endif
 }

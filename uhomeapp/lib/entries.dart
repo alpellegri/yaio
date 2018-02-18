@@ -191,7 +191,7 @@ class IoEntry {
         break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
-      v = getBits(15, 16);
+        v = getBits(15, 16) / 10;
         break;
       case DataCode.Timer:
         break;

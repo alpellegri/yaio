@@ -46,15 +46,16 @@ void VM_readIn(void) {
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint8_t pin = v >> 24;
       pinMode(pin, INPUT);
-      uint32_t mask = (1 << 24) - 1;
+      uint32_t mask = (((1 << 16) - 1) << 24);
       uint32_t value = digitalRead(pin) & mask;
-      if ((v & mask) != value) {
-        value |= (v & (~mask));
+      if ((v & ~mask) != value) {
+        value |= (v & mask);
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
                     IoEntryVec[i].value.c_str());
         IoEntryVec[i].value = value;
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
+        IoEntryVec[i].wb = true;
       }
     } break;
     case kDhtTemperature: {
@@ -86,6 +87,18 @@ void VM_readIn(void) {
       }
     } break;
     case kRadioRx: {
+      uint32_t v = atoi(IoEntryVec[i].value.c_str());
+      uint32_t mask = (((1 << 8) - 1) << 24);
+      uint32_t value = RF_GetRadioCode();
+      if ((v & ~mask) != value) {
+        value |= (v & mask);
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
+                    IoEntryVec[i].value.c_str());
+        IoEntryVec[i].value = value;
+        IoEntryVec[i].ev = true;
+        IoEntryVec[i].ev_value = value;
+        IoEntryVec[i].wb = true;
+      }
     } break;
     case kBool: {
       // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
@@ -178,22 +191,10 @@ void VM_writeOut(void) {
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     if (IoEntryVec[i].wb == true) {
       switch (IoEntryVec[i].code) {
-      case kPhyOut: {
-        DEBUG_PRINT("VM_writeOut: kPhyOut error\n");
-      } break;
-      case kDhtTemperature: {
-        uint32_t value = atoi(IoEntryVec[i].value.c_str());
-        DEBUG_PRINT("VM_writeOut: kDhtTemperature %d\n", value);
-        String kdata;
-        FbSetPath_data(kdata);
-        Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("set failed: kDhtTemperature\n");
-        } else {
-          IoEntryVec[i].wb = false;
-        }
-      } break;
-      case kDhtHumidity: {
+      case kPhyIn:
+      case kDhtTemperature:
+      case kDhtHumidity:
+      case kRadioRx: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_PRINT("VM_writeOut: kDhtHumidity %d\n", value);
         String kdata;
