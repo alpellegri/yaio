@@ -89,7 +89,7 @@ void VM_readIn(void) {
     case kRadioRx: {
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint32_t mask = (((1 << 8) - 1) << 24);
-      uint32_t value = RF_GetLastRadioCode();
+      uint32_t value = RF_GetRadioCode();
       if ((v & ~mask) != value) {
         value |= (v & mask);
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
@@ -196,7 +196,7 @@ void VM_writeOut(void) {
       case kDhtHumidity:
       case kRadioRx: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
-        DEBUG_PRINT("VM_writeOut: kDhtHumidity %d\n", value);
+        DEBUG_PRINT("VM_writeOut: %s: %d\n", IoEntryVec[i].key.c_str(), value);
         String kdata;
         FbSetPath_data(kdata);
         Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);

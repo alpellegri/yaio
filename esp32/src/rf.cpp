@@ -19,7 +19,7 @@ static Ticker RFRcvTimer;
 static RCSwitch mySwitchTx = RCSwitch();
 static RCSwitch mySwitchRx = RCSwitch();
 static uint32_t RadioCode;
-static uint32_t RadioCodeLast;
+static bool RadioEv;
 
 void RF_SetRxPin(uint8_t pin) {
   DEBUG_PRINT("RF_SetRxPin %d\n", pin);
@@ -33,22 +33,17 @@ void RF_SetTxPin(uint8_t pin) {
 
 void RF_Send(uint32_t data, uint8_t bits) { mySwitchTx.send(data, bits); }
 
-uint32_t RF_GetRadioCode(void) {
-  RadioCodeLast = RadioCode;
-  RadioCode = 0;
-
-  return RadioCodeLast;
+bool RF_GetRadioEv(void) {
+  bool ev = false;
+  if (RadioEv == true) {
+    RadioEv = false;
+  }
+  return ev;
 }
-
-uint32_t RF_GetLastRadioCode(void) {
-  return RadioCodeLast;
-}
+uint32_t RF_GetRadioCode(void) { return RadioCode; }
 
 // avoid receiving multiple code from same telegram
-void ICACHE_RAM_ATTR RF_Unmask(void) {
-  RadioCodeLast = 0;
-  RFRcvTimer.detach();
-}
+void ICACHE_RAM_ATTR RF_Unmask(void) { RFRcvTimer.detach(); }
 
 void RF_Loop() {
   if (mySwitchRx.available()) {
@@ -64,8 +59,9 @@ void RF_Loop() {
       DEBUG_PRINT("%06X / bit: %d - Protocol: %d\n", value,
                   mySwitchRx.getReceivedBitlength(),
                   mySwitchRx.getReceivedProtocol());
-      if (value != RadioCodeLast) {
+      if (RadioEv == false) {
         DEBUG_PRINT("radio code: %06X\n", value);
+        RadioEv = true;
         RadioCode = value;
         RFRcvTimer.attach_ms(1000, RF_Unmask);
       } else {
@@ -97,12 +93,12 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
 
 /* main function task */
 void RF_Service(void) {
-  uint32_t radioid = RF_GetRadioCode();
-  if (radioid != 0) {
-    uint8_t id = RF_checkRadioInCodeDB(radioid);
+  uint32_t ev = RF_GetRadioEv();
+  if (ev == true) {
+    uint8_t id = RF_checkRadioInCodeDB(RadioCode);
     if (id != 0xFF) {
       IoEntryVec[id].ev = true;
-      IoEntryVec[id].ev_value = radioid;
+      IoEntryVec[id].ev_value = RadioCode;
     }
   }
 }
