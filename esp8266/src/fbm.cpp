@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <WiFiUDP.h>
 
-#include <DHT.h>
-
 #include <stdio.h>
 #include <string.h>
 
@@ -22,15 +20,10 @@
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
-#define DHTPIN D6
-#define DHTTYPE DHT22
-
 #define FBM_UPDATE_TH (30 * 60)
 #define FBM_UPDATE_MONITOR_FAST (1)
 #define FBM_UPDATE_MONITOR_SLOW (5)
 #define FBM_MONITOR_TIMERS (15)
-
-DHT *dht;
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
@@ -42,10 +35,6 @@ static uint32_t fbm_update_last = 0;
 static uint32_t fbm_time_th_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
-
-static bool ht_monitor_run = false;
-static float humidity_data;
-static float temperature_data;
 
 static uint32_t fbm_update_timer_last;
 
@@ -126,8 +115,6 @@ bool FbmService(void) {
       DEBUG_PRINT("set failed: kcontrol/reboot\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      dht = new DHT(DHTPIN, DHTTYPE);
-      dht->begin();
       boot_sm = 3;
     }
   } break;
@@ -143,16 +130,6 @@ bool FbmService(void) {
 
       String kcontrol;
       FbSetPath_control(kcontrol);
-      float h = dht->readHumidity();
-      float t = dht->readTemperature();
-      DEBUG_PRINT("t: %f - h: %f\n", t, h);
-      if (isnan(h) || isnan(t)) {
-        ht_monitor_run = false;
-      } else {
-        ht_monitor_run = true;
-        humidity_data = h;
-        temperature_data = t;
-      }
       yield();
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {

@@ -57,12 +57,9 @@ void RF_Loop() {
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
-      // Serial.printf(">>%x\n", value);
-      // Serial.print(" / ");
-      // Serial.print(mySwitch.getReceivedBitlength());
-      // Serial.print("bit ");
-      // Serial.print("Protocol: ");
-      // Serial.println(mySwitch.getReceivedProtocol());
+      DEBUG_PRINT("%06X / bit: %d - Protocol: %d\n", value,
+                  mySwitchRx.getReceivedBitlength(),
+                  mySwitchRx.getReceivedProtocol());
       if (value != RadioCodeLast) {
         DEBUG_PRINT("radio code: %06X\n", value);
         RadioCode = value;
@@ -84,7 +81,7 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
   while ((i < len) && (id == 0xFF)) {
     IoEntry entry = FB_getIoEntry(i);
     uint32_t v = atoi(entry.value.c_str());
-    if ((radioid == v) && (entry.code == kRadioIn)) {
+    if ((radioid == v) && (entry.code == kRadioMach)) {
       DEBUG_PRINT("radio code found in table %06X\n", radioid);
       id = i;
     }

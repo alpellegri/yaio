@@ -15,6 +15,7 @@
 #include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
+#include "pht.h"
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 

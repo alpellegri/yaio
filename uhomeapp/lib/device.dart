@@ -294,7 +294,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       print('getRootRef: ${getRootRef()}');
       _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
       _onAddSubscription = _rootRef.onChildAdded.listen(_onEntryAdded);
-      _onEditedSubscription = _rootRef.onChildChanged.listen(_onEntryEdited);
+      _onEditedSubscription = _rootRef.onChildChanged.listen(_onEntryChanged);
       _onRemoveSubscription = _rootRef.onChildRemoved.listen(_onEntryRemoved);
       if (map.isNotEmpty) {
         setState(() {
@@ -605,8 +605,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     }
   }
 
-  void _onEntryEdited(Event event) {
-    print('_onEntryEdited');
+  void _onEntryChanged(Event event) {
+    print('_onEntryChanged');
     entryMap[event.snapshot.key] = event.snapshot.value;
   }
 

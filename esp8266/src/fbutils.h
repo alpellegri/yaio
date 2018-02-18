@@ -12,17 +12,16 @@
 enum {
   /*  0 */ kPhyIn = 0,
   /*  1 */ kPhyOut,
-  /*  2 */ kLogIn,
-  /*  3 */ kLogOut,
-  /*  4 */ kRadioIn,
-  /*  5 */ kRadioTx,
-  /*  6 */ kRadioElem,
+  /*  2 */ kDhtTemperature,
+  /*  3 */ kDhtHumidity,
+  /*  4 */ kRadioRx,
+  /*  5 */ kRadioMach,
+  /*  6 */ kRadioTx,
   /*  7 */ kTimer,
   /*  8 */ kBool,
   /*  9 */ kInt,
   /* 10 */ kFloat,
-  /* 11 */ kRadioRx,
-  /* 12 */ kMessaging,
+  /* 11 */ kMessaging,
 };
 
 // template class std::basic_string<char>;

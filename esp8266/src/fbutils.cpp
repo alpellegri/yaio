@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "fbutils.h"
+#include "pht.h"
 #include "rf.h"
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
@@ -36,6 +37,20 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.value = obj["value"].as<String>();
 
     switch (entry.code) {
+    case kDhtTemperature: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      uint32_t mask = ((1 << 8) - 1) << 16;
+      uint32_t period = (value & mask) >> 16;
+      PHT_Set(pin, period);
+    } break;
+    case kDhtHumidity: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      uint32_t mask = ((1 << 8) - 1) << 16;
+      uint32_t period = (value & mask) >> 16;
+      PHT_Set(pin, period);
+    } break;
     case kRadioRx: {
       uint8_t pin = atoi(entry.value.c_str()) >> 24;
       RF_SetRxPin(pin);
@@ -57,7 +72,6 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     default:
       break;
     }
-
     entry.cb = obj["cb"].as<String>();
     // TODO: can be done a setup here
     entry.ev = false;

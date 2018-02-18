@@ -14,7 +14,6 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 static uint8_t mode;
-static uint32_t current_time;
 static uint32_t schedule_time;
 
 void setup() {
@@ -52,7 +51,7 @@ void loop() {
   } else {
   }
 
-  current_time = millis();
+  uint32_t current_time = millis();
   if ((current_time - schedule_time) > 250) {
     schedule_time = current_time;
     if (mode == 0) {

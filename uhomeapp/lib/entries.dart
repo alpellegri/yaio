@@ -3,63 +3,59 @@ import 'package:firebase_database/firebase_database.dart';
 
 const String kStringPhyIn = 'PhyIn';
 const String kStringPhyOut = 'PhyOut';
-const String kStringLogIn = 'LogIn';
-const String kStringLogOut = 'LogOut';
-const String kStringRadioIn = 'RadioIn';
-const String kStringRadioOut = 'RadioTx';
-const String kStringRadioElem = 'RadioElem';
+const String kDhtTemperature = 'DhtTemperature';
+const String kDhtHumidity = 'DhtHumidity';
+const String kStringRadioRx = 'RadioRx';
+const String kStringRadioMach = 'RadioIn';
+const String kStringRadioTx = 'RadioTx';
 const String kStringTimer = 'Timer';
 const String kStringBool = 'Bool';
 const String kStringInt = 'Int';
 const String kStringFloat = 'Float';
-const String kStringRadioRx = 'RadioRx';
 const String kStringMessaging = 'Messaging';
 
 enum DataCode {
   PhyIn,
   PhyOut,
-  LogIn,
-  LogOut,
-  RadioIn,
+  DhtTemperature,
+  DhtHumidity,
+  RadioRx,
+  RadioMach,
   RadioTx,
-  RadioElem,
   Timer,
   Bool,
   Int,
   Float,
-  RadioRx,
   Messaging,
 }
 
 const Map<DataCode, String> kEntryId2Name = const {
   DataCode.PhyIn: kStringPhyIn,
   DataCode.PhyOut: kStringPhyOut,
-  DataCode.LogIn: kStringLogIn,
-  DataCode.LogOut: kStringLogOut,
-  DataCode.RadioIn: kStringRadioIn,
-  DataCode.RadioTx: kStringRadioOut,
-  DataCode.RadioElem: kStringRadioElem,
+  DataCode.DhtTemperature: kDhtTemperature,
+  DataCode.DhtHumidity: kDhtHumidity,
+  DataCode.RadioRx: kStringRadioRx,
+  DataCode.RadioMach: kStringRadioMach,
+  DataCode.RadioTx: kStringRadioTx,
   DataCode.Timer: kStringTimer,
   DataCode.Bool: kStringBool,
   DataCode.Int: kStringInt,
   DataCode.Float: kStringFloat,
-  DataCode.RadioRx: kStringRadioRx,
   DataCode.Messaging: kStringMessaging,
 };
 
 const Map<String, DataCode> kEntryName2Id = const {
   kStringPhyIn: DataCode.PhyIn,
   kStringPhyOut: DataCode.PhyOut,
-  kStringLogIn: DataCode.LogIn,
-  kStringLogOut: DataCode.LogOut,
-  kStringRadioIn: DataCode.RadioIn,
-  kStringRadioOut: DataCode.RadioTx,
-  kStringRadioElem: DataCode.RadioElem,
+  kDhtTemperature: DataCode.DhtTemperature,
+  kDhtHumidity: DataCode.DhtHumidity,
+  kStringRadioRx: DataCode.RadioRx,
+  kStringRadioMach: DataCode.RadioMach,
+  kStringRadioTx: DataCode.RadioTx,
   kStringTimer: DataCode.Timer,
   kStringBool: DataCode.Bool,
   kStringInt: DataCode.Int,
   kStringFloat: DataCode.Float,
-  kStringRadioRx: DataCode.RadioRx,
   kStringMessaging: DataCode.Messaging,
 };
 
@@ -75,7 +71,7 @@ int getMode(int type) {
         mode = 1;
         break;
       // full integer or floating value
-      case DataCode.RadioIn:
+      case DataCode.RadioMach:
       case DataCode.Int:
       case DataCode.Float:
         mode = 2;
@@ -87,6 +83,10 @@ int getMode(int type) {
       // string value
       case DataCode.Bool:
         mode = 4;
+        break;
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+        mode = 5;
         break;
       default:
         mode = 0;
@@ -151,8 +151,58 @@ class IoEntry {
     value = ((port << shift) | (v & mask));
   }
 
+  int getBits(int pos, int len) {
+    value ??= 0;
+    pos++;
+    if (pos < len) {
+      pos = len;
+    }
+    int sh = pos - len;
+    int m = ((1 << len) - 1) << sh;
+    int v = (value & m) >> sh;
+    return v;
+  }
+
+  setBits(int pos, int len, int v) {
+    value ??= 0;
+    pos++;
+    if (pos < len) {
+      pos = len;
+    }
+    int sh = pos - len;
+    int m = ((1 << len) - 1) << sh;
+    value &= ~m;
+    value |= v << sh;
+  }
+
   dynamic getValue() {
     return value;
+  }
+
+  dynamic getData() {
+    dynamic v;
+    switch (DataCode.values[code]) {
+      case DataCode.PhyIn:
+      case DataCode.PhyOut:
+      case DataCode.RadioRx:
+      case DataCode.RadioMach:
+      case DataCode.RadioTx:
+        v = getValue24();
+        break;
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+      v = getBits(15, 16);
+        break;
+      case DataCode.Timer:
+        break;
+      case DataCode.Bool:
+      case DataCode.Int:
+      case DataCode.Float:
+      case DataCode.Messaging:
+        v = value;
+        break;
+    }
+    return v;
   }
 
   setValue(dynamic v) {
@@ -317,7 +367,7 @@ class ExecEntry {
   }
 
   Map<String, dynamic> toJson() {
-    print('ExecEntry.toJson');
+    // print('ExecEntry.toJson');
     exist = true;
     Map<String, dynamic> map = new Map<String, dynamic>();
     map['owner'] = owner;

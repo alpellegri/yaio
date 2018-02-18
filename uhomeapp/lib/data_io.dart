@@ -47,7 +47,7 @@ class ListItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     new Text(
-                      '${entry.getValue()}',
+                      '${entry.getData()}',
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.right,
                     ),
@@ -204,10 +204,15 @@ class _EntryDialogState extends State<EntryDialog> {
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _selectedType = entry.code;
+      print('_selectedType $_selectedType');
       switch (getMode(_selectedType)) {
         case 1:
           _controllerPin.text = entry.getPin8().toString();
           _controllerValue.text = entry.getValue24().toString();
+          break;
+        case 5:
+          _controllerPin.text = entry.getBits(31, 8).toString();
+          _controllerValue.text = entry.getBits(23, 8).toString();
           break;
         case 2:
           _controllerValue.text = entry.getValue().toString();
@@ -292,7 +297,7 @@ class _EntryDialogState extends State<EntryDialog> {
                     )
                   : new Text(''),
               new ListTile(
-                title: const Text('Dashboard WR'),
+                title: const Text('Dashboard display WR'),
                 trailing: new Checkbox(
                     value: _checkboxValueWr,
                     onChanged: (bool value) {
@@ -301,15 +306,16 @@ class _EntryDialogState extends State<EntryDialog> {
                       });
                     }),
               ),
-        new ListTile(
-            title: const Text('Dashboard RD'),
-            trailing: new Checkbox(
-                  value: _checkboxValueRd,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _checkboxValueRd = value;
-                    });
-                  }),),
+              new ListTile(
+                title: const Text('Dashboard display RD'),
+                trailing: new Checkbox(
+                    value: _checkboxValueRd,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _checkboxValueRd = value;
+                      });
+                    }),
+              ),
             ]),
         actions: <Widget>[
           new FlatButton(
@@ -334,10 +340,17 @@ class _EntryDialogState extends State<EntryDialog> {
                       entry.setPin8(int.parse(_controllerPin.text));
                       entry.setValue24(int.parse(_controllerValue.text));
                       break;
+                    case 5:
+                      entry.setValue(0);
+                      entry.setBits(31, 8, int.parse(_controllerPin.text));
+                      entry.setBits(23, 8, int.parse(_controllerValue.text));
+                      break;
                     case 2:
                       entry.setValue(int.parse(_controllerValue.text));
                       break;
                     case 3:
+                      entry.setValue(_controllerValue.text);
+                      break;
                     case 4:
                       if (_controllerValue.text == '0') {
                         entry.setValue(false);
@@ -398,6 +411,7 @@ class DynamicEditWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (getMode(type)) {
       case 1:
+      case 5:
         return new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

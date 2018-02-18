@@ -11,6 +11,7 @@
 #include "firebase.h"
 #include "rf.h"
 #include "timers.h"
+#include "pht.h"
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
@@ -33,6 +34,7 @@ void VM_UpdateDataReq(void) { VM_UpdateDataPending = true; }
 
 void VM_readIn(void) {
   RF_Service();
+  PHT_Service();
   Timers_Service();
   bool UpdateDataFault = false;
 
@@ -48,14 +50,40 @@ void VM_readIn(void) {
       uint32_t value = digitalRead(pin) & mask;
       if ((v & mask) != value) {
         value = (v & (~mask)) | value;
-        IoEntryVec[i].value = value;
         DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
                     IoEntryVec[i].value.c_str());
+        IoEntryVec[i].value = value;
         IoEntryVec[i].ev = true;
         IoEntryVec[i].ev_value = value;
       }
     } break;
-    case kRadioIn: {
+    case kDhtTemperature: {
+      uint32_t v = atoi(IoEntryVec[i].value.c_str());
+      uint32_t mask = (1 << 24) - 1;
+      uint32_t value = PHT_GetTemperature();
+      if ((v & mask) != value) {
+        value = (v & (~mask)) | value;
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
+                    IoEntryVec[i].value.c_str());
+        IoEntryVec[i].value = value;
+        IoEntryVec[i].ev = true;
+        IoEntryVec[i].ev_value = value;
+      }
+    } break;
+    case kDhtHumidity: {
+      uint32_t v = atoi(IoEntryVec[i].value.c_str());
+      uint32_t mask = (1 << 24) - 1;
+      uint32_t value = PHT_GetHumidity();
+      if ((v & mask) != value) {
+        value = (v & (~mask)) | value;
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
+                    IoEntryVec[i].value.c_str());
+        IoEntryVec[i].value = value;
+        IoEntryVec[i].ev = true;
+        IoEntryVec[i].ev_value = value;
+      }
+    } break;
+    case kRadioRx: {
     } break;
     case kBool: {
       // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
@@ -177,8 +205,9 @@ void VM_writeOut(void) {
       } break;
       case kMessaging: {
         // DEBUG_PRINT("VM_writeOut: kMessaging %s\n",
-        // IoEntryVec[i].value.c_str()); fblog_log(IoEntryVec[i].value, true);
-        // IoEntryVec[i].wb = false;
+        IoEntryVec[i].value.c_str();
+        fblog_log(IoEntryVec[i].value, true);
+        IoEntryVec[i].wb = false;
       } break;
       default:
         // DEBUG_PRINT("VM_writeOut: error\n");
