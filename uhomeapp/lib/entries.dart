@@ -179,19 +179,19 @@ class IoEntry {
     return value;
   }
 
-  dynamic getData() {
-    dynamic v;
+  String getData() {
+    String v;
     switch (DataCode.values[code]) {
       case DataCode.PhyIn:
       case DataCode.PhyOut:
       case DataCode.RadioRx:
       case DataCode.RadioMach:
       case DataCode.RadioTx:
-        v = getValue24();
+        v = getValue24().toString();
         break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
-        v = getBits(15, 16) / 10;
+        v = (getBits(15, 16) / 10).toString();
         break;
       case DataCode.Timer:
         break;
@@ -199,7 +199,7 @@ class IoEntry {
       case DataCode.Int:
       case DataCode.Float:
       case DataCode.Messaging:
-        v = value;
+        v = value.toString();
         break;
     }
     return v;
