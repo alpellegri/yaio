@@ -41,11 +41,11 @@ class _MyDrawerState extends State<MyDrawer> {
         new UserAccountsDrawerHeader(
           accountName: new Text(getFirebaseUser().displayName),
           accountEmail: new Text(getFirebaseUser().email),
-          /*currentAccountPicture: new CircleAvatar(
+          currentAccountPicture: new CircleAvatar(
             backgroundImage: new NetworkImage(
               getFirebaseUser().photoUrl,
             ),
-          ),*/
+          ),
         ),
         new ListTile(
             leading: new Icon(Icons.home),

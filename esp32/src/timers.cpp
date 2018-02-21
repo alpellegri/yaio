@@ -10,16 +10,16 @@
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
-static uint32_t t247_last = 0;
+static uint32_t t24_last = 0;
 
 void Timers_Service(void) {
   uint32_t current = getTime();
-  uint32_t t247 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
+  uint32_t t24 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
   uint8_t wday = getWeekDay();
-  // Serial.printf_P(PSTR("%d, %d\n"), t247, getWeekDay());
+  // DEBUG_PRINT("%d, %d\n", t24, getWeekDay());
 
-  if (t247 != t247_last) {
-    t247_last = t247;
+  if (t24 != t24_last) {
+    t24_last = t24;
 
     uint8_t len = FB_getIoEntryLen();
     for (uint8_t i = 0; i < len; i++) {
@@ -32,11 +32,11 @@ void Timers_Service(void) {
         // hours: bits 15...8
         // week day mask: bits 23...16
         uint32_t _time = 60 * ((v >> 8) & 0xFF) + (v & 0xFF);
-        if (_time == t247) {
+        if (_time == t24) {
           // check week day
           uint8_t wday_mask = ((v >> 16) & 0xFF);
           if (((1 << wday) & wday_mask) != 0) {
-            DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t247);
+            DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t24);
             entry.ev = true;
           }
         }
