@@ -45,10 +45,10 @@ class DynamicDataWidget extends StatelessWidget {
   }
 }
 
-class DataItemWidget extends StatelessWidget {
+class DataIoItemWidget extends StatelessWidget {
   final IoEntry entry;
 
-  DataItemWidget(this.entry);
+  DataIoItemWidget(this.entry);
 
   @override
   Widget build(BuildContext context) {

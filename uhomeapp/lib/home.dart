@@ -310,9 +310,9 @@ class _HomeState extends State<Home> {
                               _openEntryDialog(entryList[index]);
                               _nodeUpdate(kNodeUpdate);
                             },
-                            child: new DataItemWidget(entryList[index]));
+                            child: new DataIoItemWidget(entryList[index]));
                       } else {
-                        return new DataItemWidget(entryList[index]);
+                        return new DataIoItemWidget(entryList[index]);
                       }
                     },
                   ),

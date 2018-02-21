@@ -52,7 +52,7 @@ class _DataIOState extends State<DataIO> {
         itemBuilder: (buildContext, index) {
           return new InkWell(
               onTap: () => _openEntryDialog(entryList[index]),
-              child: new DataItemWidget(entryList[index]));
+              child: new DataIoItemWidget(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
