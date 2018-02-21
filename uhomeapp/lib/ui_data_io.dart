@@ -3,7 +3,9 @@ import 'entries.dart';
 
 class DynamicDataWidget extends StatelessWidget {
   final IoEntry entry;
+
   DynamicDataWidget(this.entry);
+
   @override
   Widget build(BuildContext context) {
     String v;
@@ -34,7 +36,7 @@ class DynamicDataWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         new Text(
-          '${entry.getData()}',
+          v,
           textScaleFactor: 1.2,
           textAlign: TextAlign.right,
         ),

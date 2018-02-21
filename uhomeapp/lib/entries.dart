@@ -182,35 +182,6 @@ class IoEntry {
     return value;
   }
 
-  String getData() {
-    String v;
-    switch (DataCode.values[code]) {
-      case DataCode.PhyIn:
-      case DataCode.PhyOut:
-      case DataCode.RadioRx:
-      case DataCode.RadioMach:
-      case DataCode.RadioTx:
-        v = getValue24().toString();
-        break;
-      case DataCode.DhtTemperature:
-      case DataCode.DhtHumidity:
-        v = (getBits(15, 16) / 10).toString();
-        break;
-      case DataCode.Timer:
-        DateTime now = new DateTime.now();
-        var fmt = new DateFormat('d/M/y').format(now);
-        v = ((getBits(15, 8) * 60) + getBits(7, 8)).toString();
-        break;
-      case DataCode.Bool:
-      case DataCode.Int:
-      case DataCode.Float:
-      case DataCode.Messaging:
-        v = value.toString();
-        break;
-    }
-    return v;
-  }
-
   setValue(dynamic v) {
     value = v;
   }
