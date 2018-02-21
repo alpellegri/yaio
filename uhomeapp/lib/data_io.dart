@@ -210,10 +210,6 @@ class _EntryDialogState extends State<EntryDialog> {
           _controllerPin.text = entry.getPin8().toString();
           _controllerValue.text = entry.getValue24().toString();
           break;
-        case 5:
-          _controllerPin.text = entry.getBits(31, 8).toString();
-          _controllerValue.text = entry.getBits(23, 8).toString();
-          break;
         case 2:
           _controllerValue.text = entry.getValue().toString();
           break;
@@ -229,6 +225,14 @@ class _EntryDialogState extends State<EntryDialog> {
             print('_controllerValue.text error');
             _controllerValue.text = '0';
           }
+          break;
+        case 5:
+          _controllerPin.text = entry.getBits(31, 8).toString();
+          _controllerValue.text = entry.getBits(23, 8).toString();
+          break;
+        case 6:
+          _controllerPin.text = entry.getBits(15, 8).toString();
+          _controllerValue.text = entry.getBits(7, 8).toString();
           break;
         default:
       }
@@ -340,10 +344,6 @@ class _EntryDialogState extends State<EntryDialog> {
                       entry.setPin8(int.parse(_controllerPin.text));
                       entry.setValue24(int.parse(_controllerValue.text));
                       break;
-                    case 5:
-                      entry.setBits(31, 8, int.parse(_controllerPin.text));
-                      entry.setBits(23, 8, int.parse(_controllerValue.text));
-                      break;
                     case 2:
                       entry.setValue(int.parse(_controllerValue.text));
                       break;
@@ -358,6 +358,14 @@ class _EntryDialogState extends State<EntryDialog> {
                       } else {
                         print('_controllerValue.text error');
                       }
+                      break;
+                    case 5:
+                      entry.setBits(31, 8, int.parse(_controllerPin.text));
+                      entry.setBits(23, 8, int.parse(_controllerValue.text));
+                      break;
+                    case 6:
+                      entry.setBits(15, 8, int.parse(_controllerPin.text));
+                      entry.setBits(7, 8, int.parse(_controllerValue.text));
                       break;
                   }
                   entry.setOwner(getOwner());
@@ -467,6 +475,27 @@ class DynamicEditWidget extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
+                ),
+              ),
+            ]);
+        break;
+      case 6:
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: pin,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'hour',
+                ),
+              ),
+              new TextField(
+                controller: value,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'minutes',
                 ),
               ),
             ]);

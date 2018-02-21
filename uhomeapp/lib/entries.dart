@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 const String kStringPhyIn = 'PhyIn';
 const String kStringPhyOut = 'PhyOut';
@@ -87,6 +87,9 @@ int getMode(int type) {
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
         mode = 5;
+        break;
+      case DataCode.Timer:
+        mode = 6;
         break;
       default:
         mode = 0;
@@ -194,6 +197,9 @@ class IoEntry {
         v = (getBits(15, 16) / 10).toString();
         break;
       case DataCode.Timer:
+        DateTime now = new DateTime.now();
+        var fmt = new DateFormat('d/M/y').format(now);
+        v = ((getBits(15, 8)<<8) + getBits(7, 8)).toString();
         break;
       case DataCode.Bool:
       case DataCode.Int:
