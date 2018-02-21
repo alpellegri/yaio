@@ -199,7 +199,7 @@ class IoEntry {
       case DataCode.Timer:
         DateTime now = new DateTime.now();
         var fmt = new DateFormat('d/M/y').format(now);
-        v = ((getBits(15, 8)<<8) + getBits(7, 8)).toString();
+        v = ((getBits(15, 8) * 60) + getBits(7, 8)).toString();
         break;
       case DataCode.Bool:
       case DataCode.Int:

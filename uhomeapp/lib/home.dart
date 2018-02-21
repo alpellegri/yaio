@@ -5,6 +5,7 @@ import 'drawer.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
 import 'entries.dart';
+import 'ui_data_io.dart';
 
 class EntryDialog extends StatefulWidget {
   final IoEntry entry;
@@ -194,63 +195,6 @@ class DynamicEditWidget extends StatelessWidget {
   }
 }
 
-class ListItem extends StatelessWidget {
-  final IoEntry entry;
-
-  ListItem(this.entry);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          new Expanded(
-            child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Expanded(
-                    child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    new Text(
-                      entry.key,
-                      textScaleFactor: 1.2,
-                      textAlign: TextAlign.left,
-                    ),
-                    new Text(
-                      '${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                )),
-                new Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    new Text(
-                      '${entry.getData()}',
-                      textScaleFactor: 1.2,
-                      textAlign: TextAlign.right,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class Home extends StatefulWidget {
   Home({Key key, this.title}) : super(key: key);
 
@@ -366,9 +310,9 @@ class _HomeState extends State<Home> {
                               _openEntryDialog(entryList[index]);
                               _nodeUpdate(kNodeUpdate);
                             },
-                            child: new ListItem(entryList[index]));
+                            child: new DataItemWidget(entryList[index]));
                       } else {
-                        return new ListItem(entryList[index]);
+                        return new DataItemWidget(entryList[index]);
                       }
                     },
                   ),

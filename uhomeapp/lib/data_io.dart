@@ -4,63 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
-
-class ListItem extends StatelessWidget {
-  final IoEntry entry;
-
-  ListItem(this.entry);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          new Expanded(
-            child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Expanded(
-                    child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    new Text(
-                      entry.key,
-                      textScaleFactor: 1.2,
-                      textAlign: TextAlign.left,
-                    ),
-                    new Text(
-                      '${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textScaleFactor: 1.0,
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                )),
-                new Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    new Text(
-                      '${entry.getData()}',
-                      textScaleFactor: 1.2,
-                      textAlign: TextAlign.right,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+import 'ui_data_io.dart';
 
 class DataIO extends StatefulWidget {
   static const String routeName = '/data_io';
@@ -108,7 +52,7 @@ class _DataIOState extends State<DataIO> {
         itemBuilder: (buildContext, index) {
           return new InkWell(
               onTap: () => _openEntryDialog(entryList[index]),
-              child: new ListItem(entryList[index]));
+              child: new DataItemWidget(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
