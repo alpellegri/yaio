@@ -94,10 +94,10 @@ class DataIoItemWidget extends StatelessWidget {
 
 class DynamicEditWidget extends StatelessWidget {
   final int type;
-  final TextEditingController pin;
-  final TextEditingController value;
+  final TextEditingController ctrl_1;
+  final TextEditingController ctrl_2;
 
-  DynamicEditWidget(this.type, this.pin, this.value);
+  DynamicEditWidget(this.type, this.ctrl_1, this.ctrl_2);
 
   @override
   Widget build(BuildContext context) {
@@ -109,14 +109,14 @@ class DynamicEditWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
-                controller: pin,
+                controller: ctrl_1,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'pin value',
                 ),
               ),
               new TextField(
-                controller: value,
+                controller: ctrl_2,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'data value',
@@ -130,7 +130,7 @@ class DynamicEditWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
-                controller: value,
+                controller: ctrl_2,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
@@ -144,7 +144,7 @@ class DynamicEditWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
-                controller: value,
+                controller: ctrl_2,
                 decoration: new InputDecoration(
                   hintText: 'value',
                 ),
@@ -156,7 +156,7 @@ class DynamicEditWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
-                controller: value,
+                controller: ctrl_2,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
@@ -170,14 +170,14 @@ class DynamicEditWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
-                controller: pin,
+                controller: ctrl_1,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'hour',
                 ),
               ),
               new TextField(
-                controller: value,
+                controller: ctrl_2,
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'minutes',

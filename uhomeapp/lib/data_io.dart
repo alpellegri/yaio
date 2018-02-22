@@ -132,8 +132,8 @@ class _EntryDialogState extends State<EntryDialog> {
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
-  final TextEditingController _controllerPin = new TextEditingController();
-  final TextEditingController _controllerValue = new TextEditingController();
+  final TextEditingController _controller_1 = new TextEditingController();
+  final TextEditingController _controller_2 = new TextEditingController();
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
 
@@ -151,32 +151,32 @@ class _EntryDialogState extends State<EntryDialog> {
       _selectedType = entry.code;
       switch (getMode(_selectedType)) {
         case 1:
-          _controllerPin.text = entry.getPin8().toString();
-          _controllerValue.text = entry.getValue24().toString();
+          _controller_1.text = entry.getPin8().toString();
+          _controller_2.text = entry.getValue24().toString();
           break;
         case 2:
-          _controllerValue.text = entry.getValue().toString();
+          _controller_2.text = entry.getValue().toString();
           break;
         case 3:
-          _controllerValue.text = entry.getValue();
+          _controller_2.text = entry.getValue();
           break;
         case 4:
           if (entry.getValue() == false) {
-            _controllerValue.text = '0';
+            _controller_2.text = '0';
           } else if (entry.getValue() == true) {
-            _controllerValue.text = '1';
+            _controller_2.text = '1';
           } else {
-            print('_controllerValue.text error');
-            _controllerValue.text = '0';
+            print('_controller_2.text error');
+            _controller_2.text = '0';
           }
           break;
         case 5:
-          _controllerPin.text = entry.getBits(31, 8).toString();
-          _controllerValue.text = entry.getBits(23, 8).toString();
+          _controller_1.text = entry.getBits(31, 8).toString();
+          _controller_2.text = entry.getBits(23, 8).toString();
           break;
         case 6:
-          _controllerPin.text = entry.getBits(15, 8).toString();
-          _controllerValue.text = entry.getBits(7, 8).toString();
+          _controller_1.text = entry.getBits(15, 8).toString();
+          _controller_2.text = entry.getBits(7, 8).toString();
           break;
         default:
       }
@@ -223,7 +223,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 ),
               ),
               new DynamicEditWidget(
-                  _selectedType, _controllerPin, _controllerValue),
+                  _selectedType, _controller_1, _controller_2),
               (_execList.length > 0)
                   ? new ListTile(
                       title: const Text('Call'),
@@ -285,31 +285,31 @@ class _EntryDialogState extends State<EntryDialog> {
                   entry.cb = _selectedExec?.key;
                   switch (getMode(_selectedType)) {
                     case 1:
-                      entry.setPin8(int.parse(_controllerPin.text));
-                      entry.setValue24(int.parse(_controllerValue.text));
+                      entry.setPin8(int.parse(_controller_1.text));
+                      entry.setValue24(int.parse(_controller_2.text));
                       break;
                     case 2:
-                      entry.setValue(int.parse(_controllerValue.text));
+                      entry.setValue(int.parse(_controller_2.text));
                       break;
                     case 3:
-                      entry.setValue(_controllerValue.text);
+                      entry.setValue(_controller_2.text);
                       break;
                     case 4:
-                      if (_controllerValue.text == '0') {
+                      if (_controller_2.text == '0') {
                         entry.setValue(false);
-                      } else if (_controllerValue.text == '1') {
+                      } else if (_controller_2.text == '1') {
                         entry.setValue(true);
                       } else {
-                        print('_controllerValue.text error');
+                        print('_controller_2.text error');
                       }
                       break;
                     case 5:
-                      entry.setBits(31, 8, int.parse(_controllerPin.text));
-                      entry.setBits(23, 8, int.parse(_controllerValue.text));
+                      entry.setBits(31, 8, int.parse(_controller_1.text));
+                      entry.setBits(23, 8, int.parse(_controller_2.text));
                       break;
                     case 6:
-                      entry.setBits(15, 8, int.parse(_controllerPin.text));
-                      entry.setBits(7, 8, int.parse(_controllerValue.text));
+                      entry.setBits(15, 8, int.parse(_controller_1.text));
+                      entry.setBits(7, 8, int.parse(_controller_2.text));
                       break;
                   }
                   entry.setOwner(getOwner());
