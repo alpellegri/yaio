@@ -16,7 +16,7 @@ void Timers_Service(void) {
   uint32_t current = getTime();
   uint32_t t24 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
   uint8_t wday = getWeekDay();
-  // DEBUG_PRINT("%d, %d\n", t24, getWeekDay());
+  DEBUG_PRINT("%d, %d, %d\n", t24, t24_last, getWeekDay());
 
   if (t24 != t24_last) {
     t24_last = t24;
@@ -28,6 +28,7 @@ void Timers_Service(void) {
       if (entry.code == kTimer) {
         // convert is to 24_7 time
         uint32_t v = atoi(entry.value.c_str());
+
         // minutes: bits 0...7
         // hours: bits 15...8
         // week day mask: bits 23...16
@@ -35,6 +36,11 @@ void Timers_Service(void) {
         if (_time == t24) {
           // check week day
           uint8_t wday_mask = ((v >> 16) & 0xFF);
+          if ((wday_mask & 0x80) == 0x00) {
+            wday_mask = 0x7F;
+          } else {
+            wday_mask &= 0x7F;
+          }
           if (((1 << wday) & wday_mask) != 0) {
             DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t24);
             entry.ev = true;
