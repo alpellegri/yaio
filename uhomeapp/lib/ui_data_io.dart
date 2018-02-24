@@ -8,35 +8,12 @@ class DynamicDataWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String v;
-    switch (DataCode.values[entry.code]) {
-      case DataCode.PhyIn:
-      case DataCode.PhyOut:
-      case DataCode.RadioRx:
-      case DataCode.RadioMach:
-      case DataCode.RadioTx:
-        v = entry.getValue24().toString();
-        break;
-      case DataCode.DhtTemperature:
-      case DataCode.DhtHumidity:
-        v = (entry.getBits(15, 16) / 10).toString();
-        break;
-      case DataCode.Timer:
-        v = ((entry.getBits(15, 8) * 60) + entry.getBits(7, 8)).toString();
-        break;
-      case DataCode.Bool:
-      case DataCode.Int:
-      case DataCode.Float:
-      case DataCode.Messaging:
-        v = entry.value.toString();
-        break;
-    }
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
         new Text(
-          v,
+          entry.getValue().toString(),
           textScaleFactor: 1.2,
           textAlign: TextAlign.right,
         ),
@@ -92,31 +69,89 @@ class DataIoItemWidget extends StatelessWidget {
   }
 }
 
-class DynamicEditWidget extends StatelessWidget {
+class DynamicEditWidget extends StatefulWidget {
   final int type;
-  final TextEditingController ctrl_1;
-  final TextEditingController ctrl_2;
+  final dynamic value;
+  final ValueChanged<dynamic> onChanged;
 
-  DynamicEditWidget(this.type, this.ctrl_1, this.ctrl_2);
+  DynamicEditWidget({Key key, this.type, this.value, this.onChanged})
+      : super(key: key);
 
   @override
+  _DynamicEditWidget createState() => new _DynamicEditWidget();
+}
+
+class _DynamicEditWidget extends State<DynamicEditWidget> {
+  int type;
+  dynamic value = 0;
+  TextEditingController ctrl_1 = new TextEditingController();
+  TextEditingController ctrl_2 = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    type = widget.type;
+    if (widget.value != null) {
+      value = widget.value;
+      print('_DynamicEditWidget initState $value');
+      ctrl_1.text = getValueCtrl1(type, value).toString();
+      ctrl_2.text = getValueCtrl2(type, value).toString();
+    }
+  }
+
   Widget build(BuildContext context) {
-    switch (getMode(type)) {
-      case 1:
-      case 5:
-        return new Column(
+    Widget w;
+    switch (DataCode.values[type]) {
+      case DataCode.PhyIn:
+      case DataCode.RadioRx:
+        w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
                 controller: ctrl_1,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl1(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
-                  hintText: 'pin value',
+                  hintText: 'pin',
+                ),
+              ),
+            ]);
+        break;
+      case DataCode.PhyOut:
+      case DataCode.RadioTx:
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+        w = new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: ctrl_1,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl1(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                  hintText: 'pin',
                 ),
               ),
               new TextField(
                 controller: ctrl_2,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl2(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'data value',
@@ -124,13 +159,21 @@ class DynamicEditWidget extends StatelessWidget {
               ),
             ]);
         break;
-      case 2:
-        return new Column(
+      case DataCode.RadioMach:
+      case DataCode.Int:
+      case DataCode.Float:
+        w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
                 controller: ctrl_2,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl2(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
@@ -138,25 +181,38 @@ class DynamicEditWidget extends StatelessWidget {
               ),
             ]);
         break;
-      case 3:
-        return new Column(
+      case DataCode.Messaging:
+        w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
                 controller: ctrl_2,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl2(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 decoration: new InputDecoration(
                   hintText: 'value',
                 ),
               ),
             ]);
-      case 4:
-        return new Column(
+        break;
+      case DataCode.Bool:
+        w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
                 controller: ctrl_2,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl2(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'value',
@@ -164,13 +220,19 @@ class DynamicEditWidget extends StatelessWidget {
               ),
             ]);
         break;
-      case 6:
-        return new Column(
+      case DataCode.Timer:
+        w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
                 controller: ctrl_1,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl1(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'hour',
@@ -178,6 +240,12 @@ class DynamicEditWidget extends StatelessWidget {
               ),
               new TextField(
                 controller: ctrl_2,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl2(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
                 keyboardType: TextInputType.number,
                 decoration: new InputDecoration(
                   hintText: 'minutes',
@@ -186,12 +254,16 @@ class DynamicEditWidget extends StatelessWidget {
             ]);
         break;
       default:
-        return new Column(
+        w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new Text(''),
+              const Text(''),
             ]);
     }
+
+    return new Container(
+      child: w,
+    );
   }
 }

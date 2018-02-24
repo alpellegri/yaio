@@ -58,46 +58,156 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringMessaging: DataCode.Messaging,
 };
 
-int getMode(int type) {
-  int mode;
-  if (type != null) {
-    switch (DataCode.values[type]) {
-      // integer values with pin8 and value24
-      case DataCode.PhyIn:
-      case DataCode.PhyOut:
-      case DataCode.RadioRx:
-      case DataCode.RadioTx:
-        mode = 1;
-        break;
-      // full integer or floating value
-      case DataCode.RadioMach:
-      case DataCode.Int:
-      case DataCode.Float:
-        mode = 2;
-        break;
-      // string value
-      case DataCode.Messaging:
-        mode = 3;
-        break;
-      // string value
-      case DataCode.Bool:
-        mode = 4;
-        break;
-      case DataCode.DhtTemperature:
-      case DataCode.DhtHumidity:
-        mode = 5;
-        break;
-      case DataCode.Timer:
-        mode = 6;
-        break;
-      default:
-        mode = 0;
-    }
-  } else {
-    mode = 0;
+int getBits(int value, int pos, int len) {
+  pos++;
+  if (pos < len) {
+    pos = len;
   }
+  int sh = pos - len;
+  int m = ((1 << len) - 1) << sh;
+  int v = (value & m) >> sh;
+  return v;
+}
 
-  return mode;
+int setBits(int pos, int len, int v) {
+  int value = 0;
+  pos++;
+  if (pos < len) {
+    pos = len;
+  }
+  int sh = pos - len;
+  int m = ((1 << len) - 1) << sh;
+  value &= ~m;
+  value |= v << sh;
+  return value;
+}
+
+int clearBits(int v, int pos, int len) {
+  pos++;
+  if (pos < len) {
+    pos = len;
+  }
+  int sh = pos - len;
+  int m = ((1 << len) - 1) << sh;
+  v &= ~m;
+  return v;
+}
+
+dynamic getValueCtrl1(code, value) {
+  dynamic v;
+  switch (DataCode.values[code]) {
+    case DataCode.PhyIn:
+    case DataCode.PhyOut:
+    case DataCode.RadioRx:
+    case DataCode.RadioTx:
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(value, 31, 8);
+      break;
+    case DataCode.Timer:
+      v = getBits(value, 15, 8);
+      break;
+    default:
+  }
+  return v;
+}
+
+dynamic getValueCtrl2(int code, dynamic value) {
+  dynamic v;
+  switch (DataCode.values[code]) {
+    case DataCode.PhyIn:
+    case DataCode.PhyOut:
+    case DataCode.RadioRx:
+    case DataCode.RadioTx:
+      v = getBits(value, 23, 24);
+      break;
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(value, 23, 8);
+      break;
+    case DataCode.RadioMach:
+    case DataCode.Int:
+    case DataCode.Float:
+    case DataCode.Messaging:
+      v = value;
+      break;
+    case DataCode.Bool:
+      if (value == false) {
+        v = '0';
+      } else if (value == true) {
+        v = '1';
+      } else {
+        print('_controller_2.text error');
+        v = '0';
+      }
+      break;
+    case DataCode.Timer:
+      v = getBits(value, 7, 8);
+      break;
+    default:
+  }
+  return v;
+}
+
+dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
+  print(value);
+  switch (DataCode.values[code]) {
+    case DataCode.PhyIn:
+    case DataCode.PhyOut:
+    case DataCode.RadioRx:
+    case DataCode.RadioTx:
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      value = clearBits(value, 31, 8);
+      value |= setBits(31, 8, int.parse(v));
+      break;
+    case DataCode.Timer:
+      value = clearBits(value, 15, 8);
+      value |= setBits(15, 8, int.parse(v));
+      break;
+    default:
+  }
+  print(value);
+  return value;
+}
+
+dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
+  print(value);
+  switch (DataCode.values[code]) {
+    case DataCode.PhyIn:
+    case DataCode.PhyOut:
+    case DataCode.RadioRx:
+    case DataCode.RadioTx:
+      value = clearBits(value, 23, 24);
+      value |= setBits(23, 24, int.parse(v));
+      break;
+    case DataCode.RadioMach:
+    case DataCode.Int:
+    case DataCode.Float:
+    case DataCode.Messaging:
+      value = v;
+      break;
+    case DataCode.Bool:
+      if (v == '0') {
+        value = false;
+      } else if (v == '1') {
+        value = true;
+      } else {
+        print('ctrl_2.text error');
+      }
+      break;
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      value = clearBits(value, 23, 8);
+      value |= setBits(23, 8, int.parse(v));
+      break;
+    case DataCode.Timer:
+      value = clearBits(value, 7, 8);
+      value |= setBits(7, 8, int.parse(v));
+      break;
+  }
+  print(value);
+  return value;
 }
 
 class IoEntry {
@@ -131,58 +241,31 @@ class IoEntry {
     }
   }
 
-  int getPin8() {
-    value ??= 0;
-    return value >> shift;
-  }
-
-  setPin8(int pin) {
-    value ??= 0;
-    value = value & mask;
-    value = (pin << shift | value);
-  }
-
-  int getValue24() {
-    value ??= 0;
-    return value & mask;
-  }
-
-  setValue24(int v) {
-    value ??= 0;
-    int port = value >> shift;
-    value = ((port << shift) | (v & mask));
-  }
-
-  int getBits(int pos, int len) {
-    value ??= 0;
-    pos++;
-    if (pos < len) {
-      pos = len;
-    }
-    int sh = pos - len;
-    int m = ((1 << len) - 1) << sh;
-    int v = (value & m) >> sh;
-    return v;
-  }
-
-  setBits(int pos, int len, int v) {
-    value ??= 0;
-    pos++;
-    if (pos < len) {
-      pos = len;
-    }
-    int sh = pos - len;
-    int m = ((1 << len) - 1) << sh;
-    value &= ~m;
-    value |= v << sh;
-  }
-
   dynamic getValue() {
-    return value;
-  }
-
-  setValue(dynamic v) {
-    value = v;
+    dynamic v;
+    switch (DataCode.values[code]) {
+      case DataCode.PhyIn:
+      case DataCode.PhyOut:
+      case DataCode.RadioRx:
+      case DataCode.RadioMach:
+      case DataCode.RadioTx:
+        v = getBits(value, 23, 24);
+        break;
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+        v = getBits(value, 15, 16) / 10;
+        break;
+      case DataCode.Timer:
+        v = (getBits(value, 15, 8) * 60) + getBits(value, 7, 8);
+        break;
+      case DataCode.Bool:
+      case DataCode.Int:
+      case DataCode.Float:
+      case DataCode.Messaging:
+        v = value;
+        break;
+    }
+    return v;
   }
 
   setOwner(String _owner) {

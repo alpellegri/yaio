@@ -30,19 +30,19 @@ class ExecListItem extends StatelessWidget {
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
-                    new Text(
+                    const Text(
                       '',
                       textScaleFactor: 0.8,
                       textAlign: TextAlign.left,
-                      style: new TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                       ),
                     ),
-                    new Text(
+                    const Text(
                       '',
                       textScaleFactor: 0.9,
                       textAlign: TextAlign.left,
-                      style: new TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                       ),
                     ),

@@ -19,10 +19,14 @@ class EntryDialog extends StatefulWidget {
 class _EntryDialogState extends State<EntryDialog> {
   final IoEntry entry;
 
-  final TextEditingController _controllerName = new TextEditingController();
-  final TextEditingController _controllerType = new TextEditingController();
-  final TextEditingController _controller_1 = new TextEditingController();
-  final TextEditingController _controller_2 = new TextEditingController();
+  dynamic _currentValue;
+
+  void _handleTapboxChanged(dynamic newValue) {
+    print('_handleTapboxChanged $newValue');
+    setState(() {
+      _currentValue = newValue;
+    });
+  }
 
   _EntryDialogState(this.entry);
 
@@ -30,31 +34,7 @@ class _EntryDialogState extends State<EntryDialog> {
   void initState() {
     super.initState();
     if (entry.value != null) {
-      _controllerName.text = entry.key;
-      _controllerType.text = entry.code.toString();
-      switch (getMode(entry.code)) {
-        case 1:
-          _controller_1.text = entry.getPin8().toString();
-          _controller_2.text = entry.getValue24().toString();
-          break;
-        case 2:
-          _controller_2.text = entry.getValue().toString();
-          break;
-        case 3:
-          _controller_2.text = entry.getValue();
-          break;
-        case 4:
-          if (entry.getValue() == false) {
-            _controller_2.text = '0';
-          } else if (entry.getValue() == true) {
-            _controller_2.text = '1';
-          } else {
-            print('_controller_2.text error');
-            _controller_2.text = '0';
-          }
-          break;
-        default:
-      }
+      _currentValue = entry?.value;
     }
   }
 
@@ -72,32 +52,18 @@ class _EntryDialogState extends State<EntryDialog> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new DynamicEditWidget(
-                  entry.code, _controller_1, _controller_2),
+                type: entry.code,
+                value: _currentValue,
+                onChanged: _handleTapboxChanged,
+              ),
             ]),
         actions: <Widget>[
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
                 try {
-                  switch (getMode(entry.code)) {
-                    case 1:
-                      entry.setPin8(int.parse(_controller_1.text));
-                      entry.setValue24(int.parse(_controller_2.text));
-                      break;
-                    case 2:
-                      entry.setValue(int.parse(_controller_2.text));
-                      break;
-                    case 3:
-                    case 4:
-                      if (_controller_2.text == '0') {
-                        entry.setValue(false);
-                      } else if (_controller_2.text == '1') {
-                        entry.setValue(true);
-                      } else {
-                        print('_controller_2.text error');
-                      }
-                      break;
-                  }
+                  print(_currentValue);
+                  entry.value = _currentValue;
                   entry.reference.child(entry.key).set(entry.toJson());
                 } catch (exception, stackTrace) {
                   print('bug');
@@ -110,88 +76,6 @@ class _EntryDialogState extends State<EntryDialog> {
                 Navigator.pop(context, null);
               }),
         ]);
-  }
-}
-
-class DynamicEditWidget extends StatelessWidget {
-  final int type;
-  final TextEditingController pin;
-  final TextEditingController value;
-
-  DynamicEditWidget(this.type, this.pin, this.value);
-
-  @override
-  Widget build(BuildContext context) {
-    switch (getMode(type)) {
-      case 1:
-        return new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new TextField(
-                controller: pin,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'pin value',
-                ),
-              ),
-              new TextField(
-                controller: value,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'data value',
-                ),
-              ),
-            ]);
-        break;
-      case 2:
-        return new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new TextField(
-                controller: value,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'value',
-                ),
-              ),
-            ]);
-        break;
-      case 3:
-        return new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new TextField(
-                controller: value,
-                decoration: new InputDecoration(
-                  hintText: 'value',
-                ),
-              ),
-            ]);
-      case 4:
-        return new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new TextField(
-                controller: value,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'value',
-                ),
-              ),
-            ]);
-        break;
-      default:
-        return new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new Text(''),
-            ]);
-    }
   }
 }
 

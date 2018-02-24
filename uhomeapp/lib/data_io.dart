@@ -132,10 +132,16 @@ class _EntryDialogState extends State<EntryDialog> {
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
-  final TextEditingController _controller_1 = new TextEditingController();
-  final TextEditingController _controller_2 = new TextEditingController();
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
+  dynamic _currentValue;
+
+  void _handleTapboxChanged(dynamic newValue) {
+    print('_handleTapboxChanged $newValue');
+    setState(() {
+      _currentValue = newValue;
+    });
+  }
 
   _EntryDialogState(this.entry);
 
@@ -144,42 +150,12 @@ class _EntryDialogState extends State<EntryDialog> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
+      _currentValue = entry.value;
       _checkboxValueWr = entry.drawWr;
       _checkboxValueRd = entry.drawRd;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _selectedType = entry.code;
-      switch (getMode(_selectedType)) {
-        case 1:
-          _controller_1.text = entry.getPin8().toString();
-          _controller_2.text = entry.getValue24().toString();
-          break;
-        case 2:
-          _controller_2.text = entry.getValue().toString();
-          break;
-        case 3:
-          _controller_2.text = entry.getValue();
-          break;
-        case 4:
-          if (entry.getValue() == false) {
-            _controller_2.text = '0';
-          } else if (entry.getValue() == true) {
-            _controller_2.text = '1';
-          } else {
-            print('_controller_2.text error');
-            _controller_2.text = '0';
-          }
-          break;
-        case 5:
-          _controller_1.text = entry.getBits(31, 8).toString();
-          _controller_2.text = entry.getBits(23, 8).toString();
-          break;
-        case 6:
-          _controller_1.text = entry.getBits(15, 8).toString();
-          _controller_2.text = entry.getBits(7, 8).toString();
-          break;
-        default:
-      }
     }
     DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
   }
@@ -222,8 +198,13 @@ class _EntryDialogState extends State<EntryDialog> {
                   }).toList(),
                 ),
               ),
-              new DynamicEditWidget(
-                  _selectedType, _controller_1, _controller_2),
+              (_selectedType != null)
+                  ? (new DynamicEditWidget(
+                      type: _selectedType,
+                      value: _currentValue,
+                      onChanged: _handleTapboxChanged,
+                    ))
+                  : (const Text('')),
               (_execList.length > 0)
                   ? new ListTile(
                       title: const Text('Call'),
@@ -243,7 +224,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         }).toList(),
                       ),
                     )
-                  : new Text(''),
+                  : const Text(''),
               new ListTile(
                 title: const Text('Dashboard display WR'),
                 trailing: new Checkbox(
@@ -282,36 +263,9 @@ class _EntryDialogState extends State<EntryDialog> {
                 entry.drawRd = _checkboxValueRd;
                 try {
                   entry.code = _selectedType;
+                  print(_currentValue);
+                  entry.value = _currentValue;
                   entry.cb = _selectedExec?.key;
-                  switch (getMode(_selectedType)) {
-                    case 1:
-                      entry.setPin8(int.parse(_controller_1.text));
-                      entry.setValue24(int.parse(_controller_2.text));
-                      break;
-                    case 2:
-                      entry.setValue(int.parse(_controller_2.text));
-                      break;
-                    case 3:
-                      entry.setValue(_controller_2.text);
-                      break;
-                    case 4:
-                      if (_controller_2.text == '0') {
-                        entry.setValue(false);
-                      } else if (_controller_2.text == '1') {
-                        entry.setValue(true);
-                      } else {
-                        print('_controller_2.text error');
-                      }
-                      break;
-                    case 5:
-                      entry.setBits(31, 8, int.parse(_controller_1.text));
-                      entry.setBits(23, 8, int.parse(_controller_2.text));
-                      break;
-                    case 6:
-                      entry.setBits(15, 8, int.parse(_controller_1.text));
-                      entry.setBits(7, 8, int.parse(_controller_2.text));
-                      break;
-                  }
                   entry.setOwner(getOwner());
                   if (entry.value != null) {
                     entry.reference.child(entry.key).set(entry.toJson());
