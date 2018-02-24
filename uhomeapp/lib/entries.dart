@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 const String kStringPhyIn = 'PhyIn';
 const String kStringPhyOut = 'PhyOut';
@@ -105,7 +106,8 @@ dynamic getValueCtrl1(code, value) {
       v = getBits(value, 31, 8);
       break;
     case DataCode.Timer:
-      v = getBits(value, 15, 8);
+      DateTime now = new DateTime.now();
+      v = (24 + getBits(value, 15, 8) + now.timeZoneOffset.inHours) % 24;
       break;
     default:
   }
@@ -162,8 +164,10 @@ dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
       value |= setBits(31, 8, int.parse(v));
       break;
     case DataCode.Timer:
+      DateTime now = new DateTime.now();
       value = clearBits(value, 15, 8);
-      value |= setBits(15, 8, int.parse(v));
+      int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
+      value |= setBits(15, 8, h);
       break;
     default:
   }
@@ -256,7 +260,11 @@ class IoEntry {
         v = getBits(value, 15, 16) / 10;
         break;
       case DataCode.Timer:
-        v = (getBits(value, 15, 8) * 60) + getBits(value, 7, 8);
+        DateTime now = new DateTime.now();
+        int h = (24 + getBits(value, 15, 8) + now.timeZoneOffset.inHours) % 24;
+        int m = getBits(value, 7, 8);
+        DateTime dtset = new DateTime(0, 0, 0, h, m);
+        v = new DateFormat('Hm').format(dtset);
         break;
       case DataCode.Bool:
       case DataCode.Int:
