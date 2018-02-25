@@ -151,8 +151,18 @@ dynamic getValueCtrl2(int code, dynamic value) {
   return v;
 }
 
+dynamic getValueCtrl3(int code, dynamic value) {
+  dynamic v;
+  switch (DataCode.values[code]) {
+    case DataCode.Timer:
+      v = getBits(value, 24, 9);
+      break;
+    default:
+  }
+  return v;
+}
+
 dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
-  print(value);
   switch (DataCode.values[code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
@@ -171,12 +181,10 @@ dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
       break;
     default:
   }
-  print(value);
   return value;
 }
 
 dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
-  print(value);
   switch (DataCode.values[code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
@@ -209,8 +217,19 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
       value = clearBits(value, 7, 8);
       value |= setBits(7, 8, int.parse(v));
       break;
+    default:
   }
-  print(value);
+  return value;
+}
+
+dynamic setValueCtrl3(dynamic value, int code, dynamic v) {
+  switch (DataCode.values[code]) {
+    case DataCode.Timer:
+      value = clearBits(value, 24, 9);
+      value |= setBits(24, 9, int.parse(v));
+      break;
+    default:
+  }
   return value;
 }
 

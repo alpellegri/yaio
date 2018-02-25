@@ -251,6 +251,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   hintText: 'minutes',
                 ),
               ),
+              new TimerWidget(value: value, onChanged: _handleTimerChanged),
             ]);
         break;
       default:
@@ -264,6 +265,49 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
 
     return new Container(
       child: w,
+    );
+  }
+
+  void _handleTimerChanged(int newValue) {
+    setState(() {
+      value = newValue;
+    });
+    widget.onChanged(value);
+  }
+}
+
+class TimerWidget extends StatelessWidget {
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  TimerWidget({Key key, this.value, this.onChanged});
+
+  bool isChecked(int index, int value) => (value >> 16 & (1 << index)) != 0;
+
+  void applyOnSelected(int index) {
+    int mask = 1 << (index + 16);
+    int newValue = value & ~mask; // cleat bit
+    newValue |= ~value & mask; // toggle bit
+    print(newValue);
+    onChanged(newValue);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new PopupMenuButton(
+      padding: EdgeInsets.zero,
+      onSelected: applyOnSelected,
+      itemBuilder: (BuildContext context) {
+        return [0, 1, 2, 3, 4, 5, 6, 7].map((int index) {
+          return new PopupMenuItem<int>(
+            value: index,
+            child: new CheckedPopupMenuItem<int>(
+                value: index,
+                checked: isChecked(index, value),
+                child: new Text(index.toString())),
+          );
+        }).toList();
+      },
     );
   }
 }

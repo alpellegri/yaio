@@ -161,7 +161,7 @@ class _HomeState extends State<Home> {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text(widget.title),
+            title: new Text('${widget.title} @ ${getDomain()}'),
           ),
           body: new ListView(children: <Widget>[
             new Card(
