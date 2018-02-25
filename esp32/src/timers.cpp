@@ -36,7 +36,7 @@ void Timers_Service(void) {
         if (_time == t24) {
           // check week day
           uint8_t wday_mask = ((v >> 16) & 0xFF);
-          if ((wday_mask & 0x80) == 0x00) {
+          if ((wday_mask & 0x80) != 0) {
             wday_mask = 0x7F;
           } else {
             wday_mask &= 0x7F;
