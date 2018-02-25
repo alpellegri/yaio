@@ -300,26 +300,35 @@ class TimerWidget extends StatelessWidget {
       newValue = value ^ mask; // toggle bit
       newValue &= ~(1 << 23); // clear most
     }
-    print(newValue);
     onChanged(newValue);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new PopupMenuButton(
-      padding: EdgeInsets.zero,
-      onSelected: applyOnSelected,
-      itemBuilder: (BuildContext context) {
-        return [0, 1, 2, 3, 4, 5, 6, 7].map((int index) {
-          return new PopupMenuItem<int>(
-            value: index,
-            child: new CheckedPopupMenuItem<int>(
-                value: index,
-                checked: isChecked(index, value),
-                child: new Text(index.toString())),
-          );
-        }).toList();
-      },
+    return new ListTile(
+      title: const Text('Polarity'),
+      leading: new Checkbox(
+          value: ((value & (1 << 24)) != 0),
+          onChanged: (bool v) {
+            int newValue = value;
+            newValue = (v == true) ? (value | (1 << 24)) : (value & ~(1 << 24));
+            onChanged(newValue);
+          }),
+      trailing: new PopupMenuButton(
+        padding: EdgeInsets.zero,
+        onSelected: applyOnSelected,
+        itemBuilder: (BuildContext context) {
+          return [0, 1, 2, 3, 4, 5, 6, 7].map((int index) {
+            return new PopupMenuItem<int>(
+              value: index,
+              child: new CheckedPopupMenuItem<int>(
+                  value: index,
+                  checked: isChecked(index, value),
+                  child: new Text(index.toString())),
+            );
+          }).toList();
+        },
+      ),
     );
   }
 }

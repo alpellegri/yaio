@@ -227,7 +227,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   : const Text(''),
               new ListTile(
                 title: const Text('Dashboard display WR'),
-                trailing: new Checkbox(
+                leading: new Checkbox(
                     value: _checkboxValueWr,
                     onChanged: (bool value) {
                       setState(() {
@@ -237,7 +237,7 @@ class _EntryDialogState extends State<EntryDialog> {
               ),
               new ListTile(
                 title: const Text('Dashboard display RD'),
-                trailing: new Checkbox(
+                leading: new Checkbox(
                     value: _checkboxValueRd,
                     onChanged: (bool value) {
                       setState(() {
