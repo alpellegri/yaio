@@ -288,10 +288,10 @@ class TimerWidget extends StatelessWidget {
   void applyOnSelected(int index) {
     int newValue;
     if (index == 7) {
-      int mask = 255 << 16;
-      newValue = value; // clear bit
-      int bit = newValue >> 23;
-      bit *= 255;
+      int mask = 0xFF << 16;
+      newValue = value;
+      int bit = (newValue & (1 << 23)) >> 23;
+      bit *= 0xFF;
       newValue &= ~mask;
       newValue |= bit << 16;
       newValue = newValue ^ mask; // toggle bit

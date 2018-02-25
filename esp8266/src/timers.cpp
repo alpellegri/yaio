@@ -43,7 +43,8 @@ void Timers_Service(void) {
           }
           if (((1 << wday) & wday_mask) != 0) {
             DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t24);
-            entry.ev = true;
+            // set event ev depending on polarity bit
+            entry.ev = (v & (1 << 24)) != 0;
           }
         }
       }
