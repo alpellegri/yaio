@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'entries.dart';
 
 class DynamicDataWidget extends StatelessWidget {
@@ -285,9 +286,20 @@ class TimerWidget extends StatelessWidget {
   bool isChecked(int index, int value) => (value >> 16 & (1 << index)) != 0;
 
   void applyOnSelected(int index) {
-    int mask = 1 << (index + 16);
-    int newValue = value & ~mask; // cleat bit
-    newValue |= ~value & mask; // toggle bit
+    int newValue;
+    if (index == 7) {
+      int mask = 255 << 16;
+      newValue = value; // cleat bit
+      int bit = newValue >> 23;
+      bit *= 255;
+      newValue &= ~mask;
+      newValue |= bit << 16;
+      newValue = newValue ^ mask; // toggle bit
+    } else {
+      int mask = 1 << (index + 16);
+      newValue = value ^ mask; // toggle bit
+      newValue &= ~(1 << 23);
+    }
     print(newValue);
     onChanged(newValue);
   }
