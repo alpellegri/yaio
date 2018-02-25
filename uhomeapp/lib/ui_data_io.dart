@@ -289,7 +289,7 @@ class TimerWidget extends StatelessWidget {
     int newValue;
     if (index == 7) {
       int mask = 255 << 16;
-      newValue = value; // cleat bit
+      newValue = value; // clear bit
       int bit = newValue >> 23;
       bit *= 255;
       newValue &= ~mask;
@@ -298,7 +298,7 @@ class TimerWidget extends StatelessWidget {
     } else {
       int mask = 1 << (index + 16);
       newValue = value ^ mask; // toggle bit
-      newValue &= ~(1 << 23);
+      newValue &= ~(1 << 23); // clear most
     }
     print(newValue);
     onChanged(newValue);
