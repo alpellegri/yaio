@@ -1,6 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'entries.dart';
+
+class TextFieldWidget extends StatelessWidget {
+  TextFieldWidget({Key key, this.first, this.second});
+
+  final Widget first;
+  final Widget second;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      new Container(
+        padding: const EdgeInsets.all(0.0),
+        child: first,
+      ),
+      new Expanded(
+        child: new Container(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: second,
+        ),
+      ),
+    ]);
+  }
+}
 
 class DynamicDataWidget extends StatelessWidget {
   final IoEntry entry;
@@ -109,17 +131,20 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: ctrl_1,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl1(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'pin',
+              new TextFieldWidget(
+                first: const Text('PIN'),
+                second: new TextField(
+                  controller: ctrl_1,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl1(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'pin',
+                  ),
                 ),
               ),
             ]);
@@ -132,30 +157,36 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: ctrl_1,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl1(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'pin',
+              new TextFieldWidget(
+                first: const Text('PIN'),
+                second: new TextField(
+                  controller: ctrl_1,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl1(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'pin',
+                  ),
                 ),
               ),
-              new TextField(
-                controller: ctrl_2,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl2(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'data value',
+              new TextFieldWidget(
+                first: const Text('Value'),
+                second: new TextField(
+                  controller: ctrl_2,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl2(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'data value',
+                  ),
                 ),
               ),
             ]);
@@ -167,17 +198,20 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: ctrl_2,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl2(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'value',
+              new TextFieldWidget(
+                first: const Text('Value'),
+                second: new TextField(
+                  controller: ctrl_2,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl2(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'value',
+                  ),
                 ),
               ),
             ]);
@@ -187,16 +221,19 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: ctrl_2,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl2(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                decoration: new InputDecoration(
-                  hintText: 'value',
+              new TextFieldWidget(
+                first: const Text('Value'),
+                second: new TextField(
+                  controller: ctrl_2,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl2(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  decoration: new InputDecoration(
+                    hintText: 'value',
+                  ),
                 ),
               ),
             ]);
@@ -206,17 +243,20 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: ctrl_2,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl2(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'value',
+              new TextFieldWidget(
+                first: new Text('Value'),
+                second: new TextField(
+                  controller: ctrl_2,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl2(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'value',
+                  ),
                 ),
               ),
             ]);
@@ -226,30 +266,36 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
-                controller: ctrl_1,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl1(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'hour',
+              new TextFieldWidget(
+                first: new Text('Hour'),
+                second: new TextField(
+                  controller: ctrl_1,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl1(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'hour',
+                  ),
                 ),
               ),
-              new TextField(
-                controller: ctrl_2,
-                onSubmitted: (v) {
-                  setState(() {
-                    value = setValueCtrl2(value, type, v);
-                  });
-                  widget.onChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'minutes',
+              new TextFieldWidget(
+                first: new Text('Minutes'),
+                second: new TextField(
+                  controller: ctrl_2,
+                  onSubmitted: (v) {
+                    setState(() {
+                      value = setValueCtrl2(value, type, v);
+                    });
+                    widget.onChanged(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'minutes',
+                  ),
                 ),
               ),
               new TimerWidget(value: value, onChanged: _handleTimerChanged),

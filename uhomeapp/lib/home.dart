@@ -7,78 +7,6 @@ import 'const.dart';
 import 'entries.dart';
 import 'ui_data_io.dart';
 
-class EntryDialog extends StatefulWidget {
-  final IoEntry entry;
-
-  EntryDialog(this.entry);
-
-  @override
-  _EntryDialogState createState() => new _EntryDialogState(entry);
-}
-
-class _EntryDialogState extends State<EntryDialog> {
-  final IoEntry entry;
-
-  dynamic _currentValue;
-
-  void _handleTapboxChanged(dynamic newValue) {
-    print('_handleTapboxChanged $newValue');
-    setState(() {
-      _currentValue = newValue;
-    });
-  }
-
-  _EntryDialogState(this.entry);
-
-  @override
-  void initState() {
-    super.initState();
-    if (entry.value != null) {
-      _currentValue = entry?.value;
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new AlertDialog(
-        title: new Text('Edit'),
-        content: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new DynamicEditWidget(
-                type: entry.code,
-                value: _currentValue,
-                onChanged: _handleTapboxChanged,
-              ),
-            ]),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                try {
-                  print(_currentValue);
-                  entry.value = _currentValue;
-                  entry.reference.child(entry.key).set(entry.toJson());
-                } catch (exception, stackTrace) {
-                  print('bug');
-                }
-                Navigator.pop(context, null);
-              }),
-          new FlatButton(
-              child: const Text('DISCARD'),
-              onPressed: () {
-                Navigator.pop(context, null);
-              }),
-        ]);
-  }
-}
-
 class Home extends StatefulWidget {
   Home({Key key, this.title}) : super(key: key);
 
@@ -331,7 +259,7 @@ class _HomeState extends State<Home> {
   void _openEntryDialog(IoEntry entry) {
     showDialog(
       context: context,
-      child: new EntryDialog(entry),
+      child: new DataIoShortDialogWidget(entry),
     );
   }
 
@@ -376,5 +304,77 @@ class _HomeState extends State<Home> {
     DateTime now = new DateTime.now();
     _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(_control);
+  }
+}
+
+class DataIoShortDialogWidget extends StatefulWidget {
+  final IoEntry entry;
+
+  DataIoShortDialogWidget(this.entry);
+
+  @override
+  _DataIoShortDialogWidgetState createState() =>
+      new _DataIoShortDialogWidgetState(entry);
+}
+
+class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
+  final IoEntry entry;
+
+  dynamic _currentValue;
+
+  void _handleTapboxChanged(dynamic newValue) {
+    print('_handleTapboxChanged $newValue');
+    setState(() {
+      _currentValue = newValue;
+    });
+  }
+
+  _DataIoShortDialogWidgetState(this.entry);
+
+  @override
+  void initState() {
+    super.initState();
+    if (entry.value != null) {
+      _currentValue = entry?.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+        title: new Text('Edit'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new DynamicEditWidget(
+                type: entry.code,
+                value: _currentValue,
+                onChanged: _handleTapboxChanged,
+              ),
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                try {
+                  entry.value = _currentValue;
+                  entry.reference.child(entry.key).set(entry.toJson());
+                } catch (exception, stackTrace) {
+                  print('bug');
+                }
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
+        ]);
   }
 }
