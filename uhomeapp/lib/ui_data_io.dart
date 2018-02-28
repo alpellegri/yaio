@@ -326,6 +326,16 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
 class TimerWidget extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
+  static const List<String> dayOption = const [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'All'
+  ];
 
   TimerWidget({Key key, this.value, this.onChanged});
 
@@ -370,7 +380,7 @@ class TimerWidget extends StatelessWidget {
               child: new CheckedPopupMenuItem<int>(
                   value: index,
                   checked: isChecked(index, value),
-                  child: new Text(index.toString())),
+                  child: new Text(dayOption[index])),
             );
           }).toList();
         },

@@ -169,7 +169,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-        title: new Text('Edit'),
+        // title: new Text('Edit'),
         content: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
