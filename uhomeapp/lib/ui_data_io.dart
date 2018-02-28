@@ -334,7 +334,7 @@ class TimerWidget extends StatelessWidget {
     'Thursday',
     'Friday',
     'Saturday',
-    'All'
+    'All',
   ];
 
   TimerWidget({Key key, this.value, this.onChanged});
@@ -374,13 +374,15 @@ class TimerWidget extends StatelessWidget {
         padding: EdgeInsets.zero,
         onSelected: applyOnSelected,
         itemBuilder: (BuildContext context) {
-          return [0, 1, 2, 3, 4, 5, 6, 7].map((int index) {
+          return dayOption.map((String opt) {
+            int index = dayOption.indexOf(opt);
             return new PopupMenuItem<int>(
               value: index,
               child: new CheckedPopupMenuItem<int>(
-                  value: index,
-                  checked: isChecked(index, value),
-                  child: new Text(dayOption[index])),
+                value: index,
+                checked: isChecked(index, value),
+                child: new Text(opt),
+              ),
             );
           }).toList();
         },
