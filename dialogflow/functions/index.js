@@ -26,12 +26,12 @@ const controlRef = admin.database().ref('/control');
 const statusRef = admin.database().ref('/status');
 
 // API.AI Intent names
+const PLAY_INTENT = 'play';
 const SET_RESOURCE_INTENT = 'setResource';
 const GET_RESOURCE_INTENT = 'getResource';
 
 const REQUEST_PERMISSION_ACTION = 'request_permission';
 const GET_RIDE_ACTION = 'get_ride';
-const WELCOME_INTENT = 'input.welcome';
 const SIGN_IN = 'sign.in';
 
 // Contexts
@@ -48,6 +48,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   const app = new DialogflowApp({request: request, response: response});
 
   let actionMap = new Map();
+  actionMap.set(PLAY_INTENT, play);
   actionMap.set(SET_RESOURCE_INTENT, setResource);
   actionMap.set(GET_RESOURCE_INTENT, getResource);
   actionMap.set(REQUEST_PERMISSION_ACTION, requestPermission);
@@ -56,8 +57,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   actionMap.set(SIGN_IN, signIn);
   app.handleRequest(actionMap);
 
-  function welcomeIntent (app) {
-    app.askForSignIn();
+  function play(app) {
+	// let speech = 'try to login';
+	// app.ask(speech);
+	app.askForSignIn();
   }
 
   function signIn(app) {
@@ -111,10 +114,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         controlRef.child('time').set(Math.floor(current_date.getTime() / 1000));
         controlRef.child('alarm').set(true);
       } else {
-        speech = `sorry this action is not available`;
+        speech = 'sorry this action is not available';
       }
     } else {
-      speech = `sorry this action is not available`;
+      speech = 'sorry this action is not available';
     }
 
     app.ask(speech);
