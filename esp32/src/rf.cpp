@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "cc1101.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
@@ -12,26 +13,34 @@
 #include "rf.h"
 #include "timesrv.h"
 
+#define USE_CC1101
+
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
+#define PORT_GDO0 5
+#define PORT_GDO2 4
 
 static Ticker RFRcvTimer;
 
-static RCSwitch mySwitchTx = RCSwitch();
-static RCSwitch mySwitchRx = RCSwitch();
+static RCSwitch RcSwitchTxRx = RCSwitch();
+static CC1101 cc1101;
+
 static uint32_t RadioCode;
 static bool RadioEv;
 
 void RF_SetRxPin(uint8_t pin) {
   DEBUG_PRINT("RF_SetRxPin %d\n", pin);
-  mySwitchRx.enableReceive(pin);
+  RcSwitchTxRx.enableReceive(pin);
+  cc1101.strobe(CC1101_SIDLE);
+  cc1101.strobe(CC1101_SRX);
 }
 
 void RF_SetTxPin(uint8_t pin) {
   DEBUG_PRINT("RF_SetTxPin %d\n", pin);
-  mySwitchTx.enableTransmit(pin);
+  RcSwitchTxRx.enableTransmit(pin);
 }
 
-void RF_Send(uint32_t data, uint8_t bits) { mySwitchTx.send(data, bits); }
+void RF_Send(uint32_t data, uint8_t bits) { RcSwitchTxRx.send(data, bits); }
 
 bool RF_GetRadioEv(void) {
   bool ev = false;
@@ -40,25 +49,33 @@ bool RF_GetRadioEv(void) {
   }
   return ev;
 }
+
 uint32_t RF_GetRadioCode(void) { return RadioCode; }
 
 // avoid receiving multiple code from same telegram
 void ICACHE_RAM_ATTR RF_Unmask(void) { RFRcvTimer.detach(); }
 
+void RF_Setup() {
+#ifdef USE_CC1101
+  cc1101.init();
+  RcSwitchTxRx.setPolarity(true);
+#endif
+}
+
 void RF_Loop() {
-  if (mySwitchRx.available()) {
+  if (RcSwitchTxRx.available()) {
 
     noInterrupts();
-    uint32_t value = (uint32_t)mySwitchRx.getReceivedValue();
-    mySwitchRx.resetAvailable();
+    uint32_t value = (uint32_t)RcSwitchTxRx.getReceivedValue();
+    RcSwitchTxRx.resetAvailable();
     interrupts();
 
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
       DEBUG_PRINT("%06X / bit: %d - Protocol: %d\n", value,
-                  mySwitchRx.getReceivedBitlength(),
-                  mySwitchRx.getReceivedProtocol());
+                  RcSwitchTxRx.getReceivedBitlength(),
+                  RcSwitchTxRx.getReceivedProtocol());
       if (RadioEv == false) {
         DEBUG_PRINT("radio code: %06X\n", value);
         RadioEv = true;

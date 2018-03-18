@@ -16,7 +16,7 @@ void Timers_Service(void) {
   uint32_t current = getTime();
   uint32_t t24 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
   uint8_t wday = getWeekDay();
-  DEBUG_PRINT("%d, %d, %d\n", t24, t24_last, getWeekDay());
+  // DEBUG_PRINT("%d, %d, %d\n", t24, t24_last, getWeekDay());
 
   if (t24 != t24_last) {
     t24_last = t24;
@@ -43,7 +43,8 @@ void Timers_Service(void) {
           }
           if (((1 << wday) & wday_mask) != 0) {
             DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t24);
-            entry.ev = true;
+            // set event ev depending on polarity bit
+            entry.ev = (v & (1 << 24)) != 0;
           }
         }
       }

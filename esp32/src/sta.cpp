@@ -50,6 +50,7 @@ bool STA_Setup(void) {
   DEBUG_PRINT("trying to connect...\n");
 
   TimeSetup();
+  RF_Setup();
 
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;

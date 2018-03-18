@@ -16,7 +16,7 @@ void Timers_Service(void) {
   uint32_t current = getTime();
   uint32_t t24 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
   uint8_t wday = getWeekDay();
-  DEBUG_PRINT("%d, %d, %d\n", t24, t24_last, getWeekDay());
+  // DEBUG_PRINT("%d, %d, %d\n", t24, t24_last, getWeekDay());
 
   if (t24 != t24_last) {
     t24_last = t24;
