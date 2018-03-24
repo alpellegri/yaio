@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <RCSwitch.h>
 #include <Ticker.h>
 
 #include <stdio.h>
@@ -22,7 +21,6 @@
 
 static Ticker RFRcvTimer;
 
-static RCSwitch RcSwitchTxRx = RCSwitch();
 static CC1101 cc1101;
 
 static uint32_t RadioCode;
@@ -30,17 +28,17 @@ static bool RadioEv;
 
 void RF_SetRxPin(uint8_t pin) {
   DEBUG_PRINT("RF_SetRxPin %d\n", pin);
-  RcSwitchTxRx.enableReceive(pin);
+  cc1101.enableReceive(pin);
   cc1101.strobe(CC1101_SIDLE);
   cc1101.strobe(CC1101_SRX);
 }
 
 void RF_SetTxPin(uint8_t pin) {
   DEBUG_PRINT("RF_SetTxPin %d\n", pin);
-  RcSwitchTxRx.enableTransmit(pin);
+  cc1101.enableTransmit(pin);
 }
 
-void RF_Send(uint32_t data, uint8_t bits) { RcSwitchTxRx.send(data, bits); }
+void RF_Send(uint32_t data, uint8_t bits) { cc1101.send(data, bits); }
 
 bool RF_GetRadioEv(void) {
   bool ev = false;
@@ -57,25 +55,25 @@ void ICACHE_RAM_ATTR RF_Unmask(void) { RFRcvTimer.detach(); }
 
 void RF_Setup() {
 #ifdef USE_CC1101
-  cc1101.init();
-  RcSwitchTxRx.setPolarity(true);
+  cc1101.setSoftCS(SS);
+  cc1101.begin();
 #endif
 }
 
 void RF_Loop() {
-  if (RcSwitchTxRx.available()) {
+  if (cc1101.available()) {
 
     noInterrupts();
-    uint32_t value = (uint32_t)RcSwitchTxRx.getReceivedValue();
-    RcSwitchTxRx.resetAvailable();
+    uint32_t value = cc1101.getReceivedValue();
+    cc1101.resetAvailable();
     interrupts();
 
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
       DEBUG_PRINT("%06X / bit: %d - Protocol: %d\n", value,
-                  RcSwitchTxRx.getReceivedBitlength(),
-                  RcSwitchTxRx.getReceivedProtocol());
+                  cc1101.getReceivedBitlength(),
+                  cc1101.getReceivedProtocol());
       if (RadioEv == false) {
         DEBUG_PRINT("radio code: %06X\n", value);
         RadioEv = true;

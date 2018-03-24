@@ -3,28 +3,26 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <RCSwitch.h>
-
 #include "cc1101.h"
 
-#define LEDOUTPUT 16
+#define LEDOUTPUT 13
 
-#define PORT_GDO0 5
-#define PORT_GDO2 4
-
+#define PORT_GDO0 14
+#define PORT_GDO2 15
 
 CC1101 cc1101;
-RCSwitch mySwitch = RCSwitch();
 
 void setup() {
   uint8_t data;
   Serial.begin(115200);
 
-  cc1101.init();
+  cc1101.setSoftCS(4);
+  cc1101.begin();
 
   // setup the blinker output
   pinMode(LEDOUTPUT, OUTPUT);
-  digitalWrite(LEDOUTPUT, LOW);
+  // digitalWrite(LEDOUTPUT, LOW);
+
 
   Serial.println("");
   Serial.print("CC1101_VERSION ");
@@ -37,11 +35,8 @@ void setup() {
   data = cc1101.readReg(CC1101_MDMCFG2);
   Serial.println(data);
 
-  mySwitch.enableTransmit(PORT_GDO0);
-  mySwitch.setPolarity(true);
-  mySwitch.enableReceive(PORT_GDO2);
-  cc1101.strobe(CC1101_SIDLE);
-  cc1101.strobe(CC1101_SRX);
+  cc1101.enableTransmit(PORT_GDO0);
+  cc1101.enableReceive(PORT_GDO2);
 }
 
 uint32_t schedule_time;
@@ -50,24 +45,24 @@ void loop() {
   uint8_t data;
   uint16_t i;
 
-  if (mySwitch.available()) {
+  if (cc1101.available()) {
     Serial.print("Received ");
-    Serial.print(mySwitch.getReceivedValue());
+    Serial.print(cc1101.getReceivedValue());
     Serial.print(" / ");
-    Serial.print(mySwitch.getReceivedBitlength());
+    Serial.print(cc1101.getReceivedBitlength());
     Serial.print("bit ");
     Serial.print("Protocol: ");
-    Serial.println(mySwitch.getReceivedProtocol());
+    Serial.println(cc1101.getReceivedProtocol());
 
-    mySwitch.resetAvailable();
+    cc1101.resetAvailable();
   }
 
   uint32_t current_time = millis();
-  if ((current_time - schedule_time) > 1000) {
+  if ((current_time - schedule_time) > 3000) {
     schedule_time = current_time;
     digitalWrite(LEDOUTPUT, LOW);
 
-    // mySwitch.send("000000000001010100010001");
+    // cc1101.send(0x55555555, 32);
 
     digitalWrite(LEDOUTPUT, HIGH);
   }

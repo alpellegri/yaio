@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <RCSwitch.h>
 
 #ifndef _CC1101_H
 #define _CC1101_H
@@ -142,12 +143,25 @@ class CC1101 {
 private:
 public:
   CC1101(void);
-  void init(void);
-  void reset(void);
+  void begin(void);
+  void setSoftCS(uint8_t pin);
   uint8_t readReg(uint8_t reg);
   uint8_t readStatus(uint8_t reg);
   uint8_t strobe(uint8_t value);
   uint8_t getStatus();
+  void enableTransmit(uint8_t pin);
+  void enableReceive(uint8_t pin);
+  bool available(void) { return rcSwitch.available(); }
+  void resetAvailable(void) { return rcSwitch.resetAvailable(); }
+  void send(uint32_t code, uint16_t length);
+  uint32_t getReceivedValue(void) { return rcSwitch.getReceivedValue(); }
+  uint16_t getReceivedBitlength(void) { return rcSwitch.getReceivedBitlength(); }
+  uint32_t getReceivedDelay(void) { return rcSwitch.getReceivedDelay(); }
+  uint32_t getReceivedProtocol(void) { return rcSwitch.getReceivedProtocol(); }
+
+  bool useSoftCS = false;
+  uint8_t pinSoftCS;
+  RCSwitch rcSwitch = RCSwitch();
 };
 
 #endif

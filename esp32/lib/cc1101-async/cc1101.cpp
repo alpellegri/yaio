@@ -3,19 +3,22 @@
 
 #include "cc1101.h"
 
-#define SPI_BEGIN()                                                            \
-  do {                                                                         \
-    digitalWrite(SS, LOW);                                                     \
-  } while (0);
 #define SPI_WAIT()                                                             \
   do {                                                                         \
     delayMicroseconds(100);                                                    \
   } while (0);
 #define SPI_TXRX(x) SPI.transfer(x);
-#define SPI_END()                                                              \
-  do {                                                                         \
-    digitalWrite(SS, HIGH);                                                    \
-  } while (0);
+
+typedef void (*funcPointer)(void);
+
+funcPointer SPI_BEGIN;
+funcPointer SPI_END;
+uint8_t SpiPinCs;
+
+void spi_begin_softCs(void) { digitalWrite(SpiPinCs, LOW); }
+void spi_end_softCs(void) { digitalWrite(SpiPinCs, HIGH); }
+void spi_begin_hardCs(void) {}
+void spi_end_hardCs(void) {}
 
 /******************************************************************************
  * @fn          function name
@@ -26,11 +29,19 @@
  *
  * @return      describe return value, if any
  */
-void SPI_INIT(void) {
-  pinMode(SS, OUTPUT);
-  digitalWrite(SS, HIGH);
+void SPI_INIT(bool mode, uint8_t pin) {
+  if (mode == true) {
+    SpiPinCs = pin;
+    pinMode(SpiPinCs, OUTPUT);
+    digitalWrite(SpiPinCs, HIGH);
+    SPI_BEGIN = spi_begin_softCs;
+    SPI_END = spi_end_softCs;
+  } else {
+    SPI.setHwCs(true);
+    SPI_BEGIN = spi_begin_hardCs;
+    SPI_END = spi_end_hardCs;
+  }
   SPI.begin();
-  // SPI.setHwCs(true);
   SPI.setFrequency(1000000);
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(SPI_MODE0);
@@ -51,8 +62,7 @@ void SPI_INIT(void) {
 //      uint8_t count
 //          Number of bytes to be written to the subsequent CCxxx0 registers.
 //------------------------------------------------------------------------------
-void spiReadBurstReg(uint8_t addr, uint8_t *buffer,
-                                     uint8_t count) {
+void spiReadBurstReg(uint8_t addr, uint8_t *buffer, uint8_t count) {
   uint8_t i;
   SPI_BEGIN();
   SPI_TXRX(addr | READ_BURST);
@@ -168,8 +178,7 @@ void spiWriteReg(uint8_t addr, uint8_t value) {
 //      uint8_t count
 //          Number of bytes to be written to the subsequent CCxxx0 registers.
 //------------------------------------------------------------------------------
-void spiWriteBurstReg(uint8_t addr, uint8_t *buffer,
-                                      uint8_t count) {
+void spiWriteBurstReg(uint8_t addr, uint8_t *buffer, uint8_t count) {
   uint8_t i;
   SPI_BEGIN();
   SPI_TXRX(addr | WRITE_BURST);
@@ -218,8 +227,25 @@ uint8_t spiGetStatus(void) {
  *
  * Class constructor
  */
-CC1101::CC1101(void) {
-  SPI_INIT(); // Initialize SPI interface
+CC1101::CC1101(void) {}
+
+/**
+ * CC1101
+ *
+ * Class constructor
+ */
+void CC1101::enableTransmit(uint8_t pin) { rcSwitch.enableTransmit(pin); }
+
+void CC1101::enableReceive(uint8_t pin) {
+  rcSwitch.setPolarity(true);
+  rcSwitch.enableReceive(pin);
+  strobe(CC1101_SIDLE);
+  strobe(CC1101_SRX);
+}
+
+void CC1101::setSoftCS(uint8_t pin) {
+  useSoftCS = true;
+  pinSoftCS = pin;
 }
 
 /**
@@ -229,11 +255,13 @@ CC1101::CC1101(void) {
  *
  * @param freq Carrier frequency
  */
-void CC1101::init(void) {
+void CC1101::begin(void) {
   uint8_t writeByte;
 #ifdef PA_TABLE
   uint8_t paTable[] = PA_TABLE;
 #endif
+
+  SPI_INIT(useSoftCS, pinSoftCS); // Initialize SPI interface
 
   // reset radio
   spiStrobe(CC1101_SRES);
@@ -253,3 +281,11 @@ uint8_t CC1101::readStatus(uint8_t reg) { return spiReadStatus(reg); }
 uint8_t CC1101::readReg(uint8_t reg) { return spiReadReg(reg); }
 uint8_t CC1101::strobe(uint8_t value) { return spiStrobe(value); }
 uint8_t CC1101::getStatus(void) { return spiGetStatus(); }
+
+void CC1101::send(uint32_t code, uint16_t length) {
+  strobe(CC1101_SIDLE);
+  strobe(CC1101_STX);
+  rcSwitch.send(code, length);
+  // strobe(CC1101_SIDLE);
+  strobe(CC1101_SRX);
+}
