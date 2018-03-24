@@ -165,8 +165,6 @@ bool FbmService(void) {
                 boot_sm = 4;
               } else if (control_reboot == 3) {
                 boot_sm = 2;
-              } else if (control_reboot == 4) {
-                boot_sm = 5;
               }
             } else {
               DEBUG_PRINT("parseObject() failed\n");
@@ -194,13 +192,7 @@ bool FbmService(void) {
 
   case 4:
     STA_FotaReq();
-    boot_sm = 50;
-    break;
-  case 5:
-    EE_EraseData();
-    DEBUG_PRINT("EEPROM erased\n");
-    ESP.restart();
-    boot_sm = 50;
+    boot_sm = 5;
     break;
   default:
     break;
