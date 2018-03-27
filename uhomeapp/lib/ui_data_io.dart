@@ -243,7 +243,16 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextFieldWidget(
+              new Switch(
+                  value: value,
+                  onChanged: (bool v) {
+                    setState(() {
+                      value = v;
+                    });
+                    widget.onChanged(value);
+                  }
+              ),
+              /* new TextFieldWidget(
                 first: new Text('Value'),
                 second: new TextField(
                   controller: ctrl_2,
@@ -258,7 +267,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                     hintText: 'value',
                   ),
                 ),
-              ),
+              ),*/
             ]);
         break;
       case DataCode.Timer:
