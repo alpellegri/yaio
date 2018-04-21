@@ -274,7 +274,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   if (entry.value != null) {
                     entry.reference.child(entry.key).set(entry.toJson());
                   }
-                } catch (exception, stackTrace) {
+                } catch (exception) {
                   print('bug');
                 }
                 Navigator.pop(context, null);

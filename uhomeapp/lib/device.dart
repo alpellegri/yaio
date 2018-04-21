@@ -47,7 +47,7 @@ class _DeviceState extends State<Device> {
           const IosNotificationSettings(sound: true, badge: true, alert: true));
       _fbMessaging.onIosSettingsRegistered
           .listen((IosNotificationSettings settings) {
-        print("Settings registered: $settings");
+        print('Settings registered: $settings');
       });
       _fbMessaging.getToken().then((String token) {
         assert(token != null);
@@ -92,7 +92,7 @@ class ListItem extends StatelessWidget {
       new Radio<String>(
         value: value,
         groupValue: field.value,
-        onChanged: field.onChanged,
+        onChanged: field.didChange,
       ),
       new Text(value),
     ]);
@@ -260,6 +260,8 @@ class DemoItem<T> {
           showHint: isExpanded);
     };
   }
+
+  Widget build() => builder(this);
 }
 
 class ExpasionPanelsDemo extends StatefulWidget {
@@ -507,7 +509,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     if (_isPreferencesReady == false) {
       return new LinearProgressIndicator(value: null);
     } else {
-      var update = _update();
+      var update = _updateItemMenu();
       setState(() {
         _isNeedCreate = update;
       });
@@ -529,7 +531,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                     return new ExpansionPanel(
                         isExpanded: item.isExpanded,
                         headerBuilder: item.headerBuilder,
-                        body: item.builder(item));
+                        body: item.build());
                   }).toList()),
             ),
           ),
@@ -559,7 +561,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     }
   }
 
-  bool _update() {
+  bool _updateItemMenu() {
     bool ret = true;
     var keyList = entryMap.keys.toList();
     setState(() {
@@ -567,12 +569,12 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     });
     var keyValue = _demoItems[0].value;
     if (keyList.contains(keyValue)) {
-      keyList = entryMap[keyValue].keys.toList();
+      var keyList2 = entryMap[keyValue].keys.toList();
       setState(() {
-        _demoItems[1].query = keyList;
+        _demoItems[1].query = keyList2;
       });
-      keyValue = _demoItems[1].value;
-      ret = !keyList.contains(keyValue);
+      var keyValue2 = _demoItems[1].value;
+      ret = !keyList2.contains(keyValue2);
     }
     return ret;
   }

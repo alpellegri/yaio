@@ -97,7 +97,7 @@ Future<Map> loadPreferences() async {
   updateUserRef();
   if (_nodeConfigJson != null) {
     print(_nodeConfigJson);
-    _nodeConfigMap = JSON.decode(_nodeConfigJson);
+    _nodeConfigMap = json.decode(_nodeConfigJson);
     // override
     _nodeConfigMap['uid'] = getFirebaseUser().uid;
     updateNodeRef(_nodeConfigMap);
@@ -119,7 +119,7 @@ void savePreferencesDN(String domain, String node) {
   // update firebase references
   updateNodeRef(_nodeConfigMap);
 
-  _nodeConfigJson = JSON.encode(_nodeConfigMap);
+  _nodeConfigJson = json.encode(_nodeConfigMap);
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
@@ -132,7 +132,7 @@ void savePreferencesSP(String ssid, String password) {
   // update firebase references
   updateNodeRef(_nodeConfigMap);
 
-  _nodeConfigJson = JSON.encode(_nodeConfigMap);
+  _nodeConfigJson = json.encode(_nodeConfigMap);
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 

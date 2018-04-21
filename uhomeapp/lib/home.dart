@@ -37,9 +37,9 @@ class _HomeState extends State<Home> {
 
   bool _connected = false;
 
-  Map<String, Object> _control;
-  Map<String, Object> _status;
-  Map<String, Object> _startup;
+  Map<dynamic, dynamic> _control;
+  Map<dynamic, dynamic> _status;
+  Map<dynamic, dynamic> _startup;
 
   @override
   void initState() {
@@ -365,7 +365,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
                 try {
                   entry.value = _currentValue;
                   entry.reference.child(entry.key).set(entry.toJson());
-                } catch (exception, stackTrace) {
+                } catch (exception) {
                   print('bug');
                 }
                 Navigator.pop(context, null);
