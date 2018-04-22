@@ -257,9 +257,11 @@ class _HomeState extends State<Home> {
   }
 
   void _openEntryDialog(IoEntry entry) {
-    showDialog(
+    showDialog<Null>(
       context: context,
-      child: new DataIoShortDialogWidget(entry),
+      builder: (BuildContext context) {
+        return new DataIoShortDialogWidget(entry);
+      },
     );
   }
 

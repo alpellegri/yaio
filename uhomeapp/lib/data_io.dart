@@ -99,9 +99,11 @@ class _DataIOState extends State<DataIO> {
   }
 
   void _openEntryDialog(IoEntry entry) {
-    showDialog(
+    showDialog<Null>(
       context: context,
-      child: new DataIoDialogWidget(entry),
+      builder: (BuildContext context) {
+        return new DataIoDialogWidget(entry);
+      },
     );
   }
 
@@ -123,7 +125,7 @@ class DataIoDialogWidget extends StatefulWidget {
 class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   final IoEntry entry;
   final DatabaseReference _execRef =
-  FirebaseDatabase.instance.reference().child(getExecRef());
+      FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
   int _selectedType;
   List<int> _opTypeMenu = new List<int>();
@@ -204,30 +206,30 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
               ),
               (_selectedType != null)
                   ? (new DynamicEditWidget(
-                type: _selectedType,
-                value: _currentValue,
-                onChanged: _handleTapboxChanged,
-              ))
+                      type: _selectedType,
+                      value: _currentValue,
+                      onChanged: _handleTapboxChanged,
+                    ))
                   : (const Text('')),
               (_execList.length > 0)
                   ? new ListTile(
-                title: const Text('Call'),
-                trailing: new DropdownButton<ExecEntry>(
-                  hint: const Text('select an exec'),
-                  value: _selectedExec,
-                  onChanged: (ExecEntry newValue) {
-                    setState(() {
-                      _selectedExec = newValue;
-                    });
-                  },
-                  items: _execList.map((ExecEntry entry) {
-                    return new DropdownMenuItem<ExecEntry>(
-                      value: entry,
-                      child: new Text(entry.key),
-                    );
-                  }).toList(),
-                ),
-              )
+                      title: const Text('Call'),
+                      trailing: new DropdownButton<ExecEntry>(
+                        hint: const Text('select an exec'),
+                        value: _selectedExec,
+                        onChanged: (ExecEntry newValue) {
+                          setState(() {
+                            _selectedExec = newValue;
+                          });
+                        },
+                        items: _execList.map((ExecEntry entry) {
+                          return new DropdownMenuItem<ExecEntry>(
+                            value: entry,
+                            child: new Text(entry.key),
+                          );
+                        }).toList(),
+                      ),
+                    )
                   : const Text(''),
               new ListTile(
                 title: const Text('Dashboard display WR'),

@@ -212,6 +212,7 @@ class _ExecProgState extends State<ExecProg> {
 
   @override
   Widget build(BuildContext context) {
+    print('_ExecProgState');
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
@@ -243,55 +244,63 @@ class _ExecProgState extends State<ExecProg> {
   Future<Null> _onFloatingActionButtonPressed() async {
     final TextEditingController ctrl =
         new TextEditingController(text: '${prog.length}');
-    await showDialog<Null>(
+    await showDialog<String>(
       context: context,
       barrierDismissible: false, // user must tap button!
-      child: new AlertDialog(
-        title: new Text('Select line number'),
-        content: new SingleChildScrollView(
-          child: new ListBody(
-            children: <Widget>[
-              new TextField(
-                controller: ctrl,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  hintText: 'line',
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: new Text('Select line number'),
+          content: new SingleChildScrollView(
+            child: new ListBody(
+              children: <Widget>[
+                new TextField(
+                  controller: ctrl,
+                  keyboardType: TextInputType.number,
+                  decoration: new InputDecoration(
+                    hintText: 'line',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          new FlatButton(
-            child: new Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop(ctrl.text);
-            },
-          ),
-          new FlatButton(
-            child: new Text('DISCARD'),
-            onPressed: () {
-              Navigator.of(context).pop(null);
-            },
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(ctrl.text);
+              },
+            ),
+            new FlatButton(
+              child: new Text('DISCARD'),
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+            ),
+          ],
+        );
+      },
     ).then((e) {
       if (e != null) {
         int index = int.parse(e);
-        if (index < prog.length) {
-          prog.insert(index, new InstrEntry(0, '0'));
-        } else {
-          prog.add(new InstrEntry(0, '0'));
-        }
+        setState(() {
+          if (index < prog.length) {
+            prog.insert(index, new InstrEntry(0, '0'));
+          } else {
+            prog.add(new InstrEntry(0, '0'));
+          }
+        });
+      } else {
+        print('showDialog null');
       }
     });
   }
 
   void _openEntryDialog(int index) {
-    showDialog(
+    showDialog<Null>(
       context: context,
-      child: new EntryDialog(index, prog, entryIoList),
+      builder: (BuildContext context) {
+        return new EntryDialog(index, prog, entryIoList);
+      },
     );
   }
 
