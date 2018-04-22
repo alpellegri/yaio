@@ -66,7 +66,7 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.of(context).pushNamed(DataIO.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.functions),
+            leading: new Icon(Icons.code),
             title: new Text('Exec'),
             onTap: () {
               Navigator.of(context).pushNamed(Exec.routeName);

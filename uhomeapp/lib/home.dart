@@ -99,7 +99,7 @@ class _HomeState extends State<Home> {
                 children: <Widget>[
                   new ListTile(
                     leading: (current.difference(_heartbeatTime) > time_limit)
-                        ? (new Icon(Icons.sync_problem, color: Colors.red[200]))
+                        ? (new Icon(Icons.sync, color: Colors.red[200]))
                         : (new Icon(Icons.sync, color: Colors.green[200])),
                     title: const Text('Device Status'),
                   ),
@@ -146,7 +146,7 @@ class _HomeState extends State<Home> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.flash_on)),
+                        : (const Icon(Icons.update)),
                     title: const Text('Update Node'),
                     subtitle: new Text('Configuration'),
                     trailing: new ButtonTheme.bar(
@@ -167,7 +167,7 @@ class _HomeState extends State<Home> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.power)),
+                        : (const Icon(Icons.power_settings_new)),
                     title: const Text('PowerUp'),
                     subtitle: new Text('${_startupTime.toString()}'),
                     trailing: new ButtonTheme.bar(
@@ -186,9 +186,9 @@ class _HomeState extends State<Home> {
                   new ListTile(
                     leading: (_control['reboot'] == 2)
                         ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (const Icon(Icons.flash_on)),
+                      value: null,
+                    ))
+                        : (const Icon(Icons.system_update_alt)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${_startup["version"]}'),
                     trailing: new ButtonTheme.bar(
@@ -196,6 +196,26 @@ class _HomeState extends State<Home> {
                         children: <Widget>[
                           new FlatButton(
                             child: const Text('UPGRADE'),
+                            onPressed: () {
+                              _nodeUpdate(kNodeFlash);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  new ListTile(
+                    leading: (_control['reboot'] == 4)
+                        ? (new CircularProgressIndicator(
+                      value: null,
+                    ))
+                        : (const Icon(Icons.delete_forever)),
+                    title: const Text('Erase device'),
+                    trailing: new ButtonTheme.bar(
+                      child: new ButtonBar(
+                        children: <Widget>[
+                          new FlatButton(
+                            child: const Text('ERASE'),
                             onPressed: () {
                               _nodeUpdate(kNodeFlash);
                             },
