@@ -75,7 +75,7 @@ class _HomeState extends State<Home> {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text(widget.title),
+            title: new Text('${widget.title} @ ${getOwner()}'),
           ),
           body: new LinearProgressIndicator(
             value: null,
@@ -89,7 +89,7 @@ class _HomeState extends State<Home> {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text('${widget.title} @ ${getDomain()}'),
+            title: new Text('${widget.title} @ ${getOwner()}'),
           ),
           body: new ListView(children: <Widget>[
             new Card(
@@ -211,6 +211,7 @@ class _HomeState extends State<Home> {
                     ))
                         : (const Icon(Icons.delete_forever)),
                     title: const Text('Erase device'),
+                    subtitle: new Text('${getOwner()}'),
                     trailing: new ButtonTheme.bar(
                       child: new ButtonBar(
                         children: <Widget>[
