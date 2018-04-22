@@ -295,11 +295,16 @@ class _ExecProgState extends State<ExecProg> {
     });
   }
 
+  void _didChanged(bool newValue) {
+    setState(() {
+    });
+  }
+
   void _openEntryDialog(int index) {
     showDialog<Null>(
       context: context,
       builder: (BuildContext context) {
-        return new EntryDialog(index, prog, entryIoList);
+        return new EntryDialog(index, prog, entryIoList, _didChanged);
       },
     );
   }
@@ -327,8 +332,9 @@ class EntryDialog extends StatefulWidget {
   final int index;
   final List<InstrEntry> prog;
   final List<IoEntry> entryIoList;
+  final ValueChanged<bool> onChanged;
 
-  EntryDialog(this.index, this.prog, this.entryIoList);
+  EntryDialog(this.index, this.prog, this.entryIoList, this.onChanged);
 
   @override
   _EntryDialogState createState() =>
@@ -369,8 +375,13 @@ class _EntryDialogState extends State<EntryDialog> {
     }
   }
 
+  void _didChange() {
+    widget.onChanged(true);
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('_EntryDialogState');
     return new AlertDialog(
         title: new Text('Edit'),
         content: new Column(
@@ -429,17 +440,23 @@ class _EntryDialogState extends State<EntryDialog> {
           new FlatButton(
               child: const Text('REMOVE'),
               onPressed: () {
-                prog.removeAt(index);
+                setState(() {
+                  _didChange();
+                  prog.removeAt(index);
+                });
                 Navigator.pop(context, null);
               }),
           new FlatButton(
               child: const Text('SAVE'),
               onPressed: () {
-                prog[index].i = _selectedOpCode;
-                prog[index].v = (_isImmediate == true)
-                    ? _controllerValue.text
-                    : _selectedEntry.key;
-                Navigator.pop(context, prog);
+                _didChange();
+                setState(() {
+                  prog[index].i = _selectedOpCode;
+                  prog[index].v = (_isImmediate == true)
+                      ? _controllerValue.text
+                      : _selectedEntry.key;
+                  Navigator.pop(context, null);
+                });
               }),
           new FlatButton(
               child: const Text('DISCARD'),
