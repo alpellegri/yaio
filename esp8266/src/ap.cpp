@@ -1,5 +1,8 @@
 #include <Arduino.h>
+<<<<<<< HEAD
 #include <ESP8266WiFi.h>
+=======
+>>>>>>> master
 #include <WebSocketsServer.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,8 +17,13 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
+<<<<<<< HEAD
 static const char ap_ssid[] PROGMEM = "uHome-node";
 static const char ap_password[] PROGMEM = "123456789";
+=======
+static const char *ap_ssid = "uHomeDevice";
+static const char *ap_password = "123456789";
+>>>>>>> master
 
 static uint16_t ap_task_cnt;
 static bool enable_WiFi_Scan = false;

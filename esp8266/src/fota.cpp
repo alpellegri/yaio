@@ -33,7 +33,11 @@ typedef enum {
 
 static HTTPWeakClient http;
 
+<<<<<<< HEAD
 static const uint16_t block_size = 2*1500;
+=======
+static const uint16_t block_size = 1024;
+>>>>>>> master
 static uint16_t block;
 static uint16_t num_blocks;
 

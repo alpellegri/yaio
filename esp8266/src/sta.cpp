@@ -87,7 +87,11 @@ bool STA_Setup(void) {
 }
 
 void STA_FotaReq(void) {
+<<<<<<< HEAD
   SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("w")).c_str());
+=======
+  SPIFFS.open("/fota.req", "w");
+>>>>>>> master
   delay(500);
   ESP.restart();
 }
@@ -118,7 +122,10 @@ bool STA_Task(void) {
 }
 
 void STA_Loop() {
+<<<<<<< HEAD
   RF_Loop();
+=======
+>>>>>>> master
 #if 0
   uint8_t in = digitalRead(BUTTON);
 

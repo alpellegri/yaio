@@ -312,9 +312,15 @@ bool FbmService(void) {
         th["h"] = humidity_data;
         yield();
         if (ht_monitor_run == true) {
+<<<<<<< HEAD
           Firebase.push((klogs + F("/TH")), JsonVariant(th));
           if (Firebase.failed()) {
             Serial.print(F("push failed: klogs/TH"));
+=======
+          Firebase.push(F("logs/TH"), JsonVariant(th));
+          if (Firebase.failed()) {
+            Serial.print(F("push failed: logs/TH"));
+>>>>>>> master
             Serial.println(Firebase.error());
           } else {
             // update in case of success
@@ -335,6 +341,17 @@ bool FbmService(void) {
       yield();
     }
 
+<<<<<<< HEAD
+=======
+    // manage RF activation/deactivation
+    if (status_alarm == true) {
+      RF_Enable();
+    } else {
+      RF_Disable();
+    }
+    yield();
+
+>>>>>>> master
     // manage alarm arming/disarming notifications
     if (status_alarm_last != status_alarm) {
       status_alarm_last = status_alarm;
