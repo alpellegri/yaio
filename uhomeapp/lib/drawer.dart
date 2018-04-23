@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
-import 'setup.dart';
+import 'device.dart';
 import 'node_setup.dart';
-import 'radiocode.dart';
-import 'timer.dart';
-import 'digital_io.dart';
-import 'logical_io.dart';
-import 'functions.dart';
+import 'data_io.dart';
+import 'exec.dart';
+import 'exec_edit.dart';
 import 'log_history.dart';
 import 'chart_history.dart';
 import 'firebase_utils.dart';
@@ -15,18 +13,15 @@ final MyDrawer drawer = new MyDrawer();
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Home.routeName: (BuildContext context) => new Home(title: 'Home'),
-  Setup.routeName: (BuildContext context) => new Setup(title: 'Device'),
+  Device.routeName: (BuildContext context) => new Device(title: 'Device'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'Node Setup'),
-  DigitalIO.routeName: (BuildContext context) =>
-      new DigitalIO(title: 'Digital IO'),
-  LogicalIO.routeName: (BuildContext context) =>
-      new LogicalIO(title: 'Logical IO'),
-  RadioCode.routeName: (BuildContext context) =>
-      new RadioCode(title: 'Radio Code'),
-  Functions.routeName: (BuildContext context) =>
-      new Functions(title: 'Functions'),
-  Timer.routeName: (BuildContext context) => new Timer(title: 'Timer'),
+  DataIO.routeName: (BuildContext context) => new DataIO(),
+  Exec.routeName: (BuildContext context) => new Exec(),
+  ExecEdit.routeName: (BuildContext context) =>
+      new ExecEdit(title: 'Exec Edit'),
+  ExecProg.routeName: (BuildContext context) =>
+      new ExecProg(title: 'Exec Prog'),
   LogHistory.routeName: (BuildContext context) =>
       new LogHistory(title: 'Log History'),
   ChartHistory.routeName: (BuildContext context) =>
@@ -56,73 +51,37 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: new Icon(Icons.home),
             title: new Text('Home'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Home.routeName);
+              Navigator.of(context).pushNamed(Home.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.developer_board),
             title: new Text('Device'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Setup.routeName);
+              Navigator.of(context).pushNamed(Device.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.label_outline),
-            title: new Text('Digital IO'),
+            title: new Text('Data IO'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(DigitalIO.routeName);
+              Navigator.of(context).pushNamed(DataIO.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.label_outline),
-            title: new Text('Logical IO'),
+            leading: new Icon(Icons.code),
+            title: new Text('Exec'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(LogicalIO.routeName);
-            }),
-        new ListTile(
-            leading: new Icon(Icons.settings_input_antenna),
-            title: new Text('Radio Code'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(RadioCode.routeName);
-            }),
-        new ListTile(
-            leading: new Icon(Icons.functions),
-            title: new Text('Functions'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Functions.routeName);
-            }),
-        new ListTile(
-            leading: new Icon(Icons.alarm),
-            title: new Text('Timer'),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(Timer.routeName);
+              Navigator.of(context).pushNamed(Exec.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.message),
             title: new Text('Log History'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(LogHistory.routeName);
+              Navigator.of(context).pushNamed(LogHistory.routeName);
             }),
         new ListTile(
             leading: new Icon(Icons.timeline),
             title: new Text('Chart History'),
             onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..pushNamed(ChartHistory.routeName);
+              Navigator.of(context).pushNamed(ChartHistory.routeName);
             }),
       ]),
     );

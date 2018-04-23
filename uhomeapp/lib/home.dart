@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'drawer.dart';
 import 'firebase_utils.dart';
-import 'chart_history.dart';
 import 'const.dart';
+import 'entries.dart';
+import 'ui_data_io.dart';
 
 class Home extends StatefulWidget {
   Home({Key key, this.title}) : super(key: key);
@@ -28,17 +29,22 @@ class _HomeState extends State<Home> {
   StreamSubscription<Event> _statusSub;
   StreamSubscription<Event> _startupSub;
 
+  List<IoEntry> entryList = new List();
+  DatabaseReference _dataRef;
+  StreamSubscription<Event> _onAddSubscription;
+  StreamSubscription<Event> _onChangedSubscription;
+  StreamSubscription<Event> _onRemoveSubscription;
+
   bool _connected = false;
 
-  Map<String, Object> _control;
-  Map<String, Object> _status;
-  Map<String, Object> _startup;
+  Map<dynamic, dynamic> _control;
+  Map<dynamic, dynamic> _status;
+  Map<dynamic, dynamic> _startup;
 
   @override
   void initState() {
     super.initState();
     print('_MyHomePageState');
-
     _controlTimeoutCnt = 0;
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
     _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
@@ -46,6 +52,10 @@ class _HomeState extends State<Home> {
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
+    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
+    _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
+    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
   }
 
   @override
@@ -54,36 +64,23 @@ class _HomeState extends State<Home> {
     _controlSub.cancel();
     _statusSub.cancel();
     _startupSub.cancel();
+    _onAddSubscription.cancel();
+    _onChangedSubscription.cancel();
+    _onRemoveSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    String alarmButton;
     if (_connected == false) {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text(widget.title),
+            title: new Text('${widget.title} @ ${getOwner()}'),
           ),
           body: new LinearProgressIndicator(
             value: null,
           ));
     } else {
-      if (_status["alarm"] == true) {
-        if (_control["alarm"] == true) {
-          alarmButton = "DEACTIVATE";
-        } else {
-          alarmButton = "DISARMING";
-          _nodeUpdate(kNodeIdle);
-        }
-      } else {
-        if (_control["alarm"] == false) {
-          alarmButton = "ACTIVATE";
-        } else {
-          alarmButton = "ARMING";
-          _nodeUpdate(kNodeIdle);
-        }
-      }
       DateTime current = new DateTime.now();
       DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_startup['time'].toString()) * 1000);
@@ -92,7 +89,7 @@ class _HomeState extends State<Home> {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text(widget.title),
+            title: new Text('${widget.title} @ ${getOwner()}'),
           ),
           body: new ListView(children: <Widget>[
             new Card(
@@ -102,34 +99,9 @@ class _HomeState extends State<Home> {
                 children: <Widget>[
                   new ListTile(
                     leading: (current.difference(_heartbeatTime) > time_limit)
-                        ? (new Icon(Icons.sync_problem, color: Colors.red[200]))
+                        ? (new Icon(Icons.sync, color: Colors.red[200]))
                         : (new Icon(Icons.sync, color: Colors.green[200])),
                     title: const Text('Device Status'),
-                  ),
-                  new ListTile(
-                    leading: (_status['alarm'] == true)
-                        ? (new Icon(Icons.lock_outline, color: Colors.red[200]))
-                        : (new Icon(Icons.lock_open, color: Colors.green[200])),
-                    title: const Text('Alarm Status'),
-                    subtitle:
-                        new Text('${_status["alarm"] ? "ACTIVE" : "INACTIVE"}'),
-                    trailing: new ButtonTheme.bar(
-                      // make buttons use the appropriate styles for cards
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: new Text(alarmButton),
-                            onPressed: () {
-                              _control['alarm'] = !_control['alarm'];
-                              DateTime now = new DateTime.now();
-                              _control['time'] =
-                                  now.millisecondsSinceEpoch ~/ 1000;
-                              _controlRef.set(_control);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -139,24 +111,22 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  new ListTile(
-                    leading: const Icon(Icons.show_chart),
-                    title: const Text('Temperature / Humidity'),
-                    subtitle: new Text(
-                        '${_status["temperature"]}°C / ${_status["humidity"]}%'),
-                    trailing: new ButtonTheme.bar(
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: const Text('SHOW'),
-                            onPressed: () {
-                              Navigator.of(context)
-                                ..pushNamed(ChartHistory.routeName);
+                  new ListView.builder(
+                    shrinkWrap: true,
+                    reverse: true,
+                    itemCount: entryList.length,
+                    itemBuilder: (buildContext, index) {
+                      if (entryList[index].drawWr == true) {
+                        return new InkWell(
+                            onTap: () {
+                              _openEntryDialog(entryList[index]);
+                              _nodeUpdate(kNodeUpdate);
                             },
-                          ),
-                        ],
-                      ),
-                    ),
+                            child: new DataIoItemWidget(entryList[index]));
+                      } else {
+                        return new DataIoItemWidget(entryList[index]);
+                      }
+                    },
                   ),
                 ],
               ),
@@ -176,7 +146,7 @@ class _HomeState extends State<Home> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.flash_on)),
+                        : (const Icon(Icons.update)),
                     title: const Text('Update Node'),
                     subtitle: new Text('Configuration'),
                     trailing: new ButtonTheme.bar(
@@ -197,7 +167,7 @@ class _HomeState extends State<Home> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.power)),
+                        : (const Icon(Icons.power_settings_new)),
                     title: const Text('PowerUp'),
                     subtitle: new Text('${_startupTime.toString()}'),
                     trailing: new ButtonTheme.bar(
@@ -216,9 +186,9 @@ class _HomeState extends State<Home> {
                   new ListTile(
                     leading: (_control['reboot'] == 2)
                         ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (const Icon(Icons.flash_on)),
+                      value: null,
+                    ))
+                        : (const Icon(Icons.system_update_alt)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${_startup["version"]}'),
                     trailing: new ButtonTheme.bar(
@@ -226,6 +196,27 @@ class _HomeState extends State<Home> {
                         children: <Widget>[
                           new FlatButton(
                             child: const Text('UPGRADE'),
+                            onPressed: () {
+                              _nodeUpdate(kNodeFlash);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  new ListTile(
+                    leading: (_control['reboot'] == 4)
+                        ? (new CircularProgressIndicator(
+                      value: null,
+                    ))
+                        : (const Icon(Icons.delete_forever)),
+                    title: const Text('Erase device'),
+                    subtitle: new Text('${getOwner()}'),
+                    trailing: new ButtonTheme.bar(
+                      child: new ButtonBar(
+                        children: <Widget>[
+                          new FlatButton(
+                            child: const Text('ERASE'),
                             onPressed: () {
                               _nodeUpdate(kNodeFlash);
                             },
@@ -247,6 +238,52 @@ class _HomeState extends State<Home> {
             ),
           ]));
     }
+  }
+
+  void _onEntryAdded(Event event) {
+    bool drawWr = event.snapshot.value["drawWr"];
+    bool drawRd = event.snapshot.value["drawRd"];
+    if (((drawWr == true) || (drawRd == true))) {
+      setState(() {
+        IoEntry entry = new IoEntry.fromMap(
+            _dataRef, event.snapshot.key, event.snapshot.value);
+        entryList.add(entry);
+      });
+    }
+  }
+
+  void _onEntryChanged(Event event) {
+    bool drawWr = event.snapshot.value["drawWr"];
+    bool drawRd = event.snapshot.value["drawRd"];
+    if (((drawWr == true) || (drawRd == true))) {
+      IoEntry oldValue =
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
+            _dataRef, event.snapshot.key, event.snapshot.value);
+      });
+    }
+  }
+
+  void _onEntryRemoved(Event event) {
+    bool drawWr = event.snapshot.value["drawWr"];
+    bool drawRd = event.snapshot.value["drawRd"];
+    if (((drawWr == true) || (drawRd == true))) {
+      IoEntry oldValue =
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
+      setState(() {
+        entryList.remove(oldValue);
+      });
+    }
+  }
+
+  void _openEntryDialog(IoEntry entry) {
+    showDialog<Null>(
+      context: context,
+      builder: (BuildContext context) {
+        return new DataIoShortDialogWidget(entry);
+      },
+    );
   }
 
   bool checkConnected() {
@@ -290,5 +327,77 @@ class _HomeState extends State<Home> {
     DateTime now = new DateTime.now();
     _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(_control);
+  }
+}
+
+class DataIoShortDialogWidget extends StatefulWidget {
+  final IoEntry entry;
+
+  DataIoShortDialogWidget(this.entry);
+
+  @override
+  _DataIoShortDialogWidgetState createState() =>
+      new _DataIoShortDialogWidgetState(entry);
+}
+
+class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
+  final IoEntry entry;
+
+  dynamic _currentValue;
+
+  void _handleTapboxChanged(dynamic newValue) {
+    print('_handleTapboxChanged $newValue');
+    setState(() {
+      _currentValue = newValue;
+    });
+  }
+
+  _DataIoShortDialogWidgetState(this.entry);
+
+  @override
+  void initState() {
+    super.initState();
+    if (entry.value != null) {
+      _currentValue = entry?.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+        title: new Text('Edit'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new DynamicEditWidget(
+                type: entry.code,
+                value: _currentValue,
+                onChanged: _handleTapboxChanged,
+              ),
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                try {
+                  entry.value = _currentValue;
+                  entry.reference.child(entry.key).set(entry.toJson());
+                } catch (exception) {
+                  print('bug');
+                }
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
+        ]);
   }
 }

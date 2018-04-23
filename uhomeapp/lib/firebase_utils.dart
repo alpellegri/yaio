@@ -16,16 +16,18 @@ String _nodeConfigJson;
 
 String dUserRef;
 String dRootRef;
-String dDataRef;
+String dObjRef;
 String dNodeSubPath;
 String dControlRef;
 String dStatusRef;
 String dStartupRef;
 String dFcmTokenRef;
-String dFunctionsRef;
-String dGraphRef;
+String dDataRef;
+String dExecRef;
 String dLogsReportsRef;
 String dTHRef;
+String dDomain;
+String dNodeName;
 
 FirebaseUser getFirebaseUser() {
   return _user;
@@ -54,38 +56,48 @@ void updateUserRef() {
   print('updateUserRef');
   dUserRef = 'users/${getFirebaseUser().uid}';
   dRootRef = '$dUserRef/root';
-  dDataRef = '$dUserRef/data';
+  dObjRef = '$dUserRef/obj';
   dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
+  print('dUserRef: $dUserRef');
+  print('dRootRef: $dRootRef');
+  print('dObjRef: $dObjRef');
+  print('dFcmTokenRef: $dFcmTokenRef');
 }
 
 void updateNodeRef(Map config) {
-  print(config);
+  print('updateNodeRef: $config');
   dNodeSubPath = '${config['domain']}/${config['nodename']}';
   String prefixNode = '$dRootRef/$dNodeSubPath';
-  String prefixData = '$dRootRef/$dNodeSubPath';
+  String prefixData = '$dObjRef';
 
-  dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
   dControlRef = '$prefixNode/$kControlRef';
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
-  dFunctionsRef = '$prefixData/$kFunctionsRef';
-  dGraphRef = '$prefixData/$kGraphRef';
+  dDataRef = '$prefixData/$kDataRef/${config['domain']}';
+  dExecRef = '$prefixData/$kExecRef/$dNodeSubPath';
   dLogsReportsRef = '$prefixData/$kLogsReportsRef';
   dTHRef = '$prefixData/$kTHRef';
+  dDomain = config['domain'];
+  dNodeName = config['nodename'];
 }
 
-String getNodeSubPath() {
-  return dNodeSubPath;
+String getOwner() {
+  return dNodeName;
+}
+
+String getDomain() {
+  return dDomain;
 }
 
 Future<Map> loadPreferences() async {
   _prefs = await SharedPreferences.getInstance();
   _nodeConfigJson = _prefs.getString('node_config_json');
+  print('loadPreferences: $_nodeConfigJson');
 
   updateUserRef();
   if (_nodeConfigJson != null) {
     print(_nodeConfigJson);
-    _nodeConfigMap = JSON.decode(_nodeConfigJson);
+    _nodeConfigMap = json.decode(_nodeConfigJson);
     // override
     _nodeConfigMap['uid'] = getFirebaseUser().uid;
     updateNodeRef(_nodeConfigMap);
@@ -107,7 +119,7 @@ void savePreferencesDN(String domain, String node) {
   // update firebase references
   updateNodeRef(_nodeConfigMap);
 
-  _nodeConfigJson = JSON.encode(_nodeConfigMap);
+  _nodeConfigJson = json.encode(_nodeConfigMap);
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
@@ -120,7 +132,7 @@ void savePreferencesSP(String ssid, String password) {
   // update firebase references
   updateNodeRef(_nodeConfigMap);
 
-  _nodeConfigJson = JSON.encode(_nodeConfigMap);
+  _nodeConfigJson = json.encode(_nodeConfigMap);
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
@@ -154,12 +166,12 @@ String getFcmTokenRef() {
   return dFcmTokenRef;
 }
 
-String getFunctionsRef() {
-  return dFunctionsRef;
+String getExecRef() {
+  return dExecRef;
 }
 
-String getGraphRef() {
-  return dGraphRef;
+String getDataRef() {
+  return dDataRef;
 }
 
 String getLogsReportsRef() {
@@ -171,8 +183,7 @@ String getTHRef() {
 }
 
 Map<String, Object> _controlDefault = {
-  'alarm': false,
-  'reboot': false,
+  'reboot': 0,
   'time': -1,
 };
 
@@ -183,10 +194,7 @@ Map<String, Object> _startupDefault = {
 };
 
 Map<String, Object> _statusDefault = {
-  'alarm': false,
   'heap': 0,
-  'humidity': 0,
-  'temperature': 0,
   'time': 0,
 };
 

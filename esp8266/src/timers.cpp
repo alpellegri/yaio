@@ -8,34 +8,46 @@
 #include "fbutils.h"
 #include "timesrv.h"
 
-static uint32_t t247_last = 0;
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
-#define TestInRange(x, l, h) (((x) > (l)) && ((x) <= (h)))
+static uint32_t t24_last = 0;
 
-void MonitorTimers(void) {
-  // get time
+void Timers_Service(void) {
   uint32_t current = getTime();
-  uint32_t t247 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
-  // Serial.printf(">> t247 %d\n", t247);
+  uint32_t t24 = 60 * ((current / 3600) % 24) + (current / 60) % 60;
+  uint8_t wday = getWeekDay();
+  // DEBUG_PRINT("%d, %d, %d\n", t24, t24_last, getWeekDay());
 
-  // loop over timers
-  uint8_t len = FB_getIoEntryLen();
-  for (uint8_t i = 0; i < len; i++) {
-    IoEntry entry = FB_getIoEntry(i);
-    // test in range
-    if (entry.type == kTimer) {
-      // convert is to 24_7 time
-      uint32_t _time = 60 * (entry.id >> 24) + (entry.id & 0xFF);
-      bool res = TestInRange(_time, t247_last, t247);
-      if (res == true) {
-        // action
-        Serial.printf_P(PSTR(">>> Action on timer %s at time %d\n"),
-                        entry.name.c_str(), t247);
-        String log = F("Action on timer ");
-        log += String(entry.name) + F("\n");
-        fblog_log(log, false);
+  if (t24 != t24_last) {
+    t24_last = t24;
+
+    uint8_t len = FB_getIoEntryLen();
+    for (uint8_t i = 0; i < len; i++) {
+      IoEntry entry = FB_getIoEntry(i);
+      // test in range
+      if (entry.code == kTimer) {
+        // convert is to 24_7 time
+        uint32_t v = atoi(entry.value.c_str());
+
+        // minutes: bits 0...7
+        // hours: bits 15...8
+        // week day mask: bits 23...16
+        uint32_t _time = 60 * ((v >> 8) & 0xFF) + (v & 0xFF);
+        if (_time == t24) {
+          // check week day
+          uint8_t wday_mask = ((v >> 16) & 0xFF);
+          if ((wday_mask & 0x80) != 0) {
+            wday_mask = 0x7F;
+          } else {
+            wday_mask &= 0x7F;
+          }
+          if (((1 << wday) & wday_mask) != 0) {
+            DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t24);
+            // set event ev depending on polarity bit
+            entry.ev = (v & (1 << 24)) != 0;
+          }
+        }
       }
     }
   }
-  t247_last = t247;
 }

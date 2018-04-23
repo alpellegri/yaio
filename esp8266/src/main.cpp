@@ -8,11 +8,12 @@
 #include "sta.h"
 #include "vers.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 static uint8_t mode;
-static uint32_t current_time;
 static uint32_t schedule_time;
 
 void setup() {
@@ -24,10 +25,8 @@ void setup() {
 
   EE_Setup();
 
-  Serial.println();
-  Serial.print(F("SW version: "));
-  Serial.println(VERS_getVersion());
-  Serial.println(F("Node starting..."));
+  DEBUG_PRINT("\nSW version: %s\n", VERS_getVersion());
+  DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
   mode = 0;
   if (mode == 0) {
@@ -52,7 +51,7 @@ void loop() {
   } else {
   }
 
-  current_time = millis();
+  uint32_t current_time = millis();
   if ((current_time - schedule_time) > 250) {
     schedule_time = current_time;
     if (mode == 0) {

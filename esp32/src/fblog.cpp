@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <FirebaseArduino.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -7,19 +6,26 @@
 #include "ee.h"
 #include "fbconf.h"
 #include "fcm.h"
+#include "firebase.h"
 #include "timesrv.h"
 
 void fblog_log(String message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
-  String msg = EE_GetDomain() + F(" ") + EE_GetNodeName() + F(" ") + message;
+  String source = EE_GetDomain() + F("/") + EE_GetNodeName();
+  String msg = source + F(" ") + message;
 
   log["time"] = getTime();
-  log["msg"] = msg;
+  log["source"] = source;
+  log["msg"] = message;
 
   Serial.println(msg);
   if (fcm_notify == true) {
     FcmSendPush(msg);
   }
-  Firebase.push((klogs + F("/Reports")), JsonVariant(log));
+  String klogs;
+  FbSetPath_logs(klogs);
+  String data;
+  log.printTo(data);
+  Firebase.pushJSON((klogs + F("/Reports")), data);
 }

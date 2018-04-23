@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <FirebaseArduino.h>
+#include <ArduinoJson.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -8,66 +8,110 @@
 #include "fbconf.h"
 #include "fbutils.h"
 #include "fcm.h"
+#include "firebase.h"
 #include "rf.h"
+
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 static const char _kstartup[] PROGMEM = "startup";
 static const char _kcontrol[] PROGMEM = "control";
 static const char _kstatus[] PROGMEM = "status";
-static const char _kfunctions[] PROGMEM = "Functions";
-static const char _kmessaging[] PROGMEM = "fcmtoken";
-static const char _kgraph[] PROGMEM = "graph";
+static const char _kexec[] PROGMEM = "exec";
+static const char _kfcmtoken[] PROGMEM = "fcmtoken";
+static const char _kdata[] PROGMEM = "data";
 static const char _klogs[] PROGMEM = "logs";
 
-String kstartup;
-String kcontrol;
-String kstatus;
-String kfunctions;
-String kmessaging;
-String kgraph;
-String klogs;
-
-void FbconfInit(void) {
+void FbSetPath_fcmtoken(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-
-  String prefix_node = prefix_user + String(F("root/")) + EE_GetDomain() +
-                       String(F("/")) + EE_GetNodeName() + String(F("/"));
-
-  kmessaging = prefix_user + String(FPSTR(_kmessaging));
-  kstartup = prefix_node + String(FPSTR(_kstartup));
-  kcontrol = prefix_node + String(FPSTR(_kcontrol));
-  kstatus = prefix_node + String(FPSTR(_kstatus));
-  kfunctions = prefix_node + String(FPSTR(_kfunctions));
-  kgraph = prefix_node + String(FPSTR(_kgraph));
-  klogs = prefix_node + String(FPSTR(_klogs));
-  Serial.println(kstartup);
-  Serial.println(kcontrol);
-  Serial.println(kstatus);
-  Serial.println(kfunctions);
-  Serial.println(kmessaging);
-  Serial.println(kgraph);
-  Serial.println(klogs);
+  path = prefix_user + String(FPSTR(_kfcmtoken));
 }
 
-bool FbmUpdateRadioCodes(void) {
+void FbSetPath_startup(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_node =
+      prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
+  path = prefix_node + String(FPSTR(_kstartup));
+}
+
+void FbSetPath_control(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_node =
+      prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
+  path = prefix_node + String(FPSTR(_kcontrol));
+}
+
+void FbSetPath_status(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_node =
+      prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
+  path = prefix_node + String(FPSTR(_kstatus));
+}
+
+void FbSetPath_exec(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String subpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_kexec)) + String(F("/")) + subpath;
+}
+
+void FbSetPath_data(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String subpath = EE_GetDomain();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_kdata)) + String(F("/")) + subpath;
+}
+
+void FbSetPath_logs(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String subpath = EE_GetDomain();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_klogs)) + String(F("/")) + subpath;
+}
+
+void dump_path(void) {
+  String path;
+  FbSetPath_fcmtoken(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_startup(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_control(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_status(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_exec(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_data(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_logs(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+}
+
+bool FbGetDB(void) {
   bool ret = true;
-  yield();
+
+  String owner = EE_GetNodeName();
+  String path;
 
   if (ret == true) {
-    Serial.println(kmessaging);
-    FirebaseObject ref = Firebase.get(kmessaging);
+    String kfcmtoken;
+    FbSetPath_fcmtoken(kfcmtoken);
+    DEBUG_PRINT("%s\n", kfcmtoken.c_str());
+    String json = Firebase.getJSON(kfcmtoken);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kmessaging"));
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("get failed: kfcmtoken\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
       FcmResetRegIDsDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        // Serial.println(i->key);
         JsonObject &nestedObject = i->value;
-        String id = i->value.asString();
+        String id = i->value.as<String>();
         Serial.println(id);
         FcmAddRegIDsDB(id);
       }
@@ -75,65 +119,51 @@ bool FbmUpdateRadioCodes(void) {
   }
 
   if (ret == true) {
-    Serial.println(kfunctions);
-    FirebaseObject ref = Firebase.get(kfunctions);
+    String kexec;
+    FbSetPath_exec(kexec);
+    DEBUG_PRINT("exex path: %s\n", kexec.c_str());
+    String json = Firebase.getJSON(kexec);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kfunctions"));
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("get failed: kexec\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
-      FB_deinitFunctionDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
-      }
-
+      FB_deinitProgDB();
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        String key = i->key;
-        String type = nestedObject["type"];
-        String action = nestedObject["action"];
-        uint32_t delay = nestedObject["delay"];
-        String next = nestedObject["next"];
-        FB_addFunctionDB(key, type, action, delay, next);
+        FB_addProgDB(i->key, i->value);
       }
     }
   }
 
   if (ret == true) {
-    Serial.println(kgraph);
-    FirebaseObject ref = Firebase.get(kgraph);
+    String kdata;
+    FbSetPath_data(kdata);
+    DEBUG_PRINT("data path: %s\n", kdata.c_str());
+    String json = Firebase.getJSON(kdata);
     if (Firebase.failed() == true) {
-      Serial.print(F("get failed: kgraph"));
-      Serial.println(Firebase.error());
+      DEBUG_PRINT("get failed: kdata\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
       FB_deinitIoEntryDB();
-      JsonVariant variant = ref.getJsonVariant();
-      JsonObject &object = variant.as<JsonObject>();
-      uint8_t num = 0;
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        num++;
-      }
-
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        String key = i->key;
-        String name = nestedObject["name"];
-        String id = nestedObject["id"];
-        uint8_t type = nestedObject["type"];
-        String func = nestedObject["func"];
-        FB_addIoEntryDB(key, type, id, name, func);
+        if (nestedObject["owner"] == owner) {
+          FB_addIoEntryDB(i->key, i->value);
+        }
       }
     }
   }
 
   FB_dumpIoEntry();
-  FB_dumpFunctions();
+  FB_dumpProg();
 
   return ret;
 }

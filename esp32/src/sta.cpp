@@ -13,7 +13,12 @@
 #include "fcm.h"
 #include "fota.h"
 #include "rf.h"
+#include "timers.h"
 #include "timesrv.h"
+#include "vm.h"
+#include "pht.h"
+
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 #define LED 13
 #define LED_OFF LOW
@@ -32,26 +37,25 @@ bool STA_Setup(void) {
 
   digitalWrite(LED, LED_OFF);
 
-  Serial.println(F("connecting mode STA"));
-  Serial.println(F("Configuration parameters:"));
+  DEBUG_PRINT("Connecting mode STA\n");
+  DEBUG_PRINT("Configuration parameters:\n");
 
   delay(100);
   WiFi.mode(WIFI_STA);
 
   String sta_ssid = EE_GetSSID();
   String sta_password = EE_GetPassword();
-  Serial.print(F("sta_ssid: "));
-  Serial.println(sta_ssid);
-  Serial.print(F("sta_password: "));
-  Serial.println(sta_password);
-  Serial.println(F("trying to connect..."));
+  DEBUG_PRINT("sta_ssid: %s\n", sta_ssid.c_str());
+  DEBUG_PRINT("sta_password: %s\n", sta_password.c_str());
+  DEBUG_PRINT("trying to connect...\n");
 
   TimeSetup();
+  RF_Setup();
 
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
   while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
-    Serial.print(F("."));
+    DEBUG_PRINT(".");
     delay(500);
   }
   Serial.println();
@@ -59,12 +63,11 @@ bool STA_Setup(void) {
   preferences.begin("my-app", false);
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.print(F("connected: "));
+    DEBUG_PRINT("connected:\n");
     Serial.println(WiFi.localIP());
 
     uint32_t req = preferences.getUInt("fota-req", 2);
     if (req == 0) {
-      FbconfInit();
       fota_mode = false;
     } else if (req == 1) {
       fota_mode = true;
@@ -78,7 +81,7 @@ bool STA_Setup(void) {
   }
 
   if (sts != true) {
-    Serial.println(F("not connected to router"));
+    DEBUG_PRINT("not connected to router\n");
     ESP.restart();
     ret = false;
   }
@@ -102,16 +105,14 @@ bool STA_Task(void) {
       bool res = FOTAService();
     } else {
       if (TimeService() == true) {
-        RF_Task();
-        yield();
         FbmService();
         yield();
-        FcmService();
+        VM_run();
         yield();
       }
     }
   } else {
-    Serial.println(F(" WiFi.status != WL_CONNECTED"));
+    DEBUG_PRINT("WiFi.status != WL_CONNECTED\n");
   }
 
   return ret;
