@@ -189,7 +189,6 @@ bool FbmService(void) {
         }
         yield();
       }
-      yield();
     }
   } break;
 
