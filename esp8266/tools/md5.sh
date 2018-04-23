@@ -1,5 +1,5 @@
 #!/bin/bash
 
 file=../.pioenvs/nodemcuv2/firmware.bin
-cp $file .
-printf $(md5sum $file) > firmware.md5
+cp $file ESP8266firmware.bin
+printf $(md5sum ESP8266firmware.bin) > ESP8266firmware.md5

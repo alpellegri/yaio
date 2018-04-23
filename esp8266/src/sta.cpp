@@ -1,14 +1,13 @@
 #include <Arduino.h>
-
 #include <ESP8266WiFi.h>
 #include <FS.h>
-#include <WiFiClient.h>
 
 #include <stdio.h>
 #include <string.h>
 
 #include "ap.h"
 #include "ee.h"
+#include "fbconf.h"
 #include "fbm.h"
 #include "fcm.h"
 #include "fota.h"
@@ -16,6 +15,8 @@
 #include "timesrv.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
+#define LED_OFF HIGH
+#define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 static uint8_t sta_button = 0x55;
@@ -23,57 +24,57 @@ static bool fota_mode = false;
 
 bool STA_Setup(void) {
   bool ret = true;
-  bool sts = false;
+  bool sts = true;
   int cnt;
-  char *sta_ssid = NULL;
-  char *sta_password = NULL;
 
-  digitalWrite(LED, true);
+  digitalWrite(LED, LED_OFF);
 
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
 
-  Serial.println(F("connecting mode STA"));
+  Serial.println(F("Connecting mode STA"));
   Serial.println(F("Configuration parameters:"));
-  sts = EE_LoadData();
-  if (sts == true) {
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-    delay(100);
-    WiFi.mode(WIFI_STA);
 
-    sta_ssid = EE_GetSSID();
-    sta_password = EE_GetPassword();
-    Serial.print(F("sta_ssid: "));
-    Serial.println(sta_ssid);
-    Serial.print(F("sta_password: "));
-    Serial.println(sta_password);
-    Serial.println(F("trying to connect..."));
-    WiFi.begin(sta_ssid, sta_password);
-    cnt = 0;
-    while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
-      Serial.print(F("."));
-      delay(500);
-    }
-    Serial.println();
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+  WiFi.mode(WIFI_STA);
 
-    if (WiFi.status() == WL_CONNECTED) {
-      Serial.print(F("connected: "));
-      Serial.println(WiFi.localIP());
+  String sta_ssid = EE_GetSSID();
+  String sta_password = EE_GetPassword();
+  Serial.print(F("sta_ssid: "));
+  Serial.println(sta_ssid);
+  Serial.print(F("sta_password: "));
+  Serial.println(sta_password);
+  Serial.println(F("trying to connect..."));
 
-      SPIFFS.begin();
-      File f = SPIFFS.open("/fota.req", "r+");
-      if (!f) {
-        fota_mode = false;
-      } else {
-        fota_mode = true;
-        Serial.println(F("file open "));
-        SPIFFS.remove("/fota.req");
-        FOTA_UpdateReq();
-      }
+  TimeSetup();
+
+  WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
+  cnt = 0;
+  while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
+    Serial.print(F("."));
+    delay(500);
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print(F("connected: "));
+    Serial.println(WiFi.localIP());
+
+    SPIFFS.begin();
+    File f = SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("r+")).c_str());
+    if (!f) {
+      FbconfInit();
+      fota_mode = false;
     } else {
-      sts = false;
+      fota_mode = true;
+      Serial.println(F("file open "));
+      SPIFFS.remove(String(FPSTR("/fota.req")).c_str());
+      FOTA_UpdateReq();
     }
+  } else {
+    sts = false;
   }
 
   if (sts != true) {
@@ -86,7 +87,7 @@ bool STA_Setup(void) {
 }
 
 void STA_FotaReq(void) {
-  SPIFFS.open("/fota.req", "w");
+  SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("w")).c_str());
   delay(500);
   ESP.restart();
 }
@@ -117,6 +118,7 @@ bool STA_Task(void) {
 }
 
 void STA_Loop() {
+  RF_Loop();
 #if 0
   uint8_t in = digitalRead(BUTTON);
 
