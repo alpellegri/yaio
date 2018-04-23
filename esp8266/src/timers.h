@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-extern void MonitorTimers(void);
+extern void Timers_Service(void);
 
 #endif

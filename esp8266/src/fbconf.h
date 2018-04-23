@@ -3,23 +3,15 @@
 
 #include <Arduino.h>
 
-#define kDOut 0
-#define kRadioIn 1
-#define kLOut 2
-#define kDIn 3
-#define kRadioOut 4
-#define kRadioElem 5
-#define kTimer 6
+extern void FbSetPath_startup(String &path);
+extern void FbSetPath_control(String &path);
+extern void FbSetPath_status(String &path);
+extern void FbSetPath_exec(String &path);
+extern void FbSetPath_fcmtoken(String &path);
+extern void FbSetPath_data(String &path);
+extern void FbSetPath_logs(String &path);
+extern bool FbGetDB(void);
 
-extern String kstartup;
-extern String kcontrol;
-extern String kstatus;
-extern String kfunctions;
-extern String kmessaging;
-extern String kgraph;
-extern String klogs;
-
-void FbconfInit(void);
-extern bool FbmUpdateRadioCodes(void);
+extern void dump_path(void);
 
 #endif

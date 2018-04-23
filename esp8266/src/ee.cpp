@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define EE_SIZE 512
 
 static String ee_ssid;
@@ -53,7 +55,7 @@ void EE_EraseData() {
 void EE_StoreData(uint8_t *data, uint16_t len) {
   uint16_t i;
 
-  Serial.println(F("EE_StoreData"));
+  DEBUG_PRINT("EE_StoreData\n");
   for (i = 0; i < len; i++) {
     yield();
     EEPROM.write(i, data[i]);
@@ -66,13 +68,13 @@ bool EE_LoadData(void) {
   char data[EE_SIZE];
   uint16_t i;
 
-  Serial.println(F("EEPROM loading..."));
+  DEBUG_PRINT("EEPROM loading...\n");
   for (i = 0; i < EE_SIZE; i++) {
     yield();
     data[i] = EEPROM.read(i);
-    Serial.printf_P(PSTR("%c"), data[i]);
+    DEBUG_PRINT("%c", data[i]);
   }
-  Serial.println();
+  DEBUG_PRINT("\n");
 
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
@@ -80,20 +82,15 @@ bool EE_LoadData(void) {
   // Test if parsing succeeds.
   if (root.success() == 1) {
     const char *ssid = root[FPSTR("ssid")];
-    Serial.print(F("ssid: "));
-    Serial.println(ssid);
+    DEBUG_PRINT("ssid: %s\n", ssid);
     const char *password = root[FPSTR("password")];
-    Serial.print(F("password: "));
-    Serial.println(password);
+    DEBUG_PRINT("password: %s\n", password);
     const char *uid = root[FPSTR("uid")];
-    Serial.print(F("uid: "));
-    Serial.println(uid);
+    DEBUG_PRINT("uid: %s\n", uid);
     const char *domain = root[FPSTR("domain")];
-    Serial.print(F("domain: "));
-    Serial.println(domain);
+    DEBUG_PRINT("domain: %s\n", domain);
     const char *nodename = root[FPSTR("nodename")];
-    Serial.print(F("nodename: "));
-    Serial.println(nodename);
+    DEBUG_PRINT("nodename: %s\n", nodename);
     if ((ssid != NULL) && (password != NULL) && (uid != NULL) &&
         (domain != NULL) && (nodename != NULL)) {
       ee_ssid = String(ssid);
@@ -101,13 +98,13 @@ bool EE_LoadData(void) {
       ee_uid = String(uid);
       ee_domain = String(domain);
       ee_nodename = String(nodename);
-      Serial.println(F("EEPROM ok"));
+      DEBUG_PRINT("EEPROM ok\n");
       ret = true;
     } else {
-      Serial.println(F("EEPROM content not ok"));
+      DEBUG_PRINT("EEPROM content not ok\n");
     }
   } else {
-    Serial.println(F("parseObject() failed"));
+    DEBUG_PRINT("parseObject() failed\n");
   }
 
   return ret;

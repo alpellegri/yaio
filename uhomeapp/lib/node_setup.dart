@@ -75,7 +75,7 @@ class _NodeSetupState extends State<NodeSetup> {
     _connStatus = false;
     _iconConnStatus = const Icon(Icons.settings_remote);
     _prefs = getPreferences();
-    _nodeConfigJson = JSON.encode(_prefs);
+    _nodeConfigJson = json.encode(_prefs);
     _ctrlSSID.text = _prefs['ssid'];
     _ctrlPassword.text = _prefs['password'];
   }
@@ -120,7 +120,7 @@ class _NodeSetupState extends State<NodeSetup> {
                         onPressed: () {
                           savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
                           setState(() {
-                            _nodeConfigJson = JSON.encode(_prefs);
+                            _nodeConfigJson = json.encode(_prefs);
                           });
                         },
                       ),

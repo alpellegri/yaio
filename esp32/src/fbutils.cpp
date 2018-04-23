@@ -7,67 +7,109 @@
 #include <vector>
 
 #include "fbutils.h"
+#include "pht.h"
+#include "rf.h"
 
-static std::vector<IoEntry> IoEntryVec;
-static std::vector<FunctionEntry> FunctionVec;
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
+std::vector<IoEntry> IoEntryVec;
+std::vector<ProgEntry> ProgVec;
 
 void FB_deinitIoEntryDB(void) {
   IoEntryVec.erase(IoEntryVec.begin(), IoEntryVec.end());
 }
 
-void FB_deinitFunctionDB(void) {
-  FunctionVec.erase(FunctionVec.begin(), FunctionVec.end());
-}
+void FB_deinitProgDB(void) { ProgVec.erase(ProgVec.begin(), ProgVec.end()); }
 
 IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
 
 uint8_t FB_getIoEntryLen(void) { return IoEntryVec.size(); }
 
-FunctionEntry &FB_getFunction(uint8_t i) { return FunctionVec[i]; }
+ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
 
-uint8_t FB_getFunctionLen(void) { return FunctionVec.size(); }
+uint8_t FB_getProgLen(void) { return ProgVec.size(); }
 
-void FB_addIoEntryDB(String key, uint8_t type, String id, String name,
-                     String func) {
+void FB_addIoEntryDB(String key, JsonObject &obj) {
   if (IoEntryVec.size() < NUM_IO_ENTRY_MAX) {
     IoEntry entry;
     entry.key = key;
-    entry.type = type;
-    entry.id = atoi(id.c_str());
-    entry.name = name;
-    entry.func = func;
+    entry.code = obj["code"].as<uint8_t>();
+    entry.value = obj["value"].as<String>();
+
+    switch (entry.code) {
+    case kDhtTemperature: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      uint32_t mask = ((1 << 8) - 1) << 16;
+      uint32_t period = (value & mask) >> 16;
+      PHT_Set(pin, period);
+    } break;
+    case kDhtHumidity: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      uint32_t mask = ((1 << 8) - 1) << 16;
+      uint32_t period = (value & mask) >> 16;
+      PHT_Set(pin, period);
+    } break;
+    case kRadioRx: {
+      uint8_t pin = atoi(entry.value.c_str()) >> 24;
+      RF_SetRxPin(pin);
+    } break;
+    case kRadioTx: {
+      uint8_t pin = atoi(entry.value.c_str()) >> 24;
+      RF_SetTxPin(pin);
+    } break;
+    case kBool: {
+      if (entry.value == F("false")) {
+        entry.value = F("0");
+      } else if (entry.value == F("true")) {
+        entry.value = F("1");
+      } else {
+        DEBUG_PRINT("kBool error\n");
+        entry.value = F("0");
+      }
+    } break;
+    default:
+      break;
+    }
+    entry.cb = obj["cb"].as<String>();
+    // TODO: can be done a setup here
+    entry.ev = false;
+    entry.ev_value = 0;
+    entry.wb = false;
     IoEntryVec.push_back(entry);
   }
 }
 
-String& FB_getIoEntryNameById(uint8_t i) {
-  IoEntry& entry = IoEntryVec[i];
-  return entry.name;
+String &FB_getIoEntryNameById(uint8_t i) {
+  IoEntry &entry = IoEntryVec[i];
+  return entry.key;
 }
 
-void FB_addFunctionDB(String key, String type, String action, uint32_t delay,
-                      String next) {
-  if (FunctionVec.size() < NUM_IO_FUNCTION_MAX) {
-    FunctionEntry entry;
-    entry.key = key;
-    entry.type = atoi(type.c_str());
-    entry.action = action;
-    entry.delay = delay;
-    entry.next = next;
-    entry.timer_run = 0;
-    entry.src_idx = 0xFF;
-    entry.timer = 0;
-    FunctionVec.push_back(entry);
+void FB_addProgDB(String key, JsonObject &obj) {
+  ProgEntry entry;
+  entry.key = key;
+  DEBUG_PRINT("FB_addProgDB: key=%s\n", entry.key.c_str());
+
+  JsonArray &nest = obj["p"].as<JsonArray>();
+  for (uint32_t i = 0; i < nest.size(); ++i) {
+    FuncEntry fentry;
+    fentry.code = nest[i]["i"].as<int>();
+    if (nest[i]["v"].as<String>()) {
+      fentry.value = nest[i]["v"].as<String>();
+    }
+    entry.funcvec.push_back(fentry);
   }
+  ProgVec.push_back(entry);
 }
 
-uint8_t FB_getIoEntryIdx(String &key) {
+uint8_t FB_getIoEntryIdx(const char *key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
   while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
-    res = strcmp(IoEntryVec[i].key.c_str(), key.c_str());
+    res = strcmp(IoEntryVec[i].key.c_str(), key);
     if (res == 0) {
       idx = i;
     }
@@ -77,13 +119,13 @@ uint8_t FB_getIoEntryIdx(String &key) {
   return idx;
 }
 
-uint8_t FB_getFunctionIdx(String &key) {
+uint8_t FB_getProgIdx(const char *key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   uint8_t res;
 
-  while ((i < FunctionVec.size()) && (idx == 0xFF)) {
-    res = strcmp(FunctionVec[i].key.c_str(), key.c_str());
+  while ((i < ProgVec.size()) && (idx == 0xFF)) {
+    res = strcmp(ProgVec[i].key.c_str(), key);
     if (res == 0) {
       idx = i;
     }
@@ -93,18 +135,21 @@ uint8_t FB_getFunctionIdx(String &key) {
 }
 
 void FB_dumpIoEntry(void) {
-  Serial.println(F("FB_dumpIoEntry"));
+  DEBUG_PRINT("FB_dumpIoEntry\n");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    Serial.printf("%d: %06X, %d, %s, %s, %s\n", i, IoEntryVec[i].id,
-                  IoEntryVec[i].type, IoEntryVec[i].key.c_str(),
-                  IoEntryVec[i].name.c_str(), IoEntryVec[i].func.c_str());
+    DEBUG_PRINT("%d: key=%s, code=%d, value=%s, cb=%s\n", i,
+                IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
+                IoEntryVec[i].value.c_str(), IoEntryVec[i].cb.c_str());
   }
 }
 
-void FB_dumpFunctions(void) {
-  Serial.println(F("FB_dumpFunctions"));
-  for (uint8_t i = 0; i < FunctionVec.size(); ++i) {
-    Serial.printf("%d: %s, %s, %s\n", i, FunctionVec[i].key.c_str(),
-                  FunctionVec[i].action.c_str(), FunctionVec[i].next.c_str());
+void FB_dumpProg(void) {
+  DEBUG_PRINT("FB_dumpProg\n");
+  for (uint8_t i = 0; i < ProgVec.size(); ++i) {
+    DEBUG_PRINT("%d: key=%s\n", i, ProgVec[i].key.c_str());
+    for (uint8_t j = 0; j < ProgVec[i].funcvec.size(); j++) {
+      DEBUG_PRINT("  %d: code=%d, value=%s\n", j, ProgVec[i].funcvec[j].code,
+                  ProgVec[i].funcvec[j].value.c_str());
+    }
   }
 }
