@@ -77,11 +77,13 @@ class _NodeSetupState extends State<NodeSetup> {
   Future<Null> initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _nodeConfigJson = _prefs.getString('node_config_json');
-    _nodeConfigMap = JSON.decode(_nodeConfigJson);
-    _ctrlSSID.text = _nodeConfigMap['ssid'];
-    _ctrlPassword.text = _nodeConfigMap['password'];
-    _ctrlFbSecretKey.text = _nodeConfigMap['firebase_secret'];
-    _ctrlFbMsgKey.text = _nodeConfigMap['firebase_server_key'];
+    if (_nodeConfigJson != null) {
+      _nodeConfigMap = JSON.decode(_nodeConfigJson);
+      _ctrlSSID.text = _nodeConfigMap['ssid'];
+      _ctrlPassword.text = _nodeConfigMap['password'];
+      _ctrlFbSecretKey.text = _nodeConfigMap['firebase_secret'];
+      _ctrlFbMsgKey.text = _nodeConfigMap['firebase_server_key'];
+    }
   }
 
   @override
@@ -167,7 +169,7 @@ class _NodeSetupState extends State<NodeSetup> {
                       ),
                     ])),
               ),
-              new Text('${_nodeConfigJson}'),
+              new Text('$_nodeConfigJson'),
             ],
           ),
         ),

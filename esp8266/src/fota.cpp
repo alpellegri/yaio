@@ -34,7 +34,7 @@ typedef enum {
 
 static HTTPWeakClient http;
 
-static const uint16_t block_size = 2048;
+static const uint16_t block_size = 1024;
 static uint16_t block;
 static uint16_t num_blocks;
 

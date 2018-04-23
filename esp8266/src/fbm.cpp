@@ -35,7 +35,6 @@ static bool boot_first = false;
 static bool status_alarm = false;
 static bool status_alarm_last = false;
 static bool control_alarm = false;
-static bool control_radio_learn = false;
 static uint32_t control_time;
 static uint32_t control_time_last;
 
@@ -45,6 +44,7 @@ static uint32_t fbm_time_th_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
+static bool ht_monitor_run = false;
 static float humidity_data;
 static float temperature_data;
 
@@ -261,7 +261,6 @@ bool FbmService(void) {
             JsonObject &object = variant.as<JsonObject>();
             if (object.success()) {
               control_alarm = object["alarm"];
-              control_radio_learn = object["radio_learn"];
               control_time = object["time"];
 
               bool control_wol = object["wol"];
@@ -286,7 +285,6 @@ bool FbmService(void) {
           DynamicJsonBuffer jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
           status["alarm"] = status_alarm;
-          status["monitor"] = fbm_monitor_run;
           status["heap"] = ESP.getFreeHeap();
           status["humidity"] = humidity_data;
           status["temperature"] = temperature_data;
@@ -309,13 +307,15 @@ bool FbmService(void) {
         th["t"] = temperature_data;
         th["h"] = humidity_data;
         yield();
-        Firebase.push(F("logs/TH"), JsonVariant(th));
-        if (Firebase.failed()) {
-          Serial.print(F("push failed: logs/TH"));
-          Serial.println(Firebase.error());
-        } else {
-          // update in case of success
-          fbm_time_th_last = time_now;
+        if (ht_monitor_run == true) {
+          Firebase.push(F("logs/TH"), JsonVariant(th));
+          if (Firebase.failed()) {
+            Serial.print(F("push failed: logs/TH"));
+            Serial.println(Firebase.error());
+          } else {
+            // update in case of success
+            fbm_time_th_last = time_now;
+          }
         }
       } else {
         /* do nothing */
@@ -330,7 +330,7 @@ bool FbmService(void) {
     }
 
     // manage RF activation/deactivation
-    if ((status_alarm == true) || (control_radio_learn == true)) {
+    if (status_alarm == true) {
       RF_Enable();
     } else {
       RF_Disable();
@@ -377,7 +377,7 @@ bool FbmService(void) {
           JsonObject &inactive = jsonBuffer.createObject();
           inactive["name"] = "inactive";
           inactive["id"] = code;
-          inactive["type"] = 5;
+          inactive["type"] = kRadioElem;
           yield();
           Firebase.set(F("graph/inactive"), JsonVariant(inactive));
 

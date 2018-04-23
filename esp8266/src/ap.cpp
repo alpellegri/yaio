@@ -1,7 +1,4 @@
 #include <Arduino.h>
-#include <Hash.h>
-#include <WebSockets.h>
-#include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
 #include <WiFiServer.h>
 #include <stdio.h>
@@ -15,7 +12,7 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-static const char *ap_ssid = "esp8266";
+static const char *ap_ssid = "uHomeDevice";
 static const char *ap_password = "123456789";
 
 static uint16_t ap_task_cnt;
@@ -39,7 +36,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     enable_WiFi_Scan = EE_LoadData();
     Serial.print(F("["));
     Serial.print(num);
-    Serial.print(F(" Disconnected!"));
+    Serial.print(F("]"));
+    Serial.println(F(" Disconnected!"));
+    ESP.restart();
     break;
 
   case WStype_CONNECTED: {
