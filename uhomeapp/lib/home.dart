@@ -30,29 +30,9 @@ class _HomeState extends State<Home> {
 
   bool _connected = false;
 
-<<<<<<< HEAD:uhomeapp/lib/home.dart
   Map<String, Object> _control;
   Map<String, Object> _status;
   Map<String, Object> _startup;
-=======
-  Map<String, Object> _control = {
-    'alarm': false,
-    'reboot': false,
-    'time': 0,
-  };
-  Map<String, Object> _status = {
-    'alarm': false,
-    'heap': 0,
-    'humidity': 0,
-    'temperature': 0,
-    'time': 0,
-  };
-  Map<String, Object> _startup = {
-    'bootcnt': 0,
-    'time': 0,
-    'version': '',
-  };
->>>>>>> master:android/lib/home.dart
 
   @override
   void initState() {
