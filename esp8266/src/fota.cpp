@@ -175,7 +175,7 @@ bool FOTAService(void) {
 
         // get tcp stream
         WiFiClient *stream = http->getStreamPtr();
-        uint32_t pos = 0;
+        int pos = 0;
         bool run = true;
         bool fail = false;
 

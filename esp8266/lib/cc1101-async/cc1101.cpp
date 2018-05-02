@@ -220,6 +220,7 @@ uint8_t spiGetStatus(void) {
   x = SPI_TXRX(CC1101_SNOP | READ_BURST);
   SPI_WAIT();
   SPI_END();
+  return x;
 } // spiGetTxStatus
 
 /**

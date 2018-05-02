@@ -102,7 +102,7 @@ bool STA_Task(void) {
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (fota_mode == true) {
-      bool res = FOTAService();
+      FOTAService();
     } else {
       if (TimeService() == true) {
         FbmService();
