@@ -18,5 +18,10 @@ class MyApp extends StatelessWidget {
 }
 
 void main() {
+  print('app start');
+  DateTime now = new DateTime.now();
+  Duration off = now.timeZoneOffset;
+  print('$now');
+  print('${off.inHours}');
   runApp(new MyApp());
 }

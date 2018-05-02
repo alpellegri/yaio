@@ -144,12 +144,12 @@ class _NodeSetupState extends State<NodeSetup> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new ListTile(
-                leading: const Icon(Icons.show_chart),
+                leading: const Icon(Icons.list),
                 title: const Text('Current Configration'),
                 trailing: new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
                   new FlatButton(
-                    child: new Text('STORE TO DEVICE'),
+                    child: new Text('UPLOAD TO DEVICE'),
                     onPressed: _sendParameters,
                   ),
                 ])),
