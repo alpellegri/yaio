@@ -12,12 +12,13 @@
 void fblog_log(String message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
-  String source = EE_GetDomain() + F("/") + EE_GetNodeName();
-  String msg = source + F(" ") + message;
 
   log["time"] = getTime();
-  log["source"] = source;
+  log["source"] = EE_GetNodeName();
   log["msg"] = message;
+
+  String source = EE_GetDomain() + F("/") + EE_GetNodeName();
+  String msg = source + F(" ") + message;
 
   Serial.println(msg);
   if (fcm_notify == true) {
@@ -27,5 +28,5 @@ void fblog_log(String message, boolean fcm_notify) {
   FbSetPath_logs(klogs);
   String data;
   log.printTo(data);
-  Firebase.pushJSON((klogs + F("/Reports")), data);
+  Firebase.pushJSON(klogs, data);
 }

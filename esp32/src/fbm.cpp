@@ -161,8 +161,7 @@ bool FbmService(void) {
     if (res == true) {
       if (boot_first == false) {
         boot_first = true;
-        String str = F("\n");
-        str += FBM_getResetReason();
+        String str = FBM_getResetReason();
         fblog_log(str, true);
       }
 
