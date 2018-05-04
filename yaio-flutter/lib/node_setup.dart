@@ -99,16 +99,20 @@ class _NodeSetupState extends State<NodeSetup> {
             children: <Widget>[
               new ListTile(
                 leading: new Icon(Icons.router),
-                title: new TextField(
+                title: new TextFormField(
                   controller: _ctrlSSID,
                   decoration: new InputDecoration(
-                    hintText: 'SSID',
+                    border: const UnderlineInputBorder(),
+                    hintText: 'Enter Access Point Name',
+                    labelText: 'SSID *',
                   ),
                 ),
-                subtitle: new TextField(
+                subtitle: new TextFormField(
                   controller: _ctrlPassword,
                   decoration: new InputDecoration(
-                    hintText: 'PASSWORD',
+                    border: const UnderlineInputBorder(),
+                    hintText: 'Enter Access Point Password',
+                    labelText: 'PASSWORD *',
                   ),
                 ),
                 trailing: new ButtonTheme.bar(
@@ -116,7 +120,7 @@ class _NodeSetupState extends State<NodeSetup> {
                   child: new ButtonBar(
                     children: <Widget>[
                       new FlatButton(
-                        child: new Text('SET'),
+                        child: new Text('SAVE'),
                         onPressed: () {
                           savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
                           setState(() {
@@ -149,7 +153,7 @@ class _NodeSetupState extends State<NodeSetup> {
                 trailing: new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
                   new FlatButton(
-                    child: new Text('UPLOAD TO DEVICE'),
+                    child: new Text('SUBMIT TO DEVICE'),
                     onPressed: _sendParameters,
                   ),
                 ])),

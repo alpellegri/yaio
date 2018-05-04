@@ -173,36 +173,30 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
     return new AlertDialog(
         // title: new Text('Edit'),
         content: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextFieldWidget(
-                  first: const Text('Name'),
-                  second: new Container(
-                    child: new TextField(
-                      controller: _controllerName,
-                      decoration: new InputDecoration(
-                        hintText: 'name',
-                      ),
-                    ),
-                  )),
-              new TextFieldWidget(
-                first: const Text('Type'),
-                second: new DropdownButton<int>(
-                  hint: const Text('select'),
-                  value: _selectedType,
-                  onChanged: (int newValue) {
-                    setState(() {
-                      _selectedType = newValue;
-                    });
-                  },
-                  items: _opTypeMenu.map((int entry) {
-                    return new DropdownMenuItem<int>(
-                      value: entry,
-                      child: new Text(kEntryId2Name[DataCode.values[entry]]),
-                    );
-                  }).toList(),
+              new TextField(
+                controller: _controllerName,
+                decoration: const InputDecoration(
+                  hintText: 'name',
+                  labelText: 'Name',
                 ),
+              ),
+              new DropdownButton<int>(
+                hint: const Text('select'),
+                value: _selectedType,
+                onChanged: (int newValue) {
+                  setState(() {
+                    _selectedType = newValue;
+                  });
+                },
+                items: _opTypeMenu.map((int entry) {
+                  return new DropdownMenuItem<int>(
+                    value: entry,
+                    child: new Text(kEntryId2Name[DataCode.values[entry]]),
+                  );
+                }).toList(),
               ),
               (_selectedType != null)
                   ? (new DynamicEditWidget(
