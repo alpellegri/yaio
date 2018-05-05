@@ -9,9 +9,7 @@ import 'ui_data_io.dart';
 
 class Home extends StatefulWidget {
   Home({Key key, this.title}) : super(key: key);
-
   static const String routeName = '/home';
-
   final String title;
 
   @override
@@ -75,7 +73,7 @@ class _HomeState extends State<Home> {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text('${widget.title} @ ${getOwner()}'),
+            title: new Text('${widget.title}'),
           ),
           body: new LinearProgressIndicator(
             value: null,
@@ -89,7 +87,7 @@ class _HomeState extends State<Home> {
       return new Scaffold(
           drawer: drawer,
           appBar: new AppBar(
-            title: new Text('${widget.title} @ ${getOwner()}'),
+            title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
           ),
           body: new ListView(children: <Widget>[
             new Card(

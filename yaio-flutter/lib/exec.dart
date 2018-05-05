@@ -60,7 +60,9 @@ class ExecListItem extends StatelessWidget {
 }
 
 class Exec extends StatefulWidget {
+  Exec({Key key, this.title}) : super(key: key);
   static const String routeName = '/exec';
+  final String title;
 
   @override
   _ExecState createState() => new _ExecState();
@@ -101,7 +103,7 @@ class _ExecState extends State<Exec> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-        title: new Text('Exec @ ${getOwner()}'),
+        title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,

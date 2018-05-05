@@ -46,9 +46,7 @@ class ServiceWebSocket {
 
 class NodeSetup extends StatefulWidget {
   NodeSetup({Key key, this.title}) : super(key: key);
-
   static const String routeName = '/node_setup';
-
   final String title;
 
   @override

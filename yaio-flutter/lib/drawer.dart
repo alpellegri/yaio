@@ -16,12 +16,8 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Device.routeName: (BuildContext context) => new Device(title: 'Device'),
   NodeSetup.routeName: (BuildContext context) =>
       new NodeSetup(title: 'Device Setup'),
-  DataIO.routeName: (BuildContext context) => new DataIO(),
-  Exec.routeName: (BuildContext context) => new Exec(),
-  ExecEdit.routeName: (BuildContext context) =>
-      new ExecEdit(title: 'Exec Edit'),
-  ExecProg.routeName: (BuildContext context) =>
-      new ExecProg(title: 'Exec Prog'),
+  DataIO.routeName: (BuildContext context) => new DataIO(title: 'DataIO'),
+  Exec.routeName: (BuildContext context) => new Exec(title: 'Routine'),
   LogHistory.routeName: (BuildContext context) =>
       new LogHistory(title: 'Log History'),
   ChartHistory.routeName: (BuildContext context) =>

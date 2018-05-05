@@ -7,7 +7,9 @@ import 'firebase_utils.dart';
 import 'ui_data_io.dart';
 
 class DataIO extends StatefulWidget {
+  DataIO({Key key, this.title}) : super(key: key);
   static const String routeName = '/data_io';
+  final String title;
 
   @override
   _DataIOState createState() => new _DataIOState();
@@ -43,7 +45,7 @@ class _DataIOState extends State<DataIO> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-        title: new Text('Data IO @ ${getDomain()}'),
+        title: new Text('Data IO @ ${getDomain()}/${getOwner()}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,

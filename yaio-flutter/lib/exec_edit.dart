@@ -50,10 +50,9 @@ class _ExecEditState extends State<ExecEdit> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: drawer,
       appBar: new AppBar(
-          // title: new Text(widget.title),
-          ),
+        title: new Text('Edit Routine'),
+      ),
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -215,10 +214,9 @@ class _ExecProgState extends State<ExecProg> {
   Widget build(BuildContext context) {
     print('_ExecProgState');
     return new Scaffold(
-      drawer: drawer,
       appBar: new AppBar(
-          // title: new Text(widget.title),
-          ),
+        title: new Text('Program Routine'),
+      ),
       body: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

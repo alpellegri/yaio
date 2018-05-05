@@ -66,9 +66,7 @@ class LogListItem extends StatelessWidget {
 
 class LogHistory extends StatefulWidget {
   LogHistory({Key key, this.title}) : super(key: key);
-
   static const String routeName = '/log_history';
-
   final String title;
 
   @override
@@ -105,7 +103,7 @@ class _LogHistoryState extends State<LogHistory> {
     return new Scaffold(
       drawer: drawer,
       appBar: new AppBar(
-        title: new Text(widget.title),
+        title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
