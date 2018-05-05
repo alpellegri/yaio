@@ -207,9 +207,9 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   : (const Text('')),
               (_execList.length > 0)
                   ? new ListTile(
-                      title: const Text('Call'),
+                      title: const Text('Callback'),
                       trailing: new DropdownButton<ExecEntry>(
-                        hint: const Text('select an exec'),
+                        hint: const Text('select a routine'),
                         value: _selectedExec,
                         onChanged: (ExecEntry newValue) {
                           setState(() {
@@ -226,7 +226,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     )
                   : const Text(''),
               new ListTile(
-                title: const Text('Dashboard display WR'),
+                title: const Text('On Dashboard Write Mode'),
                 leading: new Checkbox(
                     value: _checkboxValueWr,
                     onChanged: (bool value) {
@@ -236,7 +236,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     }),
               ),
               new ListTile(
-                title: const Text('Dashboard display RD'),
+                title: const Text('On Dashboard Read Mode'),
                 leading: new Checkbox(
                     value: _checkboxValueRd,
                     onChanged: (bool value) {

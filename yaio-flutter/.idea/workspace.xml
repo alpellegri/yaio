@@ -15,10 +15,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="exec_edit.dart" pinned="false" current-in-tab="true">
+      <file leaf-file-name="exec_edit.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/exec_edit.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-891">
+            <state relative-caret-position="-126">
               <caret line="394" column="38" lean-forward="true" selection-start-line="394" selection-start-column="38" selection-end-line="394" selection-end-column="38" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
@@ -32,6 +32,16 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="328">
               <caret line="43" column="16" lean-forward="true" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="data_io.dart" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/data_io.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="741">
+              <caret line="237" column="27" lean-forward="true" selection-start-line="237" selection-start-column="27" selection-end-line="237" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -64,11 +74,11 @@
         <option value="$PROJECT_DIR$/lib/main.dart" />
         <option value="$PROJECT_DIR$/pubspec.yaml" />
         <option value="$PROJECT_DIR$/lib/ui_data_io.dart" />
-        <option value="$PROJECT_DIR$/lib/data_io.dart" />
         <option value="$PROJECT_DIR$/lib/drawer.dart" />
         <option value="$PROJECT_DIR$/lib/node_setup.dart" />
         <option value="$PROJECT_DIR$/lib/log_history.dart" />
         <option value="$PROJECT_DIR$/lib/exec_edit.dart" />
+        <option value="$PROJECT_DIR$/lib/data_io.dart" />
       </list>
     </option>
   </component>
@@ -613,14 +623,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/data_io.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="146">
-          <caret line="178" column="27" lean-forward="false" selection-start-line="178" selection-start-column="18" selection-end-line="178" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/node_setup.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="146">
@@ -679,11 +681,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/exec_edit.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-891">
+        <state relative-caret-position="-126">
           <caret line="394" column="38" lean-forward="true" selection-start-line="394" selection-start-column="38" selection-end-line="394" selection-end-column="38" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/data_io.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="741">
+          <caret line="237" column="27" lean-forward="true" selection-start-line="237" selection-start-column="27" selection-end-line="237" selection-end-column="27" />
+          <folding />
         </state>
       </provider>
     </entry>
