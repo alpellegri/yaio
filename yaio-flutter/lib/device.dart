@@ -238,8 +238,7 @@ class DemoItem<T> {
     this.hint,
     this.builder,
     this.valueToString,
-  })
-      : textController = new TextEditingController(text: valueToString(value));
+  }) : textController = new TextEditingController(text: valueToString(value));
 
   List query = new List();
   final String name;

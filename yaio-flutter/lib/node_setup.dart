@@ -101,7 +101,7 @@ class _NodeSetupState extends State<NodeSetup> {
                 leading: new Icon(Icons.router),
                 title: new TextField(
                   controller: _ctrlSSID,
-                  decoration: new InputDecoration(
+                  decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
                     hintText: 'Enter Access Point Name',
                     labelText: 'SSID *',
@@ -109,7 +109,7 @@ class _NodeSetupState extends State<NodeSetup> {
                 ),
                 subtitle: new TextField(
                   controller: _ctrlPassword,
-                  decoration: new InputDecoration(
+                  decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
                     hintText: 'Enter Access Point Password',
                     labelText: 'PASSWORD *',

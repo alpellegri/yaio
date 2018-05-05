@@ -18,13 +18,13 @@ class ExecListItem extends StatelessWidget {
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
-        children: [
+        children: <Widget>[
           new Expanded(
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Column(
-                  children: [
+                  children: <Widget>[
                     new Text(
                       '${entry.key}',
                       textScaleFactor: 1.2,

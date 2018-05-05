@@ -27,7 +27,7 @@ class LogListItem extends StatelessWidget {
                 child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  children: <Widget>[
                     new Text(
                       new DateFormat('dd/MM/yy').format(logEntry.dateTime),
                       textScaleFactor: 1.0,

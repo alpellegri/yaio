@@ -57,7 +57,7 @@ class _ExecEditState extends State<ExecEdit> {
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: <Widget>[
           new ListTile(
             title: new TextField(
               controller: _controllerName,
@@ -156,7 +156,7 @@ class ExecProgListItem extends StatelessWidget {
           new Expanded(
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 new Container(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: new Text(
@@ -222,7 +222,7 @@ class _ExecProgState extends State<ExecProg> {
       body: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             new ListView.builder(
               shrinkWrap: true,
               itemCount: prog.length,
@@ -387,7 +387,7 @@ class _EntryDialogState extends State<EntryDialog> {
         // title: new Text('Edit'),
         content: new Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             new Row(children: [
               new Expanded(
                 child: const Text('OpCode'),

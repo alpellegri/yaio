@@ -11,7 +11,7 @@ class DynamicDataWidget extends StatelessWidget {
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         new Text(
           entry.getValue().toString(),
           textScaleFactor: 1.2,
@@ -34,7 +34,7 @@ class DataIoItemWidget extends StatelessWidget {
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
-        children: [
+        children: <Widget>[
           new Expanded(
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +43,7 @@ class DataIoItemWidget extends StatelessWidget {
                     child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  children: <Widget>[
                     new Text(
                       entry.key,
                       textScaleFactor: 1.2,
@@ -117,7 +117,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   widget.onChanged(value);
                 },
                 keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
@@ -141,7 +141,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   widget.onChanged(value);
                 },
                 keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
@@ -155,7 +155,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   widget.onChanged(value);
                 },
                 keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'data value',
                   labelText: 'Value',
                 ),
@@ -178,7 +178,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   widget.onChanged(value);
                 },
                 keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -198,7 +198,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   });
                   widget.onChanged(value);
                 },
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -250,7 +250,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   widget.onChanged(value);
                 },
                 keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'hour',
                   labelText: 'Hour',
                 ),
@@ -264,7 +264,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   widget.onChanged(value);
                 },
                 keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'minutes',
                   labelText: 'Minutes',
                 ),

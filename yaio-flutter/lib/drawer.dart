@@ -48,38 +48,38 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
         ),
         new ListTile(
-            leading: new Icon(Icons.home),
-            title: new Text('Home'),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
             onTap: () {
               Navigator.of(context).pushNamed(Home.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.developer_board),
-            title: new Text('Device'),
+            leading: const Icon(Icons.developer_board),
+            title: const Text('Device'),
             onTap: () {
               Navigator.of(context).pushNamed(Device.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.label_outline),
-            title: new Text('Data IO'),
+            leading: const Icon(Icons.label_outline),
+            title: const Text('Data IO'),
             onTap: () {
               Navigator.of(context).pushNamed(DataIO.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.code),
-            title: new Text('Routine'),
+            leading: const Icon(Icons.code),
+            title: const Text('Routine'),
             onTap: () {
               Navigator.of(context).pushNamed(Exec.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.message),
-            title: new Text('Log History'),
+            leading: const Icon(Icons.message),
+            title: const Text('Log History'),
             onTap: () {
               Navigator.of(context).pushNamed(LogHistory.routeName);
             }),
         new ListTile(
-            leading: new Icon(Icons.timeline),
-            title: new Text('Chart History'),
+            leading: const Icon(Icons.timeline),
+            title: const Text('Chart History'),
             onTap: () {
               Navigator.of(context).pushNamed(ChartHistory.routeName);
             }),
