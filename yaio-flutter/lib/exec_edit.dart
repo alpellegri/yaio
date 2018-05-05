@@ -63,12 +63,13 @@ class _ExecEditState extends State<ExecEdit> {
               controller: _controllerName,
               decoration: new InputDecoration(
                 hintText: 'Name',
+                labelText: 'Routine Name',
               ),
             ),
           ),
           (execList.length > 0)
               ? new ListTile(
-                  title: const Text('Call'),
+                  title: const Text('Callback'),
                   trailing: new DropdownButton<ExecEntry>(
                     hint: const Text('Select'),
                     value: _selectedNext,
@@ -236,7 +237,7 @@ class _ExecProgState extends State<ExecProg> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
-        child: new Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -249,7 +250,7 @@ class _ExecProgState extends State<ExecProg> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return new AlertDialog(
-          title: new Text('Select line number'),
+          title: const Text('Select line number'),
           content: new SingleChildScrollView(
             child: new ListBody(
               children: <Widget>[
@@ -258,6 +259,7 @@ class _ExecProgState extends State<ExecProg> {
                   keyboardType: TextInputType.number,
                   decoration: new InputDecoration(
                     hintText: 'line',
+                    labelText: 'Line',
                   ),
                 ),
               ],
@@ -265,13 +267,13 @@ class _ExecProgState extends State<ExecProg> {
           ),
           actions: <Widget>[
             new FlatButton(
-              child: new Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(ctrl.text);
               },
             ),
             new FlatButton(
-              child: new Text('DISCARD'),
+              child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
@@ -296,8 +298,7 @@ class _ExecProgState extends State<ExecProg> {
   }
 
   void _didChanged(bool newValue) {
-    setState(() {
-    });
+    setState(() {});
   }
 
   void _openEntryDialog(int index) {
@@ -383,14 +384,16 @@ class _EntryDialogState extends State<EntryDialog> {
   Widget build(BuildContext context) {
     print('_EntryDialogState');
     return new AlertDialog(
-        title: new Text('Edit'),
+        // title: new Text('Edit'),
         content: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            new ListTile(
-              title: const Text('OpCode'),
-              trailing: new DropdownButton<int>(
+            new Row(children: [
+              new Expanded(
+                child: const Text('OpCode'),
+              ),
+              new DropdownButton<int>(
+                isDense: true,
                 hint: const Text('action'),
                 value: _selectedOpCode,
                 onChanged: (int newValue) {
@@ -403,17 +406,20 @@ class _EntryDialogState extends State<EntryDialog> {
                 items: _opCodeMenu.map((int entry) {
                   return new DropdownMenuItem<int>(
                     value: entry,
-                    child: new Text(kOpCode2Name[OpCode.values[entry]]),
+                    child: new Text(
+                      kOpCode2Name[OpCode.values[entry]],
+                    ),
                   );
                 }).toList(),
               ),
-            ),
+            ]),
             (_isImmediate == true)
                 ? (new TextField(
                     controller: _controllerValue,
                     keyboardType: TextInputType.number,
-                    decoration: new InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'value',
+                      labelText: 'Value',
                     ),
                   ))
                 : new ListTile(

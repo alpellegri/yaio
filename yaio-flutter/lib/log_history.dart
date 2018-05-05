@@ -19,46 +19,44 @@ class LogListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          new Expanded(
-            child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                new Container(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: new Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      new Text(
-                        new DateFormat('dd/MM/yy').format(logEntry.dateTime),
-                        textScaleFactor: 1.0,
-                      ),
-                      new Text(
-                        new DateFormat('Hm').format(logEntry.dateTime),
-                        textScaleFactor: 1.0,
-                        style: new TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          new Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              new Container(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     new Text(
-                      logEntry.source.toString(),
+                      new DateFormat('dd/MM/yy').format(logEntry.dateTime),
                       textScaleFactor: 1.0,
                     ),
                     new Text(
-                      logEntry.message.toString(),
-                      textScaleFactor: 0.9,
+                      new DateFormat('Hm').format(logEntry.dateTime),
+                      textScaleFactor: 1.0,
+                      style: new TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  new Text(
+                    logEntry.source.toString(),
+                    textScaleFactor: 1.0,
+                  ),
+                  new Text(
+                    logEntry.message.toString(),
+                    textScaleFactor: 0.8,
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

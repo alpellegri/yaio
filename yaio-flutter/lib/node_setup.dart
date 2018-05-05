@@ -99,7 +99,7 @@ class _NodeSetupState extends State<NodeSetup> {
             children: <Widget>[
               new ListTile(
                 leading: new Icon(Icons.router),
-                title: new TextFormField(
+                title: new TextField(
                   controller: _ctrlSSID,
                   decoration: new InputDecoration(
                     border: const UnderlineInputBorder(),
@@ -107,7 +107,7 @@ class _NodeSetupState extends State<NodeSetup> {
                     labelText: 'SSID *',
                   ),
                 ),
-                subtitle: new TextFormField(
+                subtitle: new TextField(
                   controller: _ctrlPassword,
                   decoration: new InputDecoration(
                     border: const UnderlineInputBorder(),

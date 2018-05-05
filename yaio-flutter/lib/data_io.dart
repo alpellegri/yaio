@@ -173,7 +173,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
     return new AlertDialog(
         // title: new Text('Edit'),
         content: new Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(

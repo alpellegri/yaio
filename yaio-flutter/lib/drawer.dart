@@ -67,7 +67,7 @@ class _MyDrawerState extends State<MyDrawer> {
             }),
         new ListTile(
             leading: new Icon(Icons.code),
-            title: new Text('Exec'),
+            title: new Text('Routine'),
             onTap: () {
               Navigator.of(context).pushNamed(Exec.routeName);
             }),
