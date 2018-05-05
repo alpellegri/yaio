@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 
@@ -51,7 +50,7 @@ class _ExecEditState extends State<ExecEdit> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Edit Routine'),
+        title: new Text('Edit ${widget.title}'),
       ),
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,8 +115,8 @@ class _ExecEditState extends State<ExecEdit> {
                       Navigator.push(
                           context,
                           new MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                new ExecProg(prog: entry.p),
+                            builder: (BuildContext context) => new ExecProg(
+                                title: widget.title, prog: entry.p),
                           ));
                     },
                   ),
@@ -215,7 +214,7 @@ class _ExecProgState extends State<ExecProg> {
     print('_ExecProgState');
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Program Routine'),
+        title: new Text('Program ${widget.title}'),
       ),
       body: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,

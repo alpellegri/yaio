@@ -137,7 +137,7 @@ class _ExecState extends State<Exec> {
     String owner = event.snapshot.value["owner"];
     if (owner == getOwner()) {
       ExecEntry oldValue =
-      entryList.singleWhere((el) => el.key == event.snapshot.key);
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
         entryList[entryList.indexOf(oldValue)] = new ExecEntry.fromMap(
             _entryRef, event.snapshot.key, event.snapshot.value);
@@ -149,7 +149,7 @@ class _ExecState extends State<Exec> {
     String owner = event.snapshot.value["owner"];
     if (owner == getOwner()) {
       ExecEntry oldValue =
-      entryList.singleWhere((el) => el.key == event.snapshot.key);
+          entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
         entryList.remove(oldValue);
       });
@@ -160,8 +160,8 @@ class _ExecState extends State<Exec> {
     Navigator.push(
         context,
         new MaterialPageRoute(
-          builder: (BuildContext context) =>
-              new ExecEdit(entry: entry, execList: entryList),
+          builder: (BuildContext context) => new ExecEdit(
+              title: widget.title, entry: entry, execList: entryList),
         ));
   }
 
