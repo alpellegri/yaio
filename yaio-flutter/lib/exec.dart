@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 import 'exec_edit.dart';
@@ -101,7 +100,6 @@ class _ExecState extends State<Exec> {
       e.p.forEach((f) => print('>> ${f.i.toString()} ${f.v.toString()}'));
     });*/
     return new Scaffold(
-      drawer: drawer,
       appBar: new AppBar(
         title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
       ),

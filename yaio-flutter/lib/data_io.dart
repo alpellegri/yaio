@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 import 'ui_data_io.dart';
@@ -43,7 +42,6 @@ class _DataIOState extends State<DataIO> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: drawer,
       appBar: new AppBar(
         title: new Text('Data IO @ ${getDomain()}/${getOwner()}'),
       ),
@@ -101,12 +99,12 @@ class _DataIOState extends State<DataIO> {
   }
 
   void _openEntryDialog(IoEntry entry) {
-    showDialog<Null>(
-      context: context,
-      builder: (BuildContext context) {
-        return new DataIoDialogWidget(entry);
-      },
-    );
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+          builder: (BuildContext context) => new DataIoDialogWidget(entry),
+          fullscreenDialog: true,
+        ));
   }
 
   void _onFloatingActionButtonPressed() {
@@ -172,83 +170,125 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return new AlertDialog(
-        // title: new Text('Edit'),
-        content: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new TextField(
-                controller: _controllerName,
-                decoration: const InputDecoration(
-                  hintText: 'name',
-                  labelText: 'Name',
+    return new Scaffold(
+      appBar: new AppBar(
+          title: new Text((entry.key != null) ? entry.key : 'Data IO TBD'),
+          actions: <Widget>[
+            new FlatButton(
+                child: new Text('REMOVE'),
+                onPressed: () {
+                  if (entry.exist == true) {
+                    entry.reference.child(entry.key).remove();
+                  }
+                  Navigator.pop(context, null);
+                }),
+            new FlatButton(
+                child: new Text('SAVE'),
+                onPressed: () {
+                  entry.key = _controllerName.text;
+                  entry.drawWr = _checkboxValueWr;
+                  entry.drawRd = _checkboxValueRd;
+                  try {
+                    entry.code = _selectedType;
+                    print(_currentValue);
+                    entry.value = _currentValue;
+                    entry.cb = _selectedExec?.key;
+                    entry.setOwner(getOwner());
+                    if (entry.value != null) {
+                      entry.reference.child(entry.key).set(entry.toJson());
+                    }
+                  } catch (exception) {
+                    print('bug');
+                  }
+                  Navigator.pop(context, null);
+                }),
+          ]),
+      body: new SingleChildScrollView(
+        child: new Container(
+          padding: const EdgeInsets.all(8.0),
+          alignment: Alignment.bottomLeft,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new TextField(
+                  controller: _controllerName,
+                  decoration: const InputDecoration(
+                    hintText: 'name',
+                    labelText: 'Name',
+                  ),
                 ),
-              ),
-              new DropdownButton<int>(
-                hint: const Text('select'),
-                value: _selectedType,
-                onChanged: (int newValue) {
-                  setState(() {
-                    _selectedType = newValue;
-                  });
-                },
-                items: _opTypeMenu.map((int entry) {
-                  return new DropdownMenuItem<int>(
-                    value: entry,
-                    child: new Text(kEntryId2Name[DataCode.values[entry]]),
-                  );
-                }).toList(),
-              ),
-              (_selectedType != null)
-                  ? (new DynamicEditWidget(
-                      type: _selectedType,
-                      value: _currentValue,
-                      onChanged: _handleTapboxChanged,
-                    ))
-                  : (const Text('')),
-              (_execList.length > 0)
-                  ? new ListTile(
-                      title: const Text('Callback'),
-                      trailing: new DropdownButton<ExecEntry>(
-                        hint: const Text('select a routine'),
-                        value: _selectedExec,
-                        onChanged: (ExecEntry newValue) {
-                          setState(() {
-                            _selectedExec = newValue;
-                          });
-                        },
-                        items: _execList.map((ExecEntry entry) {
-                          return new DropdownMenuItem<ExecEntry>(
-                            value: entry,
-                            child: new Text(entry.key),
-                          );
-                        }).toList(),
-                      ),
-                    )
-                  : const Text(''),
-              new ListTile(
-                title: const Text('On Dashboard Write Mode'),
-                leading: new Checkbox(
-                    value: _checkboxValueWr,
-                    onChanged: (bool value) {
+                new Row(children: [
+                  new Expanded(
+                    child: const Text('Data Type'),
+                  ),
+                  new DropdownButton<int>(
+                    hint: const Text('select'),
+                    value: _selectedType,
+                    onChanged: (int newValue) {
                       setState(() {
-                        _checkboxValueWr = value;
+                        _selectedType = newValue;
                       });
-                    }),
-              ),
-              new ListTile(
-                title: const Text('On Dashboard Read Mode'),
-                leading: new Checkbox(
-                    value: _checkboxValueRd,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _checkboxValueRd = value;
-                      });
-                    }),
-              ),
-            ]),
-        actions: <Widget>[
+                    },
+                    items: _opTypeMenu.map((int entry) {
+                      return new DropdownMenuItem<int>(
+                        value: entry,
+                        child: new Text(kEntryId2Name[DataCode.values[entry]]),
+                      );
+                    }).toList(),
+                  ),
+                ]),
+                (_selectedType != null)
+                    ? (new DynamicEditWidget(
+                        type: _selectedType,
+                        value: _currentValue,
+                        onChanged: _handleTapboxChanged,
+                      ))
+                    : (const Text('')),
+                (_execList.length > 0)
+                    ? new ListTile(
+                        title: const Text('Callback Routine'),
+                        trailing: new DropdownButton<ExecEntry>(
+                          hint: const Text('Select'),
+                          value: _selectedExec,
+                          onChanged: (ExecEntry newValue) {
+                            setState(() {
+                              _selectedExec = newValue;
+                            });
+                          },
+                          items: _execList.map((ExecEntry entry) {
+                            return new DropdownMenuItem<ExecEntry>(
+                              value: entry,
+                              child: new Text(entry.key),
+                            );
+                          }).toList(),
+                        ),
+                      )
+                    : const Text(''),
+                new ListTile(
+                  title: const Text('On Dashboard Write Mode'),
+                  leading: new Checkbox(
+                      value: _checkboxValueWr,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _checkboxValueWr = value;
+                        });
+                      }),
+                ),
+                new ListTile(
+                  title: const Text('On Dashboard Read Mode'),
+                  leading: new Checkbox(
+                      value: _checkboxValueRd,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _checkboxValueRd = value;
+                        });
+                      }),
+                ),
+              ]),
+        ),
+      ),
+      /*actions: <Widget>[
           new FlatButton(
               child: const Text('REMOVE'),
               onPressed: () {
@@ -282,7 +322,8 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
               onPressed: () {
                 Navigator.pop(context, null);
               }),
-        ]);
+        ]*/
+    );
   }
 
   void _onValueExec(Event event) {

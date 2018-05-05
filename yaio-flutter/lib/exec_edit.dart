@@ -67,7 +67,7 @@ class _ExecEditState extends State<ExecEdit> {
           ),
           (execList.length > 0)
               ? new ListTile(
-                  title: const Text('Callback'),
+                  title: const Text('Callback Routine'),
                   trailing: new DropdownButton<ExecEntry>(
                     hint: const Text('Select'),
                     value: _selectedNext,
@@ -148,9 +148,9 @@ class ExecProgListItem extends StatelessWidget {
     value = entry.v;
 
     return new Container(
-      padding: const EdgeInsets.all(2.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Row(
-        children: [
+        children: <Widget>[
           new Expanded(
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,

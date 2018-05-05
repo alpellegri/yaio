@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'drawer.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 
@@ -101,7 +100,6 @@ class _LogHistoryState extends State<LogHistory> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: drawer,
       appBar: new AppBar(
         title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
       ),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'drawer.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
 import 'entries.dart';
@@ -71,7 +70,6 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     if (_connected == false) {
       return new Scaffold(
-          drawer: drawer,
           appBar: new AppBar(
             title: new Text('${widget.title}'),
           ),
@@ -85,7 +83,6 @@ class _HomeState extends State<Home> {
       DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_status['time'].toString()) * 1000);
       return new Scaffold(
-          drawer: drawer,
           appBar: new AppBar(
             title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
           ),

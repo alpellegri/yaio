@@ -4,7 +4,6 @@ import 'device.dart';
 import 'node_setup.dart';
 import 'data_io.dart';
 import 'exec.dart';
-import 'exec_edit.dart';
 import 'log_history.dart';
 import 'chart_history.dart';
 import 'firebase_utils.dart';

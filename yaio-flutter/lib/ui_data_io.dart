@@ -206,6 +206,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             ]);
         break;
       case DataCode.Bool:
+        if (value is int) {
+          value = false;
+        }
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -269,7 +272,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   labelText: 'Minutes',
                 ),
               ),
-              new TimerWidget(value: value, onChanged: _handleTimerChanged),
+              new TimerOptWidget(value: value, onChanged: _handleTimerChanged),
             ]);
         break;
       default:
@@ -294,7 +297,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
   }
 }
 
-class TimerWidget extends StatelessWidget {
+class TimerOptWidget extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
   static const List<String> dayOption = const [
@@ -308,7 +311,7 @@ class TimerWidget extends StatelessWidget {
     'All',
   ];
 
-  TimerWidget({Key key, this.value, this.onChanged});
+  TimerOptWidget({Key key, this.value, this.onChanged});
 
   bool isChecked(int index, int value) => (value >> 16 & (1 << index)) != 0;
 
@@ -332,31 +335,45 @@ class TimerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListTile(
-      title: const Text('Polarity'),
-      leading: new Checkbox(
-          value: ((value & (1 << 24)) != 0),
-          onChanged: (bool v) {
-            int newValue = value;
-            newValue = (v == true) ? (value | (1 << 24)) : (value & ~(1 << 24));
-            onChanged(newValue);
-          }),
-      trailing: new PopupMenuButton(
-        padding: EdgeInsets.zero,
-        onSelected: applyOnSelected,
-        itemBuilder: (BuildContext context) {
-          return dayOption.map((String opt) {
-            int index = dayOption.indexOf(opt);
-            return new PopupMenuItem<int>(
-              value: index,
-              child: new CheckedPopupMenuItem<int>(
-                value: index,
-                checked: isChecked(index, value),
-                child: new Text(opt),
-              ),
-            );
-          }).toList();
-        },
+    return new Container(
+      child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Row(children: <Widget>[
+            new Expanded(
+              child: new Row(children: <Widget>[
+                new Text('Event Polarity'),
+                new Checkbox(
+                    value: ((value & (1 << 24)) != 0),
+                    onChanged: (bool v) {
+                      int newValue = value;
+                      newValue = (v == true)
+                          ? (value | (1 << 24))
+                          : (value & ~(1 << 24));
+                      onChanged(newValue);
+                    }),
+              ]),
+            ),
+            new Text('Days of the week'),
+            new PopupMenuButton(
+              padding: EdgeInsets.zero,
+              onSelected: applyOnSelected,
+              itemBuilder: (BuildContext context) {
+                return dayOption.map((String opt) {
+                  int index = dayOption.indexOf(opt);
+                  return new PopupMenuItem<int>(
+                    value: index,
+                    child: new CheckedPopupMenuItem<int>(
+                      value: index,
+                      checked: isChecked(index, value),
+                      child: new Text(opt),
+                    ),
+                  );
+                }).toList();
+              },
+            ),
+          ]),
+        ],
       ),
     );
   }
