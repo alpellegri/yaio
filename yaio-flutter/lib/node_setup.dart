@@ -99,7 +99,7 @@ class _NodeSetupState extends State<NodeSetup> {
                   controller: _ctrlSSID,
                   decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
-                    hintText: 'Enter Access Point Name',
+                    hintText: 'Access Point Name',
                     labelText: 'SSID *',
                   ),
                 ),
@@ -107,7 +107,7 @@ class _NodeSetupState extends State<NodeSetup> {
                   controller: _ctrlPassword,
                   decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
-                    hintText: 'Enter Access Point Password',
+                    hintText: 'Access Point Password',
                     labelText: 'PASSWORD *',
                   ),
                 ),
