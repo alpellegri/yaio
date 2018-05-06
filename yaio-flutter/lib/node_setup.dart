@@ -128,14 +128,7 @@ class _NodeSetupState extends State<NodeSetup> {
                   ),
                 ),
               ),
-              new ListTile(
-                  leading: new Icon(Icons.device_hub),
-                  title: new Text('Domain Name'),
-                  subtitle: new Text(_prefs["domain"])),
-              new ListTile(
-                  leading: new Icon(Icons.developer_board),
-                  title: new Text('Device Name'),
-                  subtitle: new Text(_prefs["nodename"])),
+              const SizedBox(height: 24.0),
             ],
           ),
         ),
@@ -144,17 +137,19 @@ class _NodeSetupState extends State<NodeSetup> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new ListTile(
-                leading: const Icon(Icons.list),
-                title: const Text('Current Configration'),
+                leading: const Icon(Icons.developer_board),
+                title: new Text('${_prefs["domain"]}'),
+                subtitle: new Text('${_prefs["nodename"]}'),
                 trailing: new ButtonTheme.bar(
                     child: new ButtonBar(children: <Widget>[
                   new FlatButton(
-                    child: new Text('SUBMIT TO DEVICE'),
+                    child: new Text('SUBMIT'),
                     onPressed: _sendParameters,
                   ),
                 ])),
               ),
               new Text('$_nodeConfigJson'),
+              const SizedBox(height: 24.0),
             ],
           ),
         ),
