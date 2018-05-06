@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Ticker.h>
+#include <RCSwitch.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +22,11 @@
 
 static Ticker RFRcvTimer;
 
+#ifdef USE_CC1101
 static CC1101 rfHandle;
+#else
+static RCSwitch rfHandle = RCSwitch();
+#endif
 
 static uint32_t RadioCode;
 static bool RadioEv;
@@ -43,7 +48,7 @@ void RF_SetTxPin(uint8_t pin) {
 void RF_Send(uint32_t data, uint8_t bits) { rfHandle.send(data, bits); }
 
 bool RF_GetRadioEv(void) {
-  bool ev = false;
+  bool ev = RadioEv;
   if (RadioEv == true) {
     RadioEv = false;
   }
@@ -68,6 +73,7 @@ void RF_Loop() {
     noInterrupts();
     uint32_t value = rfHandle.getReceivedValue();
     rfHandle.resetAvailable();
+    DEBUG_PRINT("getReceivedValue %d\n", value);
     interrupts();
 
     if (value == 0) {
@@ -113,6 +119,7 @@ void RF_Service(void) {
   uint32_t ev = RF_GetRadioEv();
   if (ev == true) {
     uint8_t id = RF_checkRadioInCodeDB(RadioCode);
+    DEBUG_PRINT("RF_Service %d\n", id);
     if (id != 0xFF) {
       IoEntryVec[id].ev = true;
       IoEntryVec[id].ev_value = RadioCode;
