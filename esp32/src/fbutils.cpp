@@ -36,6 +36,7 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.code = obj["code"].as<uint8_t>();
     entry.value = obj["value"].as<String>();
 
+    // post process data value for some case
     switch (entry.code) {
     case kDhtTemperature: {
       uint32_t value = atoi(entry.value.c_str());

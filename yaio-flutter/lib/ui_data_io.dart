@@ -156,7 +156,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  hintText: 'data value',
+                  hintText: 'value',
                   labelText: 'Value',
                 ),
               ),

@@ -190,6 +190,7 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+      // binary values
       value = clearBits(value, 23, 24);
       value |= setBits(23, 24, int.parse(v));
       break;
@@ -197,6 +198,7 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
     case DataCode.Int:
     case DataCode.Float:
     case DataCode.Messaging:
+      // string values
       value = v;
       break;
     case DataCode.Bool:
@@ -210,10 +212,12 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
+      // binary values
       value = clearBits(value, 23, 8);
       value |= setBits(23, 8, int.parse(v));
       break;
     case DataCode.Timer:
+      // binary values
       value = clearBits(value, 7, 8);
       value |= setBits(7, 8, int.parse(v));
       break;
@@ -270,25 +274,29 @@ class IoEntry {
       case DataCode.PhyIn:
       case DataCode.PhyOut:
       case DataCode.RadioRx:
-      case DataCode.RadioMach:
       case DataCode.RadioTx:
+        // binary values
         v = getBits(value, 23, 24);
         break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
+        // binary values
         v = getBits(value, 15, 16) / 10;
         break;
       case DataCode.Timer:
+        // binary values
         DateTime now = new DateTime.now();
         int h = (24 + getBits(value, 15, 8) + now.timeZoneOffset.inHours) % 24;
         int m = getBits(value, 7, 8);
         DateTime dtset = new DateTime(0, 0, 0, h, m);
         v = new DateFormat('Hm').format(dtset);
         break;
+      case DataCode.RadioMach:
       case DataCode.Bool:
       case DataCode.Int:
       case DataCode.Float:
       case DataCode.Messaging:
+        // string values
         v = value;
         break;
     }

@@ -16,8 +16,8 @@
 
 #define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
-// #define PORT_GDO0 5
-// #define PORT_GDO2 4
+// #define PORT_GDO0 14 // tx
+// #define PORT_GDO2 15 // rx
 
 static Ticker RFRcvTimer;
 
