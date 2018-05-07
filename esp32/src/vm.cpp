@@ -201,7 +201,7 @@ void VM_writeOut(void) {
         FbSetPath_data(kdata);
         Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("set failed: kDhtHumidity\n");
+          DEBUG_PRINT("Firebase failed: VM_writeOut %d\n", IoEntryVec[i].code);
         } else {
           IoEntryVec[i].wb = false;
         }
@@ -213,7 +213,7 @@ void VM_writeOut(void) {
         FbSetPath_data(kdata);
         Firebase.setBool(kdata + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("set failed: kBool\n");
+          DEBUG_PRINT("Firebase failed: VM_writeOut %d\n", IoEntryVec[i].code);
         } else {
           IoEntryVec[i].wb = false;
         }
@@ -225,7 +225,7 @@ void VM_writeOut(void) {
         FbSetPath_data(kdata);
         Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("set failed: kInt\n");
+          DEBUG_PRINT("Firebase failed: VM_writeOut %d\n", IoEntryVec[i].code);
         } else {
           IoEntryVec[i].wb = false;
         }

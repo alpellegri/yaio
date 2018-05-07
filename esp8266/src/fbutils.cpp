@@ -38,13 +38,7 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
 
     // post process data value for some case
     switch (entry.code) {
-    case kDhtTemperature: {
-      uint32_t value = atoi(entry.value.c_str());
-      uint8_t pin = value >> 24;
-      uint32_t mask = ((1 << 8) - 1) << 16;
-      uint32_t period = (value & mask) >> 16;
-      PHT_Set(pin, period);
-    } break;
+    case kDhtTemperature:
     case kDhtHumidity: {
       uint32_t value = atoi(entry.value.c_str());
       uint8_t pin = value >> 24;
