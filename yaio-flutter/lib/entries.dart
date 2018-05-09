@@ -111,6 +111,7 @@ dynamic getValueCtrl1(code, value) {
       break;
     default:
   }
+
   return v;
 }
 
@@ -168,6 +169,9 @@ dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+      value = clearBits(value, 31, 24);
+      value |= setBits(31, 24, int.parse(v));
+      break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       value = clearBits(value, 31, 8);
@@ -194,6 +198,12 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
       value = clearBits(value, 23, 24);
       value |= setBits(23, 24, int.parse(v));
       break;
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      // binary values
+      value = clearBits(value, 23, 8);
+      value |= setBits(23, 8, int.parse(v));
+      break;
     case DataCode.RadioMach:
     case DataCode.Int:
     case DataCode.Float:
@@ -209,12 +219,6 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
       } else {
         print('ctrl_2.text error');
       }
-      break;
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      // binary values
-      value = clearBits(value, 23, 8);
-      value |= setBits(23, 8, int.parse(v));
       break;
     case DataCode.Timer:
       // binary values

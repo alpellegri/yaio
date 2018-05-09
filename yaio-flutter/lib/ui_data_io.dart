@@ -93,7 +93,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
     type = widget.type;
     if (widget.value != null) {
       value = widget.value;
-      print('_DynamicEditWidget initState $value');
+      print('_DynamicEditWidget initState $value, $type');
       ctrl_1.text = getValueCtrl1(type, value).toString();
       ctrl_2.text = getValueCtrl2(type, value).toString();
     }
@@ -126,6 +126,40 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
         break;
       case DataCode.PhyOut:
       case DataCode.RadioTx:
+      w = new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            new TextField(
+              controller: ctrl_1,
+              onSubmitted: (v) {
+                setState(() {
+                  value = setValueCtrl1(value, type, v);
+                });
+                widget.onChanged(value);
+              },
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: 'pin',
+                labelText: 'Pin',
+              ),
+            ),
+            new TextField(
+              controller: ctrl_2,
+              onSubmitted: (v) {
+                setState(() {
+                  value = setValueCtrl2(value, type, v);
+                });
+                widget.onChanged(value);
+              },
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: 'value',
+                labelText: 'Value',
+              ),
+            ),
+          ]);
+      break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
         w = new Column(
@@ -156,8 +190,8 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  hintText: 'value',
-                  labelText: 'Value',
+                  hintText: 'period',
+                  labelText: 'Period [min]',
                 ),
               ),
             ]);

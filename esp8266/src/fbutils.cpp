@@ -40,10 +40,14 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     switch (entry.code) {
     case kDhtTemperature:
     case kDhtHumidity: {
+      // 31..24 pin
+      // 23..16 period
+      // 15..0 value
       uint32_t value = atoi(entry.value.c_str());
       uint8_t pin = value >> 24;
       uint32_t mask = ((1 << 8) - 1) << 16;
       uint32_t period = (value & mask) >> 16;
+      DEBUG_PRINT("kDht %d\n", value);
       PHT_Set(pin, period);
     } break;
     case kRadioRx: {
