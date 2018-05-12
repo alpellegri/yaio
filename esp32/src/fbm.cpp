@@ -37,8 +37,6 @@ static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
-static uint32_t fbm_update_timer_last;
-
 String verbose_print_reset_reason(RESET_REASON reason) {
   String result;
   switch (reason) {
