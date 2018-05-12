@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
@@ -11,8 +12,8 @@
 #include "firebase.h"
 #include "pht.h"
 #include "rf.h"
+#include "timesrv.h"
 #include "timers.h"
-#include "debug.h"
 
 typedef struct {
   bool cond;
@@ -190,17 +191,35 @@ void VM_writeOut(void) {
       case kPhyIn:
       case kDhtTemperature:
       case kDhtHumidity:
+      case kRadioIn:
       case kRadioRx:
       case kInt: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_PRINT("VM_writeOut: %s: %d\n", IoEntryVec[i].key.c_str(), value);
-        String kdata;
-        FbSetPath_data(kdata);
-        Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
+        String data;
+        FbSetPath_data(data);
+        Firebase.setInt(data + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase failed: VM_writeOut %d\n", IoEntryVec[i].code);
+          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n", IoEntryVec[i].key.c_str());
         } else {
-          IoEntryVec[i].wb = false;
+          if (IoEntryVec[i].enLog == true) {
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.createObject();
+            json["t"] = getTime();
+            json["v"] = value;
+            String strdata;
+            json.printTo(strdata);
+            FbSetPath_log(strdata);
+            Firebase.pushJSON(data + "/" + IoEntryVec[i].key, strdata);
+            if (Firebase.failed() == true) {
+              DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
+                          IoEntryVec[i].key.c_str());
+            } else {
+              IoEntryVec[i].wb = false;
+            }
+          } else {
+            IoEntryVec[i].wb = false;
+          }
         }
       } break;
       case kBool: {
@@ -210,7 +229,8 @@ void VM_writeOut(void) {
         FbSetPath_data(kdata);
         Firebase.setBool(kdata + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase failed: VM_writeOut %d\n", IoEntryVec[i].code);
+          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                      IoEntryVec[i].key.c_str());
         } else {
           IoEntryVec[i].wb = false;
         }

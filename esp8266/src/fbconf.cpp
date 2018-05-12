@@ -94,6 +94,8 @@ void dump_path(void) {
   DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_message(path);
   DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_log(path);
+  DEBUG_PRINT("%s\n", path.c_str());
 }
 
 bool FbGetDB(void) {
