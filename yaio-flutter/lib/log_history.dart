@@ -6,9 +6,9 @@ import 'entries.dart';
 import 'firebase_utils.dart';
 
 class LogListItem extends StatelessWidget {
-  final LogEntry logEntry;
+  final MessageEntry messageEntry;
 
-  LogListItem(this.logEntry);
+  LogListItem(this.messageEntry);
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +28,11 @@ class LogListItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     new Text(
-                      new DateFormat('dd/MM/yy').format(logEntry.dateTime),
+                      new DateFormat('dd/MM/yy').format(messageEntry.dateTime),
                       textScaleFactor: 1.0,
                     ),
                     new Text(
-                      new DateFormat('Hm').format(logEntry.dateTime),
+                      new DateFormat('Hm').format(messageEntry.dateTime),
                       textScaleFactor: 1.0,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -46,11 +46,11 @@ class LogListItem extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   new Text(
-                    logEntry.source.toString(),
+                    messageEntry.source.toString(),
                     textScaleFactor: 1.0,
                   ),
                   new Text(
-                    logEntry.message.toString(),
+                    messageEntry.message.toString(),
                     textScaleFactor: 0.8,
                   ),
                 ],
@@ -63,22 +63,22 @@ class LogListItem extends StatelessWidget {
   }
 }
 
-class LogHistory extends StatefulWidget {
-  LogHistory({Key key, this.title}) : super(key: key);
+class Messages extends StatefulWidget {
+  Messages({Key key, this.title}) : super(key: key);
   static const String routeName = '/log_history';
   final String title;
 
   @override
-  _LogHistoryState createState() => new _LogHistoryState();
+  _MessagesState createState() => new _MessagesState();
 }
 
-class _LogHistoryState extends State<LogHistory> {
-  List<LogEntry> entryList = new List();
+class _MessagesState extends State<Messages> {
+  List<MessageEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSub;
   StreamSubscription<Event> _onRemoveSub;
 
-  _LogHistoryState() {
+  _MessagesState() {
     _entryRef = FirebaseDatabase.instance.reference().child(getMessagesRef());
     _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
@@ -87,7 +87,7 @@ class _LogHistoryState extends State<LogHistory> {
   @override
   void initState() {
     super.initState();
-    print('_LogHistoryState');
+    print('_MessagesState');
   }
 
   @override
@@ -125,7 +125,7 @@ class _LogHistoryState extends State<LogHistory> {
   _onEntryAdded(Event event) {
     print('_onEntryAdded');
     setState(() {
-      entryList.add(new LogEntry.fromSnapshot(event.snapshot));
+      entryList.add(new MessageEntry.fromSnapshot(event.snapshot));
       entryList.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
     });
   }

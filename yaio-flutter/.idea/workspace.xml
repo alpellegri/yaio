@@ -25,21 +25,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="entries.dart" pinned="false" current-in-tab="true">
+      <file leaf-file-name="entries.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/entries.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-512">
-              <caret line="447" column="15" lean-forward="false" selection-start-line="447" selection-start-column="15" selection-end-line="447" selection-end-column="15" />
+            <state relative-caret-position="81">
+              <caret line="482" column="15" lean-forward="true" selection-start-line="482" selection-start-column="15" selection-end-line="482" selection-end-column="15" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="log_history.dart" pinned="false" current-in-tab="false">
+      <file leaf-file-name="log_history.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/log_history.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+            <state relative-caret-position="1292">
+              <caret line="76" column="30" lean-forward="true" selection-start-line="76" selection-start-column="30" selection-end-line="76" selection-end-column="30" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -50,9 +50,11 @@
       <file leaf-file-name="drawer.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/drawer.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="26" lean-forward="true" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
-              <folding />
+            <state relative-caret-position="223">
+              <caret line="20" column="38" lean-forward="true" selection-start-line="20" selection-start-column="38" selection-end-line="20" selection-end-column="38" />
+              <folding>
+                <element signature="e#0#39#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -88,7 +90,15 @@
       <find>_checkboxValueRd</find>
       <find>exist</find>
       <find>Log H</find>
+      <find>LogEntry</find>
+      <find>LogHistory</find>
+      <find>_LogHistoryState</find>
     </findStrings>
+    <replaceStrings>
+      <replace>MessageEntry</replace>
+      <replace>Messages</replace>
+      <replace>_MessagesState</replace>
+    </replaceStrings>
   </component>
   <component name="GradleLocalSettings">
     <option name="externalProjectsViewState">
@@ -112,13 +122,13 @@
         <option value="$PROJECT_DIR$/lib/data_io.dart" />
         <option value="$PROJECT_DIR$/lib/firebase_utils.dart" />
         <option value="$PROJECT_DIR$/lib/const.dart" />
-        <option value="$PROJECT_DIR$/lib/log_history.dart" />
         <option value="$PROJECT_DIR$/lib/entries.dart" />
+        <option value="$PROJECT_DIR$/lib/log_history.dart" />
         <option value="$PROJECT_DIR$/lib/drawer.dart" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="1">
     <option name="x" value="671" />
     <option name="y" value="28" />
     <option name="width" value="1092" />
@@ -301,7 +311,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="671" y="28" width="1092" height="987" extended-state="0" />
+    <frame x="671" y="28" width="1092" height="987" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Android Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -692,29 +702,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/entries.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="81">
+          <caret line="482" column="15" lean-forward="true" selection-start-line="482" selection-start-column="15" selection-end-line="482" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/drawer.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="26" lean-forward="true" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
-          <folding />
+        <state relative-caret-position="223">
+          <caret line="20" column="38" lean-forward="true" selection-start-line="20" selection-start-column="38" selection-end-line="20" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/log_history.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+        <state relative-caret-position="1292">
+          <caret line="76" column="30" lean-forward="true" selection-start-line="76" selection-start-column="30" selection-end-line="76" selection-end-column="30" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/entries.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-512">
-          <caret line="447" column="15" lean-forward="false" selection-start-line="447" selection-start-column="15" selection-end-line="447" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>

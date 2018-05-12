@@ -17,8 +17,8 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
       new NodeSetup(title: 'Device Setup'),
   DataIO.routeName: (BuildContext context) => new DataIO(title: 'DataIO'),
   Exec.routeName: (BuildContext context) => new Exec(title: 'Routine'),
-  LogHistory.routeName: (BuildContext context) =>
-      new LogHistory(title: 'Messages'),
+  Messages.routeName: (BuildContext context) =>
+      new Messages(title: 'Messages'),
   ChartHistory.routeName: (BuildContext context) =>
       new ChartHistory(title: 'Chart History'),
 };
@@ -70,7 +70,7 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: const Icon(Icons.message),
             title: const Text('Messages'),
             onTap: () {
-              Navigator.of(context).pushNamed(LogHistory.routeName);
+              Navigator.of(context).pushNamed(Messages.routeName);
             }),
         new ListTile(
             leading: const Icon(Icons.timeline),

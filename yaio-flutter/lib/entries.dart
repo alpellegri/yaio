@@ -484,15 +484,15 @@ class ExecEntry {
   }
 }
 
-class LogEntry {
+class MessageEntry {
   String key;
   DateTime dateTime;
   String source;
   String message;
 
-  LogEntry(this.dateTime, this.message);
+  MessageEntry(this.dateTime, this.message);
 
-  LogEntry.fromSnapshot(DataSnapshot snapshot)
+  MessageEntry.fromSnapshot(DataSnapshot snapshot)
       : key = snapshot.key,
         dateTime = new DateTime.fromMillisecondsSinceEpoch(
             snapshot.value["time"] * 1000),
