@@ -20,7 +20,7 @@ static const char _kexec[] PROGMEM = "exec";
 static const char _kfcmtoken[] PROGMEM = "fcmtoken";
 static const char _kdata[] PROGMEM = "data";
 static const char _kmessages[] PROGMEM = "messages";
-// static const char _klogs[] PROGMEM = "logs";
+static const char _klogs[] PROGMEM = "logs";
 
 void FbSetPath_fcmtoken(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
@@ -70,6 +70,13 @@ void FbSetPath_message(String &path) {
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_kmessages)) + String(F("/")) + subpath;
+}
+
+void FbSetPath_log(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String subpath = EE_GetDomain();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_klogs)) + String(F("/")) + subpath;
 }
 
 void dump_path(void) {

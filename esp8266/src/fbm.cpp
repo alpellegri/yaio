@@ -32,23 +32,16 @@ static uint32_t control_time_last;
 
 static uint16_t bootcnt = 0;
 static uint32_t fbm_update_last = 0;
-static uint32_t fbm_time_th_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
-
-static uint32_t fbm_update_timer_last;
 
 String FBM_getResetReason() { return ESP.getResetReason(); }
 
 /* main function task */
-bool FbmService(void) {
-  bool ret = false;
-
+void FbmService(void) {
   switch (boot_sm) {
   // firebase init
   case 0: {
-    bool ret = true;
-
     String firebase_url = EE_GetFirebaseUrl();
     String firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
@@ -204,6 +197,4 @@ bool FbmService(void) {
   default:
     break;
   }
-
-  return ret;
 }

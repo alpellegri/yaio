@@ -24,7 +24,6 @@
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-static uint8_t sta_button = 0x55;
 static bool fota_mode = false;
 
 bool STA_Setup(void) {

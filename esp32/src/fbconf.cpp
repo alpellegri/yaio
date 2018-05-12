@@ -19,6 +19,7 @@ static const char _kstatus[] PROGMEM = "status";
 static const char _kexec[] PROGMEM = "exec";
 static const char _kfcmtoken[] PROGMEM = "fcmtoken";
 static const char _kdata[] PROGMEM = "data";
+static const char _kmessages[] PROGMEM = "messages";
 static const char _klogs[] PROGMEM = "logs";
 
 void FbSetPath_fcmtoken(String &path) {
@@ -68,6 +69,13 @@ void FbSetPath_message(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_kmessages)) + String(F("/")) + subpath;
+}
+
+void FbSetPath_log(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String subpath = EE_GetDomain();
+  String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_klogs)) + String(F("/")) + subpath;
 }
 
@@ -110,7 +118,6 @@ bool FbGetDB(void) {
       JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        JsonObject &nestedObject = i->value;
         String id = i->value.as<String>();
         Serial.println(id);
         FcmAddRegIDsDB(id);
@@ -133,7 +140,6 @@ bool FbGetDB(void) {
       JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        JsonObject &nestedObject = i->value;
         FB_addProgDB(i->key, i->value);
       }
     }
