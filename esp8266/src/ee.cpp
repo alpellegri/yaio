@@ -1,14 +1,13 @@
 #include <Arduino.h>
 
-#include "ee.h"
-
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
 #include <stdio.h>
 #include <string.h>
 
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
+#include "ee.h"
 
 #define EE_SIZE 512
 

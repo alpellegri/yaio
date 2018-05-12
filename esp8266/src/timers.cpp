@@ -7,8 +7,7 @@
 #include "fblog.h"
 #include "fbutils.h"
 #include "timesrv.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 static uint32_t t24_last = 0;
 

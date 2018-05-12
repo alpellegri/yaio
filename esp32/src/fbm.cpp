@@ -19,9 +19,8 @@
 #include "timesrv.h"
 #include "vers.h"
 #include "vm.h"
+#include "debug.h"
 #include <rom/rtc.h>
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 #define FBM_UPDATE_TH (30 * 60)
 #define FBM_UPDATE_MONITOR_FAST (1)

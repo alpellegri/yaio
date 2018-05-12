@@ -16,8 +16,7 @@
 #include "ee.h"
 #include "fota.h"
 #include "vers.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;

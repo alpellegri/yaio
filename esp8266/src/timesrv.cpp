@@ -3,8 +3,7 @@
 #include <time.h>
 
 #include "timesrv.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 bool time_init = false;
 

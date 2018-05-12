@@ -18,7 +18,7 @@
       <file leaf-file-name="data_io.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/data_io.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="4913">
               <caret line="294" column="47" lean-forward="false" selection-start-line="294" selection-start-column="47" selection-end-line="294" selection-end-column="47" />
               <folding />
             </state>
@@ -28,7 +28,7 @@
       <file leaf-file-name="entries.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/entries.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="81">
+            <state relative-caret-position="8177">
               <caret line="482" column="15" lean-forward="false" selection-start-line="482" selection-start-column="15" selection-end-line="482" selection-end-column="15" />
               <folding />
             </state>
@@ -38,7 +38,7 @@
       <file leaf-file-name="log_history.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/log_history.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1292">
+            <state relative-caret-position="792">
               <caret line="76" column="30" lean-forward="false" selection-start-line="76" selection-start-column="30" selection-end-line="76" selection-end-column="30" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
@@ -50,7 +50,7 @@
       <file leaf-file-name="drawer.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/drawer.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="223">
+            <state relative-caret-position="204">
               <caret line="20" column="38" lean-forward="false" selection-start-line="20" selection-start-column="38" selection-end-line="20" selection-end-column="38" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
@@ -149,8 +149,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="AndroidView" />
       <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -167,8 +168,7 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -696,7 +696,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/data_io.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="4913">
           <caret line="294" column="47" lean-forward="false" selection-start-line="294" selection-start-column="47" selection-end-line="294" selection-end-column="47" />
           <folding />
         </state>
@@ -704,7 +704,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/entries.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
+        <state relative-caret-position="8177">
           <caret line="482" column="15" lean-forward="false" selection-start-line="482" selection-start-column="15" selection-end-line="482" selection-end-column="15" />
           <folding />
         </state>
@@ -712,7 +712,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/drawer.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="223">
+        <state relative-caret-position="204">
           <caret line="20" column="38" lean-forward="false" selection-start-line="20" selection-start-column="38" selection-end-line="20" selection-end-column="38" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
@@ -722,7 +722,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/log_history.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1292">
+        <state relative-caret-position="792">
           <caret line="76" column="30" lean-forward="false" selection-start-line="76" selection-start-column="30" selection-end-line="76" selection-end-column="30" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />

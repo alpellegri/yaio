@@ -9,8 +9,7 @@
 #include "fbutils.h"
 #include "pht.h"
 #include "rf.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 std::vector<IoEntry> IoEntryVec;
 std::vector<ProgEntry> ProgVec;

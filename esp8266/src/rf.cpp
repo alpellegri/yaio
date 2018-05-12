@@ -12,10 +12,9 @@
 #include "fbutils.h"
 #include "rf.h"
 #include "timesrv.h"
+#include "debug.h"
 
 // #define USE_CC1101
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 // #define PORT_GDO0 ? // tx
 // #define PORT_GDO2 13 (D7) // rx

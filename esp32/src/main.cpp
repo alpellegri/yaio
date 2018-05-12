@@ -7,8 +7,8 @@
 #include "ee.h"
 #include "sta.h"
 #include "vers.h"
+#include "debug.h"
 
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 static uint8_t mode;
 static uint32_t schedule_time;

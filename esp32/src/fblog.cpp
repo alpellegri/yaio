@@ -8,6 +8,7 @@
 #include "fcm.h"
 #include "firebase.h"
 #include "timesrv.h"
+#include "debug.h"
 
 void fblog_log(String message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
