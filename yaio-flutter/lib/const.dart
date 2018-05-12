@@ -13,3 +13,4 @@ const int kNodeIdle = 0;
 const int kNodeReboot = 1;
 const int kNodeFlash = 2;
 const int kNodeUpdate = 3;
+const int kNodeErase = 4;

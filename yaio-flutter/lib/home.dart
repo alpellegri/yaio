@@ -137,7 +137,7 @@ class _HomeState extends State<Home> {
                     subtitle: new Text('${_heartbeatTime.toString()}'),
                   ),
                   new ListTile(
-                    leading: (_control['reboot'] == 3)
+                    leading: (_control['reboot'] == kNodeUpdate)
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
@@ -158,7 +158,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   new ListTile(
-                    leading: (_control['reboot'] == 1)
+                    leading: (_control['reboot'] == kNodeReboot)
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
@@ -179,7 +179,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   new ListTile(
-                    leading: (_control['reboot'] == 2)
+                    leading: (_control['reboot'] == kNodeFlash)
                         ? (new CircularProgressIndicator(
                       value: null,
                     ))
@@ -200,7 +200,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   new ListTile(
-                    leading: (_control['reboot'] == 4)
+                    leading: (_control['reboot'] == kNodeErase)
                         ? (new CircularProgressIndicator(
                       value: null,
                     ))

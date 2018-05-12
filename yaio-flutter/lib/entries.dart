@@ -548,3 +548,36 @@ class THEntry {
     };
   }
 }
+
+class LogEntry {
+  DatabaseReference reference;
+  String key;
+  int time;
+  double value;
+
+  LogEntry(DatabaseReference ref) : reference = ref;
+
+  LogEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
+    reference = ref;
+    key = snapshot.key;
+    time = snapshot.value['t'] * 1000;
+    value = snapshot.value['h'];
+  }
+
+  double get() {
+    value ??= 0.0;
+    return value;
+  }
+
+  int getTime() {
+    time ??= 0;
+    return time;
+  }
+
+  Map toJson() {
+    return {
+      't': time,
+      'v': value,
+    };
+  }
+}

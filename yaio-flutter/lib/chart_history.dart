@@ -4,7 +4,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
-
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
