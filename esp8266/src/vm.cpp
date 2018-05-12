@@ -42,7 +42,6 @@ void VM_readIn(void) {
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     switch (IoEntryVec[i].code) {
     case kPhyIn: {
-      // DEBUG_PRINT("VM_readIn-kPhyIn: %s\n", IoEntryVec[i].name.c_str());
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint8_t pin = v >> 24;
       pinMode(pin, INPUT);
@@ -101,7 +100,6 @@ void VM_readIn(void) {
       }
     } break;
     case kBool: {
-      // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
       if (VM_UpdateDataPending == true) {
         DEBUG_PRINT("get: kBool\n");
         String kdata;
@@ -124,7 +122,6 @@ void VM_readIn(void) {
       }
     } break;
     case kInt: {
-      // DEBUG_PRINT("VM_UpdateDataPending %d\n", VM_UpdateDataPending);
       if (VM_UpdateDataPending == true) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
@@ -194,7 +191,8 @@ void VM_writeOut(void) {
       case kPhyIn:
       case kDhtTemperature:
       case kDhtHumidity:
-      case kRadioRx: {
+      case kRadioRx:
+      case kInt: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_PRINT("VM_writeOut: %s: %d\n", IoEntryVec[i].key.c_str(), value);
         String kdata;
@@ -218,21 +216,9 @@ void VM_writeOut(void) {
           IoEntryVec[i].wb = false;
         }
       } break;
-      case kInt: {
-        uint32_t value = atoi(IoEntryVec[i].value.c_str());
-        DEBUG_PRINT("VM_writeOut: kInt %d\n", value);
-        String kdata;
-        FbSetPath_data(kdata);
-        Firebase.setInt(kdata + "/" + IoEntryVec[i].key + "/value", value);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase failed: VM_writeOut %d\n", IoEntryVec[i].code);
-        } else {
-          IoEntryVec[i].wb = false;
-        }
-      } break;
       case kMessaging: {
-        // DEBUG_PRINT("VM_writeOut: kMessaging %s\n",
-        IoEntryVec[i].value.c_str();
+        DEBUG_PRINT("VM_writeOut: kMessaging %s\n",
+                    IoEntryVec[i].value.c_str());
         fblog_log(IoEntryVec[i].value, true);
         IoEntryVec[i].wb = false;
       } break;

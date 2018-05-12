@@ -35,6 +35,7 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.key = key;
     entry.code = obj["code"].as<uint8_t>();
     entry.value = obj["value"].as<String>();
+    entry.enLog = obj["enLog"].as<bool>();
 
     // post process data value for some case
     switch (entry.code) {

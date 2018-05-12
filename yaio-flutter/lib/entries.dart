@@ -248,6 +248,7 @@ class IoEntry {
   bool exist = false;
   bool drawWr = false;
   bool drawRd = false;
+  bool enLog = false;
   String key;
   String owner;
   int code;
@@ -270,6 +271,7 @@ class IoEntry {
     if (v['drawRd'] != null) {
       drawRd = v['drawRd'];
     }
+    enLog = v['enLog'];
   }
 
   dynamic getValue() {
@@ -324,6 +326,7 @@ class IoEntry {
     if (drawRd != false) {
       map['drawRd'] = drawRd;
     }
+    map['enLog'] = enLog;
     return map;
   }
 }
@@ -449,7 +452,6 @@ class ExecEntry {
   ExecEntry(DatabaseReference ref) : reference = ref;
 
   ExecEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    // print('ExecEntry.fromMap');
     reference = ref;
     exist = true;
     key = k;

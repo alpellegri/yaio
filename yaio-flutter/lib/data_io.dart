@@ -131,6 +131,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   List<int> _opTypeMenu = new List<int>();
   bool _checkboxValueWr = false;
   bool _checkboxValueRd = false;
+  bool _checkboxValueLog = false;
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
@@ -155,6 +156,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
       _currentValue = entry.value;
       _checkboxValueWr = entry.drawWr;
       _checkboxValueRd = entry.drawRd;
+      _checkboxValueLog = entry.enLog;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
       _selectedType = entry.code;
@@ -188,6 +190,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   entry.key = _controllerName.text;
                   entry.drawWr = _checkboxValueWr;
                   entry.drawRd = _checkboxValueRd;
+                  entry.enLog = _checkboxValueLog;
                   try {
                     entry.code = _selectedType;
                     print(_currentValue);
@@ -285,44 +288,20 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                         });
                       }),
                 ),
+                new ListTile(
+                  title: const Text('Enable Logs'),
+                  leading: new Checkbox(
+                      value: _checkboxValueLog,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _checkboxValueLog = value;
+                        });
+                      }),
+                ),
               ]),
         ),
       ),
-      /*actions: <Widget>[
-          new FlatButton(
-              child: const Text('REMOVE'),
-              onPressed: () {
-                if (entry.exist == true) {
-                  entry.reference.child(entry.key).remove();
-                }
-                Navigator.pop(context, null);
-              }),
-          new FlatButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                entry.key = _controllerName.text;
-                entry.drawWr = _checkboxValueWr;
-                entry.drawRd = _checkboxValueRd;
-                try {
-                  entry.code = _selectedType;
-                  print(_currentValue);
-                  entry.value = _currentValue;
-                  entry.cb = _selectedExec?.key;
-                  entry.setOwner(getOwner());
-                  if (entry.value != null) {
-                    entry.reference.child(entry.key).set(entry.toJson());
-                  }
-                } catch (exception) {
-                  print('bug');
-                }
-                Navigator.pop(context, null);
-              }),
-          new FlatButton(
-              child: const Text('DISCARD'),
-              onPressed: () {
-                Navigator.pop(context, null);
-              }),
-        ]*/
+
     );
   }
 

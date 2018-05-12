@@ -25,7 +25,7 @@ void fblog_log(String message, boolean fcm_notify) {
     FcmSendPush(msg);
   }
   String klogs;
-  FbSetPath_logs(klogs);
+  FbSetPath_message(klogs);
   String data;
   log.printTo(data);
   Firebase.pushJSON(klogs, data);

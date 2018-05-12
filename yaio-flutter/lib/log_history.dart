@@ -79,7 +79,7 @@ class _LogHistoryState extends State<LogHistory> {
   StreamSubscription<Event> _onRemoveSub;
 
   _LogHistoryState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getLogsRef());
+    _entryRef = FirebaseDatabase.instance.reference().child(getMessagesRef());
     _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
@@ -101,7 +101,7 @@ class _LogHistoryState extends State<LogHistory> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
+        title: new Text('${widget.title} @ ${getDomain()}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,

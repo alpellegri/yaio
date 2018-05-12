@@ -31,6 +31,7 @@ public:
   uint8_t code;
   bool ev;
   bool wb;
+  bool enLog;
   String key;
   String value;
   String cb;

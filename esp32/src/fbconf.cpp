@@ -64,7 +64,7 @@ void FbSetPath_data(String &path) {
   path = prefix_data + String(FPSTR(_kdata)) + String(F("/")) + subpath;
 }
 
-void FbSetPath_logs(String &path) {
+void FbSetPath_message(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
@@ -85,7 +85,7 @@ void dump_path(void) {
   DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_data(path);
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_logs(path);
+  FbSetPath_message(path);
   DEBUG_PRINT("%s\n", path.c_str());
 }
 
