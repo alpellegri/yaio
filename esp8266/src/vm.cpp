@@ -12,8 +12,8 @@
 #include "firebase.h"
 #include "pht.h"
 #include "rf.h"
-#include "timesrv.h"
 #include "timers.h"
+#include "timesrv.h"
 
 typedef struct {
   bool cond;
@@ -196,9 +196,9 @@ void VM_writeOut(void) {
       case kInt: {
         uint32_t value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_PRINT("VM_writeOut: %s: %d\n", IoEntryVec[i].key.c_str(), value);
-        String data;
-        FbSetPath_data(data);
-        Firebase.setInt(data + "/" + IoEntryVec[i].key + "/value", value);
+        String ref;
+        FbSetPath_data(ref);
+        Firebase.setInt(ref + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
           DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n", IoEntryVec[i].key.c_str());
         } else {
@@ -209,8 +209,8 @@ void VM_writeOut(void) {
             json["v"] = value;
             String strdata;
             json.printTo(strdata);
-            FbSetPath_log(strdata);
-            Firebase.pushJSON(data + "/" + IoEntryVec[i].key, strdata);
+            FbSetPath_log(ref);
+            Firebase.pushJSON(ref + "/" + IoEntryVec[i].key, strdata);
             if (Firebase.failed() == true) {
               DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                           IoEntryVec[i].key.c_str());
@@ -225,9 +225,9 @@ void VM_writeOut(void) {
       case kBool: {
         bool value = atoi(IoEntryVec[i].value.c_str());
         DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
-        String kdata;
-        FbSetPath_data(kdata);
-        Firebase.setBool(kdata + "/" + IoEntryVec[i].key + "/value", value);
+        String ref;
+        FbSetPath_data(ref);
+        Firebase.setBool(ref + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
           DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                       IoEntryVec[i].key.c_str());
