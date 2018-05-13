@@ -118,36 +118,37 @@ class Render {
 }
 
 class ChartHistory extends StatefulWidget {
-  ChartHistory({Key key, this.title}) : super(key: key);
+  ChartHistory(this.name);
 
-  static const String routeName = '/chart_history';
-
-  final String title;
+  final String name;
 
   @override
-  _ChartHistoryState createState() => new _ChartHistoryState();
+  _ChartHistoryState createState() => new _ChartHistoryState(name);
 }
 
 class _ChartHistoryState extends State<ChartHistory> {
-  List<THEntry> entryList = new List();
+  List<LogEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
   static Chart chart = new Chart();
+  final String name;
+  int num = 0;
+
+  _ChartHistoryState(this.name) {
+    print('_ChartHistoryState: ${getLogRef()}/$name');
+    _entryRef =
+        FirebaseDatabase.instance.reference().child('${getLogRef()}/$name');
+    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
+  }
 
   CustomPaint _myCustomPainter = new CustomPaint(
     size: new Size(xsize, 600.0),
     painter: chart,
   );
 
-  _ChartHistoryState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getTHRef());
-    _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
-  }
-
   @override
   void initState() {
     super.initState();
-    print('_ChartHistoryState');
   }
 
   @override
@@ -160,7 +161,7 @@ class _ChartHistoryState extends State<ChartHistory> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(widget.title),
+        title: new Text(name),
       ),
       body: new Container(
         alignment: FractionalOffset.center,
@@ -178,23 +179,23 @@ class _ChartHistoryState extends State<ChartHistory> {
 
   void _onEntryAdded(Event event) {
     setState(() {
-      chart.add(new THEntry.fromSnapshot(_entryRef, event.snapshot));
+      chart.add(new LogEntry(
+          event.snapshot.value['t'] * 1000.0, event.snapshot.value['v'] * 0.1));
     });
   }
 }
 
 class Chart extends CustomPainter {
-  List<THEntry> entryList = new List();
+  List<LogEntry> entryList = new List();
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paintT = new Paint()..color = Colors.amber[300];
-    final Paint paintH = new Paint()..color = Colors.amber[100];
+    final Paint paint = new Paint()..color = Colors.amber[300];
 
     if (entryList.length > 0) {
       DateTime dtmax = new DateTime.now();
       DateTime dtmin = dtmax.subtract(new Duration(
-        days: 7,
+        days: 1,
         hours: dtmax.hour,
         minutes: dtmax.minute,
         seconds: dtmax.second,
@@ -203,20 +204,12 @@ class Chart extends CustomPainter {
       int tmMin = dtmin.millisecondsSinceEpoch;
       int tmMax = dtmax.millisecondsSinceEpoch;
       double tempMin = entryList
-          .where((entry) => entry.time > tmMin)
-          .map((entry) => entry.t)
+          .where((entry) => entry.x > tmMin)
+          .map((entry) => entry.y)
           .reduce(math.min);
       double tempMax = entryList
-          .where((entry) => entry.time > tmMin)
-          .map((entry) => entry.t)
-          .reduce(math.max);
-      double humMin = entryList
-          .where((entry) => entry.time > tmMin)
-          .map((entry) => entry.h)
-          .reduce(math.min);
-      double humMax = entryList
-          .where((entry) => entry.time > tmMin)
-          .map((entry) => entry.h)
+          .where((entry) => entry.x > tmMin)
+          .map((entry) => entry.y)
           .reduce(math.max);
 
       double delta;
@@ -226,36 +219,25 @@ class Chart extends CustomPainter {
       delta = 0.1 * (tempMax - tempMin);
       tempMin -= delta;
       tempMax += delta;
-      delta = 0.1 * (humMax - humMin);
-      humMin -= delta;
-      humMax += delta;
       double tOffset = 200.0;
       double hOffset = 450.0;
 
-      Render renderT = new Render(canvas, tOffset, timeMin.toDouble(),
+      Render render = new Render(canvas, tOffset, timeMin.toDouble(),
           timeMax.toDouble(), tempMin, tempMax);
-      Render renderH = new Render(canvas, hOffset, timeMin.toDouble(),
-          timeMax.toDouble(), humMin, humMax);
 
-      // grid T
-      renderT.drawYGrid(12, paintT, '°C');
-      renderT.drawXGrid(1, paintT);
-      // grid H
-      renderH.drawYGrid(12, paintH, '%');
-      renderH.drawXGrid(1, paintH);
+      // grid
+      render.drawYGrid(12, paint, '');
+      render.drawXGrid(1, paint);
 
       for (int i = 0; i < entryList.length; i++) {
-        if (entryList[i].getTime() > tmMin) {
-          renderT.drawCircle(entryList[i].getTime().toDouble(),
-              entryList[i].getT(), 1.3, paintT);
-          renderH.drawCircle(entryList[i].getTime().toDouble(),
-              entryList[i].getH(), 1.3, paintH);
+        if (entryList[i].x > tmMin) {
+          render.drawCircle(entryList[i].x, entryList[i].y, 1.3, paint);
         }
       }
     }
   }
 
-  void add(THEntry entry) {
+  void add(LogEntry entry) {
     entryList.add(entry);
   }
 

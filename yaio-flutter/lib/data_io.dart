@@ -139,14 +139,14 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   StreamSubscription<Event> _onValueExecSubscription;
   dynamic _currentValue;
 
+  _DataIoDialogWidgetState(this.entry);
+
   void _handleTapboxChanged(dynamic newValue) {
     print('_handleTapboxChanged $newValue');
     setState(() {
       _currentValue = newValue;
     });
   }
-
-  _DataIoDialogWidgetState(this.entry);
 
   @override
   void initState() {

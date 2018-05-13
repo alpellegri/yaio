@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
 import 'entries.dart';
+import 'chart_history.dart';
 import 'ui_data_io.dart';
 
 class Home extends StatefulWidget {
@@ -113,13 +114,25 @@ class _HomeState extends State<Home> {
                     itemBuilder: (buildContext, index) {
                       if (entryList[index].drawWr == true) {
                         return new InkWell(
-                            onTap: () {
-                              _openEntryDialog(entryList[index]);
-                              _nodeUpdate(kNodeUpdate);
-                            },
-                            child: new DataIoItemWidget(entryList[index]));
+                          onTap: () {
+                            _openEntryDialog(entryList[index]);
+                            _nodeUpdate(kNodeUpdate);
+                          },
+                          child: new DataIoItemWidget(entryList[index]),
+                        );
                       } else {
-                        return new DataIoItemWidget(entryList[index]);
+                        return new InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                new MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      new ChartHistory(entryList[index].key),
+                                  fullscreenDialog: true,
+                                ));
+                          },
+                          child: new DataIoItemWidget(entryList[index]),
+                        );
                       }
                     },
                   ),
@@ -181,8 +194,8 @@ class _HomeState extends State<Home> {
                   new ListTile(
                     leading: (_control['reboot'] == kNodeFlash)
                         ? (new CircularProgressIndicator(
-                      value: null,
-                    ))
+                            value: null,
+                          ))
                         : (const Icon(Icons.system_update_alt)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${_startup["version"]}'),
@@ -202,8 +215,8 @@ class _HomeState extends State<Home> {
                   new ListTile(
                     leading: (_control['reboot'] == kNodeErase)
                         ? (new CircularProgressIndicator(
-                      value: null,
-                    ))
+                            value: null,
+                          ))
                         : (const Icon(Icons.delete_forever)),
                     title: const Text('Erase device'),
                     subtitle: new Text('${getOwner()}'),

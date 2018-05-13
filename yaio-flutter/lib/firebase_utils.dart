@@ -25,6 +25,7 @@ String dFcmTokenRef;
 String dDataRef;
 String dExecRef;
 String dMessagesRef;
+String dLogRef;
 String dTHRef;
 String dDomain;
 String dNodeName;
@@ -76,6 +77,7 @@ void updateNodeRef(Map config) {
   dDataRef = '$prefixData/$kDataRef/${config['domain']}';
   dExecRef = '$prefixData/$kExecRef/$dNodeSubPath';
   dMessagesRef = '$prefixData/$kMessagesRef/${config['domain']}';
+  dLogRef = '$prefixData/$kLogRef/${config['domain']}';
   dTHRef = '$prefixData/$kTHRef';
   dDomain = config['domain'];
   dNodeName = config['nodename'];
@@ -85,6 +87,7 @@ void updateNodeRef(Map config) {
   print('dDataRef: $dDataRef');
   print('dExecRef: $dExecRef');
   print('dMessagesRef: $dMessagesRef');
+  print('dLogRef: $dLogRef');
   print('dTHRef: $dTHRef');
 }
 
@@ -185,8 +188,8 @@ String getMessagesRef() {
   return dMessagesRef;
 }
 
-String getTHRef() {
-  return dTHRef;
+String getLogRef() {
+  return dLogRef;
 }
 
 Map<String, Object> _controlDefault = {

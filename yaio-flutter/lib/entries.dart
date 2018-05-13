@@ -508,76 +508,9 @@ class MessageEntry {
   }
 }
 
-class THEntry {
-  DatabaseReference reference;
-  String key;
-  double t;
-  double h;
-  int time;
-
-  THEntry(DatabaseReference ref) : reference = ref;
-
-  THEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    reference = ref;
-    key = snapshot.key;
-    t = snapshot.value['t'];
-    h = snapshot.value['h'];
-    time = snapshot.value['time'] * 1000;
-  }
-
-  double getT() {
-    t ??= 0.0;
-    return t;
-  }
-
-  double getH() {
-    h ??= 0.0;
-    return h;
-  }
-
-  int getTime() {
-    time ??= 0;
-    return time;
-  }
-
-  Map toJson() {
-    return {
-      't': t,
-      'h': h,
-      'time': time,
-    };
-  }
-}
-
 class LogEntry {
-  DatabaseReference reference;
-  String key;
-  int time;
-  double value;
+  double x;
+  double y;
 
-  LogEntry(DatabaseReference ref) : reference = ref;
-
-  LogEntry.fromSnapshot(DatabaseReference ref, DataSnapshot snapshot) {
-    reference = ref;
-    key = snapshot.key;
-    time = snapshot.value['t'] * 1000;
-    value = snapshot.value['h'];
-  }
-
-  double get() {
-    value ??= 0.0;
-    return value;
-  }
-
-  int getTime() {
-    time ??= 0;
-    return time;
-  }
-
-  Map toJson() {
-    return {
-      't': time,
-      'v': value,
-    };
-  }
+  LogEntry(this.x, this.y);
 }

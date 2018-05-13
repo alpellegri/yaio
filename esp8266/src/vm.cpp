@@ -200,13 +200,14 @@ void VM_writeOut(void) {
         FbSetPath_data(ref);
         Firebase.setInt(ref + "/" + IoEntryVec[i].key + "/value", value);
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n", IoEntryVec[i].key.c_str());
+          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                      IoEntryVec[i].key.c_str());
         } else {
           if (IoEntryVec[i].enLog == true) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.createObject();
             json["t"] = getTime();
-            json["v"] = value;
+            json["v"] = value & 0xFFFF;
             String strdata;
             json.printTo(strdata);
             FbSetPath_log(ref);

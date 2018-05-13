@@ -5,7 +5,6 @@ import 'node_setup.dart';
 import 'data_io.dart';
 import 'exec.dart';
 import 'log_history.dart';
-import 'chart_history.dart';
 import 'firebase_utils.dart';
 
 final MyDrawer drawer = new MyDrawer();
@@ -19,8 +18,6 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Exec.routeName: (BuildContext context) => new Exec(title: 'Routine'),
   Messages.routeName: (BuildContext context) =>
       new Messages(title: 'Messages'),
-  ChartHistory.routeName: (BuildContext context) =>
-      new ChartHistory(title: 'Chart History'),
 };
 
 class MyDrawer extends StatefulWidget {
@@ -71,12 +68,6 @@ class _MyDrawerState extends State<MyDrawer> {
             title: const Text('Messages'),
             onTap: () {
               Navigator.of(context).pushNamed(Messages.routeName);
-            }),
-        new ListTile(
-            leading: const Icon(Icons.timeline),
-            title: const Text('Chart History'),
-            onTap: () {
-              Navigator.of(context).pushNamed(ChartHistory.routeName);
             }),
       ]),
     );
