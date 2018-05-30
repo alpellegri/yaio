@@ -157,17 +157,11 @@ class _HomeState extends State<Home> {
                         : (const Icon(Icons.update)),
                     title: const Text('Update Device'),
                     subtitle: new Text('Configuration'),
-                    trailing: new ButtonTheme.bar(
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: const Text('UPDATE'),
-                            onPressed: () {
-                              _nodeUpdate(kNodeUpdate);
-                            },
-                          ),
-                        ],
-                      ),
+                    trailing: new OutlineButton(
+                      child: const Text('UPDATE'),
+                      onPressed: () {
+                        _nodeUpdate(kNodeUpdate);
+                      },
                     ),
                   ),
                   new ListTile(
@@ -178,17 +172,11 @@ class _HomeState extends State<Home> {
                         : (const Icon(Icons.power_settings_new)),
                     title: const Text('PowerUp'),
                     subtitle: new Text('${_startupTime.toString()}'),
-                    trailing: new ButtonTheme.bar(
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: const Text('RESTART'),
-                            onPressed: () {
-                              _nodeUpdate(kNodeReboot);
-                            },
-                          ),
-                        ],
-                      ),
+                    trailing: new OutlineButton(
+                      child: const Text('RESTART'),
+                      onPressed: () {
+                        _nodeUpdate(kNodeReboot);
+                      },
                     ),
                   ),
                   new ListTile(
@@ -199,17 +187,11 @@ class _HomeState extends State<Home> {
                         : (const Icon(Icons.system_update_alt)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${_startup["version"]}'),
-                    trailing: new ButtonTheme.bar(
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: const Text('UPGRADE'),
-                            onPressed: () {
-                              _nodeUpdate(kNodeFlash);
-                            },
-                          ),
-                        ],
-                      ),
+                    trailing: new OutlineButton(
+                      child: const Text('UPGRADE'),
+                      onPressed: () {
+                        _nodeUpdate(kNodeFlash);
+                      },
                     ),
                   ),
                   new ListTile(
@@ -220,17 +202,11 @@ class _HomeState extends State<Home> {
                         : (const Icon(Icons.delete_forever)),
                     title: const Text('Erase device'),
                     subtitle: new Text('${getOwner()}'),
-                    trailing: new ButtonTheme.bar(
-                      child: new ButtonBar(
-                        children: <Widget>[
-                          new FlatButton(
-                            child: const Text('ERASE'),
-                            onPressed: () {
-                              _nodeUpdate(kNodeFlash);
-                            },
-                          ),
-                        ],
-                      ),
+                    trailing: new RaisedButton(
+                      child: const Text('ERASE'),
+                      onPressed: () {
+                        _nodeUpdate(kNodeFlash);
+                      },
                     ),
                   ),
                 ],

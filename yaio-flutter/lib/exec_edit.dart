@@ -89,7 +89,7 @@ class _ExecEditState extends State<ExecEdit> {
             trailing: new ButtonTheme.bar(
               child: new ButtonBar(
                 children: <Widget>[
-                  new FlatButton(
+                  new OutlineButton(
                       child: const Text('REMOVE'),
                       onPressed: () {
                         print(entry.reference);
@@ -98,7 +98,7 @@ class _ExecEditState extends State<ExecEdit> {
                         }
                         Navigator.pop(context, null);
                       }),
-                  new FlatButton(
+                  new OutlineButton(
                       child: const Text('SAVE'),
                       onPressed: () {
                         setState(() {
@@ -109,7 +109,7 @@ class _ExecEditState extends State<ExecEdit> {
                         });
                         Navigator.pop(context, null);
                       }),
-                  new FlatButton(
+                  new OutlineButton(
                     child: const Text('PROGRAM'),
                     onPressed: () {
                       Navigator.push(
@@ -120,7 +120,7 @@ class _ExecEditState extends State<ExecEdit> {
                           ));
                     },
                   ),
-                  new FlatButton(
+                  new OutlineButton(
                       child: const Text('DISCARD'),
                       onPressed: () {
                         Navigator.pop(context, null);

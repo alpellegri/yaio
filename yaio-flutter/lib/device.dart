@@ -543,18 +543,12 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
           trailing: (_isNeedCreate == true)
               ? null
-              : (new ButtonTheme.bar(
-                  child: new ButtonBar(
-                    children: <Widget>[
-                      new FlatButton(
-                        child: const Text('CONFIGURE'),
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(NodeSetup.routeName);
-                        },
-                      ),
-                    ],
-                  ),
-                )),
+              : new OutlineButton(
+                  child: const Text('CONFIGURE'),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(NodeSetup.routeName);
+                  },
+                ),
         ),
       ]);
     }
