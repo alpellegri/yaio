@@ -263,13 +263,13 @@ class _ExecProgState extends State<ExecProg> {
             ),
           ),
           actions: <Widget>[
-            new FlatButton(
+            new OutlineButton(
               child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(ctrl.text);
               },
             ),
-            new FlatButton(
+            new OutlineButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(null);
@@ -440,7 +440,7 @@ class _EntryDialogState extends State<EntryDialog> {
           ],
         ),
         actions: <Widget>[
-          new FlatButton(
+          new OutlineButton(
               child: const Text('REMOVE'),
               onPressed: () {
                 setState(() {
@@ -449,7 +449,7 @@ class _EntryDialogState extends State<EntryDialog> {
                 });
                 Navigator.pop(context, null);
               }),
-          new FlatButton(
+          new OutlineButton(
               child: const Text('SAVE'),
               onPressed: () {
                 _didChange();
@@ -461,7 +461,7 @@ class _EntryDialogState extends State<EntryDialog> {
                   Navigator.pop(context, null);
                 });
               }),
-          new FlatButton(
+          new OutlineButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.pop(context, null);

@@ -177,7 +177,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
           title: new Text((entry.key != null) ? entry.key : 'Data IO TBD'),
           actions: <Widget>[
             new FlatButton(
-                child: new Text('REMOVE'),
+                child: const Text('REMOVE'),
                 onPressed: () {
                   if (entry.exist == true) {
                     entry.reference.child(entry.key).remove();
@@ -185,7 +185,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   Navigator.pop(context, null);
                 }),
             new FlatButton(
-                child: new Text('SAVE'),
+                child: const Text('SAVE'),
                 onPressed: () {
                   entry.key = _controllerName.text;
                   entry.drawWr = _checkboxValueWr;
