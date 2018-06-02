@@ -202,7 +202,7 @@ class _HomeState extends State<Home> {
                         : (const Icon(Icons.delete_forever)),
                     title: const Text('Erase device'),
                     subtitle: new Text('${getOwner()}'),
-                    trailing: new RaisedButton(
+                    trailing: new OutlineButton(
                       child: const Text('ERASE'),
                       onPressed: () {
                         _nodeUpdate(kNodeFlash);
