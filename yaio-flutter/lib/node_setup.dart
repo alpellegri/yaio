@@ -117,7 +117,7 @@ class _NodeSetupState extends State<NodeSetup> {
                             decoration: const InputDecoration(
                               border: const UnderlineInputBorder(),
                               hintText: 'Access Point Password',
-                              labelText: 'WIFI PASSWORD *',
+                              labelText: 'WiFi PASSWORD *',
                             ),
                           ),
                           const SizedBox(height: 12.0),
