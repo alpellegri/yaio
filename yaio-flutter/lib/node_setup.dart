@@ -91,44 +91,52 @@ class _NodeSetupState extends State<NodeSetup> {
       body: new ListView(children: <Widget>[
         new Card(
           child: new Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new ListTile(
-                leading: new Icon(Icons.router),
-                title: new TextField(
-                  controller: _ctrlSSID,
-                  decoration: const InputDecoration(
-                    border: const UnderlineInputBorder(),
-                    hintText: 'Access Point Name',
-                    labelText: 'SSID *',
-                  ),
-                ),
-                subtitle: new TextField(
-                  controller: _ctrlPassword,
-                  decoration: const InputDecoration(
-                    border: const UnderlineInputBorder(),
-                    hintText: 'Access Point Password',
-                    labelText: 'PASSWORD *',
-                  ),
-                ),
-                trailing: new ButtonTheme.bar(
-                  // make buttons use the appropriate styles for cards
-                  child: new ButtonBar(
-                    children: <Widget>[
-                      new FlatButton(
-                        child: new Text('SAVE'),
-                        onPressed: () {
-                          savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
-                          setState(() {
-                            _nodeConfigJson = json.encode(_prefs);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+              new Container(
+                child: new Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    const SizedBox(width: 16.0),
+                    new Icon(Icons.router),
+                    const SizedBox(width: 32.0),
+                    new Expanded(child: new Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new TextField(
+                            controller: _ctrlSSID,
+                            decoration: const InputDecoration(
+                              border: const UnderlineInputBorder(),
+                              hintText: 'Access Point Name',
+                              labelText: 'WiFi NAME *',
+                            ),
+                          ),
+                          const SizedBox(height: 12.0),
+                          new TextField(
+                            controller: _ctrlPassword,
+                            decoration: const InputDecoration(
+                              border: const UnderlineInputBorder(),
+                              hintText: 'Access Point Password',
+                              labelText: 'WIFI PASSWORD *',
+                            ),
+                          ),
+                          const SizedBox(height: 12.0),
+                        ]
+                    )),
+                    const SizedBox(width: 32.0),
+                    new OutlineButton(
+                      child: new Text('SAVE'),
+                      onPressed: () {
+                        savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
+                        setState(() {
+                          _nodeConfigJson = json.encode(_prefs);
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 16.0),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24.0),
             ],
           ),
         ),
@@ -140,16 +148,19 @@ class _NodeSetupState extends State<NodeSetup> {
                 leading: const Icon(Icons.developer_board),
                 title: new Text('${_prefs["domain"]}'),
                 subtitle: new Text('${_prefs["nodename"]}'),
-                trailing: new ButtonTheme.bar(
-                    child: new ButtonBar(children: <Widget>[
-                  new FlatButton(
-                    child: new Text('SUBMIT'),
-                    onPressed: _sendParameters,
-                  ),
-                ])),
+                trailing: new OutlineButton(
+                  child: new Text('SUBMIT'),
+                  onPressed: _sendParameters,
+                ),
               ),
+            ],
+          ),
+        ),
+        new Card(
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
               new Text('$_nodeConfigJson'),
-              const SizedBox(height: 24.0),
             ],
           ),
         ),
