@@ -125,7 +125,7 @@ class _NodeSetupState extends State<NodeSetup> {
                     )),
                     const SizedBox(width: 32.0),
                     new OutlineButton(
-                      child: new Text('SAVE'),
+                      child: const Text('SAVE'),
                       onPressed: () {
                         savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
                         setState(() {
@@ -149,7 +149,7 @@ class _NodeSetupState extends State<NodeSetup> {
                 title: new Text('${_prefs["domain"]}'),
                 subtitle: new Text('${_prefs["nodename"]}'),
                 trailing: new OutlineButton(
-                  child: new Text('SUBMIT'),
+                  child: const Text('SUBMIT'),
                   onPressed: _sendParameters,
                 ),
               ),

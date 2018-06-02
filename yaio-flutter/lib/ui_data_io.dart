@@ -39,6 +39,7 @@ class DataIoItemWidget extends StatelessWidget {
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                const SizedBox(width: 64.0),
                 new Expanded(
                     child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,40 +127,40 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
         break;
       case DataCode.PhyOut:
       case DataCode.RadioTx:
-      w = new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new TextField(
-              controller: ctrl_1,
-              onSubmitted: (v) {
-                setState(() {
-                  value = setValueCtrl1(value, type, v);
-                });
-                widget.onChanged(value);
-              },
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: 'pin',
-                labelText: 'Pin',
+        w = new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: ctrl_1,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl1(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: 'pin',
+                  labelText: 'Pin',
+                ),
               ),
-            ),
-            new TextField(
-              controller: ctrl_2,
-              onSubmitted: (v) {
-                setState(() {
-                  value = setValueCtrl2(value, type, v);
-                });
-                widget.onChanged(value);
-              },
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: 'value',
-                labelText: 'Value',
+              new TextField(
+                controller: ctrl_2,
+                onSubmitted: (v) {
+                  setState(() {
+                    value = setValueCtrl2(value, type, v);
+                  });
+                  widget.onChanged(value);
+                },
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: 'value',
+                  labelText: 'Value',
+                ),
               ),
-            ),
-          ]);
-      break;
+            ]);
+        break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
         w = new Column(
