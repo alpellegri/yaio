@@ -10,9 +10,10 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         brightness: Brightness.dark,
         accentColor: Colors.amber[200],
+        toggleableActiveColor: Colors.amber[200],
         // buttonColor: Colors.amber[200],
         buttonTheme: const ButtonThemeData(
-          textTheme: ButtonTextTheme.accent
+          textTheme: ButtonTextTheme.accent,
         ),
       ),
       home: new Device(title: 'Device'),
