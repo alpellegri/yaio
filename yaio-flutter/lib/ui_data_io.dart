@@ -39,7 +39,6 @@ class DataIoItemWidget extends StatelessWidget {
             child: new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const SizedBox(width: 64.0),
                 new Expanded(
                     child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
