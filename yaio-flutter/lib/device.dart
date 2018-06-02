@@ -286,7 +286,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   @override
   void initState() {
     super.initState();
-
     loadPreferences().then((map) {
       setState(() {
         _isPreferencesReady = true;
@@ -402,8 +401,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                               itemCount: item.query.length,
                               itemBuilder: (buildContext, index) {
                                 return new InkWell(
-                                    child:
-                                        new ListItem(item.query[index], field));
+                                  child: new ListItem(item.query[index], field),
+                                );
                               },
                             );
                           })),
@@ -483,8 +482,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                               itemCount: item.query.length,
                               itemBuilder: (buildContext, index) {
                                 return new InkWell(
-                                    child:
-                                        new ListItem(item.query[index], field));
+                                  child: new ListItem(item.query[index], field),
+                                );
                               },
                             );
                           })),
@@ -541,14 +540,14 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
               : (const Icon(Icons.link)),
           title: const Text('Selected Device'),
           subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
-          trailing: (_isNeedCreate == true)
-              ? null
-              : new OutlineButton(
-                  child: const Text('CONFIGURE'),
-                  onPressed: () {
+          trailing: new OutlineButton(
+            child: const Text('CONFIGURE'),
+            onPressed: (_isNeedCreate == true)
+                ? null
+                : () {
                     Navigator.of(context).pushNamed(NodeSetup.routeName);
                   },
-                ),
+          ),
         ),
       ]);
     }
