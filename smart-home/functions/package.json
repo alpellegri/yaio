@@ -4,7 +4,11 @@
   "dependencies": {
     "firebase": "^5.0.4",
     "firebase-admin": "^5.12.1",
-    "firebase-functions": "^1.0.3"
+    "firebase-functions": "^1.0.3",
+    "actions-on-google": "^2.1.0",
+    "cors": "^2.8.4",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^27.0.0"
   },
   "devDependencies": {
     "eslint": "^4.13.1",

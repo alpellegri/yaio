@@ -19,6 +19,9 @@ const util = require('util');
 const https = require('https');
 const functions = require('firebase-functions');
 const firebase = require('firebase');
+const {smarthome} = require('actions-on-google');
+const cors = require('cors')({origin: true});
+
 // Initialize Firebase
 const config = functions.config().firebase;
 var admin = require("firebase-admin");
@@ -64,11 +67,8 @@ exports.auth = functions.https.onRequest((request, response) => {
   console.log('-> Request query: ' + JSON.stringify(request.query));
   console.log('-> Request body: ' + JSON.stringify(request.body));
 
-	// const responseurl = util.format('%s?code=%s&state=%s',
-  //   decodeURIComponent(request.query.redirect_uri), 'xxxxxx', request.query.state);
 	const responseurl = util.format('%s?code=%s&state=%s',
     decodeURIComponent(request.query.redirect_uri), request.query.code, request.query.state);
-  console.log('-> request.query.code: ' + request.query.code);
   console.log('-> responseurl: ' + responseurl);
   return response.redirect(responseurl);
 });
@@ -77,6 +77,7 @@ exports.token = functions.https.onRequest((request, response) => {
   console.log('-> Request headers: ' + JSON.stringify(request.headers));
   console.log('-> Request query: ' + JSON.stringify(request.query));
   console.log('-> Request body: ' + JSON.stringify(request.body));
+
   const grantType = request.query.grant_type
     ? request.query.grant_type : request.body.grant_type;
   const expires = 1 * 1 * 60;
@@ -102,155 +103,196 @@ exports.token = functions.https.onRequest((request, response) => {
     .json(obj);
 });
 
-exports.ha = functions.https.onRequest((req, res) => {
-  console.log('-> Request headers: ' + JSON.stringify(req.headers));
-  console.log('-> Request query: ' + JSON.stringify(req.query));
-  console.log('-> Request body: ' + JSON.stringify(req.body));
-
-  let authToken = req.headers.authorization ? req.headers.authorization.split(' ')[1] : null;
-  console.log('authToken: ' + authToken);
-  init(req, res);
+const app = smarthome({
+  debug: true,
+  API_KEY: 'AIzaSyDSW60Gq8vbXMNKbrwwzyDTsy6V8-OzwGQ',
 });
 
-function init(req, res) {
-  let reqdata = req.body;
+app.onSync(() => {
+  return {
+    requestId: 'ff36a3cc-ec34-11e6-b1a0-64510650abcf',
+    payload: {
+      agentUserId: '123',
+      devices: [{
+        id: 'washer',
+        type: 'action.devices.types.WASHER',
+        traits: [
+          'action.devices.traits.OnOff',
+          'action.devices.traits.StartStop',
+          'action.devices.traits.RunCycle',
+          'action.devices.traits.Modes',
+          'action.devices.traits.Toggles',
+        ],
+        name: {
+          defaultNames: ['My Washer'],
+          name: 'Washer',
+          nicknames: ['Washer'],
+        },
+        deviceInfo: {
+          manufacturer: 'Yaio',
+          model: 'esp8266',
+          hwVersion: '1.0',
+          swVersion: '1.0.1',
+        },
+        attributes: {
+          dataTypesSupported: [{
+            name: 'temperature',
+            data_type: [{
+              type_synonym: ['temperature'],
+              lang: 'en',
+            }],
+            default_device_unit: 'C',
+          }],
+          availableModes: [{
+            name: 'load',
+            name_values: [{
+              name_synonym: ['load'],
+              lang: 'en',
+            }],
+            settings: [{
+              setting_name: 'small',
+              setting_values: [{
+                setting_synonym: ['small'],
+                lang: 'en',
+              }],
+            }, {
+              setting_name: 'large',
+              setting_values: [{
+                setting_synonym: ['large'],
+                lang: 'en',
+              }],
+            }],
+            ordered: true,
+          }],
+          availableToggles: [{
+            name: 'Turbo',
+            name_values: [{
+              name_synonym: ['turbo'],
+              lang: 'en',
+            }],
+          }],
+        },
+      }],
+    },
+  };
+});
 
-  if (!reqdata.inputs) { showError(res, "missing inputs"); return; }
+const queryFirebase = (deviceId) => firebaseRef.child(deviceId).once('value')
+  .then((snapshot) => {
+    const snapshotVal = snapshot.val();
+    return {
+      on: snapshotVal.OnOff.on,
+      isPaused: snapshotVal.StartStop.isPaused,
+      isRunning: snapshotVal.StartStop.isRunning,
+      load: snapshotVal.Modes.load,
+      turbo: snapshotVal.Toggles.Turbo,
+    };
+  });
 
-  for (let i = 0; i < reqdata.inputs.length; i++) {
-    let input = reqdata.inputs[i];
-		let intent = input.intent || "";
-		console.log('> intent ', intent);
-    switch (intent) {
-      case "action.devices.SYNC":
-        sync(reqdata, res);
-        return;
-      case "action.devices.QUERY":
-        query(reqdata, res);
-        return;
-      case "action.devices.EXECUTE":
-        execute(reqdata, res);
-        return;
+const queryDevice = (deviceId) => queryFirebase(deviceId).then((data) => ({
+  on: data.on,
+  isPaused: data.isPaused,
+  isRunning: data.isRunning,
+  currentRunCycle: [{
+    currentCycle: 'rinse',
+    nextCycle: 'spin',
+    lang: 'en',
+  }],
+  currentTotalRemainingTime: 1212,
+  currentCycleRemainingTime: 301,
+  currentModeSettings: {
+    load: data.load,
+  },
+  currentToggleSettings: {
+    Turbo: data.turbo,
+  },
+}));
+
+app.onQuery((body) => {
+  const {requestId} = body;
+  const payload = {
+    devices: {},
+  };
+  const queryPromises = [];
+  for (const input of body.inputs) {
+    for (const device of input.payload.devices) {
+      const deviceId = device.id;
+      queryPromises.push(queryDevice(deviceId)
+        .then((data) => {
+          // Add response to device payload
+          payload.devices[deviceId] = data;
+        }
+        ));
     }
   }
-  showError(res, "missing intent");
-}
+  // Wait for all promises to resolve
+  return Promise.all(queryPromises).then((values) => ({
+    requestId: requestId,
+    payload: payload,
+  })
+  );
+});
 
-function sync(reqdata, res) {
-  let deviceProps = {
-    requestId: reqdata.requestId,
-    payload: {
-      devices: [{
-        id: "1",
-        type: "action.devices.types.SWITCH",
-        traits: [
-          "action.devices.traits.OnOff"
-        ],
-        name: {
-          name: "fan"
-        },
-        willReportState: true
-      }, {
-        id: "2",
-        type: "action.devices.types.LIGHT",
-        traits: [
-          "action.devices.traits.OnOff",
-          "action.devices.traits.ColorSpectrum"
-        ],
-        name: {
-          name: "lights"
-        },
-        willReportState: true
-      }]
-    }
+app.onExecute((body) => {
+  const {requestId} = body;
+  const payload = {
+    commands: [{
+      ids: [],
+      status: 'SUCCESS',
+      states: {
+        online: true,
+      },
+    }],
   };
-  res.status(200).json(deviceProps);
-}
-
-function query(reqdata, res) {
-  getDevicesDataFromFirebase(devices => {
-    let deviceStates = {
-      requestId: reqdata.requestId,
-      payload: {
-        devices: {
-          "1": {
-            on: devices.fan.on,
-            online: true
-          },
-          "2": {
-            on: devices.lights.on,
-            online: true,
-            color: {
-              spectrumRGB: devices.lights.spectrumRGB
-            }
-          }
-        }
-      }
-    };
-    res.status(200).json(deviceStates);
-  });
-}
-
-function execute(reqdata, res) {
-  getDevicesDataFromFirebase(devices => {
-    let reqCommands = reqdata.inputs[0].payload.commands
-    let respCommands = [];
-
-    for (let i = 0; i < reqCommands.length; i++) {
-      let curCommand = reqCommands[i];
-      for (let j = 0; j < curCommand.execution.length; j++) {
-        let curExec = curCommand.execution[j];
-        console.log('> curExec ', curExec);
-        if (curExec.command === "action.devices.commands.OnOff") {
-          for (let k = 0; k < curCommand.devices.length; k++) {
-            let curDevice = curCommand.devices[k];
-            if (curDevice.id === "1") {
-              devices.fan.on = curExec.params.on;
-            } else if (curDevice.id === "2") {
-              devices.lights.on = curExec.params.on;
-            }
-            respCommands.push({ids: [ curDevice.id ], status: "SUCCESS"});
-          }
-        } else if (curExec.command === "action.devices.commands.ColorAbsolute") {
-          for (let k = 0; k < curCommand.devices.length; k++) {
-            let curDevice = curCommand.devices[k];
-            if (curDevice.id === "2") {
-              devices.lights.spectrumRGB = curExec.params.color.spectrumRGB;
-            }
-            respCommands.push({ids: [ curDevice.id ], status: "SUCCESS"});
+  for (const input of body.inputs) {
+    for (let k = 0; k < input.payload.commands.length; k++) {
+      const command = input.payload.commands[k];
+      for (const device of command.devices) {
+        const deviceId = device.id;
+        payload.commands[k].ids.push(deviceId);
+        for (const execution of command.execution) {
+          const execCommand = execution.command;
+          const {params} = execution;
+          switch (execCommand) {
+            case 'action.devices.commands.OnOff':
+              firebaseRef.child(deviceId).child('OnOff').update({
+                on: params.on,
+              });
+              payload.commands[0].states.on = params.on;
+              break;
+            case 'action.devices.commands.StartStop':
+              firebaseRef.child(deviceId).child('StartStop').update({
+                isRunning: params.start,
+              });
+              payload.commands[0].states.isRunning = params.start;
+              break;
+            case 'action.devices.commands.PauseUnpause':
+              firebaseRef.child(deviceId).child('StartStop').update({
+                isPaused: params.pause,
+              });
+              payload.commands[0].states.isPaused = params.pause;
+              break;
+            case 'action.devices.commands.SetModes':
+              firebaseRef.child(deviceId).child('Modes').update({
+                load: params.updateModeSettings.load,
+              });
+              break;
+            case 'action.devices.commands.SetToggles':
+              firebaseRef.child(deviceId).child('Toggles').update({
+                Turbo: params.updateToggleSettings.Turbo,
+              });
+              break;
           }
         }
       }
     }
+  }
+  return {
+    requestId: requestId,
+    payload: payload,
+  };
+});
 
-    persistDevicesDataToFirebase(devices);
-
-    let resBody = {
-      requestId: reqdata.requestId,
-      payload: {
-        commands: respCommands
-      }
-    };
-    res.status(200).json(resBody);
-  });
-}
-
-function showError(res, message) {
-  res.status(401).set({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-  }).json({error: message});
-}
-
-function getDevicesDataFromFirebase(action) {
-  admin.database().ref().once("value", snapshot => {
-    let devices = snapshot.val();
-    action(devices);
-  });
-}
-
-function persistDevicesDataToFirebase(data) {
-  admin.database().ref().set(data);
-}
+exports.ha = functions.https.onRequest(app);
 
 // [END all]
