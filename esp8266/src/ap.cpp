@@ -14,7 +14,7 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-static const char ap_ssid[] PROGMEM = "uHome-node";
+static const char ap_ssid[] PROGMEM = "yaio-node";
 static const char ap_password[] PROGMEM = "123456789";
 
 static uint16_t ap_task_cnt;
