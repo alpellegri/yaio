@@ -32,51 +32,38 @@ admin.initializeApp({
   databaseURL: "https://smarthome-washer.firebaseio.com"
 });
 
-exports.login = functions.https.onRequest((request, response) => {
-  console.log('-> Request headers: ' + JSON.stringify(request.headers));
-  console.log('-> Request query: ' + JSON.stringify(request.query));
-  console.log('-> Request body: ' + JSON.stringify(request.body));
-
-  if (!request.headers.authorization || !request.headers.authorization.startsWith('Bearer ')) {
-    console.error('No Firebase ID token was passed as a Bearer token in the Authorization header.');
-    response.status(403).send('Unauthorized');
-    return;
-  }
-
-  let idToken;
-  if (request.headers.authorization && request.headers.authorization.startsWith('Bearer ')) {
-    console.log('Found "Authorization" header');
-    // Read the ID Token from the Authorization header.
-    idToken = request.headers.authorization.split('Bearer ')[1];
-  } else {
-    // No cookie
-    response.status(403).send('Unauthorized');
-    return;
-  }
-  admin.auth().verifyIdToken(idToken).then((decodedIdToken) => {
-    console.log('ID Token correctly decoded', decodedIdToken);
-	  response.send(decodedIdToken.uid);
-  }).catch((error) => {
-    console.error('Error while verifying Firebase ID token:', error);
-    response.status(403).send('Unauthorized');
-  });
-});
+const firebaseRef = admin.database().ref('/');
+const oauth2Ref = admin.database().ref('/oauth2');
 
 exports.auth = functions.https.onRequest((request, response) => {
-  console.log('-> Request headers: ' + JSON.stringify(request.headers));
-  console.log('-> Request query: ' + JSON.stringify(request.query));
-  console.log('-> Request body: ' + JSON.stringify(request.body));
+  console.log('auth -> Request headers: ' + JSON.stringify(request.headers));
+  console.log('auth -> Request query: ' + JSON.stringify(request.query));
+  console.log('auth -> Request body: ' + JSON.stringify(request.body));
+
+  // A entry.
+  let Data = {
+    uid: request.query.code,
+    state: request.query.state,
+  };
+
+  let Key = request.query.code;
+  let updates = {};
+  updates['/code/' + Key] = Data;
+  // should wait the it returns...
+  oauth2Ref.update(updates);
 
 	const responseurl = util.format('%s?code=%s&state=%s',
-    decodeURIComponent(request.query.redirect_uri), request.query.code, request.query.state);
+    decodeURIComponent(request.query.redirect_uri),
+    request.query.code,
+    request.query.state);
   console.log('-> responseurl: ' + responseurl);
   return response.redirect(responseurl);
 });
 
 exports.token = functions.https.onRequest((request, response) => {
-  console.log('-> Request headers: ' + JSON.stringify(request.headers));
-  console.log('-> Request query: ' + JSON.stringify(request.query));
-  console.log('-> Request body: ' + JSON.stringify(request.body));
+  console.log('token -> Request headers: ' + JSON.stringify(request.headers));
+  console.log('token -> Request query: ' + JSON.stringify(request.query));
+  console.log('token -> Request body: ' + JSON.stringify(request.body));
 
   const grantType = request.query.grant_type
     ? request.query.grant_type : request.body.grant_type;
@@ -294,5 +281,128 @@ app.onExecute((body) => {
 });
 
 exports.ha = functions.https.onRequest(app);
+
+exports.requestsync = functions.https.onRequest((request, response) => {
+  console.info('Request SYNC for user 123');
+  const https = require('https');
+  const postData = {
+    agentUserId: '123', /* Hardcoded user ID */
+  };
+  return cors(request, response, () => {
+    const options = {
+      hostname: 'homegraph.googleapis.com',
+      port: 443,
+      path: `/v1/devices:requestSync?key=${app.API_KEY}`,
+      method: 'POST',
+    };
+    return new Promise((resolve, reject) => {
+      let responseData = '';
+      const req = https.request(options, (res) => {
+        res.on('data', (d) => {
+          responseData += d.toString();
+        });
+        res.on('end', () => {
+          resolve(responseData);
+        });
+      });
+      req.on('error', (e) => {
+        reject(e);
+      });
+      // Write data to request body
+      req.write(JSON.stringify(postData));
+      req.end();
+    }).then((data) => {
+      console.log('Request sync completed');
+      response.json(data);
+    }).catch((err) => {
+      console.error(err);
+    });
+  });
+});
+
+/**
+ * Send a REPORT STATE call to the homegraph when data for any device id
+ * has been changed.
+ */
+exports.reportstate = functions.database.ref('{deviceId}').onWrite((event) => {
+  console.info('Firebase write event triggered this cloud function');
+  const https = require('https');
+  const {google} = require('googleapis');
+  const key = require('./key.json');
+  const jwtClient = new google.auth.JWT(
+    key.client_email,
+    null,
+    key.private_key,
+    ['https://www.googleapis.com/auth/homegraph'],
+    null
+  );
+
+  const snapshotVal = event.data.val();
+
+  const postData = {
+    requestId: 'ff36a3cc', /* Any unique ID */
+    agentUserId: '123', /* Hardcoded user ID */
+    payload: {
+      devices: {
+        states: {
+          /* Report the current state of our washer */
+          [event.params.deviceId]: {
+            on: snapshotVal.OnOff.on,
+            isPaused: snapshotVal.StartStop.isPaused,
+            isRunning: snapshotVal.StartStop.isRunning,
+            currentRunCycle: [{
+              currentCycle: 'rinse',
+              nextCycle: 'spin',
+              lang: 'en',
+            }],
+            currentTotalRemainingTime: 1212,
+            currentCycleRemainingTime: 301,
+            currentModeSettings: {
+              load: snapshotVal.Modes.load,
+            },
+            currentToggleSettings: {
+              Turbo: snapshotVal.Toggles.Turbo,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  jwtClient.authorize((err, tokens) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    const options = {
+      hostname: 'homegraph.googleapis.com',
+      port: 443,
+      path: '/v1/devices:reportStateAndNotification',
+      method: 'POST',
+      headers: {
+        Authorization: ` Bearer ${tokens.access_token}`,
+      },
+    };
+    return new Promise((resolve, reject) => {
+      let responseData = '';
+      const req = https.request(options, (res) => {
+        res.on('data', (d) => {
+          responseData += d.toString();
+        });
+        res.on('end', () => {
+          resolve(responseData);
+        });
+      });
+      req.on('error', (e) => {
+        reject(e);
+      });
+      // Write data to request body
+      req.write(JSON.stringify(postData));
+      req.end();
+    }).then((data) => {
+      console.info(data);
+    });
+  });
+});
 
 // [END all]

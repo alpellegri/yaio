@@ -82,6 +82,7 @@ limitations under the License.
           document.getElementById('quickstart-account-details').textContent = url;
           document.getElementById('quickstart-oauthtoken').textContent = result.user.uid;
           console.log(url);
+          // redirect to google 
           window.location.href = url;
         } else {
           document.getElementById('quickstart-oauthtoken').textContent = 'null';
