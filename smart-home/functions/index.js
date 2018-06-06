@@ -40,15 +40,16 @@ exports.auth = functions.https.onRequest((request, response) => {
   console.log('auth -> Request query: ' + JSON.stringify(request.query));
   console.log('auth -> Request body: ' + JSON.stringify(request.body));
 
-  // A entry.
+  // Code entry.
   let Data = {
+    value: 0,
     uid: request.query.code,
     state: request.query.state,
   };
 
   let Key = request.query.code;
   let updates = {};
-  updates['/code/' + Key] = Data;
+  updates['/auth_code/' + Key] = Data;
   // should wait the it returns...
   oauth2Ref.update(updates);
 
@@ -73,21 +74,69 @@ exports.token = functions.https.onRequest((request, response) => {
 
   let obj;
   if (grantType === 'authorization_code') {
-    obj = {
-      token_type: 'bearer',
-      access_token: 'pinco',
-      refresh_token: 'pallo',
-      expires_in: expires,
-    };
+    console.log(`request.body.code ${request.body.code}`);
+    oauth2Ref.child('auth_code').child(request.body.code).once('value').then(function(snapshot) {
+      let auth_code = snapshot.val();
+      obj = {
+        token_type: 'bearer',
+        access_token: auth_code.uid,
+        refresh_token: auth_code.uid,
+        expires_in: expires,
+      };
+      let Data = {
+        value: 0,
+        uid: auth_code.uid,
+        expires: expires,
+      };
+      let Key = auth_code.uid;
+      let updates = {};
+      updates['/access_token/' + Key] = Data;
+      updates['/refresh_token/' + Key] = Data;
+      // should wait the it returns...
+      oauth2Ref.update(updates);
+      response.status(HTTP_STATUS_OK).json(obj);
+    }).catch((err) => {
+      console.error(err);
+    });
   } else if (grantType === 'refresh_token') {
-    obj = {
-      token_type: 'bearer',
-      access_token: 'pinco',
-      expires_in: expires,
-    };
+    console.log(`request.body.refresh_token ${request.body.refresh_token}`);
+    oauth2Ref.child('refresh_token').child(request.body.refresh_token).once('value').then(function(snapshot) {
+      let refresh_token = snapshot.val();
+      obj = {
+        token_type: 'bearer',
+        access_token: refresh_token.uid,
+        expires_in: expires,
+      };
+      let Data = {
+        value: 0,
+        uid: refresh_token.uid,
+        expires: expires,
+      };
+      let Key = refresh_token.uid;
+      let updates = {};
+      updates['/access_token/' + Key] = Data;
+      // should wait the it returns...
+      oauth2Ref.update(updates);
+      response.status(HTTP_STATUS_OK).json(obj);
+    }).catch((err) => {
+      console.error(err);
+    });
   }
-  response.status(HTTP_STATUS_OK)
-    .json(obj);
+});
+
+exports.test = functions.https.onRequest((request, response) => {
+  console.log('test -> Request headers: ' + JSON.stringify(request.headers));
+  console.log('test -> Request query: ' + JSON.stringify(request.query));
+  console.log('test -> Request body: ' + JSON.stringify(request.body));
+  const HTTP_STATUS_OK = 200;
+  let obj = {};
+  
+  return oauth2Ref.child('code').child(request.query.code).once('value').then(function(snapshot) {
+    obj = snapshot.val();
+    response.status(HTTP_STATUS_OK).json(obj);
+  }).catch((err) => {
+    console.error(err);
+  });
 });
 
 const app = smarthome({
@@ -111,9 +160,9 @@ app.onSync(() => {
           'action.devices.traits.Toggles',
         ],
         name: {
-          defaultNames: ['My Washer'],
-          name: 'Washer',
-          nicknames: ['Washer'],
+          defaultNames: ['My Yaio'],
+          name: 'Yaio',
+          nicknames: ['Yaio'],
         },
         deviceInfo: {
           manufacturer: 'Yaio',
@@ -280,128 +329,18 @@ app.onExecute((body) => {
   };
 });
 
-exports.ha = functions.https.onRequest(app);
+// exports.ha = functions.https.onRequest(app);
+exports.ha = functions.https.onRequest((req, res) => {
+  console.log('-> Request headers: ' + JSON.stringify(req.headers));
+  console.log('-> Request query: ' + JSON.stringify(req.query));
+  console.log('-> Request body: ' + JSON.stringify(req.body));
+  let access_token = req.headers.authorization ? req.headers.authorization.split(' ')[1] : null;
+  console.log('access Token: ' + access_token);
 
-exports.requestsync = functions.https.onRequest((request, response) => {
-  console.info('Request SYNC for user 123');
-  const https = require('https');
-  const postData = {
-    agentUserId: '123', /* Hardcoded user ID */
-  };
-  return cors(request, response, () => {
-    const options = {
-      hostname: 'homegraph.googleapis.com',
-      port: 443,
-      path: `/v1/devices:requestSync?key=${app.API_KEY}`,
-      method: 'POST',
-    };
-    return new Promise((resolve, reject) => {
-      let responseData = '';
-      const req = https.request(options, (res) => {
-        res.on('data', (d) => {
-          responseData += d.toString();
-        });
-        res.on('end', () => {
-          resolve(responseData);
-        });
-      });
-      req.on('error', (e) => {
-        reject(e);
-      });
-      // Write data to request body
-      req.write(JSON.stringify(postData));
-      req.end();
-    }).then((data) => {
-      console.log('Request sync completed');
-      response.json(data);
-    }).catch((err) => {
-      console.error(err);
-    });
-  });
-});
-
-/**
- * Send a REPORT STATE call to the homegraph when data for any device id
- * has been changed.
- */
-exports.reportstate = functions.database.ref('{deviceId}').onWrite((event) => {
-  console.info('Firebase write event triggered this cloud function');
-  const https = require('https');
-  const {google} = require('googleapis');
-  const key = require('./key.json');
-  const jwtClient = new google.auth.JWT(
-    key.client_email,
-    null,
-    key.private_key,
-    ['https://www.googleapis.com/auth/homegraph'],
-    null
-  );
-
-  const snapshotVal = event.data.val();
-
-  const postData = {
-    requestId: 'ff36a3cc', /* Any unique ID */
-    agentUserId: '123', /* Hardcoded user ID */
-    payload: {
-      devices: {
-        states: {
-          /* Report the current state of our washer */
-          [event.params.deviceId]: {
-            on: snapshotVal.OnOff.on,
-            isPaused: snapshotVal.StartStop.isPaused,
-            isRunning: snapshotVal.StartStop.isRunning,
-            currentRunCycle: [{
-              currentCycle: 'rinse',
-              nextCycle: 'spin',
-              lang: 'en',
-            }],
-            currentTotalRemainingTime: 1212,
-            currentCycleRemainingTime: 301,
-            currentModeSettings: {
-              load: snapshotVal.Modes.load,
-            },
-            currentToggleSettings: {
-              Turbo: snapshotVal.Toggles.Turbo,
-            },
-          },
-        },
-      },
-    },
-  };
-
-  jwtClient.authorize((err, tokens) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    const options = {
-      hostname: 'homegraph.googleapis.com',
-      port: 443,
-      path: '/v1/devices:reportStateAndNotification',
-      method: 'POST',
-      headers: {
-        Authorization: ` Bearer ${tokens.access_token}`,
-      },
-    };
-    return new Promise((resolve, reject) => {
-      let responseData = '';
-      const req = https.request(options, (res) => {
-        res.on('data', (d) => {
-          responseData += d.toString();
-        });
-        res.on('end', () => {
-          resolve(responseData);
-        });
-      });
-      req.on('error', (e) => {
-        reject(e);
-      });
-      // Write data to request body
-      req.write(JSON.stringify(postData));
-      req.end();
-    }).then((data) => {
-      console.info(data);
-    });
+  oauth2Ref.child('access_token').child(access_token).once('value').then(function(snapshot) {
+    app(req, res);
+  }).catch((err) => {
+    console.error(err);
   });
 });
 

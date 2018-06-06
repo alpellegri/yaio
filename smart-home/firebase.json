@@ -6,8 +6,8 @@
     "public": "public",
     "rewrites": [
       {
-        "source": "/login**",
-        "function": "login"
+        "source": "/test**",
+        "function": "test"
       },
       {
         "source": "/auth**",
