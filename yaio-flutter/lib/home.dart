@@ -98,6 +98,7 @@ class _HomeState extends State<Home> {
                         ? (new Icon(Icons.sync, color: Colors.red[200]))
                         : (new Icon(Icons.sync, color: Colors.green[200])),
                     title: const Text('Device Status'),
+                    subtitle: new Text('Node Heap Memory: ${_status["heap"]}'),
                   ),
                 ],
               ),
@@ -209,14 +210,6 @@ class _HomeState extends State<Home> {
                       },
                     ),
                   ),
-                ],
-              ),
-            ),
-            new Card(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  new Text('Node Heap Memory: ${_status["heap"]}'),
                 ],
               ),
             ),
