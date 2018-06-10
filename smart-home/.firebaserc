@@ -1,5 +1,6 @@
 {
   "projects": {
-    "b": "smarthome-washer"
+    "b": "smarthome-washer",
+    "staging": "yaio-ab5c1"
   }
 }

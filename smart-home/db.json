@@ -1,9 +1,0 @@
-{
-  "fan" : {
-    "on" : false
-  },
-  "lights" : {
-    "on" : true,
-    "spectrumRGB" : 16510692
-  }
-}

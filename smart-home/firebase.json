@@ -6,10 +6,6 @@
     "public": "public",
     "rewrites": [
       {
-        "source": "/test**",
-        "function": "test"
-      },
-      {
         "source": "/auth**",
         "function": "auth"
       },

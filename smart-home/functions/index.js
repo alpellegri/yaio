@@ -24,13 +24,8 @@ const cors = require('cors')({origin: true});
 
 // Initialize Firebase
 const config = functions.config().firebase;
-var admin = require("firebase-admin");
-var serviceAccount = require("./smarthome-washer-firebase-adminsdk-knmtl-c749309e3b.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://smarthome-washer.firebaseio.com"
-});
+const admin = require('firebase-admin');
+admin.initializeApp();
 
 const firebaseRef = admin.database().ref('/');
 const oauth2Ref = admin.database().ref('/oauth2');
