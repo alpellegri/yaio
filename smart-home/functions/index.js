@@ -68,27 +68,26 @@ exports.token = functions.https.onRequest((request, response) => {
 
   const grantType = request.query.grant_type
     ? request.query.grant_type : request.body.grant_type;
-  const expires = 1 * 1 * 60;
+  const expires = 1 * 60 * 60;
   const HTTP_STATUS_OK = 200;
   console.log(`Grant type ${grantType}`);
 
-  let obj;
   if (grantType === 'authorization_code') {
     console.log(`request.body.code ${request.body.code}`);
     oauth2Ref.child('auth_code').child(request.body.code).once('value').then(function(snapshot) {
-      let auth_code = snapshot.val();
-      obj = {
+      const auth_code = snapshot.val();
+      const obj = {
         token_type: 'bearer',
         access_token: auth_code.uid,
         refresh_token: auth_code.uid,
         expires_in: expires,
       };
-      let Data = {
+      const Data = {
         value: 0,
         uid: auth_code.uid,
         expires: expires,
       };
-      let Key = auth_code.uid;
+      const Key = auth_code.uid;
       let updates = {};
       updates['/access_token/' + Key] = Data;
       updates['/refresh_token/' + Key] = Data;
@@ -101,18 +100,18 @@ exports.token = functions.https.onRequest((request, response) => {
   } else if (grantType === 'refresh_token') {
     console.log(`request.body.refresh_token ${request.body.refresh_token}`);
     oauth2Ref.child('refresh_token').child(request.body.refresh_token).once('value').then(function(snapshot) {
-      let refresh_token = snapshot.val();
-      obj = {
+      const refresh_token = snapshot.val();
+      const obj = {
         token_type: 'bearer',
         access_token: refresh_token.uid,
         expires_in: expires,
       };
-      let Data = {
+      const Data = {
         value: 0,
         uid: refresh_token.uid,
         expires: expires,
       };
-      let Key = refresh_token.uid;
+      const Key = refresh_token.uid;
       let updates = {};
       updates['/access_token/' + Key] = Data;
       // should wait the it returns...
@@ -124,152 +123,112 @@ exports.token = functions.https.onRequest((request, response) => {
   }
 });
 
-exports.test = functions.https.onRequest((request, response) => {
-  console.log('test -> Request headers: ' + JSON.stringify(request.headers));
-  console.log('test -> Request query: ' + JSON.stringify(request.query));
-  console.log('test -> Request body: ' + JSON.stringify(request.body));
-  const HTTP_STATUS_OK = 200;
-  let obj = {};
-  
-  return oauth2Ref.child('code').child(request.query.code).once('value').then(function(snapshot) {
-    obj = snapshot.val();
-    response.status(HTTP_STATUS_OK).json(obj);
-  }).catch((err) => {
-    console.error(err);
-  });
-});
+function init(req, res, uid, dataRef) {
+  let reqdata = req.body;
 
-const app = smarthome({
-  debug: true,
-  API_KEY: 'AIzaSyDSW60Gq8vbXMNKbrwwzyDTsy6V8-OzwGQ',
-});
+  if (!reqdata.inputs) {
+    showError(res, 'missing inputs');
+    return;
+  }
 
-app.onSync(() => {
-  return {
-    requestId: 'ff36a3cc-ec34-11e6-b1a0-64510650abcf',
-    payload: {
-      agentUserId: '123',
-      devices: [{
-        id: 'washer',
-        type: 'action.devices.types.WASHER',
+  for (let i = 0; i < reqdata.inputs.length; i++) {
+    let input = reqdata.inputs[i];
+		let intent = input.intent || '';
+		console.log('> intent ', intent);
+    switch (intent) {
+      case 'action.devices.SYNC':
+        sync(reqdata, res, uid, dataRef);
+        return;
+      case 'action.devices.QUERY':
+        query(reqdata, res, dataRef);
+        return;
+      case 'action.devices.EXECUTE':
+        execute(reqdata, res, dataRef);
+        return;
+    }
+  }
+  showError(res, 'missing intent');
+}
+
+function sync(req, res, uid, dataRef) {
+
+  dataRef.once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const device_keys = Object.keys(snapshotVal);
+    let devices = [];
+    for (let i = 0; i < device_keys.length; i++) {
+      let type = 'action.devices.types.SWITCH';
+      let trait = 'action.devices.traits.OnOff';
+      devices[i] = {
+        id: device_keys[i],
+        type: type,
         traits: [
-          'action.devices.traits.OnOff',
-          'action.devices.traits.StartStop',
-          'action.devices.traits.RunCycle',
-          'action.devices.traits.Modes',
-          'action.devices.traits.Toggles',
+          trait,
         ],
         name: {
-          defaultNames: ['My Yaio'],
-          name: 'Yaio',
-          nicknames: ['Yaio'],
+          defaultNames: [device_keys[i]],
+          name: device_keys[i],
+          nicknames: [device_keys[i]],
         },
+        willReportState: false,
         deviceInfo: {
           manufacturer: 'Yaio',
-          model: 'esp8266',
+          model: 'yaio virtual device',
           hwVersion: '1.0',
           swVersion: '1.0.1',
         },
-        attributes: {
-          dataTypesSupported: [{
-            name: 'temperature',
-            data_type: [{
-              type_synonym: ['temperature'],
-              lang: 'en',
-            }],
-            default_device_unit: 'C',
-          }],
-          availableModes: [{
-            name: 'load',
-            name_values: [{
-              name_synonym: ['load'],
-              lang: 'en',
-            }],
-            settings: [{
-              setting_name: 'small',
-              setting_values: [{
-                setting_synonym: ['small'],
-                lang: 'en',
-              }],
-            }, {
-              setting_name: 'large',
-              setting_values: [{
-                setting_synonym: ['large'],
-                lang: 'en',
-              }],
-            }],
-            ordered: true,
-          }],
-          availableToggles: [{
-            name: 'Turbo',
-            name_values: [{
-              name_synonym: ['turbo'],
-              lang: 'en',
-            }],
-          }],
-        },
-      }],
-    },
-  };
-});
-
-const queryFirebase = (deviceId) => firebaseRef.child(deviceId).once('value')
-  .then((snapshot) => {
-    const snapshotVal = snapshot.val();
-    return {
-      on: snapshotVal.OnOff.on,
-      isPaused: snapshotVal.StartStop.isPaused,
-      isRunning: snapshotVal.StartStop.isRunning,
-      load: snapshotVal.Modes.load,
-      turbo: snapshotVal.Toggles.Turbo,
-    };
-  });
-
-const queryDevice = (deviceId) => queryFirebase(deviceId).then((data) => ({
-  on: data.on,
-  isPaused: data.isPaused,
-  isRunning: data.isRunning,
-  currentRunCycle: [{
-    currentCycle: 'rinse',
-    nextCycle: 'spin',
-    lang: 'en',
-  }],
-  currentTotalRemainingTime: 1212,
-  currentCycleRemainingTime: 301,
-  currentModeSettings: {
-    load: data.load,
-  },
-  currentToggleSettings: {
-    Turbo: data.turbo,
-  },
-}));
-
-app.onQuery((body) => {
-  const {requestId} = body;
-  const payload = {
-    devices: {},
-  };
-  const queryPromises = [];
-  for (const input of body.inputs) {
-    for (const device of input.payload.devices) {
-      const deviceId = device.id;
-      queryPromises.push(queryDevice(deviceId)
-        .then((data) => {
-          // Add response to device payload
-          payload.devices[deviceId] = data;
-        }
-        ));
+      };
     }
-  }
-  // Wait for all promises to resolve
-  return Promise.all(queryPromises).then((values) => ({
-    requestId: requestId,
-    payload: payload,
-  })
-  );
-});
 
-app.onExecute((body) => {
+    let json = {
+      requestId: req.requestId,
+      payload: {
+        agentUserId: uid,
+        devices: devices,
+      },
+    };
+    // console.log('-> json: ' + JSON.stringify(json));
+    res.status(200).json(json);
+  }).catch((err) => {
+    console.error(err);
+    showError(res, 'database error');
+  });
+}
+
+function query(req, res, dataRef) {
+
+  dataRef.once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const device_keys = Object.keys(snapshotVal);
+    const reqDevices = req.inputs[0].payload.devices;
+
+    let devices = {};
+    for (let i = 0; i < reqDevices.length; i++) {
+      let idx = device_keys.indexOf(reqDevices[i].id);
+      if (idx != -1) {
+        let value = (snapshotVal[device_keys[idx]].value != 0) ? true : false;
+        devices[device_keys[idx]] = {
+          on: value,
+          online: true,
+        };
+      }
+    }
+
+    let json = {
+      requestId: req.requestId,
+      payload: {
+        devices: devices,
+      },
+    };
+    // console.log('-> json: ' + JSON.stringify(json));
+    res.status(200).json(json);
+  }).catch((err) => {
+    console.error(err);
+    showError(res, 'database error');
+  });
+}
+
+function execute(body, res, dataRef) {
   const {requestId} = body;
   const payload = {
     commands: [{
@@ -280,67 +239,79 @@ app.onExecute((body) => {
       },
     }],
   };
-  for (const input of body.inputs) {
-    for (let k = 0; k < input.payload.commands.length; k++) {
-      const command = input.payload.commands[k];
-      for (const device of command.devices) {
-        const deviceId = device.id;
-        payload.commands[k].ids.push(deviceId);
-        for (const execution of command.execution) {
-          const execCommand = execution.command;
-          const {params} = execution;
-          switch (execCommand) {
-            case 'action.devices.commands.OnOff':
-              firebaseRef.child(deviceId).child('OnOff').update({
-                on: params.on,
-              });
-              payload.commands[0].states.on = params.on;
-              break;
-            case 'action.devices.commands.StartStop':
-              firebaseRef.child(deviceId).child('StartStop').update({
-                isRunning: params.start,
-              });
-              payload.commands[0].states.isRunning = params.start;
-              break;
-            case 'action.devices.commands.PauseUnpause':
-              firebaseRef.child(deviceId).child('StartStop').update({
-                isPaused: params.pause,
-              });
-              payload.commands[0].states.isPaused = params.pause;
-              break;
-            case 'action.devices.commands.SetModes':
-              firebaseRef.child(deviceId).child('Modes').update({
-                load: params.updateModeSettings.load,
-              });
-              break;
-            case 'action.devices.commands.SetToggles':
-              firebaseRef.child(deviceId).child('Toggles').update({
-                Turbo: params.updateToggleSettings.Turbo,
-              });
-              break;
+
+  dataRef.once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const device_keys = Object.keys(snapshotVal);
+
+    for (const input of body.inputs) {
+      for (let k = 0; k < input.payload.commands.length; k++) {
+        const command = input.payload.commands[k];
+        for (const device of command.devices) {
+          const deviceId = device.id;
+          const id = device_keys.indexOf(deviceId);
+          payload.commands[k].ids.push(deviceId);
+          if (id != -1) {
+            for (const execution of command.execution) {
+              const execCommand = execution.command;
+              const {params} = execution;
+              const value = (params.on == true) ? 1 : 0;
+              switch (execCommand) {
+                case 'action.devices.commands.OnOff':
+                  dataRef.child(device_keys[id]).update({
+                    value: value,
+                  });
+                  payload.commands[0].states.on = params.on;
+                  break;
+              }
+            }
           }
         }
       }
     }
-  }
-  return {
-    requestId: requestId,
-    payload: payload,
-  };
-});
 
-// exports.ha = functions.https.onRequest(app);
-exports.ha = functions.https.onRequest((req, res) => {
-  console.log('-> Request headers: ' + JSON.stringify(req.headers));
-  console.log('-> Request query: ' + JSON.stringify(req.query));
-  console.log('-> Request body: ' + JSON.stringify(req.body));
-  let access_token = req.headers.authorization ? req.headers.authorization.split(' ')[1] : null;
-  console.log('access Token: ' + access_token);
-
-  oauth2Ref.child('access_token').child(access_token).once('value').then(function(snapshot) {
-    app(req, res);
+    let json = {
+      requestId: requestId,
+      payload: payload,
+    };
+    // console.log('-> json: ' + JSON.stringify(json));
+    res.status(200).json(json);
   }).catch((err) => {
     console.error(err);
+    showError(res, 'database error');
+  });
+}
+
+function showError(res, message) {
+  res.status(401).set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  }).json({error: message});
+}
+
+exports.ha = functions.https.onRequest((req, res) => {
+  // console.log('-> Request headers: ' + JSON.stringify(req.headers));
+  // console.log('-> Request query: ' + JSON.stringify(req.query));
+  // console.log('-> Request body: ' + JSON.stringify(req.body));
+
+  let access_token = req.headers.authorization ? req.headers.authorization.split(' ')[1] : null;
+  console.log('access_token: ' + access_token);
+
+  // for now uid is access_token
+  const uid = access_token;
+
+  const root = '/users/' + uid + '/root';
+  const rootRef = admin.database().ref(root);
+
+  rootRef.once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const groups = Object.keys(snapshotVal);
+    const data = '/users/' + uid + '/obj/data/' + groups[0];
+    const dataRef = admin.database().ref(data);
+    init(req, res, uid, dataRef);
+  }).catch((err) => {
+    console.error(err);
+    showError(res, 'database error');
   });
 });
 
