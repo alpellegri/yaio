@@ -83,6 +83,17 @@ class _HomeState extends State<Home> {
           int.parse(_startup['time'].toString()) * 1000);
       DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(_status['time'].toString()) * 1000);
+      Duration diff = current.difference(_heartbeatTime);
+      String diffTime;
+      if (diff.inDays > 0) {
+        diffTime = '${diff.inDays} days';
+      } else if (diff.inHours > 0) {
+        diffTime = '${diff.inHours} hours';
+      } else if (diff.inMinutes > 0) {
+        diffTime = '${diff.inMinutes} minutes';
+      } else if (diff.inSeconds> 0) {
+        diffTime = '${diff.inSeconds} seconds';
+      }
       return new Scaffold(
           appBar: new AppBar(
             title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
@@ -94,10 +105,12 @@ class _HomeState extends State<Home> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   new ListTile(
-                    leading: (current.difference(_heartbeatTime) > time_limit)
-                        ? (new Icon(Icons.sync, color: Colors.red[200]))
+                    leading: (diff > time_limit)
+                        ? (new CircularProgressIndicator(
+                            value: null,
+                          ))
                         : (new Icon(Icons.sync, color: Colors.green[200])),
-                    title: const Text('Device Status'),
+                    title: new Text('HeartBeat: $diffTime ago'),
                     subtitle: new Text('Node Heap Memory: ${_status["heap"]}'),
                   ),
                 ],
@@ -145,11 +158,6 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  new ListTile(
-                    leading: const Icon(Icons.link),
-                    title: const Text('HeartBeat'),
-                    subtitle: new Text('${_heartbeatTime.toString()}'),
-                  ),
                   new ListTile(
                     leading: (_control['reboot'] == kNodeUpdate)
                         ? (new CircularProgressIndicator(

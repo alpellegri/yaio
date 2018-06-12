@@ -199,10 +199,10 @@ function query(req, res, dataRef) {
 
     let devices = {};
     for (let i = 0; i < reqDevices.length; i++) {
-      let idx = device_keys.indexOf(reqDevices[i].id);
-      if (idx != -1) {
-        let value = (snapshotVal[device_keys[idx]].value != 0) ? true : false;
-        devices[device_keys[idx]] = {
+      let id = device_keys.indexOf(reqDevices[i].id);
+      if (id != -1) {
+        let value = (snapshotVal[device_keys[id]].value != 0) ? true : false;
+        devices[device_keys[id]] = {
           on: value,
           online: true,
         };
@@ -251,10 +251,13 @@ function execute(body, res, dataRef) {
               const execCommand = execution.command;
               const {params} = execution;
               const value = (params.on == true) ? 1 : 0;
+              let val = snapshotVal[device_keys[id]].value;
+              // clear last significant bit and set
+              val = (val & (~1)) | value;
               switch (execCommand) {
                 case 'action.devices.commands.OnOff':
                   dataRef.child(device_keys[id]).update({
-                    value: value,
+                    value: val,
                   });
                   payload.commands[0].states.on = params.on;
                   break;
