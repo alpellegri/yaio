@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "debug.h"
 #include "fbutils.h"
 #include "pht.h"
 #include "rf.h"
-#include "debug.h"
 
 std::vector<IoEntry> IoEntryVec;
 std::vector<ProgEntry> ProgVec;
@@ -38,6 +38,18 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
 
     // post process data value for some case
     switch (entry.code) {
+    case kPhyIn: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      pinMode(pin, INPUT);
+    } break;
+    case kPhyOut: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      value &= (1U << 24) - 1;
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, !!value);
+    } break;
     case kDhtTemperature:
     case kDhtHumidity: {
       // 31..24 pin

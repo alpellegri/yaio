@@ -59,37 +59,34 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringMessaging: DataCode.Messaging,
 };
 
+// ......XXXXXX.........
+//             ^--------| pos
+//      ^------| len
 int getBits(int value, int pos, int len) {
-  pos++;
-  if (pos < len) {
-    pos = len;
+  if ((pos + len) > 32) {
+    len = 32 - pos;
   }
-  int sh = pos - len;
-  int m = ((1 << len) - 1) << sh;
-  int v = (value & m) >> sh;
+  int m = ((1 << len) - 1) << pos;
+  int v = (value & m) >> pos;
   return v;
 }
 
 int setBits(int pos, int len, int v) {
   int value = 0;
-  pos++;
-  if (pos < len) {
-    pos = len;
+  if ((pos + len) > 32) {
+    len = 32 - pos;
   }
-  int sh = pos - len;
-  int m = ((1 << len) - 1) << sh;
+  int m = ((1 << len) - 1) << pos;
   value &= ~m;
-  value |= v << sh;
+  value |= v << pos;
   return value;
 }
 
 int clearBits(int v, int pos, int len) {
-  pos++;
-  if (pos < len) {
-    pos = len;
+  if ((pos + len) > 32) {
+    len = 32 - pos;
   }
-  int sh = pos - len;
-  int m = ((1 << len) - 1) << sh;
+  int m = ((1 << len) - 1) << pos;
   v &= ~m;
   return v;
 }
@@ -103,11 +100,11 @@ dynamic getValueCtrl1(code, value) {
     case DataCode.RadioTx:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(value, 31, 8);
+      v = getBits(value, 24, 8);
       break;
     case DataCode.Timer:
       DateTime now = new DateTime.now();
-      v = (24 + getBits(value, 15, 8) + now.timeZoneOffset.inHours) % 24;
+      v = (24 + getBits(value, 8, 8) + now.timeZoneOffset.inHours) % 24;
       break;
     default:
   }
@@ -122,11 +119,11 @@ dynamic getValueCtrl2(int code, dynamic value) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      v = getBits(value, 23, 24);
+      v = getBits(value, 0, 24);
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(value, 23, 8);
+      v = getBits(value, 16, 8);
       break;
     case DataCode.RadioMach:
     case DataCode.Int:
@@ -145,7 +142,7 @@ dynamic getValueCtrl2(int code, dynamic value) {
       }
       break;
     case DataCode.Timer:
-      v = getBits(value, 7, 8);
+      v = getBits(value, 0, 8);
       break;
     default:
   }
@@ -156,7 +153,7 @@ dynamic getValueCtrl3(int code, dynamic value) {
   dynamic v;
   switch (DataCode.values[code]) {
     case DataCode.Timer:
-      v = getBits(value, 24, 9);
+      v = getBits(value, 16, 9);
       break;
     default:
   }
@@ -169,19 +166,19 @@ dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      value = clearBits(value, 31, 24);
-      value |= setBits(31, 24, int.parse(v));
+      value = clearBits(value, 24, 8);
+      value |= setBits(24, 8, int.parse(v));
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      value = clearBits(value, 31, 8);
-      value |= setBits(31, 8, int.parse(v));
+      value = clearBits(value, 24, 8);
+      value |= setBits(24, 8, int.parse(v));
       break;
     case DataCode.Timer:
       DateTime now = new DateTime.now();
-      value = clearBits(value, 15, 8);
+      value = clearBits(value, 8, 8);
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
-      value |= setBits(15, 8, h);
+      value |= setBits(8, 8, h);
       break;
     default:
   }
@@ -195,14 +192,14 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
     case DataCode.RadioRx:
     case DataCode.RadioTx:
       // binary values
-      value = clearBits(value, 23, 24);
-      value |= setBits(23, 24, int.parse(v));
+      value = clearBits(value, 0, 24);
+      value |= setBits(0, 24, int.parse(v));
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // binary values
-      value = clearBits(value, 23, 8);
-      value |= setBits(23, 8, int.parse(v));
+      value = clearBits(value, 16, 8);
+      value |= setBits(16, 8, int.parse(v));
       break;
     case DataCode.RadioMach:
     case DataCode.Int:
@@ -222,8 +219,8 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
       break;
     case DataCode.Timer:
       // binary values
-      value = clearBits(value, 7, 8);
-      value |= setBits(7, 8, int.parse(v));
+      value = clearBits(value, 0, 8);
+      value |= setBits(0, 8, int.parse(v));
       break;
     default:
   }
@@ -233,8 +230,8 @@ dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
 dynamic setValueCtrl3(dynamic value, int code, dynamic v) {
   switch (DataCode.values[code]) {
     case DataCode.Timer:
-      value = clearBits(value, 24, 9);
-      value |= setBits(24, 9, int.parse(v));
+      value = clearBits(value, 16, 9);
+      value |= setBits(16, 9, int.parse(v));
       break;
     default:
   }
@@ -282,18 +279,18 @@ class IoEntry {
       case DataCode.RadioRx:
       case DataCode.RadioTx:
         // binary values
-        v = getBits(value, 23, 24);
+        v = getBits(value, 0, 24);
         break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
         // binary values
-        v = getBits(value, 15, 16) / 10;
+        v = getBits(value, 0, 16) / 10;
         break;
       case DataCode.Timer:
         // binary values
         DateTime now = new DateTime.now();
-        int h = (24 + getBits(value, 15, 8) + now.timeZoneOffset.inHours) % 24;
-        int m = getBits(value, 7, 8);
+        int h = (24 + getBits(value, 8, 8) + now.timeZoneOffset.inHours) % 24;
+        int m = getBits(value, 0, 8);
         DateTime dtset = new DateTime(0, 0, 0, h, m);
         v = new DateFormat('Hm').format(dtset);
         break;

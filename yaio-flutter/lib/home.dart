@@ -130,7 +130,8 @@ class _HomeState extends State<Home> {
                         return new InkWell(
                           onTap: () {
                             _openEntryDialog(entryList[index]);
-                            _nodeUpdate(kNodeUpdate);
+                            // _nodeUpdate(kNodeUpdate);
+                            _nodeRefresh();
                           },
                           child: new DataIoItemWidget(entryList[index]),
                         );
@@ -308,7 +309,12 @@ class _HomeState extends State<Home> {
   void _nodeUpdate(int value) {
     _controlTimeoutCnt = 0;
     _control['reboot'] = value;
+    DateTime now = new DateTime.now();
+    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(_control);
+  }
+
+  void _nodeRefresh() {
     DateTime now = new DateTime.now();
     _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(_control);

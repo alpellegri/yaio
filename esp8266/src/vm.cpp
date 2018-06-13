@@ -57,6 +57,31 @@ void VM_readIn(void) {
         IoEntryVec[i].wb = true;
       }
     } break;
+    case kPhyOut: {
+      if (VM_UpdateDataPending == true) {
+        DEBUG_PRINT("get: kPhyOut\n");
+        String kdata;
+        FbSetPath_data(kdata);
+        uint32_t value =
+            Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
+        if (Firebase.failed() == true) {
+          DEBUG_PRINT("get failed: kPhyOut %s\n", IoEntryVec[i].key.c_str());
+        } else {
+          uint32_t v = atoi(IoEntryVec[i].value.c_str());
+          uint32_t mask = (((1 << 8) - 1) << 24);
+          value &= ~mask;
+          if ((v & ~mask) != value) {
+            value |= (v & mask);
+            DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(),
+                        value, IoEntryVec[i].value.c_str());
+            IoEntryVec[i].value = value;
+            IoEntryVec[i].ev = true;
+            IoEntryVec[i].ev_value = value;
+            IoEntryVec[i].wb = true;
+          }
+        }
+      }
+    } break;
     case kDhtTemperature: {
       uint32_t v = atoi(IoEntryVec[i].value.c_str());
       uint32_t mask = (((1 << 16) - 1) << 16);
@@ -188,6 +213,15 @@ void VM_writeOut(void) {
   for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
     if (IoEntryVec[i].wb == true) {
       switch (IoEntryVec[i].code) {
+      case kPhyOut: {
+        uint32_t v = atoi(IoEntryVec[i].value.c_str());
+        uint8_t pin = v >> 24;
+        uint32_t mask = (((1 << 8) - 1) << 24);
+        v &= ~mask;
+        pinMode(pin, OUTPUT);
+        DEBUG_PRINT("kPhyOut: %d, %d\n", pin, !!v);
+        IoEntryVec[i].wb = false;
+      } break;
       case kPhyIn:
       case kDhtTemperature:
       case kDhtHumidity:
@@ -393,12 +427,8 @@ void vm_write24(vm_context_t &ctx, const char *key_value) {
   uint32_t mask = (1 << 24) - 1;
   uint32_t v = atoi(IoEntryVec[id].value.c_str());
   uint32_t value = (v & (~mask)) | (ctx.ACC & mask);
-  if (IoEntryVec[id].code == kPhyOut) {
-    VM_writeOutPhyOut(value);
-  } else {
-    IoEntryVec[id].value = value;
-    IoEntryVec[id].wb = true;
-  }
+  IoEntryVec[id].value = value;
+  IoEntryVec[id].wb = true;
 }
 
 vm_itlb_t VM_pipe[] = {
