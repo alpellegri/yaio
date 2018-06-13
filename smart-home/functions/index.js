@@ -241,7 +241,7 @@ function execute(body, res, snapshotData) {
             val = (val & (~1)) | value;
             switch (execCommand) {
               case 'action.devices.commands.OnOff':
-                dataRef.child(device_keys[id]).update({
+                snapshotData.child(device_keys[id]).update({
                   value: val,
                 });
                 payload.commands[0].states.on = params.on;
