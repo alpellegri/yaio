@@ -303,7 +303,7 @@ exports.ha = functions.https.onRequest((req, res) => {
   const uidPath = '/users/' + uid;
   const uidRef = admin.database().ref(uidPath);
 
-  rootRef.child('/root').once('value').then(function(snapshot) {
+  uidRef.child('/root').once('value').then(function(snapshot) {
     const snapshotVal = snapshot.val();
     const domains = Object.keys(snapshotVal);
     // const data = '/users/' + uid + '/obj/data/' + domains[0];
