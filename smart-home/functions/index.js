@@ -27,7 +27,6 @@ const config = functions.config().firebase;
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-const firebaseRef = admin.database().ref('/');
 const oauth2Ref = admin.database().ref('/oauth2');
 
 exports.auth = functions.https.onRequest((request, response) => {
@@ -68,7 +67,7 @@ exports.token = functions.https.onRequest((request, response) => {
   console.log(`Grant type ${grantType}`);
 
   if (grantType === 'authorization_code') {
-    // console.log(`request.body.code ${request.body.code}`);
+    console.log(`request.body.code ${request.body.code}`);
     oauth2Ref.child('auth_code').child(request.body.code).once('value').then(function(snapshot) {
       const auth_code = snapshot.val();
       const obj = {
@@ -86,13 +85,14 @@ exports.token = functions.https.onRequest((request, response) => {
       let updates = {};
       updates['/access_token/' + Key] = Data;
       updates['/refresh_token/' + Key] = Data;
+      // should wait the it returns...
       oauth2Ref.update(updates);
       response.status(HTTP_STATUS_OK).json(obj);
     }).catch((err) => {
       console.error(err);
     });
   } else if (grantType === 'refresh_token') {
-    // console.log(`request.body.refresh_token ${request.body.refresh_token}`);
+    console.log(`request.body.refresh_token ${request.body.refresh_token}`);
     oauth2Ref.child('refresh_token').child(request.body.refresh_token).once('value').then(function(snapshot) {
       const refresh_token = snapshot.val();
       const obj = {
@@ -108,7 +108,6 @@ exports.token = functions.https.onRequest((request, response) => {
       const Key = refresh_token.uid;
       let updates = {};
       updates['/access_token/' + Key] = Data;
-      // should wait the it returns...
       oauth2Ref.update(updates);
       response.status(HTTP_STATUS_OK).json(obj);
     }).catch((err) => {
@@ -117,7 +116,7 @@ exports.token = functions.https.onRequest((request, response) => {
   }
 });
 
-function init(req, res, uid, snapshotData) {
+function init(req, res, uid, domains, uidRef) {
   let reqdata = req.body;
 
   if (!reqdata.inputs) {
@@ -131,86 +130,99 @@ function init(req, res, uid, snapshotData) {
 		console.log('> intent ', intent);
     switch (intent) {
       case 'action.devices.SYNC':
-        sync(reqdata, res, uid, snapshotData);
+        sync(reqdata, res, uid, domains, uidRef);
         return;
       case 'action.devices.QUERY':
-        query(reqdata, res, snapshotData);
+        query(reqdata, res, uid, domains, uidRef);
         return;
       case 'action.devices.EXECUTE':
-        execute(reqdata, res, snapshotData);
+        execute(reqdata, res, uid, domains, uidRef);
         return;
     }
   }
   showError(res, 'missing intent');
 }
 
-function sync(req, res, uid, snapshotData) {
+function sync(req, res, uid, domains, uidRef) {
 
-  const device_keys = Object.keys(snapshotData);
-  let devices = [];
-  for (let i = 0; i < device_keys.length; i++) {
-    let type = 'action.devices.types.SWITCH';
-    let trait = 'action.devices.traits.OnOff';
-    devices[i] = {
-      id: device_keys[i],
-      type: type,
-      traits: [
-        trait,
-      ],
-      name: {
-        defaultNames: [device_keys[i]],
-        name: device_keys[i],
-        nicknames: [device_keys[i]],
-      },
-      willReportState: false,
-      deviceInfo: {
-        manufacturer: 'Yaio',
-        model: 'yaio virtual device',
-        hwVersion: '1.0',
-        swVersion: '1.0.1',
-      },
-    };
-  }
-
-  let json = {
-    requestId: req.requestId,
-    payload: {
-      agentUserId: uid,
-      devices: devices,
-    },
-  };
-  // console.log('-> json: ' + JSON.stringify(json));
-  res.status(200).json(json);
-}
-
-function query(req, res, snapshotData) {
-
-  const device_keys = Object.keys(snapshotData);
-  const reqDevices = req.inputs[0].payload.devices;
-
-  let devices = {};
-  for (let i = 0; i < reqDevices.length; i++) {
-    let id = device_keys.indexOf(reqDevices[i].id);
-    if (id != -1) {
-      let value = (snapshotData[device_keys[id]].value != 0) ? true : false;
-      devices[device_keys[id]] = {
-        on: value,
-        online: true,
+  uidRef.child('/obj/data').child(domains[0]).once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const device_keys = Object.keys(snapshotVal);
+    let devices = [];
+    for (let i = 0; i < device_keys.length; i++) {
+      let type = 'action.devices.types.SWITCH';
+      let trait = 'action.devices.traits.OnOff';
+      devices[i] = {
+        id: device_keys[i],
+        type: type,
+        traits: [
+          trait,
+        ],
+        name: {
+          defaultNames: [device_keys[i]],
+          name: device_keys[i],
+          nicknames: [device_keys[i]],
+        },
+        willReportState: false,
+        deviceInfo: {
+          manufacturer: 'Yaio',
+          model: 'yaio virtual device',
+          hwVersion: '1.0',
+          swVersion: '1.0.1',
+        },
       };
     }
-  }
 
-  let json = {
-    requestId: req.requestId,
-    payload: {
-      devices: devices,
-    },
-  };
-  // console.log('-> json: ' + JSON.stringify(json));
-  res.status(200).json(json);
+    let json = {
+      requestId: req.requestId,
+      payload: {
+        agentUserId: uid,
+        devices: devices,
+      },
+    };
+    // console.log('-> json: ' + JSON.stringify(json));
+    res.status(200).json(json);
+  }).catch((err) => {
+    console.error(err);
+    showError(res, 'database error');
+  });
 }
 
-function execute(body, res, snapshotData) {
+function query(req, res, uid, domains, uidRef) {
+
+  uidRef.child('/obj/data').child(domains[0]).once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const device_keys = Object.keys(snapshotVal);
+    const reqDevices = req.inputs[0].payload.devices;
+
+    let devices = {};
+    for (let i = 0; i < reqDevices.length; i++) {
+      let id = device_keys.indexOf(reqDevices[i].id);
+      if (id != -1) {
+        let value = (snapshotVal[device_keys[id]].value != 0) ? true : false;
+        devices[device_keys[id]] = {
+          on: value,
+          online: true,
+        };
+      }
+    }
+
+    let json = {
+      requestId: req.requestId,
+      payload: {
+        devices: devices,
+      },
+    };
+    // console.log('-> json: ' + JSON.stringify(json));
+    res.status(200).json(json);
+  }).catch((err) => {
+    console.error(err);
+    showError(res, 'database error');
+  });
+}
+
+function execute(body, res, uid, domains, uidRef) {
+
   const {requestId} = body;
   const payload = {
     commands: [{
@@ -222,43 +234,52 @@ function execute(body, res, snapshotData) {
     }],
   };
 
-  const device_keys = Object.keys(snapshotData);
+  uidRef.child('/obj/data').child(domains[0]).once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const device_keys = Object.keys(snapshotVal);
 
-  for (const input of body.inputs) {
-    for (let k = 0; k < input.payload.commands.length; k++) {
-      const command = input.payload.commands[k];
-      for (const device of command.devices) {
-        const deviceId = device.id;
-        const id = device_keys.indexOf(deviceId);
-        payload.commands[k].ids.push(deviceId);
-        if (id != -1) {
-          for (const execution of command.execution) {
-            const execCommand = execution.command;
-            const {params} = execution;
-            const value = (params.on == true) ? 1 : 0;
-            let val = snapshotData[device_keys[id]].value;
-            // clear last significant bit and set
-            val = (val & (~1)) | value;
-            switch (execCommand) {
-              case 'action.devices.commands.OnOff':
-                snapshotData.child(device_keys[id]).update({
-                  value: val,
-                });
-                payload.commands[0].states.on = params.on;
-                break;
+    for (const input of body.inputs) {
+      for (let k = 0; k < input.payload.commands.length; k++) {
+        const command = input.payload.commands[k];
+        for (const device of command.devices) {
+          const deviceId = device.id;
+          const id = device_keys.indexOf(deviceId);
+          payload.commands[k].ids.push(deviceId);
+          if (id != -1) {
+            for (const execution of command.execution) {
+              const execCommand = execution.command;
+              const {params} = execution;
+              const value = (params.on == true) ? 1 : 0;
+              let val = snapshotVal[device_keys[id]].value;
+              // clear last significant bit and set
+              val = (val & (~1)) | value;
+              switch (execCommand) {
+                case 'action.devices.commands.OnOff':
+                  uidRef.child('/obj/data').child(domains[0]).child(device_keys[id]).update({
+                    value: val,
+                  });
+                  uidRef.child('/root').child(domains[0]).child(snapshotVal[device_keys[id]].owner).child('control').update({
+                    time: 0,
+                  });
+                  payload.commands[0].states.on = params.on;
+                  break;
+              }
             }
           }
         }
       }
     }
-  }
 
-  let json = {
-    requestId: requestId,
-    payload: payload,
-  };
-  // console.log('-> json: ' + JSON.stringify(json));
-  res.status(200).json(json);
+    let json = {
+      requestId: requestId,
+      payload: payload,
+    };
+    // console.log('-> json: ' + JSON.stringify(json));
+    res.status(200).json(json);
+  }).catch((err) => {
+    console.error(err);
+    showError(res, 'database error');
+  });
 }
 
 function showError(res, message) {
@@ -276,33 +297,20 @@ exports.ha = functions.https.onRequest((req, res) => {
   let access_token = req.headers.authorization ? req.headers.authorization.split(' ')[1] : null;
   console.log('access_token: ' + access_token);
 
-  // TODO: for now uid is access_token
-  //       uid should be retreived from access_token
+  // for now uid is access_token
   const uid = access_token;
 
-  // const root = '/users/' + uid + '/root';
-  const root = `/users/${uid}/root`;
-  firebaseRef.child(root).once('value').then(function(snapshot) {
-    const snapshotRoot = snapshot.val();
-    const groups = Object.keys(snapshotRoot);
-    if (groups.length > 0) {
-      // const data = '/users/' + uid + '/obj/data/' + groups[0];
-      const data = `/users/${uid}/obj/data/${groups[0]}`;
-      firebaseRef.child(data).once('value').then(function(snapshot) {
-        const snapshotData = snapshot.val();
-        const device_keys = Object.keys(snapshotData);
-        if (device_keys.length > 0) {
-          init(req, res, uid, snapshotData);
-        }
-      }).catch((err) => {
-        console.error(err);
-        showError(res, 'database error');
-      });
-    }
+  const uidPath = '/users/' + uid;
+  const uidRef = admin.database().ref(uidPath);
+
+  rootRef.child('/root').once('value').then(function(snapshot) {
+    const snapshotVal = snapshot.val();
+    const domains = Object.keys(snapshotVal);
+    // const data = '/users/' + uid + '/obj/data/' + domains[0];
+    // const dataRef = admin.database().ref(data);
+    init(req, res, uid, domains, uidRef);
   }).catch((err) => {
     console.error(err);
     showError(res, 'database error');
   });
 });
-
-// [END all]
