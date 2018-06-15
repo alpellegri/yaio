@@ -215,11 +215,7 @@ void VM_writeOut(void) {
       switch (IoEntryVec[i].code) {
       case kPhyOut: {
         uint32_t v = atoi(IoEntryVec[i].value.c_str());
-        uint8_t pin = v >> 24;
-        uint32_t mask = (((1 << 8) - 1) << 24);
-        v &= ~mask;
-        pinMode(pin, OUTPUT);
-        DEBUG_PRINT("kPhyOut: %d, %d\n", pin, !!v);
+        VM_writeOutPhyOut(v);
         IoEntryVec[i].wb = false;
       } break;
       case kPhyIn:
