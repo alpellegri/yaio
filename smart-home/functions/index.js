@@ -253,13 +253,14 @@ function execute(body, res, uid, domains, uidRef) {
               let val = snapshotVal[device_keys[id]].value;
               // clear last significant bit and set
               val = (val & (~1)) | value;
+              let d = new Date();
               switch (execCommand) {
                 case 'action.devices.commands.OnOff':
                   uidRef.child('/obj/data').child(domains[0]).child(device_keys[id]).update({
                     value: val,
                   });
                   uidRef.child('/root').child(domains[0]).child(snapshotVal[device_keys[id]].owner).child('control').update({
-                    time: 0,
+                    time: Math.floor(d.getTime()/1000),
                   });
                   payload.commands[0].states.on = params.on;
                   break;
