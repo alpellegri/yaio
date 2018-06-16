@@ -19,10 +19,8 @@
 #include "vm.h"
 #include "debug.h"
 
-#define FBM_UPDATE_TH (30 * 60)
 #define FBM_UPDATE_MONITOR_FAST (1)
 #define FBM_UPDATE_MONITOR_SLOW (5)
-#define FBM_MONITOR_TIMERS (15)
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;

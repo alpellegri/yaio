@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <Adafruit_Sensor.h>
 #include <DHT.h>
+
 
 #include "pht.h"
 #include "debug.h"

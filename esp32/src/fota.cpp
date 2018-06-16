@@ -110,7 +110,7 @@ bool FOTAService(void) {
         state = FOTA_Sm_ERROR;
       }
     } else {
-      DEBUG_PRINT("[HTTP] begin... failed, error: %s\n", res);
+      DEBUG_PRINT("[HTTP] begin... failed, error: %d\n", res);
       state = FOTA_Sm_ERROR;
     }
   } break;
