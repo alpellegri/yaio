@@ -5,8 +5,7 @@
 #include "ee.h"
 #include "fcm.h"
 #include "firebase.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define FCM_SERVICE_TIMEOUT (5 * 1000)
 #define FCM_NUM_REGIDS_MAX (5)

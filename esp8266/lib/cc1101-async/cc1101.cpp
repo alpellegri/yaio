@@ -3,6 +3,8 @@
 
 #include "cc1101.h"
 
+#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+
 #define SPI_WAIT()                                                             \
   do {                                                                         \
     delayMicroseconds(100);                                                    \
@@ -220,6 +222,7 @@ uint8_t spiGetStatus(void) {
   x = SPI_TXRX(CC1101_SNOP | READ_BURST);
   SPI_WAIT();
   SPI_END();
+  return x;
 } // spiGetTxStatus
 
 /**
@@ -256,6 +259,8 @@ void CC1101::setSoftCS(uint8_t pin) {
  * @param freq Carrier frequency
  */
 void CC1101::begin(void) {
+  DEBUG_PRINT("CC1101::begin\n");
+
   uint8_t writeByte;
 #ifdef PA_TABLE
   uint8_t paTable[] = PA_TABLE;

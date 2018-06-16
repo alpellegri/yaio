@@ -9,7 +9,8 @@ extern void FbSetPath_status(String &path);
 extern void FbSetPath_exec(String &path);
 extern void FbSetPath_fcmtoken(String &path);
 extern void FbSetPath_data(String &path);
-extern void FbSetPath_logs(String &path);
+extern void FbSetPath_message(String &path);
+extern void FbSetPath_log(String &path);
 extern bool FbGetDB(void);
 
 extern void dump_path(void);

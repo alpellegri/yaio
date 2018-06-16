@@ -16,8 +16,7 @@
 #include "ee.h"
 #include "fota.h"
 #include "vers.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
@@ -175,7 +174,7 @@ bool FOTAService(void) {
 
         // get tcp stream
         WiFiClient *stream = http->getStreamPtr();
-        uint32_t pos = 0;
+        int pos = 0;
         bool run = true;
         bool fail = false;
 

@@ -6,11 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "debug.h"
 #include "fbutils.h"
 #include "pht.h"
 #include "rf.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
 
 std::vector<IoEntry> IoEntryVec;
 std::vector<ProgEntry> ProgVec;
@@ -35,16 +34,27 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.key = key;
     entry.code = obj["code"].as<uint8_t>();
     entry.value = obj["value"].as<String>();
+    entry.enLog = obj["enLog"].as<bool>();
 
+    // post process data value for some case
     switch (entry.code) {
-    case kDhtTemperature: {
+    case kPhyIn: {
       uint32_t value = atoi(entry.value.c_str());
       uint8_t pin = value >> 24;
-      uint32_t mask = ((1 << 8) - 1) << 16;
-      uint32_t period = (value & mask) >> 16;
-      PHT_Set(pin, period);
+      pinMode(pin, INPUT);
     } break;
+    case kPhyOut: {
+      uint32_t value = atoi(entry.value.c_str());
+      uint8_t pin = value >> 24;
+      value &= (1U << 24) - 1;
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, !!value);
+    } break;
+    case kDhtTemperature:
     case kDhtHumidity: {
+      // 31..24 pin
+      // 23..16 period
+      // 15..0 value
       uint32_t value = atoi(entry.value.c_str());
       uint8_t pin = value >> 24;
       uint32_t mask = ((1 << 8) - 1) << 16;

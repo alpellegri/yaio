@@ -10,8 +10,7 @@
 #include <string>
 
 #include "firebase.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 // Use web browser to view and copy
 // SHA1 fingerprint of the certificate

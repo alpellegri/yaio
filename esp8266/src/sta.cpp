@@ -5,26 +5,19 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ap.h"
 #include "ee.h"
-#include "fbconf.h"
 #include "fbm.h"
-#include "fcm.h"
 #include "fota.h"
 #include "rf.h"
-#include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
-#include "pht.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-static uint8_t sta_button = 0x55;
 static bool fota_mode = false;
 
 bool STA_Setup(void) {
@@ -103,7 +96,7 @@ bool STA_Task(void) {
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (fota_mode == true) {
-      bool res = FOTAService();
+      FOTAService();
     } else {
       if (TimeService() == true) {
         FbmService();

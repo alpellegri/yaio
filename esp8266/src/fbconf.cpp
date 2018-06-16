@@ -10,8 +10,7 @@
 #include "fcm.h"
 #include "firebase.h"
 #include "rf.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 static const char _kstartup[] PROGMEM = "startup";
 static const char _kcontrol[] PROGMEM = "control";
@@ -19,6 +18,7 @@ static const char _kstatus[] PROGMEM = "status";
 static const char _kexec[] PROGMEM = "exec";
 static const char _kfcmtoken[] PROGMEM = "fcmtoken";
 static const char _kdata[] PROGMEM = "data";
+static const char _kmessages[] PROGMEM = "messages";
 static const char _klogs[] PROGMEM = "logs";
 
 void FbSetPath_fcmtoken(String &path) {
@@ -64,7 +64,14 @@ void FbSetPath_data(String &path) {
   path = prefix_data + String(FPSTR(_kdata)) + String(F("/")) + subpath;
 }
 
-void FbSetPath_logs(String &path) {
+void FbSetPath_message(String &path) {
+  String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
+  String subpath = EE_GetDomain();
+  String prefix_data = prefix_user + String(F("obj/"));
+  path = prefix_data + String(FPSTR(_kmessages)) + String(F("/")) + subpath;
+}
+
+void FbSetPath_log(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
@@ -85,7 +92,9 @@ void dump_path(void) {
   DEBUG_PRINT("%s\n", path.c_str());
   FbSetPath_data(path);
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_logs(path);
+  FbSetPath_message(path);
+  DEBUG_PRINT("%s\n", path.c_str());
+  FbSetPath_log(path);
   DEBUG_PRINT("%s\n", path.c_str());
 }
 
@@ -110,7 +119,6 @@ bool FbGetDB(void) {
       JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        JsonObject &nestedObject = i->value;
         String id = i->value.as<String>();
         Serial.println(id);
         FcmAddRegIDsDB(id);
@@ -133,7 +141,6 @@ bool FbGetDB(void) {
       JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
-        JsonObject &nestedObject = i->value;
         FB_addProgDB(i->key, i->value);
       }
     }

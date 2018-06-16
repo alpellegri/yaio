@@ -6,19 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ap.h"
 #include "ee.h"
-#include "fbconf.h"
 #include "fbm.h"
-#include "fcm.h"
 #include "fota.h"
 #include "rf.h"
-#include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
-#include "pht.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define LED 13
 #define LED_OFF LOW
@@ -102,7 +96,7 @@ bool STA_Task(void) {
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (fota_mode == true) {
-      bool res = FOTAService();
+      FOTAService();
     } else {
       if (TimeService() == true) {
         FbmService();

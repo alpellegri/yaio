@@ -6,8 +6,7 @@
 #include <DHT.h>
 
 #include "pht.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define DHTPIN D6
 #define DHTTYPE DHT22

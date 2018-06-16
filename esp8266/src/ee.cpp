@@ -1,14 +1,13 @@
 #include <Arduino.h>
 
-#include "ee.h"
-
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
 #include <stdio.h>
 #include <string.h>
 
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
+#include "ee.h"
 
 #define EE_SIZE 512
 
@@ -19,14 +18,15 @@ static String ee_domain;
 static String ee_nodename;
 
 // do not include 'https://'
-static const char ee_fb_url[] PROGMEM = "uhome-9b8a1.firebaseio.com";
+static const char ee_fb_url[] PROGMEM = "yaio-ab5c1.firebaseio.com";
 static const char ee_fb_secret[] PROGMEM =
-    "HFfNAKvCGiLhSGwhy1aNTnj1QK6k5lZJukAaKprz";
+    "quVNAdWixVJLqPfk4OxIgpUFokuFzdGxEfIV0bqK";
 static const char ee_fb_cloud_messaging_server_key[] PROGMEM =
-    "AAAAfnPi7d8:APA91bED_durAs8Hn4oyKvaDWQihT_vgRYGKk_Y_"
-    "oUkwEpqnctgXUTsnLsiHm241L3RRY9UxcXiHNF3QxBavFmrasx5RjJOk13oETI82c8Awji2ydV"
-    "jjruTiZ9Um6Ue72JErI0kwy-Nu";
-static const char ee_fb_storage_bucket[] PROGMEM = "uhome-9b8a1.appspot.com";
+    "AAAAQjCiAdM:APA91bE-2LpgH4APk02qly-vKsCgUqGDUcVWSbttEhVk-_"
+    "aBdkSeY4QlXkliCU_"
+    "0UJlO8NkgL7vingQuqM3ZhO8dkIkhViCvgxQ96SsWHGQfRJhouoC9D8fKcWLJd_"
+    "KRkvX2yohFWfn2";
+static const char ee_fb_storage_bucket[] PROGMEM = "yaio-ab5c1.appspot.com";
 
 void EE_Setup() { EEPROM.begin(EE_SIZE); }
 

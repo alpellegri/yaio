@@ -7,8 +7,7 @@
 #include "fblog.h"
 #include "fbutils.h"
 #include "timesrv.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 static uint32_t t24_last = 0;
 
@@ -33,6 +32,7 @@ void Timers_Service(void) {
         // hours: bits 15...8
         // week day mask: bits 23...16
         uint32_t _time = 60 * ((v >> 8) & 0xFF) + (v & 0xFF);
+        DEBUG_PRINT("%d, %d, %d\n", t24, _time, getWeekDay());
         if (_time == t24) {
           // check week day
           uint8_t wday_mask = ((v >> 16) & 0xFF);

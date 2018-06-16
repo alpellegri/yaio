@@ -6,8 +6,7 @@
 
 #include "ee.h"
 #include "sta.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
@@ -15,7 +14,7 @@
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
 // AP mode: local access
-static const char ap_ssid[] PROGMEM = "uHome-node";
+static const char ap_ssid[] PROGMEM = "yaio-node";
 static const char ap_password[] PROGMEM = "123456789";
 
 static uint16_t ap_task_cnt;
@@ -29,7 +28,6 @@ static uint8_t port_id;
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                     size_t lenght) {
   uint16_t len;
-  uint8_t sts;
 
   switch (type) {
   case WStype_DISCONNECTED:
@@ -70,7 +68,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 
 bool AP_Setup(void) {
   bool ret = true;
-  bool sts = false;
 
   ap_task_cnt = 0;
   pinMode(LED, OUTPUT);
@@ -97,8 +94,8 @@ bool AP_Setup(void) {
     WiFi.softAP(String(FPSTR(ap_ssid)).c_str(),
                 String(FPSTR(ap_password)).c_str());
 
-    IPAddress myIP = WiFi.softAPIP();
     DEBUG_PRINT("AP mode enabled\n");
+    // IPAddress myIP = WiFi.softAPIP();
     // DEBUG_PRINT("IP address: %d\n", myIP.c_str());
     webSocket = new WebSocketsServer(80);
     webSocket->begin();
@@ -108,7 +105,7 @@ bool AP_Setup(void) {
   return ret;
 }
 
-bool AP_Loop(void) {
+void AP_Loop(void) {
   uint8_t in = digitalRead(BUTTON);
 
 #if 1

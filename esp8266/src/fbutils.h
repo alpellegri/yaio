@@ -15,7 +15,7 @@ enum {
   /*  2 */ kDhtTemperature,
   /*  3 */ kDhtHumidity,
   /*  4 */ kRadioRx,
-  /*  5 */ kRadioMach,
+  /*  5 */ kRadioIn,
   /*  6 */ kRadioTx,
   /*  7 */ kTimer,
   /*  8 */ kBool,
@@ -31,6 +31,7 @@ public:
   uint8_t code;
   bool ev;
   bool wb;
+  bool enLog;
   String key;
   String value;
   String cb;
