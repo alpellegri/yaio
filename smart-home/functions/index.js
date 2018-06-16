@@ -307,9 +307,11 @@ exports.ha = functions.https.onRequest((req, res) => {
   uidRef.child('/root').once('value').then(function(snapshot) {
     const snapshotVal = snapshot.val();
     const domains = Object.keys(snapshotVal);
-    // const data = '/users/' + uid + '/obj/data/' + domains[0];
-    // const dataRef = admin.database().ref(data);
-    init(req, res, uid, domains, uidRef);
+    if (domains.length > 0) {
+      init(req, res, uid, domains, uidRef);
+    } else {
+      showError(res, 'database error');
+    }
   }).catch((err) => {
     console.error(err);
     showError(res, 'database error');
