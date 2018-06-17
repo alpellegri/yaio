@@ -336,7 +336,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
 
   dynamic _currentValue;
 
-  void _handleTapboxChanged(dynamic newValue) {
+  void _handleChangedValue(dynamic newValue) {
     print('_handleTapboxChanged $newValue');
     setState(() {
       _currentValue = newValue;
@@ -369,7 +369,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
               new DynamicEditWidget(
                 type: entry.code,
                 value: _currentValue,
-                onChanged: _handleTapboxChanged,
+                onChangedValue: _handleChangedValue,
               ),
             ]),
         actions: <Widget>[

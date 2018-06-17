@@ -99,6 +99,7 @@ String FBM_getResetReason(void) {
 
 /* main function task */
 void FbmService(void) {
+  DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
   switch (boot_sm) {
   // firebase init
   case 0: {
@@ -177,7 +178,6 @@ void FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
-      DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       String kcontrol;

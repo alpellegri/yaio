@@ -120,8 +120,9 @@ void RF_Service(void) {
     uint8_t id = RF_checkRadioInCodeDB(RadioCode);
     DEBUG_PRINT("RF_Service %d\n", id);
     if (id != 0xFF) {
-      IoEntryVec[id].ev = true;
-      IoEntryVec[id].ev_value = RadioCode;
+      IoEntry &entry = FB_getIoEntry(id);
+      entry.ev = true;
+      entry.ev_value = RadioCode;
     }
   }
 }

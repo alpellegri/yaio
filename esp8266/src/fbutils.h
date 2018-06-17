@@ -34,6 +34,7 @@ public:
   bool enLog;
   String key;
   String value;
+  uint32_t ioctl;
   String cb;
   uint32_t ev_value;
 };
@@ -50,8 +51,8 @@ public:
   std::vector<FuncEntry> funcvec;
 };
 
-extern std::vector<IoEntry> IoEntryVec;
-extern std::vector<ProgEntry> ProgVec;
+// extern std::vector<IoEntry> IoEntryVec;
+// extern std::vector<ProgEntry> ProgVec;
 
 extern void FB_deinitIoEntryDB(void);
 extern void FB_deinitProgDB(void);
@@ -63,6 +64,7 @@ extern String &FB_getIoEntryNameById(uint8_t i);
 
 extern void FB_addProgDB(String key, JsonObject &obj);
 extern uint8_t FB_getProgIdx(const char *key);
+extern ProgEntry &FB_getProg(uint8_t i);
 
 extern uint8_t FB_checkRadioCodeDB(uint32_t code);
 extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);

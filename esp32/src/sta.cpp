@@ -18,8 +18,6 @@
 #define LED_OFF LOW
 #define LED_ON HIGH
 
-static uint8_t sta_button = 0x55;
-static uint8_t sta_cnt = 0;
 static bool fota_mode = false;
 
 static Preferences preferences;
@@ -43,9 +41,6 @@ bool STA_Setup(void) {
   DEBUG_PRINT("sta_password: %s\n", sta_password.c_str());
   DEBUG_PRINT("trying to connect...\n");
 
-  TimeSetup();
-  RF_Setup();
-
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
   while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
@@ -57,6 +52,9 @@ bool STA_Setup(void) {
   preferences.begin("my-app", false);
 
   if (WiFi.status() == WL_CONNECTED) {
+    TimeSetup();
+    RF_Setup();
+
     DEBUG_PRINT("connected:\n");
     Serial.println(WiFi.localIP());
 
@@ -93,6 +91,7 @@ void STA_FotaReq(void) {
 bool STA_Task(void) {
   bool ret = true;
 
+  DEBUG_PRINT("WiFi.status(): %d\n", WiFi.status());
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (fota_mode == true) {

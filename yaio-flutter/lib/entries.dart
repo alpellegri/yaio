@@ -91,20 +91,25 @@ int clearBits(int v, int pos, int len) {
   return v;
 }
 
-dynamic getValueCtrl1(code, value) {
-  dynamic v;
-  switch (DataCode.values[code]) {
+String getValueCtrl1(IoEntryControl data) {
+  String v;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+      v = (data.ioctl).toString();
+      break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(value, 24, 8);
+      v = getBits(data.ioctl, 0, 8).toString();
       break;
     case DataCode.Timer:
       DateTime now = new DateTime.now();
-      v = (24 + getBits(value, 8, 8) + now.timeZoneOffset.inHours) % 24;
+      // compensate timezone
+      v = ((24 + (int.parse(data.value) ~/ 60) + now.timeZoneOffset.inHours) %
+              24)
+          .toString();
       break;
     default:
   }
@@ -112,29 +117,29 @@ dynamic getValueCtrl1(code, value) {
   return v;
 }
 
-dynamic getValueCtrl2(int code, dynamic value) {
-  dynamic v;
-  switch (DataCode.values[code]) {
+String getValueCtrl2(IoEntryControl data) {
+  String v;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      v = getBits(value, 0, 24);
+      v = data.value;
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(value, 16, 8);
+      v = getBits(data.ioctl, 8, 8).toString();
       break;
     case DataCode.RadioMach:
     case DataCode.Int:
     case DataCode.Float:
     case DataCode.Messaging:
-      v = value;
+      v = data.value;
       break;
     case DataCode.Bool:
-      if (value == false) {
+      if (data.value == 'false') {
         v = '0';
-      } else if (value == true) {
+      } else if (data.value == 'true') {
         v = '1';
       } else {
         print('_controller_2.text error');
@@ -142,100 +147,107 @@ dynamic getValueCtrl2(int code, dynamic value) {
       }
       break;
     case DataCode.Timer:
-      v = getBits(value, 0, 8);
+      v = (int.parse(data.value) % 60).toString();
       break;
     default:
   }
   return v;
 }
 
-dynamic getValueCtrl3(int code, dynamic value) {
-  dynamic v;
-  switch (DataCode.values[code]) {
+int getValueCtrl3(IoEntryControl data) {
+  int v;
+  switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      v = getBits(value, 16, 9);
+      v = getBits(data.ioctl, 16, 9);
       break;
     default:
   }
   return v;
 }
 
-dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
-  switch (DataCode.values[code]) {
+IoEntryControl setValueCtrl1(IoEntryControl data, String v) {
+  IoEntryControl local = data;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      value = clearBits(value, 24, 8);
-      value |= setBits(24, 8, int.parse(v));
+      local.ioctl = int.parse(v);
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      value = clearBits(value, 24, 8);
-      value |= setBits(24, 8, int.parse(v));
+      local.ioctl = clearBits(local.ioctl, 0, 8);
+      local.ioctl |= setBits(0, 8, int.parse(v));
       break;
     case DataCode.Timer:
+      // binary values
       DateTime now = new DateTime.now();
-      value = clearBits(value, 8, 8);
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
-      value |= setBits(8, 8, h);
+      local.value = ((60 * h) + (int.parse(local.value) % 60)).toString();
       break;
     default:
   }
-  return value;
+  return local;
 }
 
-dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
-  switch (DataCode.values[code]) {
+IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
+  IoEntryControl local = data;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      // binary values
-      value = clearBits(value, 0, 24);
-      value |= setBits(0, 24, int.parse(v));
+      local.value = v;
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // binary values
-      value = clearBits(value, 16, 8);
-      value |= setBits(16, 8, int.parse(v));
+      local.ioctl = clearBits(local.ioctl, 16, 8);
+      local.ioctl |= setBits(16, 8, int.parse(v));
       break;
     case DataCode.RadioMach:
     case DataCode.Int:
     case DataCode.Float:
     case DataCode.Messaging:
       // string values
-      value = v;
+      local.value = v;
       break;
     case DataCode.Bool:
       if (v == '0') {
-        value = false;
+        local.value = 'false';
       } else if (v == '1') {
-        value = true;
+        local.value = 'true';
       } else {
         print('ctrl_2.text error');
       }
       break;
     case DataCode.Timer:
-      // binary values
-      value = clearBits(value, 0, 8);
-      value |= setBits(0, 8, int.parse(v));
+      int value = int.parse(local.value);
+      local.value = ((value - (value % 60)) + int.parse(v)).toString();
       break;
     default:
   }
-  return value;
+  return local;
 }
 
-dynamic setValueCtrl3(dynamic value, int code, dynamic v) {
-  switch (DataCode.values[code]) {
+IoEntryControl setValueCtrl3(IoEntryControl data, String v) {
+  IoEntryControl local = data;
+  switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      value = clearBits(value, 16, 9);
-      value |= setBits(16, 9, int.parse(v));
+      local.ioctl = clearBits(local.ioctl, 16, 9);
+      local.ioctl |= setBits(16, 9, int.parse(v));
       break;
     default:
   }
-  return value;
+  return local;
+}
+
+class IoEntryControl {
+  int code;
+  String value;
+  int ioctl;
+
+  IoEntryControl(this.code, this.value, this.ioctl);
 }
 
 class IoEntry {
@@ -249,7 +261,8 @@ class IoEntry {
   String key;
   String owner;
   int code;
-  dynamic value;
+  String value;
+  int ioctl;
   String cb;
 
   IoEntry(DatabaseReference ref) : reference = ref;
@@ -261,6 +274,7 @@ class IoEntry {
     owner = v['owner'];
     code = v['code'];
     value = v['value'];
+    ioctl = v['ioctl'];
     cb = v['cb'];
     if (v['drawWr'] != null) {
       drawWr = v['drawWr'];
@@ -272,25 +286,24 @@ class IoEntry {
   }
 
   dynamic getValue() {
-    dynamic v;
+    String v;
     switch (DataCode.values[code]) {
       case DataCode.PhyIn:
       case DataCode.PhyOut:
       case DataCode.RadioRx:
       case DataCode.RadioTx:
-        // binary values
-        v = getBits(value, 0, 24);
+        v = value;
         break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
-        // binary values
-        v = getBits(value, 0, 16) / 10;
+        v = (int.parse(value) / 10).toString();
         break;
       case DataCode.Timer:
         // binary values
         DateTime now = new DateTime.now();
-        int h = (24 + getBits(value, 8, 8) + now.timeZoneOffset.inHours) % 24;
-        int m = getBits(value, 0, 8);
+        int h =
+            (24 + (int.parse(value) ~/ 60) + now.timeZoneOffset.inHours) % 24;
+        int m = int.parse(value) % 60;
         DateTime dtset = new DateTime(0, 0, 0, h, m);
         v = new DateFormat('Hm').format(dtset);
         break;
@@ -316,6 +329,7 @@ class IoEntry {
     map['owner'] = owner;
     map['code'] = code;
     map['value'] = value;
+    map['ioctl'] = ioctl;
     map['cb'] = cb;
     if (drawWr != false) {
       map['drawWr'] = drawWr;

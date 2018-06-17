@@ -138,13 +138,14 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
   dynamic _currentValue;
+  int _currentIoctl;
 
   _DataIoDialogWidgetState(this.entry);
 
-  void _handleTapboxChanged(dynamic newValue) {
-    print('_handleTapboxChanged $newValue');
+  void _handleChangedValue(IoEntryControl newValue) {
     setState(() {
-      _currentValue = newValue;
+      _currentValue = newValue.value;
+      _currentIoctl = newValue.ioctl;
     });
   }
 
@@ -154,6 +155,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
       _currentValue = entry.value;
+      _currentIoctl = entry.ioctl;
       _checkboxValueWr = entry.drawWr;
       _checkboxValueRd = entry.drawRd;
       _checkboxValueLog = entry.enLog;
@@ -195,6 +197,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     entry.code = _selectedType;
                     print(_currentValue);
                     entry.value = _currentValue;
+                    entry.ioctl = _currentIoctl;
                     entry.cb = _selectedExec?.key;
                     entry.setOwner(getOwner());
                     if (entry.value != null) {
@@ -245,7 +248,8 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     ? (new DynamicEditWidget(
                         type: _selectedType,
                         value: _currentValue,
-                        onChanged: _handleTapboxChanged,
+                        ioctl: _currentIoctl,
+                        onChangedValue: _handleChangedValue,
                       ))
                     : (const Text('')),
                 (_execList.length > 0)
@@ -301,7 +305,6 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
               ]),
         ),
       ),
-
     );
   }
 

@@ -44,9 +44,6 @@ bool STA_Setup(void) {
   DEBUG_PRINT("sta_password: %s\n", sta_password.c_str());
   DEBUG_PRINT("trying to connect...\n");
 
-  TimeSetup();
-  RF_Setup();
-
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
   while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
@@ -56,6 +53,9 @@ bool STA_Setup(void) {
   Serial.println();
 
   if (WiFi.status() == WL_CONNECTED) {
+    TimeSetup();
+    RF_Setup();
+
     DEBUG_PRINT("connected:\n");
     Serial.println(WiFi.localIP());
 

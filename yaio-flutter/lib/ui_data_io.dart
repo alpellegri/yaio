@@ -72,9 +72,11 @@ class DataIoItemWidget extends StatelessWidget {
 class DynamicEditWidget extends StatefulWidget {
   final int type;
   final dynamic value;
-  final ValueChanged<dynamic> onChanged;
+  final int ioctl;
+  final ValueChanged<IoEntryControl> onChangedValue;
 
-  DynamicEditWidget({Key key, this.type, this.value, this.onChanged})
+  DynamicEditWidget(
+      {Key key, this.type, this.value, this.ioctl, this.onChangedValue})
       : super(key: key);
 
   @override
@@ -82,26 +84,26 @@ class DynamicEditWidget extends StatefulWidget {
 }
 
 class _DynamicEditWidget extends State<DynamicEditWidget> {
-  int type;
-  dynamic value = 0;
+  IoEntryControl data;
   TextEditingController ctrl_1 = new TextEditingController();
   TextEditingController ctrl_2 = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    type = widget.type;
+    data = new IoEntryControl(widget.type, widget.value, widget.ioctl);
+    // init if null
+    data.value ??= '0';
+    data.ioctl ??= 0;
     if (widget.value != null) {
-      value = widget.value;
-      print('_DynamicEditWidget initState $value, $type');
-      ctrl_1.text = getValueCtrl1(type, value).toString();
-      ctrl_2.text = getValueCtrl2(type, value).toString();
+      ctrl_1.text = getValueCtrl1(data).toString();
+      ctrl_2.text = getValueCtrl2(data).toString();
     }
   }
 
   Widget build(BuildContext context) {
     Widget w;
-    switch (DataCode.values[type]) {
+    switch (DataCode.values[data.code]) {
       case DataCode.PhyIn:
       case DataCode.RadioRx:
         w = new Column(
@@ -112,9 +114,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data.ioctl = int.parse(v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -134,9 +136,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data.ioctl = int.parse(v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -148,9 +150,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data.value = v;
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -170,9 +172,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data.ioctl = int.parse(v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -184,9 +186,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data.value = v;
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -207,9 +209,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data.value = v;
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -228,9 +230,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data.value = v;
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 decoration: const InputDecoration(
                   hintText: 'value',
@@ -240,37 +242,18 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             ]);
         break;
       case DataCode.Bool:
-        if (value is int) {
-          value = false;
-        }
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Switch(
-                  value: value,
+                  value: data.value == 'true',
                   onChanged: (bool v) {
                     setState(() {
-                      value = v;
+                      data.value = v.toString();
                     });
-                    widget.onChanged(value);
+                    widget.onChangedValue(data);
                   }),
-              /* new TextFieldWidget(
-                first: new Text('Value'),
-                second: new TextField(
-                  controller: ctrl_2,
-                  onSubmitted: (v) {
-                    setState(() {
-                      value = setValueCtrl2(value, type, v);
-                    });
-                    widget.onChanged(value);
-                  },
-                  keyboardType: TextInputType.number,
-                  decoration: new InputDecoration(
-                    hintText: 'value',
-                  ),
-                ),
-              ),*/
             ]);
         break;
       case DataCode.Timer:
@@ -282,9 +265,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data = setValueCtrl1(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -296,9 +279,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data = setValueCtrl2(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -306,7 +289,8 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   labelText: 'Minutes',
                 ),
               ),
-              new TimerOptWidget(value: value, onChanged: _handleTimerChanged),
+              new TimerOptWidget(
+                  value: data.ioctl, onChanged: _handleTimerChanged),
             ]);
         break;
       default:
@@ -325,9 +309,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
 
   void _handleTimerChanged(int newValue) {
     setState(() {
-      value = newValue;
+      data.ioctl = newValue;
     });
-    widget.onChanged(value);
+    widget.onChangedValue(data);
   }
 }
 
@@ -369,6 +353,7 @@ class TimerOptWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('TimerOptWidget $value');
     return new Container(
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
