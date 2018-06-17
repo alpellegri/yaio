@@ -29,9 +29,14 @@ bool STA_Setup(void) {
 
   digitalWrite(LED, LED_OFF);
 
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
+
   DEBUG_PRINT("Connecting mode STA\n");
   DEBUG_PRINT("Configuration parameters:\n");
 
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
   delay(100);
   WiFi.mode(WIFI_STA);
 
@@ -91,7 +96,6 @@ void STA_FotaReq(void) {
 bool STA_Task(void) {
   bool ret = true;
 
-  DEBUG_PRINT("WiFi.status(): %d\n", WiFi.status());
   if (WiFi.status() == WL_CONNECTED) {
     // wait for time service is up
     if (fota_mode == true) {

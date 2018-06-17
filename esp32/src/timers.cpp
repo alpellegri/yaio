@@ -51,6 +51,5 @@ void Timers_Service(void) {
         }
       }
     }
-    FB_dumpIoEntry();
   }
 }
