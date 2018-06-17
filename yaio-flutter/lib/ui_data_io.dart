@@ -93,7 +93,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
     super.initState();
     data = new IoEntryControl(widget.type, widget.value, widget.ioctl);
     // init if null
-    data.value ??= '0';
+    data.value ??= 0;
     data.ioctl ??= 0;
     if (widget.value != null) {
       ctrl_1.text = getValueCtrl1(data).toString();
@@ -150,7 +150,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    data.value = v;
+                    data.value = int.parse(v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -186,7 +186,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    data.value = v;
+                    data.ioctl = int.parse(v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -209,7 +209,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    data.value = v;
+                    data.value = int.parse(v);
                   });
                   widget.onChangedValue(data);
                 },

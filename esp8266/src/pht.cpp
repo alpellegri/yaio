@@ -9,7 +9,7 @@
 #include "pht.h"
 #include "debug.h"
 
-#define DHTPIN D6
+#define DHTPIN D6 // 12
 #define DHTTYPE DHT22
 
 DHT *dht;
