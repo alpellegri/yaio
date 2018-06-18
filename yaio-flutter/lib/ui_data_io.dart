@@ -96,8 +96,8 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
     data.value ??= 0;
     data.ioctl ??= 0;
     if (widget.value != null) {
-      ctrl_1.text = getValueCtrl1(data).toString();
-      ctrl_2.text = getValueCtrl2(data).toString();
+      ctrl_1.text = getValueCtrl1(data);
+      ctrl_2.text = getValueCtrl2(data);
     }
   }
 
@@ -114,7 +114,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    data.ioctl = int.parse(v);
+                    data = setValueCtrl1(data, v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -136,7 +136,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    data.ioctl = int.parse(v);
+                    data = setValueCtrl1(data, v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -150,7 +150,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    data.value = int.parse(v);
+                    data = setValueCtrl2(data, v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -172,7 +172,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    data.ioctl = int.parse(v);
+                    data = setValueCtrl1(data, v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -186,7 +186,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    data.ioctl = int.parse(v);
+                    data = setValueCtrl2(data, v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -209,7 +209,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    data.value = int.parse(v);
+                    data = setValueCtrl2(data, v);
                   });
                   widget.onChangedValue(data);
                 },
@@ -250,7 +250,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   value: data.value == 'true',
                   onChanged: (bool v) {
                     setState(() {
-                      data.value = v.toString();
+                      data = setValueCtrl1(data, v.toString());
                     });
                     widget.onChangedValue(data);
                   }),

@@ -196,6 +196,10 @@ IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+    case DataCode.RadioMach:
+    case DataCode.Int:
+    case DataCode.Float:
+      // binary values
       local.value = v;
       break;
     case DataCode.DhtTemperature:
@@ -205,23 +209,15 @@ IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
       local.ioctl = clearBits(local.ioctl, 8, 8);
       local.ioctl |= setBits(8, 8, int.parse(v));
       break;
-    case DataCode.RadioMach:
-    case DataCode.Int:
-    case DataCode.Float:
     case DataCode.Messaging:
       // string values
       local.value = v;
       break;
     case DataCode.Bool:
-      if (v == '0') {
-        local.value = 'false';
-      } else if (v == '1') {
-        local.value = 'true';
-      } else {
-        print('ctrl_2.text error');
-      }
+      local.value = v;
       break;
     case DataCode.Timer:
+      // binary values
       int value = int.parse(local.value);
       local.value = (value - (value % 60)) + int.parse(v);
       break;

@@ -305,14 +305,14 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
       _fcmRef = FirebaseDatabase.instance.reference().child(getFcmTokenRef());
       _fcmRef.once().then((DataSnapshot onValue) {
-        print("once: ${onValue.value}");
+        print('once: ${onValue.value}');
         Map map = onValue.value;
         bool tokenFound = false;
         String token = getFbToken();
         if (map != null) {
           map.forEach((key, value) {
             if (value == token) {
-              print("key test: $key");
+              print('key test: $key');
               tokenFound = true;
             }
           });
@@ -320,7 +320,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         if (tokenFound == false) {
           _nodeNeedUpdate = true;
           _fcmRef.push().set(token);
-          print("token saved: $token");
+          print('token saved: $token');
         }
 
         // at the end, not before
