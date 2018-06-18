@@ -92,9 +92,6 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
   void initState() {
     super.initState();
     data = new IoEntryControl(widget.type, widget.value, widget.ioctl);
-    // init if null
-    data.value ??= 0;
-    data.ioctl ??= 0;
     if (widget.value != null) {
       ctrl_1.text = getValueCtrl1(data);
       ctrl_2.text = getValueCtrl2(data);

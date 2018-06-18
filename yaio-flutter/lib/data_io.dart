@@ -195,7 +195,6 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   entry.enLog = _checkboxValueLog;
                   try {
                     entry.code = _selectedType;
-                    print(_currentValue);
                     entry.value = _currentValue;
                     entry.ioctl = _currentIoctl;
                     entry.cb = _selectedExec?.key;

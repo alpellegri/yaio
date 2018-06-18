@@ -127,25 +127,20 @@ String getValueCtrl2(IoEntryControl data) {
     case DataCode.RadioMach:
     case DataCode.Int:
     case DataCode.Float:
-    case DataCode.Messaging:
       v = data.value.toString();
+      break;
+    case DataCode.Messaging:
+      v = data.value;
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       v = getBits(data.ioctl, 8, 8).toString();
       break;
     case DataCode.Bool:
-      if (data.value == 'false') {
-        v = '0';
-      } else if (data.value == 'true') {
-        v = '1';
-      } else {
-        print('_controller_2.text error');
-        v = '0';
-      }
+      v = data.value.toString();
       break;
     case DataCode.Timer:
-      v = (int.parse(data.value) % 60).toString();
+      v = (data.value % 60).toString();
       break;
     default:
   }
@@ -165,21 +160,25 @@ int getValueCtrl3(IoEntryControl data) {
 
 IoEntryControl setValueCtrl1(IoEntryControl data, String v) {
   IoEntryControl local = data;
+  local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+      local.value ??= 0;
       local.ioctl = int.parse(v);
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // pin
+      local.value ??= 0;
       local.ioctl = clearBits(local.ioctl, 0, 8);
       local.ioctl |= setBits(0, 8, int.parse(v));
       break;
     case DataCode.Timer:
       // binary values
+      local.value ??= 0;
       DateTime now = new DateTime.now();
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
       local.value = (60 * h) + (local.value % 60);
@@ -191,6 +190,7 @@ IoEntryControl setValueCtrl1(IoEntryControl data, String v) {
 
 IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
   IoEntryControl local = data;
+  local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
@@ -200,17 +200,20 @@ IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
     case DataCode.Int:
     case DataCode.Float:
       // binary values
+      local.value ??= 0;
       local.value = v;
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // binary values
       // period
+      local.value ??= 0;
       local.ioctl = clearBits(local.ioctl, 8, 8);
       local.ioctl |= setBits(8, 8, int.parse(v));
       break;
     case DataCode.Messaging:
       // string values
+
       local.value = v;
       break;
     case DataCode.Bool:
@@ -218,6 +221,7 @@ IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
       break;
     case DataCode.Timer:
       // binary values
+      local.value ??= 0;
       int value = int.parse(local.value);
       local.value = (value - (value % 60)) + int.parse(v);
       break;
@@ -228,6 +232,7 @@ IoEntryControl setValueCtrl2(IoEntryControl data, String v) {
 
 IoEntryControl setValueCtrl3(IoEntryControl data, String v) {
   IoEntryControl local = data;
+  local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
     case DataCode.Timer:
       local.ioctl = clearBits(local.ioctl, 16, 9);
