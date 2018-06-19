@@ -149,6 +149,7 @@ class _ChartHistoryState extends State<ChartHistory> {
   @override
   void initState() {
     super.initState();
+    chart.clear();
   }
 
   @override
@@ -239,6 +240,12 @@ class Chart extends CustomPainter {
 
   void add(LogEntry entry) {
     entryList.add(entry);
+    print('${entryList.length}');
+  }
+
+  void clear() {
+    entryList.clear();
+    print('${entryList.length}');
   }
 
   @override
