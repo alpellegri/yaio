@@ -222,7 +222,7 @@ void VM_writeOut(void) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.createObject();
             json["t"] = getTime();
-            json["v"] = value & 0xFFFF;
+            json["v"] = value;
             String strdata;
             json.printTo(strdata);
             FbSetPath_log(ref);
