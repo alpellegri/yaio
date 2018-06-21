@@ -1,5 +1,5 @@
-1. Data Definitions
-   ================
+1. Data Object Definitions
+   =======================
 
   These entities are defined into a json database.
 
@@ -47,6 +47,15 @@
 
   VM register ACC = <value>
 
+  example
+  {
+    "code" : 1,
+    "drawWr" : true,
+    "ioctl" : 16,
+    "owner" : "Node1",
+    "value" : 1
+  }
+
 * <code> == Timer
   it variable describing the time in minute in a week.
   Time is represent a tick (a minute) inside  a week (7*24*60=34560 ticks) time is a modulo number.
@@ -68,12 +77,20 @@
 
   radio-code := <value>
   radio-mask := <ioctl>
-  
+
   At start VM read all radioin from DB and store them to RAM.
 
   if (radio & radio-mask) == (radio-code & radio-mask)
-    VM call callback cb 
+    VM call callback cb
     ACC = radio & ~radio-mask
+
+  example
+  {
+    "code" : 5,
+    "ioctl" : 0,
+    "owner" : "Node1",
+    "value" : "7418204"
+  }
 
 * <code> == RadioRx
   <value> := radio
@@ -114,12 +131,12 @@ Program run into a simple virtual machine VM.
     "v" : <arg>,
   }
 
-  <instr> ::= 
+  <instr> ::=
     /*  0: ex0  */
     /*  1: ldi  */
-    /*  2: ld24 */
+-----    /*  2: ld24 */
     /*  3: ld   */
-    /*  4: st24 */
+-----    /*  4: st24 */
     /*  5: st   */
     /*  6: lt   */
     /*  7: gt   */
@@ -136,7 +153,7 @@ Program run into a simple virtual machine VM.
 
   <arg> := <data-symbol>
 
-    
+
 * VM execution model
 At startup, the VM initializes its runtime environment copying all DB entities.
 
@@ -238,63 +255,36 @@ the DB
 
 A1.1 example simple boolean trigger
     ===============================
+instruction-code:
+Routine1:
+  0: st Status
 
-pin: physical input mapped on a pin
-
-pseudo-code:
-  @pin.event
-  status = event.value;
-
-instruction code:
-0: st status, end
-
-key-In -> {
-  code: phyin,
-  value: pin<<24,
-  cb: key-prog,
+{
+  "Input" : {
+    "cb" : "Routine1"
+    "code" : 0,
+    "enLog" : false,
+    "ioctl" : 1,
+    "owner" : "Node1",
+    "value" : 0,
+  },
+  "Status" : {
+    "code" : 8,
+    "enLog" : false,
+    "ioctl" : 0,
+    "owner" : "Node1",
+    "value" : "0"
+  },
 }
-key-status -> {
-  code: bool,
-  value: 0,
+{
+  "Routine1" : {
+    "owner" : "Node1",
+    "p" : [ {
+      "i" : 5,
+      "v" : "Status"
+    } ]
+  }
 }
-key-prog -> {
-  p: [
-    { i: st, v: key-status }
-  ]
-}
-
-A1.2 example simple sensor trigger
-    ==============================
-
-sensor: physical input mapped on a pin
-thr1: variable
-
-pseudo-code:
-  @sensor.event
-  status = (event.value>thr);
-
-instruction code:
-0: gt thr, f02
-1: st status, end
-
-key-sensor -> {
-  code: phyin,
-  value: pin<<24,
-  cb: key-prog,
-}
-key-thr1 -> {
-  code: var,
-  value: 90,
-}
-key-status -> {
-  code: bool,
-  value: 0,
-}
-key-prog: {
-  p: [
-    { i: gt, v: 0 },
-    { i: st, v: key-status }
-  ]
 
 A2. example led on/off depending by a variable
    ===========================================
@@ -302,28 +292,34 @@ A2. example led on/off depending by a variable
 led: physical output mapped on a pin
 status: variable
 
-pseudo-code:
-  @status.event
-  led = (status.value != 0);
-
 instruction-code:
-0: eqi 0, 2
-1: st led
+Routine2:
+0: st led
 
-key-led -> {
-  code: phyout,
-  value: pin<<24,
+{
+  "Led1" : {
+    "code" : 1,
+    "ioctl" : 16,
+    "owner" : "Node1",
+    "value" : 1
+  },
+  "Status" : {
+    "cb" : "Routine2"
+    "code" : 8,
+    "ioctl" : 0,
+    "owner" : "Node1",
+    "value" : "0"
+  }
 }
-key-status -> {
-  code: bool,
-  value: 0,
-  cb: key-prog,
-}
-key-prog -> {
-  p: [
-    { i: eqi, v: 0 },
-    { i: st, v: key-led }
-  ]
+
+{
+  "Routine2" : {
+    "owner" : "Node1",
+    "p" : [ {
+      "i" : 5,
+      "v" : "Led1"
+    } ]
+  }
 }
 
 A3. example sensor trigger with hysteresis switching a relay
@@ -525,22 +521,12 @@ pseudo-code:
     led = false;
   }
 
-key-timer1 -> {
-  code: int,
-  value: 1*2^18 + mask*2^11 + 0*60+0, // on config
-  cb: key-prog,
-}
-key-timer2 -> {
-  code: int,
-  value:  0*2^18 + mask*2^11 + 0*60+1, // off config
-  cb: key-prog,
-}
-key-led -> {
-  code: phyout,
-  value: pin<<24,
-}
-key-prog -> {
-  p: [
-    { i: st, v: key-led }
-  ]
+{
+  "Routine2" : {
+    "owner" : "Node1",
+    "p" : [ {
+      "i" : 5,
+      "v" : "Led1"
+    } ]
+  }
 }
