@@ -110,7 +110,7 @@ class _ExecEditState extends State<ExecEdit> {
                         Navigator.pop(context, null);
                       }),
                   new OutlineButton(
-                    child: const Text('PROGRAM'),
+                    child: const Text('EDIT'),
                     onPressed: () {
                       Navigator.push(
                           context,

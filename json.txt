@@ -10,6 +10,14 @@
     value: <value>, // it is dynamic: a string or a number
     cb: <callback>, // optional, it is a string representing the key of the database
   }
+
+  name : {
+    "code" : <num>, // it is a number
+    "ioctl" : <value>,  // it is a number
+    "owner" : "Node1",  // it is a string: device
+    "value" : "7418204"
+  },
+
   type: {phyin, phyout, timer, login, logout, bool, int, float}
 
 * physical i/o
