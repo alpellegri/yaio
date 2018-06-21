@@ -29,22 +29,6 @@ class ExecListItem extends StatelessWidget {
                       textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
-                    const Text(
-                      '',
-                      textScaleFactor: 0.8,
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const Text(
-                      '',
-                      textScaleFactor: 0.9,
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
