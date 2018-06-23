@@ -244,7 +244,7 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Switch(
-                  value: data.value == 'true',
+                  value: data.value ?? false,
                   onChanged: (bool v) {
                     setState(() {
                       data = setValueCtrl1(data, v.toString());

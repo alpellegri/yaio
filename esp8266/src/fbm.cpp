@@ -116,7 +116,6 @@ void FbmService(void) {
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
       fbm_update_last = time_now;
-      DEBUG_PRINT("boot_sm: %d - update\n", boot_sm);
 
       String kcontrol;
       FbSetPath_control(kcontrol);

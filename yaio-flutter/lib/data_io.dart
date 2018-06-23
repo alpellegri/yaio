@@ -108,7 +108,7 @@ class _DataIOState extends State<DataIO> {
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry(_dataRef);
+    final IoEntry entry = new IoEntry.setReference(_dataRef);
     _openEntryDialog(entry);
   }
 }
