@@ -1,18 +1,18 @@
 #include <Arduino.h>
-#include <Ticker.h>
 #include <RCSwitch.h>
+#include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
 
 #include "cc1101.h"
+#include "debug.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
 #include "fbutils.h"
 #include "rf.h"
 #include "timesrv.h"
-#include "debug.h"
 
 // #define USE_CC1101
 
@@ -28,6 +28,7 @@ static RCSwitch rfHandle = RCSwitch();
 #endif
 
 static uint32_t RadioCode;
+static uint8_t RadioCodeLen;
 static bool RadioEv;
 
 void RF_SetRxPin(uint8_t pin) {
@@ -78,13 +79,14 @@ void RF_Loop() {
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
-      DEBUG_PRINT("%06X / bit: %d - Protocol: %d\n", value,
+      DEBUG_PRINT("%d / bit: %d - Protocol: %d\n", value,
                   rfHandle.getReceivedBitlength(),
                   rfHandle.getReceivedProtocol());
       if (RadioEv == false) {
-        DEBUG_PRINT("radio code: %06X\n", value);
+        DEBUG_PRINT("radio code: %d\n", value);
         RadioEv = true;
         RadioCode = value;
+        RadioCodeLen = rfHandle.getReceivedBitlength();
         RFRcvTimer.attach_ms(1000, RF_Unmask);
       } else {
         DEBUG_PRINT(".\n");
@@ -99,12 +101,12 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
 
   uint8_t len = FB_getIoEntryLen();
 
-  DEBUG_PRINT("RF_CheckRadioCodeDB: code %06X\n", radioid);
+  DEBUG_PRINT("RF_CheckRadioCodeDB: code %d\n", radioid);
   while ((i < len) && (id == 0xFF)) {
     IoEntry entry = FB_getIoEntry(i);
-    uint32_t v = atoi(entry.value.c_str());
+    uint32_t v = entry.ioctl;
     if ((radioid == v) && (entry.code == kRadioIn)) {
-      DEBUG_PRINT("radio code found in table %06X\n", radioid);
+      DEBUG_PRINT("radio code found in table %d\n", radioid);
       id = i;
     }
     i++;
@@ -117,12 +119,20 @@ uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
 void RF_Service(void) {
   uint32_t ev = RF_GetRadioEv();
   if (ev == true) {
-    uint8_t id = RF_checkRadioInCodeDB(RadioCode);
-    DEBUG_PRINT("RF_Service %d\n", id);
+    uint32_t RadioId = RadioCode;
+    uint8_t data_bits = (RadioCodeLen > 24) ? (RadioCodeLen - 24) : (0);
+    RadioId = RadioCode >> data_bits;
+
+    uint8_t id = RF_checkRadioInCodeDB(RadioId);
+    DEBUG_PRINT("RF_Service id %d\n", id);
     if (id != 0xFF) {
       IoEntry &entry = FB_getIoEntry(id);
+      uint8_t value = RadioCode & ((1 << data_bits) - 1);
+      entry.value = String(value);
       entry.ev = true;
-      entry.ev_value = RadioCode;
+      entry.ev_value = value;
+      DEBUG_PRINT("RF_Service key=%s, value=%s\n", entry.key.c_str(),
+                  entry.value.c_str());
     }
   }
 }

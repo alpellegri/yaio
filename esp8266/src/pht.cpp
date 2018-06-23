@@ -49,6 +49,7 @@ void PHT_Service(void) {
       float t = dht->readTemperature() + 0.05;
       DEBUG_PRINT("pht_period %d, t: %f - h: %f\n", pht_period, t, h);
       if (isnan(h) || isnan(t)) {
+        DEBUG_PRINT("dht sensor error\n");
       } else {
         humidity_data = 10 * h;
         temperature_data = 10 * t;

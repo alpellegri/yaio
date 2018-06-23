@@ -191,6 +191,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     entry.cb = _selectedExec?.key;
                     entry.setOwner(getOwner());
                     if (entry.value != null) {
+                      print('saving');
                       entry.reference.child(entry.key).set(entry.toJson());
                     } else {
                       print('missing');

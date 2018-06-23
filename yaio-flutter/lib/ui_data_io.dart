@@ -193,6 +193,26 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             ]);
         break;
       case DataCode.RadioMach:
+        w = new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: ctrl_1,
+                onSubmitted: (v) {
+                  setState(() {
+                    data = setValueCtrl1(data, v);
+                  });
+                  widget.onChangedValue(data);
+                },
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: 'value',
+                  labelText: 'Value',
+                ),
+              ),
+            ]);
+        break;
       case DataCode.Int:
       case DataCode.Float:
         w = new Column(

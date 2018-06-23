@@ -98,6 +98,7 @@ String getValueCtrl1(IoEntry data) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+    case DataCode.RadioMach:
       v = (data.ioctl).toString();
       break;
     case DataCode.DhtTemperature:
@@ -166,6 +167,7 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+    case DataCode.RadioMach:
       local.value ??= 0;
       local.ioctl = int.parse(v);
       break;
