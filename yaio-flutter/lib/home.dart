@@ -367,8 +367,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new DynamicEditWidget(
-                type: entry.code,
-                value: _currentValue,
+                data: entry,
                 onChangedValue: _handleChangedValue,
               ),
             ]),

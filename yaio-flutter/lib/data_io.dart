@@ -127,7 +127,6 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
-  int _selectedType;
   List<int> _opTypeMenu = new List<int>();
   bool _checkboxValueWr = false;
   bool _checkboxValueRd = false;
@@ -137,15 +136,13 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   final TextEditingController _controllerType = new TextEditingController();
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
-  dynamic _currentValue;
-  int _currentIoctl;
 
   _DataIoDialogWidgetState(this.entry);
 
-  void _handleChangedValue(IoEntryControl newValue) {
+  void _handleChangedValue(IoEntry newValue) {
     setState(() {
-      _currentValue = newValue.value;
-      _currentIoctl = newValue.ioctl;
+      entry.value = newValue.value;
+      entry.ioctl = newValue.ioctl;
     });
   }
 
@@ -154,14 +151,11 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
-      _currentValue = entry.value;
-      _currentIoctl = entry.ioctl;
       _checkboxValueWr = entry.drawWr;
       _checkboxValueRd = entry.drawRd;
       _checkboxValueLog = entry.enLog;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
-      _selectedType = entry.code;
     }
     DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
   }
@@ -194,13 +188,12 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   entry.drawRd = _checkboxValueRd;
                   entry.enLog = _checkboxValueLog;
                   try {
-                    entry.code = _selectedType;
-                    entry.value = _currentValue;
-                    entry.ioctl = _currentIoctl;
                     entry.cb = _selectedExec?.key;
                     entry.setOwner(getOwner());
                     if (entry.value != null) {
                       entry.reference.child(entry.key).set(entry.toJson());
+                    } else {
+                      print('missing');
                     }
                   } catch (exception) {
                     print('bug');
@@ -229,10 +222,10 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   ),
                   new DropdownButton<int>(
                     hint: const Text('select'),
-                    value: _selectedType,
+                    value: entry.code,
                     onChanged: (int newValue) {
                       setState(() {
-                        _selectedType = newValue;
+                        entry.code = newValue;
                       });
                     },
                     items: _opTypeMenu.map((int entry) {
@@ -243,11 +236,9 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     }).toList(),
                   ),
                 ]),
-                (_selectedType != null)
+                (entry.code != null)
                     ? (new DynamicEditWidget(
-                        type: _selectedType,
-                        value: _currentValue,
-                        ioctl: _currentIoctl,
+                        data: entry,
                         onChangedValue: _handleChangedValue,
                       ))
                     : (const Text('')),

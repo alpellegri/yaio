@@ -70,13 +70,10 @@ class DataIoItemWidget extends StatelessWidget {
 }
 
 class DynamicEditWidget extends StatefulWidget {
-  final int type;
-  final dynamic value;
-  final int ioctl;
-  final ValueChanged<IoEntryControl> onChangedValue;
+  final IoEntry data;
+  final ValueChanged<IoEntry> onChangedValue;
 
-  DynamicEditWidget(
-      {Key key, this.type, this.value, this.ioctl, this.onChangedValue})
+  DynamicEditWidget({Key key, this.data, this.onChangedValue})
       : super(key: key);
 
   @override
@@ -84,15 +81,15 @@ class DynamicEditWidget extends StatefulWidget {
 }
 
 class _DynamicEditWidget extends State<DynamicEditWidget> {
-  IoEntryControl data;
+  IoEntry data;
   TextEditingController ctrl_1 = new TextEditingController();
   TextEditingController ctrl_2 = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    data = new IoEntryControl(widget.type, widget.value, widget.ioctl);
-    if (widget.value != null) {
+    data = widget.data;
+    if (widget.data.value != null) {
       ctrl_1.text = getValueCtrl1(data);
       ctrl_2.text = getValueCtrl2(data);
     }
@@ -239,12 +236,13 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             ]);
         break;
       case DataCode.Bool:
+        data.value = data.value ?? false;
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Switch(
-                  value: data.value ?? false,
+                  value: data.value,
                   onChanged: (bool v) {
                     setState(() {
                       data = setValueCtrl1(data, v.toString());
