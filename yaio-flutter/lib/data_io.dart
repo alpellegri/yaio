@@ -128,10 +128,6 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
       FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
   List<int> _opTypeMenu = new List<int>();
-  bool _checkboxAOG = false;
-  bool _checkboxValueWr = false;
-  bool _checkboxValueRd = false;
-  bool _checkboxValueLog = false;
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
@@ -152,9 +148,6 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
-      _checkboxValueWr = entry.drawWr;
-      _checkboxValueRd = entry.drawRd;
-      _checkboxValueLog = entry.enLog;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
     }
@@ -185,10 +178,6 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                 child: const Text('SAVE'),
                 onPressed: () {
                   entry.key = _controllerName.text;
-                  entry.aog = _checkboxAOG;
-                  entry.drawWr = _checkboxValueWr;
-                  entry.drawRd = _checkboxValueRd;
-                  entry.enLog = _checkboxValueLog;
                   try {
                     entry.cb = _selectedExec?.key;
                     entry.setOwner(getOwner());
@@ -268,40 +257,40 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                 new ListTile(
                   title: const Text('Enable on Google Home'),
                   leading: new Checkbox(
-                      value: _checkboxAOG,
+                      value: entry.aog,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxAOG = value;
+                          entry.aog = value;
                         });
                       }),
                 ),
                 new ListTile(
                   title: const Text('On Dashboard Write Mode'),
                   leading: new Checkbox(
-                      value: _checkboxValueWr,
+                      value: entry.drawWr,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxValueWr = value;
+                          entry.drawWr = value;
                         });
                       }),
                 ),
                 new ListTile(
                   title: const Text('On Dashboard Read Mode'),
                   leading: new Checkbox(
-                      value: _checkboxValueRd,
+                      value: entry.drawRd,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxValueRd = value;
+                          entry.drawRd = value;
                         });
                       }),
                 ),
                 new ListTile(
                   title: const Text('Enable Logs'),
                   leading: new Checkbox(
-                      value: _checkboxValueLog,
+                      value: entry.enLog,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxValueLog = value;
+                          entry.enLog = value;
                         });
                       }),
                 ),
