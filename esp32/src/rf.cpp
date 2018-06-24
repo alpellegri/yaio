@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <RCSwitch.h>
-#include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
+
+#include "Ticker.h"
 
 #include "cc1101.h"
 #include "debug.h"
@@ -15,7 +16,13 @@
 #include "timesrv.h"
 
 #define USE_CC1101
-
+// CC1101 <===> ESP32
+//   MOSI <---> MISO/19
+//   MISO <---> MOSI/18
+//    SCK <---> SCK/5
+//     CS <---> A5/4
+//    GD0 <---> 14/A6
+//    GD2 <---> 15/A8
 // #define PORT_GDO0 14 // tx
 // #define PORT_GDO2 15 // rx
 

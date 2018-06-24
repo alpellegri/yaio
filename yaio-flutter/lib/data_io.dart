@@ -128,6 +128,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
       FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
   List<int> _opTypeMenu = new List<int>();
+  bool _checkboxAOG = false;
   bool _checkboxValueWr = false;
   bool _checkboxValueRd = false;
   bool _checkboxValueLog = false;
@@ -184,6 +185,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                 child: const Text('SAVE'),
                 onPressed: () {
                   entry.key = _controllerName.text;
+                  entry.aog = _checkboxAOG;
                   entry.drawWr = _checkboxValueWr;
                   entry.drawRd = _checkboxValueRd;
                   entry.enLog = _checkboxValueLog;
@@ -263,6 +265,16 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                         ),
                       )
                     : const Text(''),
+                new ListTile(
+                  title: const Text('Enable on Google Home'),
+                  leading: new Checkbox(
+                      value: _checkboxAOG,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _checkboxAOG = value;
+                        });
+                      }),
+                ),
                 new ListTile(
                   title: const Text('On Dashboard Write Mode'),
                   leading: new Checkbox(

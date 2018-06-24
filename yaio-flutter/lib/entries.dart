@@ -260,6 +260,7 @@ class IoEntryControl {
 class IoEntry {
   DatabaseReference reference;
   bool exist = false;
+  bool aog = false;
   bool drawWr = false;
   bool drawRd = false;
   bool enLog = false;
@@ -271,24 +272,6 @@ class IoEntry {
   String cb;
 
   IoEntry.setReference(DatabaseReference ref) : reference = ref;
-
-  IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    reference = ref;
-    exist = true;
-    key = k;
-    owner = v['owner'];
-    code = v['code'];
-    value = v['value'];
-    ioctl = v['ioctl'];
-    cb = v['cb'];
-    if (v['drawWr'] != null) {
-      drawWr = v['drawWr'];
-    }
-    if (v['drawRd'] != null) {
-      drawRd = v['drawRd'];
-    }
-    enLog = v['enLog'];
-  }
 
   dynamic getValue() {
     dynamic v;
@@ -324,6 +307,25 @@ class IoEntry {
     owner = _owner;
   }
 
+  IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
+    reference = ref;
+    exist = true;
+    key = k;
+    owner = v['owner'];
+    code = v['code'];
+    value = v['value'];
+    ioctl = v['ioctl'];
+    cb = v['cb'];
+    aog = v['aog'];
+    if (v['drawWr'] != null) {
+      drawWr = v['drawWr'];
+    }
+    if (v['drawRd'] != null) {
+      drawRd = v['drawRd'];
+    }
+    enLog = v['enLog'];
+  }
+
   Map toJson() {
     exist = true;
     Map<String, dynamic> map = new Map<String, dynamic>();
@@ -332,6 +334,7 @@ class IoEntry {
     map['value'] = value;
     map['ioctl'] = ioctl;
     map['cb'] = cb;
+    map['aog'] = aog;
     if (drawWr != false) {
       map['drawWr'] = drawWr;
     }
