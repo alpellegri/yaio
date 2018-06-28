@@ -334,12 +334,11 @@ class DataIoShortDialogWidget extends StatefulWidget {
 class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
   final IoEntry entry;
 
-  dynamic _currentValue;
-
-  void _handleChangedValue(dynamic newValue) {
+  void _handleChangedValue(IoEntry newValue) {
     print('_handleTapboxChanged $newValue');
     setState(() {
-      _currentValue = newValue;
+      entry.value = newValue.value;
+      entry.ioctl = newValue.ioctl;
     });
   }
 
@@ -348,9 +347,6 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
   @override
   void initState() {
     super.initState();
-    if (entry.value != null) {
-      _currentValue = entry?.value;
-    }
   }
 
   @override
@@ -376,7 +372,6 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
               child: const Text('SAVE'),
               onPressed: () {
                 try {
-                  entry.value = _currentValue;
                   entry.reference.child(entry.key).set(entry.toJson());
                 } catch (exception) {
                   print('bug');
