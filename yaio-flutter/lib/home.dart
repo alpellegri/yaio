@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'firebase_utils.dart';
-import 'const.dart';
 import 'entries.dart';
 import 'chart_history.dart';
 import 'ui_data_io.dart';
@@ -17,15 +16,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  static const time_limit = const Duration(seconds: 20);
   DatabaseReference _controlRef;
-  DatabaseReference _statusRef;
-  DatabaseReference _startupRef;
-  int _controlTimeoutCnt;
-
   StreamSubscription<Event> _controlSub;
-  StreamSubscription<Event> _statusSub;
-  StreamSubscription<Event> _startupSub;
 
   List<IoEntry> entryList = new List();
   DatabaseReference _dataRef;
@@ -33,23 +25,14 @@ class _HomeState extends State<Home> {
   StreamSubscription<Event> _onChangedSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
-  bool _connected = false;
-
   Map<dynamic, dynamic> _control;
-  Map<dynamic, dynamic> _status;
-  Map<dynamic, dynamic> _startup;
 
   @override
   void initState() {
     super.initState();
     print('_MyHomePageState');
-    _controlTimeoutCnt = 0;
     _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
-    _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
-    _startupRef = FirebaseDatabase.instance.reference().child(getStartupRef());
     _controlSub = _controlRef.onValue.listen(_onValueControl);
-    _statusSub = _statusRef.onValue.listen(_onValueStatus);
-    _startupSub = _startupRef.onValue.listen(_onValueStartup);
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
@@ -60,8 +43,6 @@ class _HomeState extends State<Home> {
   void dispose() {
     super.dispose();
     _controlSub.cancel();
-    _statusSub.cancel();
-    _startupSub.cancel();
     _onAddSubscription.cancel();
     _onChangedSubscription.cancel();
     _onRemoveSubscription.cancel();
@@ -69,161 +50,50 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    if (_connected == false) {
-      return new Scaffold(
-          appBar: new AppBar(
-            title: new Text('${widget.title}'),
+    return new Scaffold(
+        appBar: new AppBar(
+          title: new Text('${widget.title} @ ${getDomain()}'),
+        ),
+        body: new ListView(children: <Widget>[
+          new Card(
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new ListView.builder(
+                  shrinkWrap: true,
+                  reverse: true,
+                  itemCount: entryList.length,
+                  itemBuilder: (buildContext, index) {
+                    if (entryList[index].drawWr == true) {
+                      return new InkWell(
+                        onTap: () {
+                          _openEntryDialog(entryList[index]);
+                          // _nodeUpdate(kNodeUpdate);
+                          _nodeRefresh();
+                        },
+                        child: new DataIoItemWidget(entryList[index]),
+                      );
+                    } else {
+                      return new InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              new MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    new ChartHistory(entryList[index].key),
+                                fullscreenDialog: true,
+                              ));
+                        },
+                        child: new DataIoItemWidget(entryList[index]),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
-          body: new LinearProgressIndicator(
-            value: null,
-          ));
-    } else {
-      DateTime current = new DateTime.now();
-      DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-          int.parse(_startup['time'].toString()) * 1000);
-      DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
-          int.parse(_status['time'].toString()) * 1000);
-      Duration diff = current.difference(_heartbeatTime);
-      String diffTime;
-      if (diff.inDays > 0) {
-        diffTime = '${diff.inDays} days';
-      } else if (diff.inHours > 0) {
-        diffTime = '${diff.inHours} hours';
-      } else if (diff.inMinutes > 0) {
-        diffTime = '${diff.inMinutes} minutes';
-      } else if (diff.inSeconds> 0) {
-        diffTime = '${diff.inSeconds} seconds';
-      }
-      return new Scaffold(
-          appBar: new AppBar(
-            title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
-          ),
-          body: new ListView(children: <Widget>[
-            new Card(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new ListTile(
-                    leading: (diff > time_limit)
-                        ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (new Icon(Icons.sync, color: Colors.green[200])),
-                    title: new Text('HeartBeat: $diffTime ago'),
-                    subtitle: new Text('Node Heap Memory: ${_status["heap"]}'),
-                  ),
-                ],
-              ),
-            ),
-            new Card(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new ListView.builder(
-                    shrinkWrap: true,
-                    reverse: true,
-                    itemCount: entryList.length,
-                    itemBuilder: (buildContext, index) {
-                      if (entryList[index].drawWr == true) {
-                        return new InkWell(
-                          onTap: () {
-                            _openEntryDialog(entryList[index]);
-                            // _nodeUpdate(kNodeUpdate);
-                            _nodeRefresh();
-                          },
-                          child: new DataIoItemWidget(entryList[index]),
-                        );
-                      } else {
-                        return new InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                new MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      new ChartHistory(entryList[index].key),
-                                  fullscreenDialog: true,
-                                ));
-                          },
-                          child: new DataIoItemWidget(entryList[index]),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-            new Card(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new ListTile(
-                    leading: (_control['reboot'] == kNodeUpdate)
-                        ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (const Icon(Icons.update)),
-                    title: const Text('Update Device'),
-                    subtitle: new Text('Configuration'),
-                    trailing: new OutlineButton(
-                      child: const Text('UPDATE'),
-                      onPressed: () {
-                        _nodeUpdate(kNodeUpdate);
-                      },
-                    ),
-                  ),
-                  new ListTile(
-                    leading: (_control['reboot'] == kNodeReboot)
-                        ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (const Icon(Icons.power_settings_new)),
-                    title: const Text('PowerUp'),
-                    subtitle: new Text('${_startupTime.toString()}'),
-                    trailing: new OutlineButton(
-                      child: const Text('RESTART'),
-                      onPressed: () {
-                        _nodeUpdate(kNodeReboot);
-                      },
-                    ),
-                  ),
-                  new ListTile(
-                    leading: (_control['reboot'] == kNodeFlash)
-                        ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (const Icon(Icons.system_update_alt)),
-                    title: const Text('Firmware Version'),
-                    subtitle: new Text('${_startup["version"]}'),
-                    trailing: new OutlineButton(
-                      child: const Text('UPGRADE'),
-                      onPressed: () {
-                        _nodeUpdate(kNodeFlash);
-                      },
-                    ),
-                  ),
-                  new ListTile(
-                    leading: (_control['reboot'] == kNodeErase)
-                        ? (new CircularProgressIndicator(
-                            value: null,
-                          ))
-                        : (const Icon(Icons.delete_forever)),
-                    title: const Text('Erase device'),
-                    subtitle: new Text('${getOwner()}'),
-                    trailing: new OutlineButton(
-                      child: const Text('ERASE'),
-                      onPressed: () {
-                        _nodeUpdate(kNodeFlash);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]));
-    }
+        ]));
   }
 
   void _onEntryAdded(Event event) {
@@ -272,46 +142,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  bool checkConnected() {
-    return ((_control != null) && (_status != null) && (_startup != null));
-  }
-
   void _onValueControl(Event event) {
     print('_onValueControl');
     setState(() {
       _control = event.snapshot.value;
-      _connected = checkConnected();
     });
-  }
-
-  void _onValueStatus(Event event) {
-    print('_onValueStatus');
-    // update control time to keep up node
-    DateTime now = new DateTime.now();
-    setState(() {
-      if ((_control != null) && (_controlTimeoutCnt++ < 10)) {
-        _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-        _controlRef.set(_control);
-      }
-      _status = event.snapshot.value;
-      _connected = checkConnected();
-    });
-  }
-
-  void _onValueStartup(Event event) {
-    print('_onValueStartup');
-    setState(() {
-      _startup = event.snapshot.value;
-      _connected = checkConnected();
-    });
-  }
-
-  void _nodeUpdate(int value) {
-    _controlTimeoutCnt = 0;
-    _control['reboot'] = value;
-    DateTime now = new DateTime.now();
-    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-    _controlRef.set(_control);
   }
 
   void _nodeRefresh() {

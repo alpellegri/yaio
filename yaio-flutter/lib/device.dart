@@ -6,6 +6,7 @@ import 'drawer.dart';
 import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
+import 'entries.dart';
 
 class Device extends StatefulWidget {
   Device({Key key, this.title}) : super(key: key);
@@ -114,12 +115,12 @@ class DualHeaderWithHint extends StatelessWidget {
     return new AnimatedCrossFade(
       firstChild: first,
       secondChild: second,
-      firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-      secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+      firstCurve: const Interval(0.0, 0.75, curve: Curves.fastOutSlowIn),
+      secondCurve: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn),
       sizeCurve: Curves.fastOutSlowIn,
       crossFadeState:
           isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 500),
     );
   }
 
@@ -137,20 +138,23 @@ class DualHeaderWithHint extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: new Text(
               name,
-              style: textTheme.body1.copyWith(fontSize: 15.0),
+              // style: textTheme.body1.copyWith(fontSize: 15.0),
             ),
           ),
         ),
       ),
-      new Expanded(
-          child: new Container(
-              margin: const EdgeInsets.only(left: 24.0),
-              child: _crossFade(
-                  new Text(value,
-                      style: textTheme.caption.copyWith(fontSize: 15.0)),
-                  new Text(hint,
-                      style: textTheme.caption.copyWith(fontSize: 15.0)),
-                  showHint)))
+      new Container(
+          margin: const EdgeInsets.only(left: 24.0),
+          child: _crossFade(
+              new Text(
+                value,
+                // style: textTheme.caption.copyWith(fontSize: 15.0),
+              ),
+              new Text(
+                hint,
+                // style: textTheme.caption.copyWith(fontSize: 15.0),
+              ),
+              showHint))
     ]);
   }
 }
@@ -220,12 +224,9 @@ class CollapsibleBody extends StatelessWidget {
 
     return new Column(children: <Widget>[
       new Container(
-          margin: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 0.0) -
+          margin: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 0.0) -
               margin,
-          child: new Center(
-              child: new DefaultTextStyle(
-                  style: textTheme.caption.copyWith(fontSize: 15.0),
-                  child: child))),
+          child: child),
       widget,
     ]);
   }
@@ -283,6 +284,21 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   String _ctrlNodeName = '';
   bool _isNeedCreate = true;
 
+  static const time_limit = const Duration(seconds: 20);
+  Map<dynamic, dynamic> _control;
+  Map<dynamic, dynamic> _status;
+  Map<dynamic, dynamic> _startup;
+  DatabaseReference _controlRef;
+  DatabaseReference _statusRef;
+  DatabaseReference _startupRef;
+  bool _connected = false;
+  int _controlTimeoutCnt;
+  StreamSubscription<Event> _controlSub;
+  StreamSubscription<Event> _statusSub;
+  StreamSubscription<Event> _startupSub;
+
+  List<IoEntry> entryList = new List();
+
   @override
   void initState() {
     super.initState();
@@ -293,9 +309,11 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
       print('getRootRef: ${getRootRef()}');
       _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
-      _onAddSubscription = _rootRef.onChildAdded.listen(_onEntryAdded);
-      _onEditedSubscription = _rootRef.onChildChanged.listen(_onEntryChanged);
-      _onRemoveSubscription = _rootRef.onChildRemoved.listen(_onEntryRemoved);
+      _onAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
+      _onEditedSubscription =
+          _rootRef.onChildChanged.listen(_onRootEntryChanged);
+      _onRemoveSubscription =
+          _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
       if (map.isNotEmpty) {
         setState(() {
           _ctrlDomainName = map['domain'];
@@ -327,6 +345,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         // FirebaseDatabase.instance.setPersistenceEnabled(true);
         // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
       });
+
+      _loadNodeInfo();
 
       _demoItems = <DemoItem<dynamic>>[
         new DemoItem<String>(
@@ -500,6 +520,9 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     _onAddSubscription.cancel();
     _onEditedSubscription.cancel();
     _onRemoveSubscription.cancel();
+    _controlSub.cancel();
+    _statusSub.cancel();
+    _startupSub.cancel();
   }
 
   @override
@@ -512,13 +535,33 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         _isNeedCreate = update;
       });
       print('_isNeedCreate $_isNeedCreate');
+      DateTime _startupTime;
+      String diffTime;
+      Duration diff;
+      if (_connected == true) {
+        DateTime current = new DateTime.now();
+        _startupTime = new DateTime.fromMillisecondsSinceEpoch(
+            int.parse(_startup['time'].toString()) * 1000);
+        DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
+            int.parse(_status['time'].toString()) * 1000);
+        diff = current.difference(_heartbeatTime);
+        if (diff.inDays > 0) {
+          diffTime = '${diff.inDays} days';
+        } else if (diff.inHours > 0) {
+          diffTime = '${diff.inHours} hours';
+        } else if (diff.inMinutes > 0) {
+          diffTime = '${diff.inMinutes} minutes';
+        } else if (diff.inSeconds > 0) {
+          diffTime = '${diff.inSeconds} seconds';
+        }
+      }
       return new ListView(children: <Widget>[
         new SingleChildScrollView(
           child: new SafeArea(
             top: false,
             bottom: false,
-            child: new Container(
-              margin: const EdgeInsets.all(24.0),
+            child: new Card(
+              margin: const EdgeInsets.all(4.0),
               child: new ExpansionPanelList(
                   expansionCallback: (int index, bool isExpanded) {
                     setState(() {
@@ -534,21 +577,105 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
             ),
           ),
         ),
-        new ListTile(
-          leading: (_isNeedCreate == true)
-              ? (const Icon(Icons.link_off))
-              : (const Icon(Icons.link)),
-          title: const Text('Selected Device'),
-          subtitle: new Text('$_ctrlNodeName @ $_ctrlDomainName'),
-          trailing: new OutlineButton(
-            child: const Text('CONFIGURE'),
-            onPressed: (_isNeedCreate == true)
-                ? null
-                : () {
-                    Navigator.of(context).pushNamed(NodeSetup.routeName);
-                  },
-          ),
-        ),
+        new Card(
+            child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+              new ListTile(
+                leading: (_isNeedCreate == true)
+                    ? (const Icon(Icons.link_off))
+                    : (const Icon(Icons.link)),
+                title: const Text('Selected Device'),
+                subtitle: new Text('$_ctrlDomainName/$_ctrlNodeName'),
+                trailing: new OutlineButton(
+                  child: const Text('CONFIGURE'),
+                  onPressed: (_isNeedCreate == true)
+                      ? null
+                      : () {
+                          Navigator.of(context).pushNamed(NodeSetup.routeName);
+                        },
+                ),
+              ),
+            ])),
+        (_connected == false)
+            ? (const Text(''))
+            : (new Card(
+                child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    new ListTile(
+                      leading: (diff > time_limit)
+                          ? (new Icon(Icons.cloud, color: Colors.red[200]))
+                          : (new Icon(Icons.cloud_done,
+                              color: Colors.green[200])),
+                      title: new Text('HeartBeat: $diffTime ago'),
+                      subtitle: new Text('Device Memory: ${_status["heap"]}'),
+                    ),
+                    new ListTile(
+                      leading: (_control['reboot'] == kNodeUpdate)
+                          ? (new CircularProgressIndicator(
+                              value: null,
+                            ))
+                          : (const Icon(Icons.update)),
+                      title: const Text('Update Device'),
+                      subtitle: new Text('Configuration'),
+                      trailing: new OutlineButton(
+                        child: const Text('UPDATE'),
+                        onPressed: () {
+                          _nodeActionRequest(kNodeUpdate);
+                        },
+                      ),
+                    ),
+                    new ListTile(
+                      leading: (_control['reboot'] == kNodeReboot)
+                          ? (new CircularProgressIndicator(
+                              value: null,
+                            ))
+                          : (const Icon(Icons.power_settings_new)),
+                      title: const Text('PowerUp'),
+                      subtitle: new Text('${_startupTime.toString()}'),
+                      trailing: new OutlineButton(
+                        child: const Text('RESTART'),
+                        onPressed: () {
+                          _nodeActionRequest(kNodeReboot);
+                        },
+                      ),
+                    ),
+                    new ListTile(
+                      leading: (_control['reboot'] == kNodeFlash)
+                          ? (new CircularProgressIndicator(
+                              value: null,
+                            ))
+                          : (const Icon(Icons.system_update_alt)),
+                      title: const Text('Firmware Version'),
+                      subtitle: new Text('${_startup["version"]}'),
+                      trailing: new OutlineButton(
+                        child: const Text('UPGRADE'),
+                        onPressed: () {
+                          _nodeActionRequest(kNodeFlash);
+                        },
+                      ),
+                    ),
+                    new ListTile(
+                      leading: (_control['reboot'] == kNodeErase)
+                          ? (new CircularProgressIndicator(
+                              value: null,
+                            ))
+                          : (const Icon(Icons.delete_forever)),
+                      title: const Text('Erase device'),
+                      subtitle: new Text('${getOwner()}'),
+                      trailing: new OutlineButton(
+                        child: const Text('ERASE'),
+                        onPressed: () {
+                          _nodeActionRequest(kNodeFlash);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              )),
       ]);
     }
   }
@@ -583,7 +710,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
   }
 
-  void _onEntryAdded(Event event) {
+  void _onRootEntryAdded(Event event) {
     setState(() {
       print(event.snapshot.key);
       entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
@@ -599,15 +726,26 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     }
   }
 
-  void _onEntryChanged(Event event) {
+  void _onRootEntryChanged(Event event) {
     print('_onEntryChanged');
     entryMap[event.snapshot.key] = event.snapshot.value;
   }
 
-  void _onEntryRemoved(Event event) {
+  void _onRootEntryRemoved(Event event) {
     setState(() {
       entryMap.remove(event.snapshot.key);
     });
+  }
+
+  void _loadNodeInfo() {
+    _connected = false;
+    _controlTimeoutCnt = 0;
+    _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
+    _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
+    _startupRef = FirebaseDatabase.instance.reference().child(getStartupRef());
+    _controlSub = _controlRef.onValue.listen(_onValueControl);
+    _statusSub = _statusRef.onValue.listen(_onValueStatus);
+    _startupSub = _startupRef.onValue.listen(_onValueStartup);
   }
 
   void _changePreferences() {
@@ -618,8 +756,49 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
       ref.set(getControlDefault());
       ref = FirebaseDatabase.instance.reference().child(getStartupRef());
       ref.set(getStartupDefault());
-      ref = FirebaseDatabase.instance.reference().child(getStatusRef());
-      ref.set(getStatusDefault());
     }
+    _loadNodeInfo();
+  }
+
+  bool checkConnected() {
+    return ((_control != null) && (_status != null) && (_startup != null));
+  }
+
+  void _onValueControl(Event event) {
+    print('_onValueControl');
+    setState(() {
+      _control = event.snapshot.value;
+      _connected = checkConnected();
+    });
+  }
+
+  void _onValueStatus(Event event) {
+    print('_onValueStatus');
+    // update control time to keep up node
+    DateTime now = new DateTime.now();
+    setState(() {
+      if ((_control != null) && (_controlTimeoutCnt++ < 10)) {
+        _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
+        _controlRef.set(_control);
+      }
+      _status = event.snapshot.value;
+      _connected = checkConnected();
+    });
+  }
+
+  void _onValueStartup(Event event) {
+    print('_onValueStartup');
+    setState(() {
+      _startup = event.snapshot.value;
+      _connected = checkConnected();
+    });
+  }
+
+  void _nodeActionRequest(int value) {
+    _controlTimeoutCnt = 0;
+    _control['reboot'] = value;
+    DateTime now = new DateTime.now();
+    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
+    _controlRef.set(_control);
   }
 }
