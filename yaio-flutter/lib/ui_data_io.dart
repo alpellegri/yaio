@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'entries.dart';
 
-class DynamicDataWidget extends StatelessWidget {
+class DataValueWidget extends StatelessWidget {
   final IoEntry entry;
 
-  DynamicDataWidget(this.entry);
+  DataValueWidget(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +22,10 @@ class DynamicDataWidget extends StatelessWidget {
   }
 }
 
-class DataIoItemWidget extends StatelessWidget {
+class DataItemWidget extends StatelessWidget {
   final IoEntry entry;
 
-  DataIoItemWidget(this.entry);
+  DataItemWidget(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class DataIoItemWidget extends StatelessWidget {
                     ),
                   ],
                 )),
-                new DynamicDataWidget(entry),
+                new DataValueWidget(entry),
               ],
             ),
           ),
@@ -69,18 +69,18 @@ class DataIoItemWidget extends StatelessWidget {
   }
 }
 
-class DynamicEditWidget extends StatefulWidget {
+class DataConfigWidget extends StatefulWidget {
   final IoEntry data;
   final ValueChanged<IoEntry> onChangedValue;
 
-  DynamicEditWidget({Key key, this.data, this.onChangedValue})
+  DataConfigWidget({Key key, this.data, this.onChangedValue})
       : super(key: key);
 
   @override
-  _DynamicEditWidget createState() => new _DynamicEditWidget();
+  _DataConfigWidget createState() => new _DataConfigWidget();
 }
 
-class _DynamicEditWidget extends State<DynamicEditWidget> {
+class _DataConfigWidget extends State<DataConfigWidget> {
   IoEntry data;
   TextEditingController ctrl_1 = new TextEditingController();
   TextEditingController ctrl_2 = new TextEditingController();

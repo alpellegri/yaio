@@ -51,8 +51,8 @@ class _DataIOState extends State<DataIO> {
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entryList[index]),
-              child: new DataIoItemWidget(entryList[index]));
+              onTap: () => _openEntryEdit(entryList[index]),
+              child: new DataItemWidget(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -98,31 +98,31 @@ class _DataIOState extends State<DataIO> {
     }
   }
 
-  void _openEntryDialog(IoEntry entry) {
+  void _openEntryEdit(IoEntry entry) {
     Navigator.push(
         context,
         new MaterialPageRoute(
-          builder: (BuildContext context) => new DataIoDialogWidget(entry),
+          builder: (BuildContext context) => new DataEditScreen(entry),
           fullscreenDialog: true,
         ));
   }
 
   void _onFloatingActionButtonPressed() {
     final IoEntry entry = new IoEntry.setReference(_dataRef);
-    _openEntryDialog(entry);
+    _openEntryEdit(entry);
   }
 }
 
-class DataIoDialogWidget extends StatefulWidget {
+class DataEditScreen extends StatefulWidget {
   final IoEntry entry;
 
-  DataIoDialogWidget(this.entry);
+  DataEditScreen(this.entry);
 
   @override
-  _DataIoDialogWidgetState createState() => new _DataIoDialogWidgetState(entry);
+  _DataDataEditScreenState createState() => new _DataDataEditScreenState(entry);
 }
 
-class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
+class _DataDataEditScreenState extends State<DataEditScreen> {
   final IoEntry entry;
   final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getExecRef());
@@ -134,7 +134,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
 
-  _DataIoDialogWidgetState(this.entry);
+  _DataDataEditScreenState(this.entry);
 
   void _handleChangedValue(IoEntry newValue) {
     setState(() {
@@ -229,7 +229,7 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   ),
                 ]),
                 (entry.code != null)
-                    ? (new DynamicEditWidget(
+                    ? (new DataConfigWidget(
                         data: entry,
                         onChangedValue: _handleChangedValue,
                       ))

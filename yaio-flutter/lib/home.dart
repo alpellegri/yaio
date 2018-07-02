@@ -72,7 +72,7 @@ class _HomeState extends State<Home> {
                           // _nodeUpdate(kNodeUpdate);
                           _nodeRefresh();
                         },
-                        child: new DataIoItemWidget(entryList[index]),
+                        child: new DataItemWidget(entryList[index]),
                       );
                     } else {
                       return new InkWell(
@@ -85,7 +85,7 @@ class _HomeState extends State<Home> {
                                 fullscreenDialog: true,
                               ));
                         },
-                        child: new DataIoItemWidget(entryList[index]),
+                        child: new DataItemWidget(entryList[index]),
                       );
                     }
                   },
@@ -197,7 +197,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new DynamicEditWidget(
+              new DataConfigWidget(
                 data: entry,
                 onChangedValue: _handleChangedValue,
               ),
