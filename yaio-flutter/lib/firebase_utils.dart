@@ -34,7 +34,7 @@ FirebaseUser getFirebaseUser() {
   return _user;
 }
 
-Future<String> signInWithGoogle() async {
+Future<FirebaseUser> signInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
   final FirebaseUser user = await _auth.signInWithGoogle(
@@ -50,7 +50,7 @@ Future<String> signInWithGoogle() async {
   assert(user.uid == currentUser.uid);
   print(user);
   _user = user;
-  return 'signInWithGoogle succeeded: $user';
+  return user;
 }
 
 void updateUserRef() {
@@ -99,6 +99,10 @@ String getDomain() {
   return dDomain;
 }
 
+String getNode() {
+  return dNodeName;
+}
+
 Future<Map> loadPreferences() async {
   _prefs = await SharedPreferences.getInstance();
   _nodeConfigJson = _prefs.getString('node_config_json');
@@ -144,16 +148,6 @@ void savePreferencesSP(String ssid, String password) {
 
   _nodeConfigJson = json.encode(_nodeConfigMap);
   _prefs.setString('node_config_json', _nodeConfigJson);
-}
-
-String _token;
-
-String getFbToken() {
-  return _token;
-}
-
-void setFbToken(String token) {
-  _token = token;
 }
 
 String getRootRef() {

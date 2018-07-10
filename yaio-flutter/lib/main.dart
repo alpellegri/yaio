@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'drawer.dart';
-import 'device.dart';
+import 'login.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
           textTheme: ButtonTextTheme.accent,
         ),
       ),
-      home: new Device(title: 'Device'),
+      home: new Login(title: 'Login'),
       routes: menuRoutes,
     );
   }
