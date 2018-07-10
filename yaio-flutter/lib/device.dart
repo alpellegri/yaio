@@ -435,18 +435,20 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         child: new SafeArea(
           top: false,
           bottom: false,
-          child: new ExpansionPanelList(
-              expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  _demoItems[index].isExpanded = !isExpanded;
-                });
-              },
-              children: _demoItems.map((DemoItem<dynamic> item) {
-                return new ExpansionPanel(
-                    isExpanded: item.isExpanded,
-                    headerBuilder: item.headerBuilder,
-                    body: item.build());
-              }).toList()),
+          child: new Container(
+              margin: const EdgeInsets.all(16.0),
+              child: new ExpansionPanelList(
+                  expansionCallback: (int index, bool isExpanded) {
+                    setState(() {
+                      _demoItems[index].isExpanded = !isExpanded;
+                    });
+                  },
+                  children: _demoItems.map((DemoItem<dynamic> item) {
+                    return new ExpansionPanel(
+                        isExpanded: item.isExpanded,
+                        headerBuilder: item.headerBuilder,
+                        body: item.build());
+                  }).toList())),
         ),
       ),
       new Column(
@@ -592,11 +594,13 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         _nodeUpdate(domain, node);
       });
     }
+    _updateItemMenu();
   }
 
   void _onRootEntryChanged(Event event) {
     // print('_onEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     entryMap[event.snapshot.key] = event.snapshot.value;
+    _updateItemMenu();
   }
 
   void _onRootEntryRemoved(Event event) {
@@ -604,6 +608,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     setState(() {
       entryMap.remove(event.snapshot.key);
     });
+    _updateItemMenu();
   }
 
   void _loadNodeInfo() {
