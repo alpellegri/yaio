@@ -580,12 +580,12 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   }
 
   void _onRootEntryAdded(Event event) {
-    print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
-      print(event.snapshot.key);
+      // print(event.snapshot.key);
       entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
     });
-    print(_nodeNeedUpdate);
+    // print(_nodeNeedUpdate);
     if (_nodeNeedUpdate == true) {
       var domain = event.snapshot.key;
       // value contain a map of nodes, each key is the name of the node
@@ -604,7 +604,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   }
 
   void _onRootEntryRemoved(Event event) {
-    print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       entryMap.remove(event.snapshot.key);
     });
@@ -656,7 +656,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   }
 
   void _onValueControl(Event event) {
-    print('_onValueControl ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onValueControl ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       _control = event.snapshot.value;
       _connected = checkConnected();
@@ -664,7 +664,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   }
 
   void _onValueStatus(Event event) {
-    print('_onValueStatus ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onValueStatus ${event.snapshot.key} ${event.snapshot.value}');
     // update control time to keep up node
     DateTime now = new DateTime.now();
     setState(() {
@@ -678,7 +678,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   }
 
   void _onValueStartup(Event event) {
-    print('_onValueStartup ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onValueStartup ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       _startup = event.snapshot.value;
       _connected = checkConnected();
