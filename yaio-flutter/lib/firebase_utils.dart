@@ -81,14 +81,14 @@ void updateNodeRef(Map config) {
   dTHRef = '$prefixData/$kTHRef';
   dDomain = config['domain'];
   dNodeName = config['nodename'];
-  print('dControlRef: $dControlRef');
-  print('dStatusRef: $dStatusRef');
-  print('dStartupRef: $dStartupRef');
-  print('dDataRef: $dDataRef');
-  print('dExecRef: $dExecRef');
-  print('dMessagesRef: $dMessagesRef');
-  print('dLogRef: $dLogRef');
-  print('dTHRef: $dTHRef');
+  // print('dControlRef: $dControlRef');
+  // print('dStatusRef: $dStatusRef');
+  // print('dStartupRef: $dStartupRef');
+  // print('dDataRef: $dDataRef');
+  // print('dExecRef: $dExecRef');
+  // print('dMessagesRef: $dMessagesRef');
+  // print('dLogRef: $dLogRef');
+  // print('dTHRef: $dTHRef');
 }
 
 String getOwner() {
