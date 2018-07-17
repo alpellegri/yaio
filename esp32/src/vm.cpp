@@ -48,8 +48,7 @@ void VM_readIn(void) {
       pinMode(pin, INPUT);
       uint32_t value = digitalRead(pin);
       if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value,
-                    entry.value.c_str());
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -61,15 +60,13 @@ void VM_readIn(void) {
         DEBUG_PRINT("get: kPhyOut\n");
         String kdata;
         FbSetPath_data(kdata);
-        uint32_t value =
-            Firebase.getInt(kdata + "/" + entry.key + "/value");
+        uint32_t value = Firebase.getInt(kdata + "/" + entry.key + "/value");
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kPhyOut %s\n", entry.key.c_str());
         } else {
           uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(),
-                        value, entry.value.c_str());
+            DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
@@ -82,8 +79,7 @@ void VM_readIn(void) {
       uint32_t v = atoi(entry.value.c_str());
       uint32_t value = PHT_GetTemperature();
       if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value,
-                    entry.value.c_str());
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -94,8 +90,7 @@ void VM_readIn(void) {
       uint32_t v = atoi(entry.value.c_str());
       uint32_t value = PHT_GetHumidity();
       if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value,
-                    entry.value.c_str());
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -105,9 +100,8 @@ void VM_readIn(void) {
     case kRadioRx: {
       uint32_t v = atoi(entry.value.c_str());
       uint32_t value = RF_GetRadioCode();
-      if (v!= value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value,
-                    entry.value.c_str());
+      if (v != value) {
+        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -119,16 +113,14 @@ void VM_readIn(void) {
         DEBUG_PRINT("get: kBool\n");
         String kdata;
         FbSetPath_data(kdata);
-        bool value =
-            Firebase.getBool(kdata + "/" + entry.key + "/value");
+        bool value = Firebase.getBool(kdata + "/" + entry.key + "/value");
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kBool %s\n", entry.key.c_str());
           UpdateDataFault = true;
         } else {
           uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", entry.key.c_str(),
-                        value);
+            DEBUG_PRINT("VM_readIn: %s, %d\n", entry.key.c_str(), value);
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
@@ -141,16 +133,14 @@ void VM_readIn(void) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
         FbSetPath_data(kdata);
-        uint32_t value =
-            Firebase.getInt(kdata + "/" + entry.key + "/value");
+        uint32_t value = Firebase.getInt(kdata + "/" + entry.key + "/value");
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kInt %s\n", entry.key.c_str());
           UpdateDataFault = true;
         } else {
           uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", entry.key.c_str(),
-                        value);
+            DEBUG_PRINT("VM_readIn: %s, %d\n", entry.key.c_str(), value);
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
@@ -252,8 +242,7 @@ void VM_writeOut(void) {
         }
       } break;
       case kMessaging: {
-        DEBUG_PRINT("VM_writeOut: kMessaging %s\n",
-                    entry.value.c_str());
+        DEBUG_PRINT("VM_writeOut: kMessaging %s\n", entry.value.c_str());
         fblog_log(entry.value, true);
         entry.wb = false;
       } break;
