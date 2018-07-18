@@ -77,7 +77,7 @@ bool AP_Setup(void) {
   IPAddress ip(192, 168, 2, 1);
 
   WiFi.disconnect();
-  WiFi.softAPdisconnect(true);
+  // WiFi.softAPdisconnect(true);
 
   enable_WiFi_Scan = EE_LoadData();
 
