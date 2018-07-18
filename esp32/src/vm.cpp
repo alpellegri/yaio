@@ -48,7 +48,7 @@ void VM_readIn(void) {
       pinMode(pin, INPUT);
       uint32_t value = digitalRead(pin);
       if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
+        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -66,7 +66,7 @@ void VM_readIn(void) {
         } else {
           uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
+            DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
@@ -77,9 +77,10 @@ void VM_readIn(void) {
     } break;
     case kDhtTemperature: {
       uint32_t v = atoi(entry.value.c_str());
-      uint32_t value = PHT_GetTemperature();
-      if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
+      uint16_t value;
+      bool res = PHT_GetTemperature(&value);
+      if ((res == true)&&(v != value)) {
+        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -88,9 +89,10 @@ void VM_readIn(void) {
     } break;
     case kDhtHumidity: {
       uint32_t v = atoi(entry.value.c_str());
-      uint32_t value = PHT_GetHumidity();
-      if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
+      uint16_t value;
+      bool res = PHT_GetHumidity(&value);
+      if ((res == true)&&(v != value)) {
+        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;
@@ -101,7 +103,7 @@ void VM_readIn(void) {
       uint32_t v = atoi(entry.value.c_str());
       uint32_t value = RF_GetRadioCode();
       if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", entry.key.c_str(), value, v);
+        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
         entry.value = value;
         entry.ev = true;
         entry.ev_value = value;

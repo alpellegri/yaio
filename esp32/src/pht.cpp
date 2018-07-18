@@ -6,19 +6,20 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 
-#include "pht.h"
 #include "debug.h"
+#include "pht.h"
 
-#define DHTPIN D6
+#define DHTPIN D6 // 12
 #define DHTTYPE DHT22
 
 DHT *dht;
 static uint8_t pht_state;
+static bool pht_init;
 static uint8_t pht_pin;
-static uint32_t pht_period;
+static uint16_t pht_period;
 static uint32_t schedule_time;
-static uint32_t humidity_data;
-static uint32_t temperature_data;
+static uint16_t humidity_data;
+static uint16_t temperature_data;
 
 void PHT_Set(uint8_t pin, uint32_t period) {
   DEBUG_PRINT("DHT_Set %d, %d\n", pin, period);
@@ -27,8 +28,14 @@ void PHT_Set(uint8_t pin, uint32_t period) {
   pht_state = 1;
 }
 
-uint32_t PHT_GetTemperature(void) { return temperature_data; }
-uint32_t PHT_GetHumidity(void) { return humidity_data; }
+bool PHT_GetTemperature(uint16_t *t) {
+  *t = temperature_data;
+  return pht_init;
+}
+bool PHT_GetHumidity(uint16_t *h) {
+  *h = humidity_data;
+  return pht_init;
+}
 
 /* main function task */
 void PHT_Service(void) {
@@ -41,6 +48,7 @@ void PHT_Service(void) {
     dht = new DHT(pht_pin, DHTTYPE);
     dht->begin();
     pht_state = 2;
+    pht_init = false;
     break;
   case 2:
     if ((current_time - schedule_time) > pht_period) {
@@ -51,6 +59,7 @@ void PHT_Service(void) {
       if (isnan(h) || isnan(t)) {
         DEBUG_PRINT("dht sensor error\n");
       } else {
+        pht_init = true;
         humidity_data = 10 * h;
         temperature_data = 10 * t;
       }
