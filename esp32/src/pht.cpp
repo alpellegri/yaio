@@ -77,12 +77,12 @@ void PHT_Service(void) {
           IoEntry &entry = FB_getIoEntry(i);
           // uint32_t v = entry.ioctl;
           if (entry.code == kDhtHumidity) {
-            pht_humidity = 10 * (humidity + 0.05);
+            pht_humidity = 100 * (humidity + 0.05);
             entry.value = String(pht_humidity);
             entry.wb = true;
           }
           if (entry.code == kDhtTemperature) {
-            pht_temperature = 10 * (temperature + 0.05);
+            pht_temperature = 100 * (temperature + 0.05);
             entry.value = String(pht_temperature);
             entry.wb = true;
           }
@@ -101,13 +101,13 @@ void PHT_Service(void) {
         IoEntry &entry = FB_getIoEntry(i);
         // uint32_t v = entry.ioctl;
         if (entry.code == kDhtHumidity) {
-          pht_humidity = 10 * (humidity + 0.05);
+          pht_humidity = 100 * (humidity + 0.05);
           entry.value = String(pht_humidity);
           entry.ev = true;
           entry.wb = true;
         }
         if (entry.code == kDhtTemperature) {
-          pht_temperature = 10 * (temperature + 0.05);
+          pht_temperature = 100 * (temperature + 0.05);
           entry.value = String(pht_temperature);
           entry.ev = true;
           entry.wb = true;
