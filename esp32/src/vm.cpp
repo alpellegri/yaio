@@ -75,30 +75,6 @@ void VM_readIn(void) {
         }
       }
     } break;
-    case kDhtTemperature: {
-      uint32_t v = atoi(entry.value.c_str());
-      uint16_t value;
-      bool res = PHT_GetTemperature(&value);
-      if ((res == true)&&(v != value)) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
-        entry.value = value;
-        entry.ev = true;
-        entry.ev_value = value;
-        entry.wb = true;
-      }
-    } break;
-    case kDhtHumidity: {
-      uint32_t v = atoi(entry.value.c_str());
-      uint16_t value;
-      bool res = PHT_GetHumidity(&value);
-      if ((res == true)&&(v != value)) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
-        entry.value = value;
-        entry.ev = true;
-        entry.ev_value = value;
-        entry.wb = true;
-      }
-    } break;
     case kRadioRx: {
       uint32_t v = atoi(entry.value.c_str());
       uint32_t value = RF_GetRadioCode();
@@ -165,8 +141,8 @@ uint8_t VM_findEvent(uint32_t *ev_value) {
   while ((i < FB_getIoEntryLen()) && (idx == 0xFF)) {
     IoEntry &entry = FB_getIoEntry(i);
     if (entry.ev == true) {
-      // DEBUG_PRINT("VM_findEvent found: %d\n", i);
-      entry.ev = false;
+      DEBUG_PRINT("VM_findEvent found: %d\n", i);
+      // entry.ev = false;
       *ev_value = entry.ev_value;
       idx = i;
     }
@@ -197,10 +173,7 @@ void VM_writeOut(void) {
       } break;
       case kPhyIn:
       case kDhtTemperature:
-      case kDhtHumidity:
-      case kRadioIn:
-      case kRadioRx:
-      case kInt: {
+      case kDhtHumidity: {
         uint32_t value = atoi(entry.value.c_str());
         DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), value);
         String ref;
@@ -210,48 +183,90 @@ void VM_writeOut(void) {
           DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                       entry.key.c_str());
         } else {
-          if (entry.enLog == true) {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
-            json["t"] = getTime();
-            json["v"] = value;
-            String strdata;
-            json.printTo(strdata);
-            FbSetPath_log(ref);
-            Firebase.pushJSON(ref + "/" + entry.key, strdata);
-            if (Firebase.failed() == true) {
-              DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
-                          entry.key.c_str());
-            } else {
-              entry.wb = false;
-            }
-          } else {
-            entry.wb = false;
-          }
-        }
-      } break;
-      case kBool: {
-        bool value = atoi(entry.value.c_str());
-        DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
-        String ref;
-        FbSetPath_data(ref);
-        Firebase.setBool(ref + "/" + entry.key + "/value", value);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
-                      entry.key.c_str());
-        } else {
           entry.wb = false;
         }
-      } break;
-      case kMessaging: {
-        DEBUG_PRINT("VM_writeOut: kMessaging %s\n", entry.value.c_str());
-        fblog_log(entry.value, true);
-        entry.wb = false;
       } break;
       default:
         // DEBUG_PRINT("VM_writeOut: error\n");
         break;
       }
+    }
+  }
+}
+
+void VM_writeEventOut(void) {
+  /* loop over data elements looking for write-back requests */
+  for (uint8_t i = 0; i < FB_getIoEntryLen(); i++) {
+    IoEntry &entry = FB_getIoEntry(i);
+    if (entry.ev == true) {
+      if (entry.wb == true) {
+        switch (entry.code) {
+        case kPhyOut: {
+          uint32_t v = atoi(entry.value.c_str());
+          uint8_t pin = entry.ioctl;
+          pinMode(pin, OUTPUT);
+          digitalWrite(pin, v);
+          entry.wb = false;
+        } break;
+        case kPhyIn:
+        case kDhtTemperature:
+        case kDhtHumidity:
+        case kRadioIn:
+        case kRadioRx:
+        case kInt: {
+          uint32_t value = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeEventOut: %s: %d\n", entry.key.c_str(), value);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setInt(ref + "/" + entry.key + "/value", value);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            if (entry.enLog == true) {
+              DynamicJsonBuffer jsonBuffer;
+              JsonObject &json = jsonBuffer.createObject();
+              json["t"] = getTime();
+              json["v"] = value;
+              String strdata;
+              json.printTo(strdata);
+              FbSetPath_log(ref);
+              Firebase.pushJSON(ref + "/" + entry.key, strdata);
+              if (Firebase.failed() == true) {
+                DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
+                            entry.key.c_str());
+              } else {
+                entry.wb = false;
+              }
+            } else {
+              entry.wb = false;
+            }
+          }
+        } break;
+        case kBool: {
+          bool value = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setBool(ref + "/" + entry.key + "/value", value);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            entry.wb = false;
+          }
+        } break;
+        case kMessaging: {
+          DEBUG_PRINT("VM_writeOut: kMessaging %s\n", entry.value.c_str());
+          fblog_log(entry.value, true);
+          entry.wb = false;
+        } break;
+        default:
+          // DEBUG_PRINT("VM_writeOut: error\n");
+          break;
+        }
+      }
+      entry.ev = false;
     }
   }
 }
@@ -485,7 +500,11 @@ void VM_run(void) {
                     funcvec[pc].code, ctx.ACC, ctx.V);
       }
     }
-    VM_writeOut();
+    VM_writeEventOut();
     DEBUG_PRINT("VM_run stop <<<<<<<<<<<<<\n");
+  }
+
+  if (FBM_monitorActive() == true) {
+    VM_writeOut();
   }
 }

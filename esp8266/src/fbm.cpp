@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fblog.h"
@@ -17,7 +18,6 @@
 #include "timesrv.h"
 #include "vers.h"
 #include "vm.h"
-#include "debug.h"
 
 #define FBM_UPDATE_MONITOR_FAST (1)
 #define FBM_UPDATE_MONITOR_SLOW (5)
@@ -32,7 +32,9 @@ static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
-String FBM_getResetReason() { return ESP.getResetReason(); }
+bool FBM_monitorActive(void) { return fbm_monitor_run; }
+
+String FBM_getResetReason(void) { return ESP.getResetReason(); }
 
 /* main function task */
 void FbmService(void) {

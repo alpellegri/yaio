@@ -6,8 +6,7 @@
 
 #include "ee.h"
 #include "sta.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define LED 13
 #define LED_OFF LOW

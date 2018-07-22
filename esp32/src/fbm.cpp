@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fblog.h"
@@ -17,7 +18,6 @@
 #include "timesrv.h"
 #include "vers.h"
 #include "vm.h"
-#include "debug.h"
 #include <rom/rtc.h>
 
 #define FBM_UPDATE_MONITOR_FAST (1)
@@ -32,6 +32,8 @@ static uint16_t bootcnt = 0;
 static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
+
+bool FBM_monitorActive(void) { return fbm_monitor_run; }
 
 String verbose_print_reset_reason(RESET_REASON reason) {
   String result;

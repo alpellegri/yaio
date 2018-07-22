@@ -138,6 +138,7 @@ void RF_Service(void) {
       entry.value = String(value);
       entry.ev = true;
       entry.ev_value = value;
+      entry.wb = true;
       DEBUG_PRINT("RF_Service key=%s, value=%s\n", entry.key.c_str(),
                   entry.value.c_str());
     }
