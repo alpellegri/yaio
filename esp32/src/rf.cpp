@@ -52,7 +52,10 @@ void RF_SetTxPin(uint8_t pin) {
   rfHandle.enableTransmit(pin);
 }
 
-void RF_Send(uint32_t data, uint8_t bits) { rfHandle.send(data, bits); }
+void RF_Send(uint32_t data, uint8_t bits) {
+  DEBUG_PRINT("RF_Send %d, %d\n", data, bits);
+  rfHandle.send(data, bits);
+}
 
 bool RF_GetRadioEv(void) {
   bool ev = RadioEv;
@@ -61,8 +64,6 @@ bool RF_GetRadioEv(void) {
   }
   return ev;
 }
-
-uint32_t RF_GetRadioCode(void) { return RadioCode; }
 
 // avoid receiving multiple code from same telegram
 void ICACHE_RAM_ATTR RF_Unmask(void) { RFRcvTimer.detach(); }
@@ -102,26 +103,6 @@ void RF_Loop() {
   }
 }
 
-uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
-  uint8_t i = 0;
-  uint8_t id = 0xFF;
-
-  uint8_t len = FB_getIoEntryLen();
-
-  DEBUG_PRINT("RF_CheckRadioCodeDB: code %d\n", radioid);
-  while ((i < len) && (id == 0xFF)) {
-    IoEntry entry = FB_getIoEntry(i);
-    uint32_t v = entry.ioctl;
-    if ((radioid == v) && (entry.code == kRadioIn)) {
-      DEBUG_PRINT("radio code found in table %d\n", radioid);
-      id = i;
-    }
-    i++;
-  }
-
-  return id;
-}
-
 /* main function task */
 void RF_Service(void) {
   uint32_t ev = RF_GetRadioEv();
@@ -130,17 +111,24 @@ void RF_Service(void) {
     uint8_t data_bits = (RadioCodeLen > 24) ? (RadioCodeLen - 24) : (0);
     RadioId = RadioCode >> data_bits;
 
-    uint8_t id = RF_checkRadioInCodeDB(RadioId);
-    DEBUG_PRINT("RF_Service id %d\n", id);
-    if (id != 0xFF) {
+    for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
       IoEntry &entry = FB_getIoEntry(id);
-      uint8_t value = RadioCode & ((1 << data_bits) - 1);
-      entry.value = String(value);
-      entry.ev = true;
-      entry.ev_value = value;
-      entry.wb = true;
-      DEBUG_PRINT("RF_Service key=%s, value=%s\n", entry.key.c_str(),
-                  entry.value.c_str());
+      if (entry.code == kRadioRx) {
+        DEBUG_PRINT("RF_Service: %s, %d\n", entry.key.c_str(), RadioCode);
+        entry.value = RadioCode;
+        entry.ev = true;
+        entry.ev_value = RadioCode;
+        entry.wb = true;
+      }
+
+      if ((entry.code == kRadioIn) && (entry.ioctl == RadioId)) {
+        uint8_t value = RadioCode & ((1 << data_bits) - 1);
+        DEBUG_PRINT("RF_Service: %s, %d\n", entry.key.c_str(), RadioCode);
+        entry.value = String(value);
+        entry.ev = true;
+        entry.ev_value = value;
+        entry.wb = true;
+      }
     }
   }
 }

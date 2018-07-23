@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
 #include "vm.h"
-#include "debug.h"
 
 #define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH

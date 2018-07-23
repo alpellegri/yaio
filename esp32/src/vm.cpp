@@ -75,19 +75,8 @@ void VM_readIn(void) {
         }
       }
     } break;
-    case kRadioRx: {
-      uint32_t v = atoi(entry.value.c_str());
-      uint32_t value = RF_GetRadioCode();
-      if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
-        entry.value = value;
-        entry.ev = true;
-        entry.ev_value = value;
-        entry.wb = true;
-      }
-    } break;
     case kBool: {
-      if (VM_UpdateDataPending == true) {
+      if ((entry.cb != NULL) && (VM_UpdateDataPending == true)) {
         DEBUG_PRINT("get: kBool\n");
         String kdata;
         FbSetPath_data(kdata);
@@ -107,7 +96,7 @@ void VM_readIn(void) {
       }
     } break;
     case kInt: {
-      if (VM_UpdateDataPending == true) {
+      if ((entry.cb != NULL) && (VM_UpdateDataPending == true)) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
         FbSetPath_data(kdata);
@@ -169,6 +158,11 @@ void VM_writeOut(void) {
         uint8_t pin = entry.ioctl;
         pinMode(pin, OUTPUT);
         digitalWrite(pin, v);
+        entry.wb = false;
+      } break;
+      case kRadioTx: {
+        uint32_t v = atoi(entry.value.c_str());
+        RF_Send(v, 24);
         entry.wb = false;
       } break;
       case kPhyIn:

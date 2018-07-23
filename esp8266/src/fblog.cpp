@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fcm.h"
 #include "firebase.h"
 #include "timesrv.h"
-#include "debug.h"
 
 void fblog_log(String message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;

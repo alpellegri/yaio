@@ -6,13 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
 #include "vm.h"
-#include "debug.h"
 
 #define LED 13
 #define LED_OFF LOW
