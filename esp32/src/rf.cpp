@@ -70,8 +70,17 @@ void ICACHE_RAM_ATTR RF_Unmask(void) { RFRcvTimer.detach(); }
 
 void RF_Setup() {
 #ifdef USE_CC1101
+  uint8_t data[3];
   rfHandle.setSoftCS(4);
   rfHandle.begin();
+  data[0] = rfHandle.readStatus(CC1101_VERSION);
+  data[1] = rfHandle.readReg(CC1101_PKTCTRL0);
+  data[2] = rfHandle.readReg(CC1101_MDMCFG2);
+  if ((data[0] == 20) && (data[1] == 50) && (data[2] == 48)) {
+    DEBUG_PRINT("CC1101 ok\n");
+  } else {
+    DEBUG_PRINT("CC1101 fail\n");
+  }
 #endif
 }
 

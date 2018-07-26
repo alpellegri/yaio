@@ -51,9 +51,6 @@ public:
   std::vector<FuncEntry> funcvec;
 };
 
-// extern std::vector<IoEntry> IoEntryVec;
-// extern std::vector<ProgEntry> ProgVec;
-
 extern void FB_deinitIoEntryDB(void);
 extern void FB_deinitProgDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);

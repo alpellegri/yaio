@@ -10,7 +10,10 @@
 #include "fbutils.h"
 #include "pht.h"
 
-#define SAMPLE_PERIOD 5000
+#define SAMPLE_PERIOD 60000
+
+#define fir(y, x) (0.95 * (y) + 0.05 * (x))
+
 // #define DHTPIN D6 // 12
 #define DHTTYPE DHT22
 
@@ -67,8 +70,8 @@ void PHT_Service(void) {
       if (isnan(h) || isnan(t)) {
         DEBUG_PRINT("dht sensor error\n");
       } else {
-        humidity = 0.9 * humidity + 0.1 * h;
-        temperature = 0.9 * temperature + 0.1 * t;
+        humidity = fir(humidity, h);
+        temperature = fir(temperature, t);
         // DEBUG_PRINT("pht: %f, %f\n", humidity, temperature);
 
         uint8_t len = FB_getIoEntryLen();
