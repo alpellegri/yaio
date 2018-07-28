@@ -289,7 +289,7 @@ class IoEntry {
         break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
-        v = value * .01;
+        v = .01 * value;
         break;
       case DataCode.Timer:
         // binary values

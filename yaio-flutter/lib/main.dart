@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Raleway',
         primaryColor: Colors.blue[800],
         // brightness: Brightness.dark,
-        accentColor: Colors.blueAccent[500],
+        accentColor: Colors.blueAccent[600],
         //toggleableActiveColor: Colors.deepPurple[200],
         // buttonColor: Colors.amber[200],
         buttonTheme: const ButtonThemeData(
