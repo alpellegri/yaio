@@ -94,7 +94,7 @@ class _LoginState extends State<Login> {
       ),
       body: (_connected == false)
           ? (new LinearProgressIndicator(value: null))
-          : (new Text('logged in')),
+          : (new Text('Welcome to Yaio')),
     );
   }
 }

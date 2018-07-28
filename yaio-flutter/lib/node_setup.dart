@@ -89,80 +89,77 @@ class _NodeSetupState extends State<NodeSetup> {
         title: new Text(widget.title),
       ),
       body: new ListView(children: <Widget>[
-        new Card(
-          child: new Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              new Container(
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    const SizedBox(width: 16.0),
-                    new Icon(Icons.router),
-                    const SizedBox(width: 32.0),
-                    new Expanded(child: new Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          new TextField(
-                            controller: _ctrlSSID,
-                            decoration: const InputDecoration(
-                              border: const UnderlineInputBorder(),
-                              hintText: 'Access Point Name',
-                              labelText: 'WiFi NAME *',
-                            ),
+        new Column(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            new Container(
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  const SizedBox(width: 16.0),
+                  new Icon(Icons.router),
+                  const SizedBox(width: 32.0),
+                  new Expanded(
+                      child: new Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                        new TextField(
+                          controller: _ctrlSSID,
+                          decoration: const InputDecoration(
+                            border: const UnderlineInputBorder(),
+                            hintText: 'Access Point Name',
+                            labelText: 'WiFi NAME *',
                           ),
-                          const SizedBox(height: 12.0),
-                          new TextField(
-                            controller: _ctrlPassword,
-                            decoration: const InputDecoration(
-                              border: const UnderlineInputBorder(),
-                              hintText: 'Access Point Password',
-                              labelText: 'WiFi PASSWORD *',
-                            ),
+                        ),
+                        const SizedBox(height: 12.0),
+                        new TextField(
+                          controller: _ctrlPassword,
+                          decoration: const InputDecoration(
+                            border: const UnderlineInputBorder(),
+                            hintText: 'Access Point Password',
+                            labelText: 'WiFi PASSWORD *',
                           ),
-                          const SizedBox(height: 12.0),
-                        ]
-                    )),
-                    const SizedBox(width: 32.0),
-                    new OutlineButton(
-                      child: const Text('SAVE'),
-                      onPressed: () {
-                        savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
-                        setState(() {
-                          _nodeConfigJson = json.encode(_prefs);
-                        });
-                      },
-                    ),
-                    const SizedBox(width: 16.0),
-                  ],
-                ),
+                        ),
+                        const SizedBox(height: 12.0),
+                      ])),
+                  const SizedBox(width: 32.0),
+                  new FlatButton(
+                    textColor: Theme.of(context).accentColor,
+                    child: const Text('SAVE'),
+                    onPressed: () {
+                      savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
+                      setState(() {
+                        _nodeConfigJson = json.encode(_prefs);
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 16.0),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        new Card(
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new ListTile(
-                leading: const Icon(Icons.developer_board),
-                title: new Text('${_prefs["domain"]}'),
-                subtitle: new Text('${_prefs["nodename"]}'),
-                trailing: new OutlineButton(
-                  child: const Text('SUBMIT'),
-                  onPressed: _sendParameters,
-                ),
+        new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            new ListTile(
+              leading: const Icon(Icons.developer_board),
+              title: new Text('${_prefs["domain"]}'),
+              subtitle: new Text('${_prefs["nodename"]}'),
+              trailing: new FlatButton(
+                textColor: Theme.of(context).accentColor,
+                child: const Text('SUBMIT'),
+                onPressed: _sendParameters,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        new Card(
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new Text('$_nodeConfigJson'),
-            ],
-          ),
+        new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            new Text('Configuration file'),
+            new Text('$_nodeConfigJson'),
+          ],
         ),
       ]),
       floatingActionButton: new FloatingActionButton(
@@ -181,7 +178,7 @@ class _NodeSetupState extends State<NodeSetup> {
     print('_openCb');
     setState(() {
       _connStatus = true;
-      _iconConnStatus = const Icon(Icons.settings_remote, color: Colors.red);
+      _iconConnStatus = const Icon(Icons.settings_remote, color: Colors.green);
     });
   }
 
