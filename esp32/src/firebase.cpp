@@ -141,7 +141,7 @@ String FirebaseRest::getString(const String &path) {
 
 bool FirebaseRest::getBool(const String &path) {
   String res = RestApi(METHOD_GET, path.c_str(), "").c_str();
-  return res.toInt();
+  return res.equals("true");
 }
 
 void FirebaseRest::remove(const String &path) {
