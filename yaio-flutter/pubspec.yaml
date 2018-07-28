@@ -57,3 +57,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies, 
   # see https://flutter.io/custom-fonts/#from-packages
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: asset/fonts/raleway/Raleway-Regular.ttf
+        - asset: asset/fonts/raleway/Raleway-Medium.ttf
+        - asset: asset/fonts/raleway/Raleway-SemiBold.ttf
+          style: italic

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -95,7 +94,7 @@ class _LoginState extends State<Login> {
       ),
       body: (_connected == false)
           ? (new LinearProgressIndicator(value: null))
-          : (new Text('login')),
+          : (new Text('logged in')),
     );
   }
 }

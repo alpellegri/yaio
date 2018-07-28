@@ -8,12 +8,14 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Yaio',
       theme: new ThemeData(
-        //brightness: Brightness.dark,
-        //accentColor: Colors.amber[200],
-        //toggleableActiveColor: Colors.amber[200],
+        fontFamily: 'Raleway',
+        primaryColor: Colors.blue[800],
+        // brightness: Brightness.dark,
+        accentColor: Colors.blueAccent[500],
+        //toggleableActiveColor: Colors.deepPurple[200],
         // buttonColor: Colors.amber[200],
         buttonTheme: const ButtonThemeData(
-          //textTheme: ButtonTextTheme.accent,
+          // textTheme: ButtonTextTheme.accent,
         ),
       ),
       home: new Login(title: 'Login'),

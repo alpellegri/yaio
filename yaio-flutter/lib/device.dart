@@ -461,7 +461,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   : (const Icon(Icons.link)),
               title: const Text('Selected Device'),
               subtitle: new Text('$_ctrlDomainName/$_ctrlNodeName'),
-              trailing: new OutlineButton(
+              trailing: new FlatButton(
+                textColor: Theme.of(context).accentColor,
                 child: const Text('CONFIGURE'),
                 onPressed: (_isNeedCreate == true)
                     ? null
@@ -492,7 +493,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                       : (const Icon(Icons.update)),
                   title: const Text('Update Device'),
                   subtitle: new Text('Configuration'),
-                  trailing: new OutlineButton(
+                  trailing: new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('UPDATE'),
                     onPressed: () {
                       _nodeActionRequest(kNodeUpdate);
@@ -507,7 +509,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                       : (const Icon(Icons.power_settings_new)),
                   title: const Text('PowerUp'),
                   subtitle: new Text('${_startupTime.toString()}'),
-                  trailing: new OutlineButton(
+                  trailing: new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('RESTART'),
                     onPressed: () {
                       _nodeActionRequest(kNodeReboot);
@@ -522,7 +525,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                       : (const Icon(Icons.system_update_alt)),
                   title: const Text('Firmware Version'),
                   subtitle: new Text('${_startup["version"]}'),
-                  trailing: new OutlineButton(
+                  trailing: new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('UPGRADE'),
                     onPressed: () {
                       _nodeActionRequest(kNodeFlash);
@@ -537,7 +541,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                       : (const Icon(Icons.delete_forever)),
                   title: const Text('Erase device'),
                   subtitle: new Text('${getOwner()}'),
-                  trailing: new OutlineButton(
+                  trailing: new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('ERASE'),
                     onPressed: () {
                       _nodeActionRequest(kNodeFlash);

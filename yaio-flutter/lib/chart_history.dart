@@ -48,7 +48,7 @@ class _ChartHistoryState extends State<ChartHistory> {
         title: new Text(name),
       ),
       body: (seriesList.length == 0)
-          ? (const Text('hello'))
+          ? (const Text(''))
           : (new Padding(
               padding: const EdgeInsets.all(8.0),
               child: new SizedBox(
@@ -92,7 +92,7 @@ class _ChartHistoryState extends State<ChartHistory> {
     charts.Series<TimeSeries, DateTime> Serie =
         new charts.Series<TimeSeries, DateTime>(
       id: 'Sales',
-      // colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
       domainFn: (TimeSeries sales, _) => sales.time,
       measureFn: (TimeSeries sales, _) => sales.value,
       data: data,
