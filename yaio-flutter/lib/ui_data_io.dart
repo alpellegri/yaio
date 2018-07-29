@@ -51,7 +51,7 @@ class DataItemWidget extends StatelessWidget {
                     ),
                     new Text(
                       '${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textScaleFactor: 1.0,
+                      // textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,

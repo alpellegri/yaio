@@ -167,7 +167,10 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
           title: new Text((entry.key != null) ? entry.key : 'Data IO TBD'),
           actions: <Widget>[
             new FlatButton(
-                child: const Text('REMOVE'),
+                child: const Text(
+                  'REMOVE',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onPressed: () {
                   if (entry.exist == true) {
                     entry.reference.child(entry.key).remove();
@@ -175,7 +178,10 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
                   Navigator.pop(context, null);
                 }),
             new FlatButton(
-                child: const Text('SAVE'),
+                child: const Text(
+                  'SAVE',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onPressed: () {
                   entry.key = _controllerName.text;
                   try {

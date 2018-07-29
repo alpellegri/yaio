@@ -23,6 +23,8 @@ class ExecListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     new Text(
                       '${entry.key}',
@@ -30,8 +32,6 @@ class ExecListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                   ],
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                 ),
               ],
             ),

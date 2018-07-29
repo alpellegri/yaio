@@ -481,8 +481,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               children: <Widget>[
                 new ListTile(
                   leading: (diff > time_limit)
-                      ? (new Icon(Icons.cloud_queue, color: Colors.grey[500]))
-                      : (new Icon(Icons.cloud_done, color: Colors.green[200])),
+                      ? (new Icon(Icons.cloud_queue, color: Colors.red[400]))
+                      : (new Icon(Icons.cloud_done, color: Colors.green[400])),
                   title: new Text('HeartBeat: $diffTime ago'),
                   subtitle: new Text('Device Memory: ${_status["heap"]}'),
                 ),
