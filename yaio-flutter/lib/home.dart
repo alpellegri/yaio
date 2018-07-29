@@ -154,9 +154,8 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
   final IoEntry entry;
 
   void _handleChangedValue(IoEntry newValue) {
-    // print('_handleTapboxChanged $newValue');
+    print('_handleTapboxChanged ${newValue.value}');
     entry.value = newValue.value;
-    entry.ioctl = newValue.ioctl;
   }
 
   _DataIoShortDialogWidgetState(this.entry);
