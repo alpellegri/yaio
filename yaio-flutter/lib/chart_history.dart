@@ -27,7 +27,7 @@ class _ChartHistoryState extends State<ChartHistory> {
     _entryRef =
         FirebaseDatabase.instance.reference().child('${getLogRef()}/$name');
     _onAddSubscription =
-        _entryRef.limitToLast(1000).onValue.listen(_onEntryAdded);
+        _entryRef.limitToLast(400).onValue.listen(_onEntryAdded);
   }
 
   @override
@@ -52,7 +52,7 @@ class _ChartHistoryState extends State<ChartHistory> {
           : (new Padding(
               padding: const EdgeInsets.all(8.0),
               child: new SizedBox(
-                height: 400.0,
+                height: 300.0,
                 child: new charts.TimeSeriesChart(seriesList,
                     animate: true,
                     // Optionally pass in a [DateTimeFactory] used by the chart. The factory
@@ -65,15 +65,8 @@ class _ChartHistoryState extends State<ChartHistory> {
                                 zeroBound: false))),
               ),
             )),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _onFloatingActionButtonPressed,
-        tooltip: 'add',
-        child: new Icon(Icons.add),
-      ),
     );
   }
-
-  void _onFloatingActionButtonPressed() {}
 
   void _onEntryAdded(Event event) {
     // print('_onValueStartup ${event.snapshot.key} ${event.snapshot.value}');
@@ -84,7 +77,7 @@ class _ChartHistoryState extends State<ChartHistory> {
       // print(k);
       // print(dt);
       if (dt.isAfter(start) == true) {
-        data.add(new TimeSeries(dt, (v['v']*.01)));
+        data.add(new TimeSeries(dt, (v['v'] * .01)));
         data.sort((a, b) => a.time.compareTo(b.time));
       }
     });
