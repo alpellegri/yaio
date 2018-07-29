@@ -5,6 +5,7 @@ import 'drawer.dart';
 import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
+import 'dart:convert';
 
 class Device extends StatefulWidget {
   Device({Key key, this.title}) : super(key: key);
@@ -586,20 +587,21 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
   void _onRootEntryAdded(Event event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
-    setState(() {
-      // print(event.snapshot.key);
-      entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
-    });
     // print(_nodeNeedUpdate);
+    var domain = event.snapshot.key;
+    var v = event.snapshot.value;
     if (_nodeNeedUpdate == true) {
-      var domain = event.snapshot.key;
       // value contain a map of nodes, each key is the name of the node
-      var v = event.snapshot.value;
       v.forEach((node, v) {
         _nodeUpdate(domain, node);
       });
     }
-    _updateItemMenu();
+
+    setState(() {
+      // print(event.snapshot.key);
+      entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
+      _updateItemMenu();
+    });
   }
 
   void _onRootEntryChanged(Event event) {

@@ -6,6 +6,15 @@ import 'entries.dart';
 import 'chart_history.dart';
 import 'ui_data_io.dart';
 
+void _nodeRefresh(String node) {
+  DatabaseReference _rootRef =
+      FirebaseDatabase.instance.reference().child(getRootRef());
+  String domain = getDomain();
+  DateTime now = new DateTime.now();
+  int time = now.millisecondsSinceEpoch ~/ 1000;
+  _rootRef.child(domain).child(node).child('control/time').set(time);
+}
+
 class Home extends StatefulWidget {
   Home({Key key, this.title}) : super(key: key);
   static const String routeName = '/home';
@@ -16,23 +25,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  DatabaseReference _controlRef;
-  StreamSubscription<Event> _controlSub;
-
   List<IoEntry> entryList = new List();
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onChangedSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
-  Map<dynamic, dynamic> _control;
-
   @override
   void initState() {
     super.initState();
     print('_MyHomePageState');
-    _controlRef = FirebaseDatabase.instance.reference().child(getControlRef());
-    _controlSub = _controlRef.onValue.listen(_onValueControl);
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
@@ -42,7 +44,6 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     super.dispose();
-    _controlSub.cancel();
     _onAddSubscription.cancel();
     _onChangedSubscription.cancel();
     _onRemoveSubscription.cancel();
@@ -68,7 +69,6 @@ class _HomeState extends State<Home> {
                     return new InkWell(
                       onTap: () {
                         _openEntryDialog(entryList[index]);
-                        _nodeRefresh();
                       },
                       child: new DataItemWidget(entryList[index]),
                     );
@@ -138,19 +138,6 @@ class _HomeState extends State<Home> {
       },
     );
   }
-
-  void _onValueControl(Event event) {
-    print('_onValueControl');
-    setState(() {
-      _control = event.snapshot.value;
-    });
-  }
-
-  void _nodeRefresh() {
-    DateTime now = new DateTime.now();
-    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-    _controlRef.set(_control);
-  }
 }
 
 class DataIoShortDialogWidget extends StatefulWidget {
@@ -167,11 +154,9 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
   final IoEntry entry;
 
   void _handleChangedValue(IoEntry newValue) {
-    print('_handleTapboxChanged $newValue');
-    setState(() {
-      entry.value = newValue.value;
-      entry.ioctl = newValue.ioctl;
-    });
+    // print('_handleTapboxChanged $newValue');
+    entry.value = newValue.value;
+    entry.ioctl = newValue.ioctl;
   }
 
   _DataIoShortDialogWidgetState(this.entry);
@@ -205,6 +190,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
               onPressed: () {
                 try {
                   entry.reference.child(entry.key).set(entry.toJson());
+                  _nodeRefresh(entry.owner);
                 } catch (exception) {
                   print('bug');
                 }
