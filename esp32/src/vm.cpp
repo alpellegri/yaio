@@ -484,7 +484,7 @@ void VM_run(void) {
       std::vector<FuncEntry> &funcvec = prog.funcvec;
 
       uint8_t pc = 0;
-      while (pc < funcvec.size()) {
+      while ((pc < funcvec.size()) && (ctx.halt == false)) {
         DEBUG_PRINT("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc,
                     funcvec[pc].code, ctx.ACC, ctx.V);
         /* decode */
