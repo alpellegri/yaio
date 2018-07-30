@@ -27,7 +27,7 @@ class _ChartHistoryState extends State<ChartHistory> {
     _entryRef =
         FirebaseDatabase.instance.reference().child('${getLogRef()}/$name');
     _onAddSubscription =
-        _entryRef.limitToLast(400).onValue.listen(_onEntryAdded);
+        _entryRef.limitToLast(300).onValue.listen(_onEntryAdded);
   }
 
   @override
@@ -73,7 +73,7 @@ class _ChartHistoryState extends State<ChartHistory> {
     List<TimeSeries> data = new List<TimeSeries>();
     event.snapshot.value.forEach((k, v) {
       DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
-      DateTime start = DateTime.now().subtract(Duration(days: 2));
+      DateTime start = DateTime.now().subtract(Duration(days: 3));
       // print(k);
       // print(dt);
       if (dt.isAfter(start) == true) {

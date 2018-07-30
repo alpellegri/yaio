@@ -5,7 +5,6 @@ import 'drawer.dart';
 import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
-import 'dart:convert';
 
 class Device extends StatefulWidget {
   Device({Key key, this.title}) : super(key: key);
