@@ -153,9 +153,9 @@ bool FOTAService(void) {
   case FOTA_Sm_GET_BLOCK: {
     bool res = http->begin(addr);
     if (res == true) {
-      String range = "bytes=" + String(block * block_size) + "-" +
-                     String(((block + 1) * block_size) - 1);
-      http->addHeader("Range", range);
+      String range = String(F("bytes=")) + String(block * block_size) +
+                     String(F("-")) + String(((block + 1) * block_size) - 1);
+      http->addHeader(String(F("Range")), range);
       int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {
