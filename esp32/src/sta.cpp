@@ -60,8 +60,7 @@ bool STA_Setup(void) {
     TimeSetup();
     RF_Setup();
 
-    DEBUG_PRINT("connected:\n");
-    Serial.println(WiFi.localIP());
+    DEBUG_PRINT("connected: %s\n", String(WiFi.localIP()).c_str());
 
     uint32_t req = preferences.getUInt("fota-req", 2);
     if (req == 0) {
