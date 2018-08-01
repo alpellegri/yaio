@@ -280,13 +280,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    print('ctrl_1');
-                    print('${data.ioctl}');
-                    print('ctrl_1-1');
                     data = setValueCtrl1(data, v);
-                    print('ctrl_1-2');
-                    print('${data.ioctl}');
-                    print('ctrl_1-3');
                   });
                   widget.onChangedValue(data);
                 },
@@ -300,13 +294,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    print('ctrl_2');
-                    print('${data.ioctl}');
-                    print('ctrl_2-1');
                     data = setValueCtrl2(data, v);
-                    print('ctrl_2-2');
-                    print('${data.ioctl}');
-                    print('ctrl_2-3');
                   });
                   widget.onChangedValue(data);
                 },
