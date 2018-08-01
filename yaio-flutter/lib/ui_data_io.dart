@@ -73,8 +73,7 @@ class DataConfigWidget extends StatefulWidget {
   final IoEntry data;
   final ValueChanged<IoEntry> onChangedValue;
 
-  DataConfigWidget({Key key, this.data, this.onChangedValue})
-      : super(key: key);
+  DataConfigWidget({Key key, this.data, this.onChangedValue}) : super(key: key);
 
   @override
   _DataConfigWidget createState() => new _DataConfigWidget();
@@ -89,6 +88,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
   void initState() {
     super.initState();
     data = widget.data;
+    data.ioctl ??= 0;
     if (widget.data.value != null) {
       ctrl_1.text = getValueCtrl1(data);
       ctrl_2.text = getValueCtrl2(data);
@@ -256,7 +256,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
             ]);
         break;
       case DataCode.Bool:
-        data.value = data.value ?? false;
+        data.value ??= false;
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -280,7 +280,13 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
+                    print('ctrl_1');
+                    print('${data.ioctl}');
+                    print('ctrl_1-1');
                     data = setValueCtrl1(data, v);
+                    print('ctrl_1-2');
+                    print('${data.ioctl}');
+                    print('ctrl_1-3');
                   });
                   widget.onChangedValue(data);
                 },
@@ -294,7 +300,13 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
+                    print('ctrl_2');
+                    print('${data.ioctl}');
+                    print('ctrl_2-1');
                     data = setValueCtrl2(data, v);
+                    print('ctrl_2-2');
+                    print('${data.ioctl}');
+                    print('ctrl_2-3');
                   });
                   widget.onChangedValue(data);
                 },

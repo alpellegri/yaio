@@ -108,8 +108,7 @@ String getValueCtrl1(IoEntry data) {
     case DataCode.Timer:
       DateTime now = new DateTime.now();
       // compensate timezone
-      v = ((24 + (int.parse(data.value) ~/ 60) + now.timeZoneOffset.inHours) %
-              24)
+      v = ((24 + (data.value ~/ 60) + now.timeZoneOffset.inHours) % 24)
           .toString();
       break;
     default:
@@ -228,7 +227,7 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
     case DataCode.Timer:
       // binary values
       local.value ??= 0;
-      int value = int.parse(local.value);
+      int value = local.value;
       local.value = (value - (value % 60)) + int.parse(v);
       break;
     default:
