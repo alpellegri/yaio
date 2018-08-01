@@ -498,7 +498,5 @@ void VM_run(void) {
     DEBUG_PRINT("VM_run stop <<<<<<<<<<<<<\n");
   }
 
-  if (FBM_monitorActive() == true) {
-    VM_writeOut();
-  }
+  VM_writeOut();
 }
