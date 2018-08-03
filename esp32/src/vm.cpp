@@ -76,7 +76,7 @@ void VM_readIn(void) {
       }
     } break;
     case kBool: {
-      if ((entry.cb != NULL) && (VM_UpdateDataPending == true)) {
+      if (VM_UpdateDataPending == true) {
         DEBUG_PRINT("get: kBool\n");
         String kdata;
         FbSetPath_data(kdata);
@@ -96,7 +96,7 @@ void VM_readIn(void) {
       }
     } break;
     case kInt: {
-      if ((entry.cb != NULL) && (VM_UpdateDataPending == true)) {
+      if (VM_UpdateDataPending == true) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
         FbSetPath_data(kdata);
