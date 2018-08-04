@@ -159,7 +159,7 @@ function sync(req, res, uid, domains, uidRef) {
       if (snapshotVal[device_keys[id]].aog == true) {
         // filter with Bool and Int
         if ((snapshotVal[device_keys[id]].code == kCodeBool) || (snapshotVal[device_keys[id]].code == kCodeInt)) {
-          console.log(`[$i] key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
+          console.log(`[${i}] key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
           let type = 'action.devices.types.SWITCH';
           let trait = 'action.devices.traits.OnOff';
           devices[i++] = {
