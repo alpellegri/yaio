@@ -1,16 +1,17 @@
-# uHome
+# Yaio
 
 a **Cloud Home Automation** based on:
-* Firbase + FCM
+* Firbase
 * ESP8266 / ESP32
 
 Please note that this is in **Alpha status**. This project is **under heavy development, experimental, unversioned and not stable**.
 
 ## **Features**
 * Cloud (Firebase)
+* Action On Google
 * Flutter
 * DTH22
-* RF433
+* RF434MHz: CC1101
 * FOTA
 
 ## Install
