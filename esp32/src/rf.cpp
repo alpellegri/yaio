@@ -131,7 +131,10 @@ void RF_Service(void) {
       }
 
       if ((entry.code == kRadioIn) && (entry.ioctl == RadioId)) {
-        uint8_t value = RadioCode & ((1 << data_bits) - 1);
+        uint8_t value = 0;
+        if (data_bits > 0) {
+          value = RadioCode & ((1 << data_bits) - 1);
+        }
         DEBUG_PRINT("RF_Service: %s, %d\n", entry.key.c_str(), RadioCode);
         entry.value = String(value);
         entry.ev = true;
