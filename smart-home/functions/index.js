@@ -29,6 +29,9 @@ admin.initializeApp();
 
 const oauth2Ref = admin.database().ref('/oauth2');
 
+const kCodeBool = 8;
+const kCodeInt = 9;
+
 exports.auth = functions.https.onRequest((request, response) => {
   // console.log('auth -> Request headers: ' + JSON.stringify(request.headers));
   // console.log('auth -> Request query: ' + JSON.stringify(request.query));
@@ -149,28 +152,41 @@ function sync(req, res, uid, domains, uidRef) {
     const snapshotVal = snapshot.val();
     const device_keys = Object.keys(snapshotVal);
     let devices = [];
-    for (let i = 0; i < device_keys.length; i++) {
-      let type = 'action.devices.types.SWITCH';
-      let trait = 'action.devices.traits.OnOff';
-      devices[i] = {
-        id: device_keys[i],
-        type: type,
-        traits: [
-          trait,
-        ],
-        name: {
-          defaultNames: [device_keys[i]],
-          name: device_keys[i],
-          nicknames: [device_keys[i]],
-        },
-        willReportState: false,
-        deviceInfo: {
-          manufacturer: 'Yaio',
-          model: 'yaio virtual device',
-          hwVersion: '1.0',
-          swVersion: '1.0.1',
-        },
-      };
+    let i = 0;
+    for (let id = 0; id < device_keys.length; id++) {
+      // console.log(`key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
+      // filter with selected aog
+      if (snapshotVal[device_keys[id]].aog == true) {
+        // filter with Bool and Int
+        if ((snapshotVal[device_keys[id]].code == kCodeBool) || (snapshotVal[device_keys[id]].code == kCodeInt)) {
+          console.log(`[$i] key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
+          let type = 'action.devices.types.SWITCH';
+          let trait = 'action.devices.traits.OnOff';
+          devices[i++] = {
+            id: device_keys[id],
+            type: type,
+            traits: [
+              trait,
+            ],
+            name: {
+              defaultNames: [device_keys[id]],
+              name: device_keys[id],
+              nicknames: [device_keys[id]],
+            },
+            willReportState: false,
+            deviceInfo: {
+              manufacturer: 'Yaio',
+              model: 'yaio virtual device',
+              hwVersion: '1.0',
+              swVersion: '1.0.1',
+            },
+          };
+        } else {
+          // console.log(`x key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
+        }
+      } else {
+        // console.log(`x key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
+      }
     }
 
     let json = {
@@ -199,7 +215,11 @@ function query(req, res, uid, domains, uidRef) {
     for (let i = 0; i < reqDevices.length; i++) {
       let id = device_keys.indexOf(reqDevices[i].id);
       if (id != -1) {
-        let value = (snapshotVal[device_keys[id]].value != 0) ? true : false;
+        let value = snapshotVal[device_keys[id]].value;
+        if (snapshotVal[device_keys[id]].code == kCodeInt) {
+          // convert int to bool
+          value = (value != 0) ? true : false;
+        }
         devices[device_keys[id]] = {
           on: value,
           online: true,
@@ -249,10 +269,15 @@ function execute(body, res, uid, domains, uidRef) {
             for (const execution of command.execution) {
               const execCommand = execution.command;
               const {params} = execution;
-              const value = (params.on == true) ? 1 : 0;
               let val = snapshotVal[device_keys[id]].value;
-              // clear last significant bit and set
-              val = (val & (~1)) | value;
+              if (snapshotVal[device_keys[id]].code == kCodeInt) {
+                // convert bool to int
+                const value = (params.on == true) ? 1 : 0;
+                // clear last significant bit and set
+                val = (val & (~1)) | value;
+              } else {
+                val = params.on;
+              }
               let d = new Date();
               switch (execCommand) {
                 case 'action.devices.commands.OnOff':
