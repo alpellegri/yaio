@@ -56,7 +56,8 @@ bool STA_Setup(void) {
     TimeSetup();
     RF_Setup();
 
-    DEBUG_PRINT("connected: %s\n", String(WiFi.localIP()).c_str());
+    DEBUG_PRINT("connected: ");
+    Serial.println(WiFi.localIP());
 
     SPIFFS.begin();
     File f = SPIFFS.open(String(FPSTR("/fota.req")).c_str(),

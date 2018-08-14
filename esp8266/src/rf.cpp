@@ -83,13 +83,12 @@ void RF_Loop() {
     noInterrupts();
     uint32_t value = rfHandle.getReceivedValue();
     rfHandle.resetAvailable();
-    DEBUG_PRINT("getReceivedValue %d\n", value);
     interrupts();
 
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
-      DEBUG_PRINT("%d / bit: %d - Protocol: %d\n", value,
+      DEBUG_PRINT("%d - bit: %d - Protocol: %d\n", value,
                   rfHandle.getReceivedBitlength(),
                   rfHandle.getReceivedProtocol());
       if (RadioEv == false) {
@@ -116,7 +115,8 @@ void RF_Service(void) {
     for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
       IoEntry &entry = FB_getIoEntry(id);
       if (entry.code == kRadioRx) {
-        DEBUG_PRINT("RF_Service: %s, %d\n", entry.key.c_str(), RadioCode);
+        DEBUG_PRINT("RF_Service [%d]: %s, %d\n", id, entry.key.c_str(),
+                    RadioCode);
         entry.value = RadioCode;
         entry.ev = true;
         entry.ev_value = RadioCode;
@@ -128,7 +128,8 @@ void RF_Service(void) {
         if (data_bits > 0) {
           value = RadioCode & ((1 << data_bits) - 1);
         }
-        DEBUG_PRINT("RF_Service: %s, %d\n", entry.key.c_str(), RadioCode);
+        DEBUG_PRINT("RF_Service [%d]: %s, %d\n", id, entry.key.c_str(),
+                    RadioCode);
         entry.value = String(value);
         entry.ev = true;
         entry.ev_value = value;

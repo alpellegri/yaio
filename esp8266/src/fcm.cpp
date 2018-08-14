@@ -2,12 +2,11 @@
 #include <ESP8266HTTPClient.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fcm.h"
 #include "firebase.h"
-#include "debug.h"
 
-#define FCM_SERVICE_TIMEOUT (5 * 1000)
 #define FCM_NUM_REGIDS_MAX (5)
 
 static const char FcmServer[] PROGMEM = "fcm.googleapis.com";

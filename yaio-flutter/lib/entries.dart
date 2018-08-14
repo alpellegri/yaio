@@ -345,11 +345,11 @@ class IoEntry {
   }
 }
 
-const String kOpCodeStringex0 = 'ex0';
+const String kOpCodeStringnop = 'nop';
 const String kOpCodeStringldi = 'ldi';
-const String kOpCodeStringld24 = 'ld24';
+const String kOpCodeStringres1 = 'res1';
 const String kOpCodeStringld = 'ld';
-const String kOpCodeStringst24 = 'st24';
+const String kOpCodeStringres2 = 'res2';
 const String kOpCodeStringst = 'st';
 const String kOpCodeStringlt = 'lt';
 const String kOpCodeStringgt = 'gt';
@@ -358,18 +358,22 @@ const String kOpCodeStringeq = 'eq';
 const String kOpCodeStringbz = 'bz';
 const String kOpCodeStringbnz = 'bnz';
 const String kOpCodeStringdly = 'dly';
-const String kOpCodeStringstne = 'stne';
+const String kOpCodeStringres3 = 'res3';
 const String kOpCodeStringlte = 'lte';
 const String kOpCodeStringgte = 'gte';
 const String kOpCodeStringhalt = 'halt';
 const String kOpCodeStringjmp = 'jmp';
+const String kOpCodeStringaddi = 'addi';
+const String kOpCodeStringadd = 'add';
+const String kOpCodeStringsubi = 'subi';
+const String kOpCodeStringsub = 'sub';
 
 enum OpCode {
-  ex0,
+  nop,
   ldi,
-  ld24,
+  res1,
   ld,
-  st24,
+  res2,
   st,
   lt,
   gt,
@@ -378,19 +382,23 @@ enum OpCode {
   bz,
   bnz,
   dly,
-  stne,
+  res3,
   lte,
   gte,
   halt,
   jmp,
+  addi,
+  add,
+  subi,
+  sub,
 }
 
 const Map<OpCode, bool> kOpCodeIsImmediate = const {
-  OpCode.ex0: true,
+  OpCode.nop: true,
   OpCode.ldi: true,
-  OpCode.ld24: false,
+  OpCode.res1: true,
   OpCode.ld: false,
-  OpCode.st24: false,
+  OpCode.res2: true,
   OpCode.st: false,
   OpCode.lt: false,
   OpCode.gt: false,
@@ -399,19 +407,23 @@ const Map<OpCode, bool> kOpCodeIsImmediate = const {
   OpCode.bz: true,
   OpCode.bnz: true,
   OpCode.dly: true,
-  OpCode.stne: false,
+  OpCode.res3: true,
   OpCode.lte: false,
   OpCode.gte: false,
   OpCode.halt: true,
   OpCode.jmp: true,
+  OpCode.addi: true,
+  OpCode.add: false,
+  OpCode.subi: true,
+  OpCode.sub: false,
 };
 
 const Map<OpCode, String> kOpCode2Name = const {
-  OpCode.ex0: kOpCodeStringex0,
+  OpCode.nop: kOpCodeStringnop,
   OpCode.ldi: kOpCodeStringldi,
-  OpCode.ld24: kOpCodeStringld24,
+  OpCode.res1: kOpCodeStringres1,
   OpCode.ld: kOpCodeStringld,
-  OpCode.st24: kOpCodeStringst24,
+  OpCode.res2: kOpCodeStringres2,
   OpCode.st: kOpCodeStringst,
   OpCode.lt: kOpCodeStringlt,
   OpCode.gt: kOpCodeStringgt,
@@ -420,19 +432,23 @@ const Map<OpCode, String> kOpCode2Name = const {
   OpCode.bz: kOpCodeStringbz,
   OpCode.bnz: kOpCodeStringbnz,
   OpCode.dly: kOpCodeStringdly,
-  OpCode.stne: kOpCodeStringstne,
+  OpCode.res3: kOpCodeStringres3,
   OpCode.lte: kOpCodeStringlte,
   OpCode.gte: kOpCodeStringgte,
   OpCode.halt: kOpCodeStringhalt,
   OpCode.jmp: kOpCodeStringjmp,
+  OpCode.addi: kOpCodeStringaddi,
+  OpCode.add: kOpCodeStringadd,
+  OpCode.subi: kOpCodeStringsubi,
+  OpCode.sub: kOpCodeStringsub,
 };
 
 const Map<String, OpCode> kName2Opcode = const {
-  kOpCodeStringex0: OpCode.ex0,
+  kOpCodeStringnop: OpCode.nop,
   kOpCodeStringldi: OpCode.ldi,
-  kOpCodeStringld24: OpCode.ld24,
+  kOpCodeStringres1: OpCode.res1,
   kOpCodeStringld: OpCode.ld,
-  kOpCodeStringst24: OpCode.st24,
+  kOpCodeStringres2: OpCode.res2,
   kOpCodeStringst: OpCode.st,
   kOpCodeStringlt: OpCode.lt,
   kOpCodeStringgt: OpCode.gt,
@@ -441,11 +457,15 @@ const Map<String, OpCode> kName2Opcode = const {
   kOpCodeStringbz: OpCode.bz,
   kOpCodeStringbnz: OpCode.bnz,
   kOpCodeStringdly: OpCode.dly,
-  kOpCodeStringstne: OpCode.stne,
+  kOpCodeStringres3: OpCode.res3,
   kOpCodeStringlte: OpCode.lte,
   kOpCodeStringgte: OpCode.gte,
   kOpCodeStringhalt: OpCode.halt,
   kOpCodeStringjmp: OpCode.jmp,
+  kOpCodeStringaddi: OpCode.addi,
+  kOpCodeStringadd: OpCode.add,
+  kOpCodeStringsubi: OpCode.subi,
+  kOpCodeStringsub: OpCode.sub,
 };
 
 class InstrEntry {

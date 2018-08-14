@@ -14,7 +14,7 @@ class DataValueWidget extends StatelessWidget {
       children: <Widget>[
         new Text(
           entry.getValue().toString(),
-          textScaleFactor: 1.2,
+          // textScaleFactor: 1.2,
           textAlign: TextAlign.right,
         ),
       ],
@@ -46,7 +46,7 @@ class DataItemWidget extends StatelessWidget {
                   children: <Widget>[
                     new Text(
                       entry.key,
-                      textScaleFactor: 1.2,
+                      // textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                     new Text(

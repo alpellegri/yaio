@@ -28,7 +28,7 @@ class ExecListItem extends StatelessWidget {
                   children: <Widget>[
                     new Text(
                       '${entry.key}',
-                      textScaleFactor: 1.2,
+                      // textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                   ],
