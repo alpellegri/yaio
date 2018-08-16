@@ -59,7 +59,7 @@ void FcmSendPush(String &message) {
     String json;
     json = F("{");
     json += F("\"notification\":{");
-    json += F("\"title\":\"ESP8266 Alert\",");
+    json += F("\"title\":\"Yaio\",");
     json += F("\"body\":\"");
     json += message;
     json += F("\",");
