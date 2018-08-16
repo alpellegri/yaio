@@ -1,5 +1,13 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
+#if 0
 #include <ESP8266HTTPClient.h>
+#else
+// use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
+#include <ESP8266HTTPWeakClient.h>
+#define HTTPClient HTTPWeakClient
+#endif
+
 #include <string.h>
 
 #include "debug.h"
