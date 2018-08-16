@@ -9,8 +9,8 @@
 
 #include <string>
 
-#include "firebase.h"
 #include "debug.h"
+#include "firebase.h"
 
 // Use web browser to view and copy
 // SHA1 fingerprint of the certificate
