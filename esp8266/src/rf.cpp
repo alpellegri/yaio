@@ -84,10 +84,10 @@ void RF_Loop() {
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
-      DEBUG_PRINT("%d - bit: %d - Protocol: %d\n", value,
-                  rfHandle.getReceivedBitlength(),
-                  rfHandle.getReceivedProtocol());
       if (RadioEv == false) {
+        DEBUG_PRINT("%d - bit: %d - Protocol: %d\n", value,
+                    rfHandle.getReceivedBitlength(),
+                    rfHandle.getReceivedProtocol());
         DEBUG_PRINT("radio code: %d\n", value);
         RadioEv = true;
         RadioCode = value;

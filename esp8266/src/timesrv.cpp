@@ -2,8 +2,8 @@
 #include <sys/time.h> // struct timeval
 #include <time.h>
 
-#include "timesrv.h"
 #include "debug.h"
+#include "timesrv.h"
 
 bool time_init = false;
 
