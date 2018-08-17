@@ -18,7 +18,10 @@
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
+#define STA_WIFI_TIMEOUT (1 * 60 * 1000)
+
 static bool fota_mode = false;
+static uint32_t last_wifi_time;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -93,7 +96,9 @@ void STA_FotaReq(void) {
 bool STA_Task(void) {
   bool ret = true;
 
+  uint32_t current_time = millis();
   if (WiFi.status() == WL_CONNECTED) {
+    last_wifi_time = current_time;
     // wait for time service is up
     if (fota_mode == true) {
       FOTAService();
@@ -107,6 +112,10 @@ bool STA_Task(void) {
     }
   } else {
     DEBUG_PRINT("WiFi.status != WL_CONNECTED\n");
+    if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
+      // force reboot
+      ESP.restart();
+    }
   }
 
   return ret;

@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "sta.h"
-#include "debug.h"
 
 #define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
@@ -17,7 +17,6 @@
 static const char ap_ssid[] PROGMEM = "yaio-node";
 static const char ap_password[] PROGMEM = "123456789";
 
-static uint16_t ap_task_cnt;
 static bool enable_WiFi_Scan = false;
 static uint16_t ap_button = 0x55;
 
@@ -69,7 +68,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 bool AP_Setup(void) {
   bool ret = true;
 
-  ap_task_cnt = 0;
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LED_ON);
 
@@ -131,28 +129,24 @@ bool AP_Task(void) {
 
   if (enable_WiFi_Scan == true) {
     DEBUG_PRINT("networks scan\n");
-    if (ap_task_cnt-- == 0) {
-      ap_task_cnt = 10;
-      int n = WiFi.scanNetworks();
-      DEBUG_PRINT("scan done\n");
-      if (n == 0) {
-        DEBUG_PRINT("no networks found\n");
-        ESP.restart();
-      } else {
-        String sta_ssid = EE_GetSSID();
+    int n = WiFi.scanNetworks();
+    DEBUG_PRINT("scan done\n");
+    String sta_ssid = EE_GetSSID();
 
-        for (int i = 0; i < n; ++i) {
-          yield();
-          int test = WiFi.SSID(i).compareTo(sta_ssid);
-          Serial.println(WiFi.SSID(i));
-          if (test == 0) {
-            DEBUG_PRINT("network found: ");
-            Serial.println(WiFi.SSID(i));
-            ret = false;
-            i = n; // exit for
-          }
-        }
+    for (int i = 0; i < n; ++i) {
+      yield();
+      int test = WiFi.SSID(i).compareTo(sta_ssid);
+      Serial.println(WiFi.SSID(i));
+      if (test == 0) {
+        DEBUG_PRINT("network found: ");
+        Serial.println(WiFi.SSID(i));
+        ret = false;
+        i = n; // exit for
       }
+    }
+    if (ret == true) {
+      DEBUG_PRINT("no networks found: restart\n");
+      ESP.restart();
     }
   }
 
