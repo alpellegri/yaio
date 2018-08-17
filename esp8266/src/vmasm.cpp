@@ -157,24 +157,24 @@ uint8_t VM_decode(uint8_t pc, vm_context_t &ctx, FuncEntry &stm) {
 
   if (code < (sizeof(VM_pipe) / sizeof(vm_itlb_t))) {
     /* decode-read */
-    DEBUG_PRINT("VM_pipe read\n");
+    // DEBUG_PRINT("VM_pipe read\n");
     if (VM_pipe[code].read != NULL) {
       VM_pipe[code].read(ctx, value.c_str());
-      DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+      // DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
     }
 
     /* decode-execute */
-    DEBUG_PRINT("VM_pipe exec\n");
+    // DEBUG_PRINT("VM_pipe exec\n");
     if (VM_pipe[code].exec != NULL) {
       pc = VM_pipe[code].exec(pc, ctx, value.c_str());
-      DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+      // DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
     }
 
     /* decode-write */
-    DEBUG_PRINT("VM_pipe write\n");
+    // DEBUG_PRINT("VM_pipe write\n");
     if (VM_pipe[code].write != NULL) {
       VM_pipe[code].write(ctx, value.c_str());
-      DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+      // DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
     }
   } else {
     ctx.HALT = true;

@@ -28,15 +28,24 @@ enum {
 
 class IoEntry {
 public:
-  uint8_t code;
-  bool ev;
-  bool wb;
-  bool enLog;
+  /* snapshot DB data */
   String key;
+  uint8_t code;
   String value;
   uint32_t ioctl;
   String cb;
+  bool enLog;
+  bool enWrite;
+  bool enRead;
+  /* internal data */
+  /* event notification flag */
+  bool ev;
+  /* event value */
   uint32_t ev_value;
+  /* event timestamp */
+  uint32_t ev_tmstamp;
+  /* write back request */
+  bool wb;
 };
 
 class FuncEntry {

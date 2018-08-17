@@ -62,7 +62,7 @@ void VM_readIn(void) {
       }
     } break;
     case kBool: {
-      if (VM_UpdateDataPending == true) {
+      if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
         DEBUG_PRINT("get: kBool\n");
         String kdata;
         FbSetPath_data(kdata);
@@ -82,7 +82,7 @@ void VM_readIn(void) {
       }
     } break;
     case kInt: {
-      if (VM_UpdateDataPending == true) {
+      if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
         FbSetPath_data(kdata);
@@ -139,32 +139,34 @@ void VM_writeOut(void) {
       case kRadioIn:
       case kRadioRx:
       case kInt: {
-        uint32_t value = atoi(entry.value.c_str());
-        DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), value);
-        String ref;
-        FbSetPath_data(ref);
-        Firebase.setInt(ref + "/" + entry.key + "/value", value);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
-                      entry.key.c_str());
-        } else {
-          if (entry.enLog == true) {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
-            json["t"] = getTime();
-            json["v"] = value;
-            String strdata;
-            json.printTo(strdata);
-            FbSetPath_log(ref);
-            Firebase.pushJSON(ref + "/" + entry.key, strdata);
-            if (Firebase.failed() == true) {
-              DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
-                          entry.key.c_str());
+        if (entry.enRead == true) {
+          uint32_t value = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), value);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setInt(ref + "/" + entry.key + "/value", value);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            if (entry.enLog == true) {
+              DynamicJsonBuffer jsonBuffer;
+              JsonObject &json = jsonBuffer.createObject();
+              json["t"] = getTime();
+              json["v"] = value;
+              String strdata;
+              json.printTo(strdata);
+              FbSetPath_log(ref);
+              Firebase.pushJSON(ref + "/" + entry.key, strdata);
+              if (Firebase.failed() == true) {
+                DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
+                            entry.key.c_str());
+              } else {
+                entry.wb = false;
+              }
             } else {
               entry.wb = false;
             }
-          } else {
-            entry.wb = false;
           }
         }
       } break;
@@ -220,12 +222,13 @@ void VM_run(void) {
 
         /* keep the event name */
         ctx.ev_name = entry.key.c_str();
-        DEBUG_PRINT("VM_run start >>>>>>>>>>>>\n");
-        DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
         uint8_t id_prog = FB_getProgIdx(cbkey.c_str());
         ProgEntry &prog = FB_getProg(id_prog);
         std::vector<FuncEntry> &funcvec = prog.funcvec;
+
+        DEBUG_PRINT("VM_run start [%s] >>>>>>>>>>>>\n", prog.key.c_str());
+        DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
         uint8_t pc = 0;
         while ((pc < funcvec.size()) && (ctx.HALT == false)) {
@@ -238,7 +241,7 @@ void VM_run(void) {
           DEBUG_PRINT("VM_run stop [%d] code=%d, ACC=%d V=%d\n", pc,
                       funcvec[pc].code, ctx.ACC, ctx.V);
         }
-        DEBUG_PRINT("VM_run stop <<<<<<<<<<<<<\n");
+        DEBUG_PRINT("VM_run stop [%s] <<<<<<<<<<<<\n", prog.key.c_str());
       }
     }
   }
