@@ -6,20 +6,18 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
 #include "vm.h"
-#include "debug.h"
 
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
 
-static uint8_t sta_button = 0x55;
-static uint8_t sta_cnt = 0;
 static bool fota_mode = false;
 
 static Preferences preferences;
@@ -31,9 +29,14 @@ bool STA_Setup(void) {
 
   digitalWrite(LED, LED_OFF);
 
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
+
   DEBUG_PRINT("Connecting mode STA\n");
   DEBUG_PRINT("Configuration parameters:\n");
 
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
   delay(100);
   WiFi.mode(WIFI_STA);
 
@@ -42,9 +45,6 @@ bool STA_Setup(void) {
   DEBUG_PRINT("sta_ssid: %s\n", sta_ssid.c_str());
   DEBUG_PRINT("sta_password: %s\n", sta_password.c_str());
   DEBUG_PRINT("trying to connect...\n");
-
-  TimeSetup();
-  RF_Setup();
 
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
@@ -57,8 +57,10 @@ bool STA_Setup(void) {
   preferences.begin("my-app", false);
 
   if (WiFi.status() == WL_CONNECTED) {
-    DEBUG_PRINT("connected:\n");
-    Serial.println(WiFi.localIP());
+    TimeSetup();
+    RF_Setup();
+
+    DEBUG_PRINT("connected: %s\n", String(WiFi.localIP()).c_str());
 
     uint32_t req = preferences.getUInt("fota-req", 2);
     if (req == 0) {

@@ -1,128 +1,111 @@
-1. Data Definitions
-   ================
+1. Data Object Definitions
+   =======================
 
-  These entities are defined into a database.
+  These entities are defined into a json database.
 
-  definition
-  key -> {
-    owner: <owner>, // it is a string
-    code: <type>,   // it is a enum
-    value: <value>, // it is dynamic: a string or a number
-    cb: <callback>, // optional, it is a string representing the key of the database
+  data object definition:
+
+  <data-symbol> : {
+    "code" : <code>,
+    "ioctl" : <ioctl>,
+    "owner" : <device-symbol>,
+    "value" : <value>
+    "cb" : [<cb>]
+  },
+  <code> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11"
+  // define the type of the object
+  enum {
+    /*  0 */ PhyIn,
+    /*  1 */ PhyOut,
+    /*  2 */ DhtTemperature,
+    /*  3 */ DhtHumidity,
+    /*  4 */ RadioRx,
+    /*  5 */ RadioIn,
+    /*  6 */ RadioTx,
+    /*  7 */ Timer,
+    /*  8 */ Bool,
+    /*  9 */ Int,
+    /* 10 */ Float,
+    /* 11 */ Messaging,
+  };
+  <data-symbol> ::= string
+  // define the reference name of the object
+  <ioctl> ::= integer
+  // define physical and logical setting of the object
+  <device> ::= string
+  // define the device where the object is implemented
+  <value> ::= integer | string
+  // define the value of the object
+  <cb> ::= string
+  // define the name of the routine to be called on value write
+
+* <code> == PhyIn | PhyOut
+  this maps a i/o device pin
+  pin-num = <ioctl>
+  pin-value := <value>
+  <value> := pin_value
+
+  VM register ACC = <value>
+
+  example
+  {
+    "code" : 1,
+    "drawWr" : true,
+    "ioctl" : 16,
+    "owner" : "Node1",
+    "value" : 1
   }
-  type: {phyin, phyout, timer, login, logout, bool, int, float}
 
-* physical i/o
-  type: {phyin, phyout}
-  i/o are addressed by id (pin, value: v)
-
-  . input is scanned periodically (or event driven)
-    on change can generate a call back
-  . output is program driven
-
-  input
-  identifier = pin<<24
-  key -> {
-    owner: <owner>,
-    code: phyin,
-    value: <identifier>, // it is a number
-    cb: <callback>, // optional
-  }
-
-  VM call callback cb when a physical input changes and ACC = input value
-
-  output
-  identifier = pin<<24|value
-  key -> {
-    owner: <owner>,
-    code: phyout,
-    value: <identifier>, // it is a number
-    cb: <callback>, // optional
-  }
-
-* timer is a logical value.
-  it variable describing the time in a week.
+* <code> == Timer
+  it variable describing the time in minute in a week.
   Time is represent a tick (a minute) inside  a week (7*24*60=34560 ticks) time is a modulo number.
   in case of modulo-day 1439+1 overflow to 0, in case of modulo-week 34559+1 overflow to 0.
   The idea is to use this as a base for event generation. When its value change a callback may be
   called.
-    
-  key -> {
-    owner: <owner>,
-    code: timer,
-    value: <configuration>, // it is an number
-    cb: <callback>, // optional
-  }
-  mtime: minutes
-  htime: hours
-  mask: weekday bitmap (7bits)
-  configuration: OUT<<23 | mask<<16 | htime<<8 | mtime
-  
-  therefore if (1<<wday & mask) callback is called and ACC is set with OUT value (ACC = OUT)
 
-  
+  day-minute := <value>
+  week-days := <ioctl> & 0x7F0000
+  all-week-day := <ioctl> & 0x800000
+  polarity := <ioctl> & 0x1000000
+
+  callback is called and ACC is set with polarity value (ACC = polarity)
+
   At start VM read all timers from DB and store them to RAM. VM generates callbacks when timer value
   is reached
 
-* radioin is a logical value.
-  key -> {
-    owner: <owner>,
-    code: radioin,
-    value: <configuration>, // it is a number
-    cb: <callback>, // optional
-  }
-  configuration: mask
+* <code> == RadioIn
+
+  radio-code := <value>
+  radio-mask := <ioctl>
 
   At start VM read all radioin from DB and store them to RAM.
-  if (radio & mask) == mask an event is 
-  VM call callback cb when (radio & mask) == mask
-  and ACC = radio & ~mask
 
-* radiorx is a logical value.
-  key -> {
-    owner: <owner>,
-    code: radiorx,
-    value: 0,
-    cb: <callback>, // optional
+  if (radio & radio-mask) == (radio-code & radio-mask)
+    VM call callback cb
+    ACC = radio & ~radio-mask
+
+  example
+  {
+    "code" : 5,
+    "ioctl" : 0,
+    "owner" : "Node1",
+    "value" : "7418204"
   }
 
-  VM call callback cb when a radio is received and no match happened
-  and ACC = radio
+* <code> == RadioRx
+  <value> := radio
+  pin := <ioctl>
 
-* radioout is a logical value.
-  key -> {
-    owner: <owner>,
-    code: radioout,
-    value: <configuration>, // it is a number
-    cb: <callback>, // optional
-  }
-  configuration: mask
+  VM call cb on write <value>
+  and ACC = <value>
+
+* <code> == RadioTx
+  radio := <value>
+  pin := <ioctl>
 
 * notify is a logical output
-  key -> {
-    owner: <owner>,
-    code: message,
-    value: <message>, // it is a string
-    cb: <callback>, // optional
-  }
 
 * variables are input/output and may have a callback
-  These entities are defined into a database.
-  Variable are read periodically or at event and copied into local
-  type: {bool, int, float}
-
-  generic definition
-  key -> {
-    owner: <node>,  // it is a string
-    code: <type>,   // it is a number (enum)
-    value: <value>, // it is a number
-    cb: <callback>, // optional
-    subscriber: {   // this is an array
-      <node>: <callback>,
-      ...,
-      <node>: <callback>,
-    },
-  }
 
 2. Program Definition
    ==================
@@ -134,35 +117,42 @@ Program run into a simple virtual machine VM.
 * functions: execute a statement of a program, can call other statement
 
   key -> {
-    owner: <node>,  // it is a string
-    p: [<array>],   // it is an array.
+    "owner" : <node>,  // it is a string
+    "p" : [<array>],   // it is an array.
   }
 
-  array-element -> {
-    i: <instr>,  // it is a enum
-    v: <arg>,   // it is a string. depending on the instruction can be an integer or a string
+  <routine-symbol> : {
+    "owner" : <device-symbol>,
+    "p" : [<array>]
   }
-  
-  instr: {
-    /*  0: ex0  */ {vm_read0, vm_exec_ex0, vm_write0},
-    /*  1: ldi  */ {vm_readi, vm_exec_ldi, vm_write0},
-    /*  2: ld24 */ {vm_read24, vm_exec_ldi, vm_write0},
-    /*  3: ld   */ {vm_read, vm_exec_ldi, vm_write0},
-    /*  4: st24 */ {vm_read0, vm_exec_st, vm_write24},
-    /*  5: st   */ {vm_read0, vm_exec_st, vm_write},
-    /*  6: lt   */ {vm_read, vm_exec_lt, vm_write0},
-    /*  7: gt   */ {vm_read, vm_exec_gt, vm_write0},
-    /*  8: eqi  */ {vm_readi, vm_exec_eq, vm_write0},
-    /*  9: eq   */ {vm_read, vm_exec_eq, vm_write0},
-    /* 10: bz   */ {vm_read0, vm_exec_bz, vm_write0},
-    /* 11: bnz  */ {vm_read0, vm_exec_bnz, vm_write0},
-    /* 12: dly  */ {vm_readi, vm_exec_dly, vm_write0},
-    /* 13: stne */ {vm_read0, vm_exec_stne, vm_cwrite},
-    /* 14: lte  */ {vm_read, vm_exec_lte, vm_write0},
-    /* 15: gte  */ {vm_read, vm_exec_gte, vm_write0},
-    /* 16: halt */ {vm_read0, vm_exec_halt, vm_write0},
-    /* 17: jmp  */ {vm_read0, vm_exec_jmp, vm_write0},
-}
+
+  <array-element> : {
+    "i" : <instr>,
+    "v" : <arg>,
+  }
+
+  <instr> ::=
+    /*  0: ex0  */
+    /*  1: ldi  */
+-----    /*  2: ld24 */
+    /*  3: ld   */
+-----    /*  4: st24 */
+    /*  5: st   */
+    /*  6: lt   */
+    /*  7: gt   */
+    /*  8: eqi  */
+    /*  9: eq   */
+    /* 10: bz   */
+    /* 11: bnz  */
+    /* 12: dly  */
+    /* 13: stne */
+    /* 14: lte  */
+    /* 15: gte  */
+    /* 16: halt */
+    /* 17: jmp  */
+
+  <arg> := <data-symbol>
+
 
 * VM execution model
 At startup, the VM initializes its runtime environment copying all DB entities.
@@ -190,16 +180,16 @@ typedef struct {
 
 2. VM-fetch
   key_prog is the entry point of a program
-  
+
   if (key_prog != null) {
     prog = lookup(key_prog)
   }
 
   array-element = {
-    i: <instr>,
-    v: <arg>,
+    "i": <instr>,
+    "v": <arg>,
   }
- 
+
 3. VM-decode
 
   pc = 0;
@@ -210,7 +200,7 @@ typedef struct {
   load data
   execute
   write data
-  
+
   pipeline definition:
   typedef struct {
     void (*read)(vm_context_t &ctx, const char *value);
@@ -221,7 +211,7 @@ typedef struct {
 3.1 VM-decode-read
 if instruction is immediate then:
   V = value
-  
+
 if instruction is not immediate, value represent a key of the DB:
   // fetch
   vm_pipe[code].read(ctx, *value)
@@ -238,18 +228,18 @@ if instruction is not immediate, value represent a key of the DB:
   }
 
 3.2 VM-decode-execution
-  pc is the index of the array-element to be executed. No branch instructions will increment pc by one. 
-  
+  pc is the index of the array-element to be executed. No branch instructions will increment pc by one.
+
   pc = vm_pipe[code].exec(pc, ctx, value)
 
   execute <instr> against the tuple {pc, ACC, V, value}
   pc = <instr>(pc, ACC, V, value)
   inc is an output incrementer because an instruction is able to change the execution flow
-  
+
 3.3 VM-decode-write
 
   vm_pipe[code].write(ctx, stm.value);
-  
+
   data = lookup(stm.value)
   data.value = ACC
 
@@ -265,63 +255,36 @@ the DB
 
 A1.1 example simple boolean trigger
     ===============================
+instruction-code:
+Routine1:
+  0: st Status
 
-pin: physical input mapped on a pin
-
-pseudo-code:
-  @pin.event
-  status = event.value;
-
-instruction code:
-0: st status, end
-
-key-In -> {
-  code: phyin,
-  value: pin<<24,
-  cb: key-prog,
+{
+  "Input" : {
+    "cb" : "Routine1"
+    "code" : 0,
+    "enLog" : false,
+    "ioctl" : 1,
+    "owner" : "Node1",
+    "value" : 0,
+  },
+  "Status" : {
+    "code" : 8,
+    "enLog" : false,
+    "ioctl" : 0,
+    "owner" : "Node1",
+    "value" : "0"
+  },
 }
-key-status -> {
-  code: bool,
-  value: 0,
+{
+  "Routine1" : {
+    "owner" : "Node1",
+    "p" : [ {
+      "i" : 5,
+      "v" : "Status"
+    } ]
+  }
 }
-key-prog -> {
-  p: [
-    { i: st, v: key-status }
-  ]
-}
-
-A1.2 example simple sensor trigger
-    ==============================
-
-sensor: physical input mapped on a pin
-thr1: variable
-
-pseudo-code:
-  @sensor.event
-  status = (event.value>thr);
-
-instruction code:
-0: gt thr, f02
-1: st status, end
-
-key-sensor -> {
-  code: phyin,
-  value: pin<<24,
-  cb: key-prog,
-}
-key-thr1 -> {
-  code: var,
-  value: 90,
-}
-key-status -> {
-  code: bool,
-  value: 0,
-}
-key-prog: {
-  p: [
-    { i: gt, v: 0 },
-    { i: st, v: key-status }
-  ]
 
 A2. example led on/off depending by a variable
    ===========================================
@@ -329,28 +292,34 @@ A2. example led on/off depending by a variable
 led: physical output mapped on a pin
 status: variable
 
-pseudo-code:
-  @status.event
-  led = (status.value != 0);
-
 instruction-code:
-0: eqi 0, f03
-1: st led, end
+Routine2:
+0: st led
 
-key-led -> {
-  code: phyout,
-  value: pin<<24,
+{
+  "Led1" : {
+    "code" : 1,
+    "ioctl" : 16,
+    "owner" : "Node1",
+    "value" : 1
+  },
+  "Status" : {
+    "cb" : "Routine2"
+    "code" : 8,
+    "ioctl" : 0,
+    "owner" : "Node1",
+    "value" : "0"
+  }
 }
-key-status -> {
-  code: bool,
-  value: 0,
-  cb: key-prog,
-}
-key-prog -> {
-  p: [
-    { i: eqi, v: 0 },
-    { i: st, v: key-led }
-  ]
+
+{
+  "Routine2" : {
+    "owner" : "Node1",
+    "p" : [ {
+      "i" : 5,
+      "v" : "Led1"
+    } ]
+  }
 }
 
 A3. example sensor trigger with hysteresis switching a relay
@@ -368,14 +337,14 @@ init:
 
 the following code write the output variable status only when status needs to change.
 
-         .....             ......
-T2      .     .           .
-       .       .         .
-      .         .       .
-T1   .           .     .
-    .             .....
-    OFF  ON       OFF      ON
-	_____---------_________------
+           -----             -----
+  T2_     /     \           /
+         /       \         /
+  T1_   /         \       /
+       /           \     /
+      /             -----
+  OFF     ON       OFF      ON
+  	______---------_________------
 
 run:
   @sensor.event
@@ -388,17 +357,17 @@ run:
       status = true;
     }
   }
-  
+
 instruction-code:
 0: ld status
 1: bz 6
 2: ld sensor
 3: gt T1
-4: bnz end
+4: bnz 10
 5: jmp 9
 6: ld sensor
 7: gt T2
-8: bz end
+8: bz 10
 9: st status
 
 // the following code write the output variable status the proper condition is
@@ -432,24 +401,24 @@ key-prog -> {
     { i: bz, v: 6 },
     { i: ld, v: key-sensor },
     { i: gt, v: key-T1 },
-    { i: bnz, v: end },
+    { i: bnz, v: 10 },
     { i: jmp, v: 9 },
     { i: ld, v: key-sensor },
     { i: gt, v: key-T2 },
-    { i: bz, v: end },
+    { i: bz, v: 10 },
     { i: st, v: key-status },
     { i: st, v: key-led }
   ]
 }
 
-         .....             ......
-T2      .     .           .
-       .       .         .
-      .         .       .
-T1   .           .     .
-    .             .....
-    ON   OFF      ON       OFF
-    -----_________---------______
+           -----             -----
+  T2_     /     \           /
+         /       \         /
+  T1_   /         \       /
+       /           \     /
+      /             -----
+  ON      OFF      ON       OFF
+  	------_________---------_______
 
 run:
   @sensor.event
@@ -462,17 +431,17 @@ run:
       status = false;
     }
   }
-  
+
 instruction-code:
 0: ld status
 1: bnz 6
 2: ld sensor
 3: lt T1
-4: bz end
+4: bz 10
 5: jmp 9
 6: ld sensor
 7: lt T2
-8: bnz end
+8: bnz 10
 9: st status
 
 
@@ -552,22 +521,12 @@ pseudo-code:
     led = false;
   }
 
-key-timer1 -> {
-  code: int,
-  value: 1*2^18 + mask*2^11 + 0*60+0, // on config
-  cb: key-prog,
-}
-key-timer2 -> {
-  code: int,
-  value:  0*2^18 + mask*2^11 + 0*60+1, // off config
-  cb: key-prog,
-}
-key-led -> {
-  code: phyout,
-  value: pin<<24,
-}
-key-prog -> {
-  p: [
-    { i: st, v: key-led }
-  ]
+{
+  "Routine2" : {
+    "owner" : "Node1",
+    "p" : [ {
+      "i" : 5,
+      "v" : "Led1"
+    } ]
+  }
 }

@@ -5,20 +5,23 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
 #include "rf.h"
 #include "timesrv.h"
 #include "vm.h"
-#include "debug.h"
 
 #define LED D0 // Led in NodeMCU at pin GPIO16 (D0).
 #define LED_OFF HIGH
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
+#define STA_WIFI_TIMEOUT (1 * 60 * 1000)
+
 static bool fota_mode = false;
+static uint32_t last_wifi_time;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -44,9 +47,6 @@ bool STA_Setup(void) {
   DEBUG_PRINT("sta_password: %s\n", sta_password.c_str());
   DEBUG_PRINT("trying to connect...\n");
 
-  TimeSetup();
-  RF_Setup();
-
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
   while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
@@ -56,7 +56,10 @@ bool STA_Setup(void) {
   Serial.println();
 
   if (WiFi.status() == WL_CONNECTED) {
-    DEBUG_PRINT("connected:\n");
+    TimeSetup();
+    RF_Setup();
+
+    DEBUG_PRINT("connected: ");
     Serial.println(WiFi.localIP());
 
     SPIFFS.begin();
@@ -93,7 +96,9 @@ void STA_FotaReq(void) {
 bool STA_Task(void) {
   bool ret = true;
 
+  uint32_t current_time = millis();
   if (WiFi.status() == WL_CONNECTED) {
+    last_wifi_time = current_time;
     // wait for time service is up
     if (fota_mode == true) {
       FOTAService();
@@ -107,6 +112,10 @@ bool STA_Task(void) {
     }
   } else {
     DEBUG_PRINT("WiFi.status != WL_CONNECTED\n");
+    if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
+      // force reboot
+      ESP.restart();
+    }
   }
 
   return ret;

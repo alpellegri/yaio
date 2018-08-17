@@ -23,31 +23,15 @@ class ExecListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     new Text(
                       '${entry.key}',
-                      textScaleFactor: 1.2,
+                      // textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
-                    ),
-                    const Text(
-                      '',
-                      textScaleFactor: 0.8,
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const Text(
-                      '',
-                      textScaleFactor: 0.9,
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                      ),
                     ),
                   ],
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                 ),
               ],
             ),

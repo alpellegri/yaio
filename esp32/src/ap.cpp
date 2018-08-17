@@ -6,8 +6,7 @@
 
 #include "ee.h"
 #include "sta.h"
-
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#include "debug.h"
 
 #define LED 13
 #define LED_OFF LOW
@@ -77,7 +76,7 @@ bool AP_Setup(void) {
   IPAddress ip(192, 168, 2, 1);
 
   WiFi.disconnect();
-  WiFi.softAPdisconnect(true);
+  // WiFi.softAPdisconnect(true);
 
   enable_WiFi_Scan = EE_LoadData();
 

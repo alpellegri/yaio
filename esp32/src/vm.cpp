@@ -39,22 +39,20 @@ void VM_readIn(void) {
   bool UpdateDataFault = false;
 
   /* loop over data elements looking for events */
-  for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
-    switch (IoEntryVec[i].code) {
+  for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
+    IoEntry &entry = FB_getIoEntry(id);
+    switch (entry.code) {
     case kPhyIn: {
-      uint32_t v = atoi(IoEntryVec[i].value.c_str());
-      uint8_t pin = v >> 24;
+      uint32_t v = atoi(entry.value.c_str());
+      uint8_t pin = entry.ioctl;
       pinMode(pin, INPUT);
-      uint32_t mask = (((1 << 16) - 1) << 24);
-      uint32_t value = digitalRead(pin) & mask;
-      if ((v & ~mask) != value) {
-        value |= (v & mask);
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
-                    IoEntryVec[i].value.c_str());
-        IoEntryVec[i].value = value;
-        IoEntryVec[i].ev = true;
-        IoEntryVec[i].ev_value = value;
-        IoEntryVec[i].wb = true;
+      uint32_t value = digitalRead(pin);
+      if (v != value) {
+        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
+        entry.value = value;
+        entry.ev = true;
+        entry.ev_value = value;
+        entry.wb = true;
       }
     } break;
     case kPhyOut: {
@@ -62,66 +60,19 @@ void VM_readIn(void) {
         DEBUG_PRINT("get: kPhyOut\n");
         String kdata;
         FbSetPath_data(kdata);
-        uint32_t value =
-            Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
+        uint32_t value = Firebase.getInt(kdata + "/" + entry.key + "/value");
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("get failed: kPhyOut %s\n", IoEntryVec[i].key.c_str());
+          DEBUG_PRINT("get failed: kPhyOut %s\n", entry.key.c_str());
         } else {
-          uint32_t v = atoi(IoEntryVec[i].value.c_str());
-          uint32_t mask = (((1 << 8) - 1) << 24);
-          value &= ~mask;
-          if ((v & ~mask) != value) {
-            value |= (v & mask);
-            DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(),
-                        value, IoEntryVec[i].value.c_str());
-            IoEntryVec[i].value = value;
-            IoEntryVec[i].ev = true;
-            IoEntryVec[i].ev_value = value;
-            IoEntryVec[i].wb = true;
+          uint32_t v = atoi(entry.value.c_str());
+          if (v != value) {
+            DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
+            entry.value = value;
+            entry.ev = true;
+            entry.ev_value = value;
+            entry.wb = true;
           }
         }
-      }
-    } break;
-    case kDhtTemperature: {
-      uint32_t v = atoi(IoEntryVec[i].value.c_str());
-      uint32_t mask = (((1 << 16) - 1) << 16);
-      uint32_t value = PHT_GetTemperature();
-      if ((v & ~mask) != value) {
-        value |= (v & mask);
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
-                    IoEntryVec[i].value.c_str());
-        IoEntryVec[i].value = value;
-        IoEntryVec[i].ev = true;
-        IoEntryVec[i].ev_value = value;
-        IoEntryVec[i].wb = true;
-      }
-    } break;
-    case kDhtHumidity: {
-      uint32_t v = atoi(IoEntryVec[i].value.c_str());
-      uint32_t mask = (((1 << 16) - 1) << 16);
-      uint32_t value = PHT_GetHumidity();
-      if ((v & ~mask) != value) {
-        value |= (v & mask);
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
-                    IoEntryVec[i].value.c_str());
-        IoEntryVec[i].value = value;
-        IoEntryVec[i].ev = true;
-        IoEntryVec[i].ev_value = value;
-        IoEntryVec[i].wb = true;
-      }
-    } break;
-    case kRadioRx: {
-      uint32_t v = atoi(IoEntryVec[i].value.c_str());
-      uint32_t mask = (((1 << 8) - 1) << 24);
-      uint32_t value = RF_GetRadioCode();
-      if ((v & ~mask) != value) {
-        value |= (v & mask);
-        DEBUG_PRINT("VM_readIn: %s, %d, %s\n", IoEntryVec[i].key.c_str(), value,
-                    IoEntryVec[i].value.c_str());
-        IoEntryVec[i].value = value;
-        IoEntryVec[i].ev = true;
-        IoEntryVec[i].ev_value = value;
-        IoEntryVec[i].wb = true;
       }
     } break;
     case kBool: {
@@ -129,19 +80,17 @@ void VM_readIn(void) {
         DEBUG_PRINT("get: kBool\n");
         String kdata;
         FbSetPath_data(kdata);
-        bool value =
-            Firebase.getBool(kdata + "/" + IoEntryVec[i].key + "/value");
+        bool value = Firebase.getBool(kdata + "/" + entry.key + "/value");
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("get failed: kBool %s\n", IoEntryVec[i].key.c_str());
+          DEBUG_PRINT("get failed: kBool %s\n", entry.key.c_str());
           UpdateDataFault = true;
         } else {
-          uint32_t v = atoi(IoEntryVec[i].value.c_str());
+          uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(),
-                        value);
-            IoEntryVec[i].value = value;
-            IoEntryVec[i].ev = true;
-            IoEntryVec[i].ev_value = value;
+            DEBUG_PRINT("VM_readIn: %s, %d\n", entry.key.c_str(), value);
+            entry.value = value;
+            entry.ev = true;
+            entry.ev_value = value;
           }
         }
       }
@@ -151,19 +100,17 @@ void VM_readIn(void) {
         DEBUG_PRINT("get: kInt\n");
         String kdata;
         FbSetPath_data(kdata);
-        uint32_t value =
-            Firebase.getInt(kdata + "/" + IoEntryVec[i].key + "/value");
+        uint32_t value = Firebase.getInt(kdata + "/" + entry.key + "/value");
         if (Firebase.failed() == true) {
-          DEBUG_PRINT("get failed: kInt %s\n", IoEntryVec[i].key.c_str());
+          DEBUG_PRINT("get failed: kInt %s\n", entry.key.c_str());
           UpdateDataFault = true;
         } else {
-          uint32_t v = atoi(IoEntryVec[i].value.c_str());
+          uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
-            DEBUG_PRINT("VM_readIn: %s, %d\n", IoEntryVec[i].key.c_str(),
-                        value);
-            IoEntryVec[i].value = value;
-            IoEntryVec[i].ev = true;
-            IoEntryVec[i].ev_value = value;
+            DEBUG_PRINT("VM_readIn: %s, %d\n", entry.key.c_str(), value);
+            entry.value = value;
+            entry.ev = true;
+            entry.ev_value = value;
           }
         }
       }
@@ -180,26 +127,18 @@ uint8_t VM_findEvent(uint32_t *ev_value) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
   /* loop over data elements looking for events */
-  while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
-    if (IoEntryVec[i].ev == true) {
-      IoEntryVec[i].ev = false;
-      *ev_value = IoEntryVec[i].ev_value;
+  while ((i < FB_getIoEntryLen()) && (idx == 0xFF)) {
+    IoEntry &entry = FB_getIoEntry(i);
+    if (entry.ev == true) {
+      DEBUG_PRINT("VM_findEvent found: %d\n", i);
+      // entry.ev = false;
+      *ev_value = entry.ev_value;
       idx = i;
     }
     i++;
   }
 
   return idx;
-}
-
-void VM_writeOutPhyOut(uint32_t value) {
-  uint32_t mask = (1 << 24) - 1;
-  uint8_t pin = value >> 24;
-  value &= mask;
-  value = !!value;
-  DEBUG_PRINT("VM_writeOutPhyOut: %d, %d\n", pin, value);
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, value);
 }
 
 void VM_writeOutMessage(vm_context_t &ctx, String value) {
@@ -210,72 +149,118 @@ void VM_writeOutMessage(vm_context_t &ctx, String value) {
 
 void VM_writeOut(void) {
   /* loop over data elements looking for write-back requests */
-  for (uint8_t i = 0; i < IoEntryVec.size(); i++) {
-    if (IoEntryVec[i].wb == true) {
-      switch (IoEntryVec[i].code) {
+  for (uint8_t i = 0; i < FB_getIoEntryLen(); i++) {
+    IoEntry &entry = FB_getIoEntry(i);
+    if (entry.wb == true) {
+      switch (entry.code) {
       case kPhyOut: {
-        uint32_t v = atoi(IoEntryVec[i].value.c_str());
-        VM_writeOutPhyOut(v);
-        IoEntryVec[i].wb = false;
+        uint32_t v = atoi(entry.value.c_str());
+        uint8_t pin = entry.ioctl;
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, v);
+        entry.wb = false;
+      } break;
+      case kRadioTx: {
+        uint32_t v = atoi(entry.value.c_str());
+        RF_Send(v, 24);
+        entry.wb = false;
       } break;
       case kPhyIn:
       case kDhtTemperature:
-      case kDhtHumidity:
-      case kRadioIn:
-      case kRadioRx:
-      case kInt: {
-        uint32_t value = atoi(IoEntryVec[i].value.c_str());
-        DEBUG_PRINT("VM_writeOut: %s: %d\n", IoEntryVec[i].key.c_str(), value);
+      case kDhtHumidity: {
+        uint32_t value = atoi(entry.value.c_str());
+        DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), value);
         String ref;
         FbSetPath_data(ref);
-        Firebase.setInt(ref + "/" + IoEntryVec[i].key + "/value", value);
+        Firebase.setInt(ref + "/" + entry.key + "/value", value);
         if (Firebase.failed() == true) {
           DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
-                      IoEntryVec[i].key.c_str());
+                      entry.key.c_str());
         } else {
-          if (IoEntryVec[i].enLog == true) {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
-            json["t"] = getTime();
-            json["v"] = value & 0xFFFF;
-            String strdata;
-            json.printTo(strdata);
-            FbSetPath_log(ref);
-            Firebase.pushJSON(ref + "/" + IoEntryVec[i].key, strdata);
-            if (Firebase.failed() == true) {
-              DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
-                          IoEntryVec[i].key.c_str());
-            } else {
-              IoEntryVec[i].wb = false;
-            }
-          } else {
-            IoEntryVec[i].wb = false;
-          }
+          entry.wb = false;
         }
-      } break;
-      case kBool: {
-        bool value = atoi(IoEntryVec[i].value.c_str());
-        DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
-        String ref;
-        FbSetPath_data(ref);
-        Firebase.setBool(ref + "/" + IoEntryVec[i].key + "/value", value);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
-                      IoEntryVec[i].key.c_str());
-        } else {
-          IoEntryVec[i].wb = false;
-        }
-      } break;
-      case kMessaging: {
-        DEBUG_PRINT("VM_writeOut: kMessaging %s\n",
-                    IoEntryVec[i].value.c_str());
-        fblog_log(IoEntryVec[i].value, true);
-        IoEntryVec[i].wb = false;
       } break;
       default:
         // DEBUG_PRINT("VM_writeOut: error\n");
         break;
       }
+    }
+  }
+}
+
+void VM_writeEventOut(void) {
+  /* loop over data elements looking for write-back requests */
+  for (uint8_t i = 0; i < FB_getIoEntryLen(); i++) {
+    IoEntry &entry = FB_getIoEntry(i);
+    if (entry.ev == true) {
+      if (entry.wb == true) {
+        switch (entry.code) {
+        case kPhyOut: {
+          uint32_t v = atoi(entry.value.c_str());
+          uint8_t pin = entry.ioctl;
+          pinMode(pin, OUTPUT);
+          digitalWrite(pin, v);
+          entry.wb = false;
+        } break;
+        case kPhyIn:
+        case kDhtTemperature:
+        case kDhtHumidity:
+        case kRadioIn:
+        case kRadioRx:
+        case kInt: {
+          uint32_t value = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeEventOut: %s: %d\n", entry.key.c_str(), value);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setInt(ref + "/" + entry.key + "/value", value);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            if (entry.enLog == true) {
+              DynamicJsonBuffer jsonBuffer;
+              JsonObject &json = jsonBuffer.createObject();
+              json["t"] = getTime();
+              json["v"] = value;
+              String strdata;
+              json.printTo(strdata);
+              FbSetPath_log(ref);
+              Firebase.pushJSON(ref + "/" + entry.key, strdata);
+              if (Firebase.failed() == true) {
+                DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
+                            entry.key.c_str());
+              } else {
+                entry.wb = false;
+              }
+            } else {
+              entry.wb = false;
+            }
+          }
+        } break;
+        case kBool: {
+          bool value = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setBool(ref + "/" + entry.key + "/value", value);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            entry.wb = false;
+          }
+        } break;
+        case kMessaging: {
+          DEBUG_PRINT("VM_writeOut: kMessaging %s\n", entry.value.c_str());
+          fblog_log(entry.value, true);
+          entry.wb = false;
+        } break;
+        default:
+          // DEBUG_PRINT("VM_writeOut: error\n");
+          break;
+        }
+      }
+      entry.ev = false;
     }
   }
 }
@@ -293,14 +278,16 @@ void vm_read24(vm_context_t &ctx, const char *value) {
   DEBUG_PRINT("vm_readi24 value=%s\n", value);
   uint8_t id = FB_getIoEntryIdx(value);
   uint32_t mask = (1 << 24) - 1;
-  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  IoEntry &entry = FB_getIoEntry(id);
+  uint32_t v = atoi(entry.value.c_str());
   ctx.V = v & mask;
 }
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
   DEBUG_PRINT("vm_read value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  IoEntry &entry = FB_getIoEntry(id);
+  uint32_t v = atoi(entry.value.c_str());
   ctx.V = v;
 }
 
@@ -397,23 +384,25 @@ void vm_write0(vm_context_t &ctx, const char *key_value) {
 void vm_write(vm_context_t &ctx, const char *key_value) {
   DEBUG_PRINT("vm_write value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  if (IoEntryVec[id].code == kMessaging) {
+  IoEntry &entry = FB_getIoEntry(id);
+  if (entry.code == kMessaging) {
     /**/
-    VM_writeOutMessage(ctx, IoEntryVec[id].value);
+    VM_writeOutMessage(ctx, entry.value);
   } else {
-    IoEntryVec[id].value = ctx.ACC;
-    IoEntryVec[id].wb = true;
+    entry.value = ctx.ACC;
+    entry.wb = true;
   }
 }
 
 void vm_cwrite(vm_context_t &ctx, const char *key_value) {
   DEBUG_PRINT("vm_cwrite value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
-  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  IoEntry &entry = FB_getIoEntry(id);
+  uint32_t v = atoi(entry.value.c_str());
   if ((ctx.cond == true) && (v != ctx.ACC)) {
     ctx.cond = false;
-    IoEntryVec[id].value = ctx.ACC;
-    IoEntryVec[id].wb = true;
+    entry.value = ctx.ACC;
+    entry.wb = true;
   }
 }
 
@@ -421,10 +410,11 @@ void vm_write24(vm_context_t &ctx, const char *key_value) {
   DEBUG_PRINT("vm_write24 value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   uint32_t mask = (1 << 24) - 1;
-  uint32_t v = atoi(IoEntryVec[id].value.c_str());
+  IoEntry &entry = FB_getIoEntry(id);
+  uint32_t v = atoi(entry.value.c_str());
   uint32_t value = (v & (~mask)) | (ctx.ACC & mask);
-  IoEntryVec[id].value = value;
-  IoEntryVec[id].wb = true;
+  entry.value = value;
+  entry.wb = true;
 }
 
 vm_itlb_t VM_pipe[] = {
@@ -475,7 +465,8 @@ void VM_run(void) {
   uint32_t ev_value;
   uint8_t id = VM_findEvent(&ev_value);
   if (id != 0xFF) {
-    String key = IoEntryVec[id].cb;
+    IoEntry &entry = FB_getIoEntry(id);
+    String key = entry.cb;
 
     vm_context_t ctx;
     ctx.V = 0;
@@ -484,16 +475,16 @@ void VM_run(void) {
     ctx.halt = false;
 
     /* keep the event name */
-    ctx.ev_name = IoEntryVec[id].key.c_str();
+    ctx.ev_name = entry.key.c_str();
     DEBUG_PRINT("VM_run start >>>>>>>>>>>>\n");
     DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
     if (key.length() != 0) {
       uint8_t id_prog = FB_getProgIdx(key.c_str());
-      ProgEntry &prog = ProgVec[id_prog];
+      ProgEntry &prog = FB_getProg(id_prog);
       std::vector<FuncEntry> &funcvec = prog.funcvec;
 
       uint8_t pc = 0;
-      while (pc < funcvec.size()) {
+      while ((pc < funcvec.size()) && (ctx.halt == false)) {
         DEBUG_PRINT("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc,
                     funcvec[pc].code, ctx.ACC, ctx.V);
         /* decode */
@@ -503,7 +494,9 @@ void VM_run(void) {
                     funcvec[pc].code, ctx.ACC, ctx.V);
       }
     }
-    VM_writeOut();
+    VM_writeEventOut();
     DEBUG_PRINT("VM_run stop <<<<<<<<<<<<<\n");
   }
+
+  VM_writeOut();
 }

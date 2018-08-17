@@ -1,28 +1,24 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <WiFiUDP.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
-#include "fbutils.h"
 #include "fcm.h"
 #include "firebase.h"
-#include "rf.h"
 #include "sta.h"
-#include "timers.h"
 #include "timesrv.h"
 #include "vers.h"
 #include "vm.h"
-#include "debug.h"
 
-#define FBM_UPDATE_TH (30 * 60)
 #define FBM_UPDATE_MONITOR_FAST (1)
 #define FBM_UPDATE_MONITOR_SLOW (5)
-#define FBM_MONITOR_TIMERS (15)
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
@@ -34,13 +30,17 @@ static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
-String FBM_getResetReason() { return ESP.getResetReason(); }
+bool FBM_monitorActive(void) { return fbm_monitor_run; }
+
+String FBM_getResetReason(void) { return ESP.getResetReason(); }
 
 /* main function task */
 void FbmService(void) {
+
   switch (boot_sm) {
   // firebase init
   case 0: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     String firebase_url = EE_GetFirebaseUrl();
     String firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
@@ -51,6 +51,7 @@ void FbmService(void) {
 
   // firebase control/status init
   case 1: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     String kstartup;
     FbSetPath_startup(kstartup);
     String json = Firebase.getJSON(kstartup);
@@ -84,6 +85,7 @@ void FbmService(void) {
 
   // firebase init DB
   case 2: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     bool res = FbGetDB();
     if (res == true) {
       if (boot_first == false) {
@@ -99,6 +101,7 @@ void FbmService(void) {
   } break;
 
   case 21: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     String kcontrol;
     FbSetPath_control(kcontrol);
     Firebase.setInt((kcontrol + F("/reboot")), 0);
@@ -184,15 +187,19 @@ void FbmService(void) {
   } break;
 
   case 4:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     STA_FotaReq();
     boot_sm = 50;
     break;
+
   case 5:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     EE_EraseData();
     DEBUG_PRINT("EEPROM erased\n");
     ESP.restart();
     boot_sm = 50;
     break;
+
   default:
     break;
   }

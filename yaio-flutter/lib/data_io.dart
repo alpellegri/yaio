@@ -51,8 +51,8 @@ class _DataIOState extends State<DataIO> {
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(
-              onTap: () => _openEntryDialog(entryList[index]),
-              child: new DataIoItemWidget(entryList[index]));
+              onTap: () => _openEntryEdit(entryList[index]),
+              child: new DataItemWidget(entryList[index]));
         },
       ),
       floatingActionButton: new FloatingActionButton(
@@ -98,53 +98,48 @@ class _DataIOState extends State<DataIO> {
     }
   }
 
-  void _openEntryDialog(IoEntry entry) {
+  void _openEntryEdit(IoEntry entry) {
     Navigator.push(
         context,
         new MaterialPageRoute(
-          builder: (BuildContext context) => new DataIoDialogWidget(entry),
+          builder: (BuildContext context) => new DataEditScreen(entry),
           fullscreenDialog: true,
         ));
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry(_dataRef);
-    _openEntryDialog(entry);
+    final IoEntry entry = new IoEntry.setReference(_dataRef);
+    _openEntryEdit(entry);
   }
 }
 
-class DataIoDialogWidget extends StatefulWidget {
+class DataEditScreen extends StatefulWidget {
   final IoEntry entry;
 
-  DataIoDialogWidget(this.entry);
+  DataEditScreen(this.entry);
 
   @override
-  _DataIoDialogWidgetState createState() => new _DataIoDialogWidgetState(entry);
+  _DataDataEditScreenState createState() => new _DataDataEditScreenState(entry);
 }
 
-class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
+class _DataDataEditScreenState extends State<DataEditScreen> {
   final IoEntry entry;
   final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getExecRef());
   List<ExecEntry> _execList = new List();
-  int _selectedType;
   List<int> _opTypeMenu = new List<int>();
-  bool _checkboxValueWr = false;
-  bool _checkboxValueRd = false;
-  bool _checkboxValueLog = false;
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
-  dynamic _currentValue;
 
-  _DataIoDialogWidgetState(this.entry);
+  _DataDataEditScreenState(this.entry);
 
-  void _handleTapboxChanged(dynamic newValue) {
-    print('_handleTapboxChanged $newValue');
+  void _handleChangedValue(IoEntry newValue) {
     setState(() {
-      _currentValue = newValue;
+      entry.value = newValue.value;
+      entry.ioctl = newValue.ioctl;
     });
   }
 
@@ -153,13 +148,8 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
     super.initState();
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
-      _currentValue = entry.value;
-      _checkboxValueWr = entry.drawWr;
-      _checkboxValueRd = entry.drawRd;
-      _checkboxValueLog = entry.enLog;
       _controllerName.text = entry.key;
       _controllerType.text = entry.code.toString();
-      _selectedType = entry.code;
     }
     DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
   }
@@ -174,10 +164,13 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-          title: new Text((entry.key != null) ? entry.key : 'Data IO TBD'),
+          title: new Text((entry.key != null) ? entry.key : 'Data'),
           actions: <Widget>[
             new FlatButton(
-                child: const Text('REMOVE'),
+                child: const Text(
+                  'REMOVE',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onPressed: () {
                   if (entry.exist == true) {
                     entry.reference.child(entry.key).remove();
@@ -185,20 +178,20 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   Navigator.pop(context, null);
                 }),
             new FlatButton(
-                child: const Text('SAVE'),
+                child: const Text(
+                  'SAVE',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onPressed: () {
                   entry.key = _controllerName.text;
-                  entry.drawWr = _checkboxValueWr;
-                  entry.drawRd = _checkboxValueRd;
-                  entry.enLog = _checkboxValueLog;
                   try {
-                    entry.code = _selectedType;
-                    print(_currentValue);
-                    entry.value = _currentValue;
                     entry.cb = _selectedExec?.key;
                     entry.setOwner(getOwner());
                     if (entry.value != null) {
+                      print('saving');
                       entry.reference.child(entry.key).set(entry.toJson());
+                    } else {
+                      print('missing');
                     }
                   } catch (exception) {
                     print('bug');
@@ -227,10 +220,10 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                   ),
                   new DropdownButton<int>(
                     hint: const Text('select'),
-                    value: _selectedType,
+                    value: entry.code,
                     onChanged: (int newValue) {
                       setState(() {
-                        _selectedType = newValue;
+                        entry.code = newValue;
                       });
                     },
                     items: _opTypeMenu.map((int entry) {
@@ -241,11 +234,10 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                     }).toList(),
                   ),
                 ]),
-                (_selectedType != null)
-                    ? (new DynamicEditWidget(
-                        type: _selectedType,
-                        value: _currentValue,
-                        onChanged: _handleTapboxChanged,
+                (entry.code != null)
+                    ? (new DataConfigWidget(
+                        data: entry,
+                        onChangedValue: _handleChangedValue,
                       ))
                     : (const Text('')),
                 (_execList.length > 0)
@@ -269,39 +261,48 @@ class _DataIoDialogWidgetState extends State<DataIoDialogWidget> {
                       )
                     : const Text(''),
                 new ListTile(
-                  title: const Text('On Dashboard Write Mode'),
+                  title: const Text('Enable on Google Home'),
                   leading: new Checkbox(
-                      value: _checkboxValueWr,
+                      value: entry.aog,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxValueWr = value;
+                          entry.aog = value;
+                        });
+                      }),
+                ),
+                new ListTile(
+                  title: const Text('On Dashboard Write Mode'),
+                  leading: new Checkbox(
+                      value: entry.drawWr,
+                      onChanged: (bool value) {
+                        setState(() {
+                          entry.drawWr = value;
                         });
                       }),
                 ),
                 new ListTile(
                   title: const Text('On Dashboard Read Mode'),
                   leading: new Checkbox(
-                      value: _checkboxValueRd,
+                      value: entry.drawRd,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxValueRd = value;
+                          entry.drawRd = value;
                         });
                       }),
                 ),
                 new ListTile(
                   title: const Text('Enable Logs'),
                   leading: new Checkbox(
-                      value: _checkboxValueLog,
+                      value: entry.enLog,
                       onChanged: (bool value) {
                         setState(() {
-                          _checkboxValueLog = value;
+                          entry.enLog = value;
                         });
                       }),
                 ),
               ]),
         ),
       ),
-
     );
   }
 

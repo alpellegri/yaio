@@ -1,13 +1,20 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
+#if 0
 #include <ESP8266HTTPClient.h>
+#else
+// use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
+#include <ESP8266HTTPWeakClient.h>
+#define HTTPClient HTTPWeakClient
+#endif
+
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fcm.h"
 #include "firebase.h"
-#include "debug.h"
 
-#define FCM_SERVICE_TIMEOUT (5 * 1000)
 #define FCM_NUM_REGIDS_MAX (5)
 
 static const char FcmServer[] PROGMEM = "fcm.googleapis.com";
@@ -52,7 +59,7 @@ void FcmSendPush(String &message) {
     String json;
     json = F("{");
     json += F("\"notification\":{");
-    json += F("\"title\":\"ESP8266 Alert\",");
+    json += F("\"title\":\"Yaio\",");
     json += F("\"body\":\"");
     json += message;
     json += F("\",");

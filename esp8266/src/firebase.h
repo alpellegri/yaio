@@ -2,7 +2,13 @@
 #define firebase_h
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
+#if 0
+#include <ESP8266HTTPClient.h>
+#else
+// use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
+#include <ESP8266HTTPWeakClient.h>
+#define HTTPClient HTTPWeakClient
+#endif
 
 #include <string>
 
@@ -38,17 +44,26 @@ public:
   bool getBool(const String &path);
   String getJSON(const String &path);
   void remove(const String &path);
+  void stream(const String &path);
+  bool available();
+  bool connected();
+  String readEvent();
   bool failed();
   String error();
 
 private:
-  std::string RestApi(RestMethod_t method, const std::string path,
-                      const std::string value);
+  std::string restReqApi(RestMethod_t method, const std::string path,
+                         const std::string value);
+  std::string _restReqApi(RestMethod_t method, const std::string path,
+                          const std::string value);
+  void restStreamApi(const std::string path);
 
   std::string host_;
   std::string auth_;
   std::string result_;
   int httpCode_;
+  HTTPClient http_req;
+  HTTPClient http_stream;
 };
 
 extern FirebaseRest Firebase;

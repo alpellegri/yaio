@@ -1,25 +1,25 @@
 #include <Arduino.h>
-#include <Ticker.h>
 #include <RCSwitch.h>
 
 #include <stdio.h>
 #include <string.h>
 
 #include "cc1101.h"
+#include "debug.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
 #include "fbutils.h"
 #include "rf.h"
 #include "timesrv.h"
-#include "debug.h"
 
 // #define USE_CC1101
 
 // #define PORT_GDO0 ? // tx
 // #define PORT_GDO2 13 (D7) // rx
 
-static Ticker RFRcvTimer;
+// rf suspend timeout
+#define RF_SUSPEND_TO (1 * 1000)
 
 #ifdef USE_CC1101
 static CC1101 rfHandle;
@@ -28,6 +28,7 @@ static RCSwitch rfHandle = RCSwitch();
 #endif
 
 static uint32_t RadioCode;
+static uint8_t RadioCodeLen;
 static bool RadioEv;
 
 void RF_SetRxPin(uint8_t pin) {
@@ -44,7 +45,10 @@ void RF_SetTxPin(uint8_t pin) {
   rfHandle.enableTransmit(pin);
 }
 
-void RF_Send(uint32_t data, uint8_t bits) { rfHandle.send(data, bits); }
+void RF_Send(uint32_t data, uint8_t bits) {
+  DEBUG_PRINT("RF_Send %d, %d\n", data, bits);
+  rfHandle.send(data, bits);
+}
 
 bool RF_GetRadioEv(void) {
   bool ev = RadioEv;
@@ -54,38 +58,40 @@ bool RF_GetRadioEv(void) {
   return ev;
 }
 
-uint32_t RF_GetRadioCode(void) { return RadioCode; }
-
-// avoid receiving multiple code from same telegram
-void ICACHE_RAM_ATTR RF_Unmask(void) { RFRcvTimer.detach(); }
-
 void RF_Setup() {
 #ifdef USE_CC1101
+  uint8_t data[3];
   rfHandle.setSoftCS(4);
   rfHandle.begin();
+  data[0] = rfHandle.readStatus(CC1101_VERSION);
+  data[1] = rfHandle.readReg(CC1101_PKTCTRL0);
+  data[2] = rfHandle.readReg(CC1101_MDMCFG2);
+  if ((data[0] == 20) && (data[1] == 50) && (data[2] == 48)) {
+    DEBUG_PRINT("CC1101 ok\n");
+  } else {
+    DEBUG_PRINT("CC1101 fail\n");
+  }
 #endif
 }
 
 void RF_Loop() {
   if (rfHandle.available()) {
-
     noInterrupts();
     uint32_t value = rfHandle.getReceivedValue();
     rfHandle.resetAvailable();
-    DEBUG_PRINT("getReceivedValue %d\n", value);
     interrupts();
 
     if (value == 0) {
       DEBUG_PRINT("Unknown encoding\n");
     } else {
-      DEBUG_PRINT("%06X / bit: %d - Protocol: %d\n", value,
-                  rfHandle.getReceivedBitlength(),
-                  rfHandle.getReceivedProtocol());
       if (RadioEv == false) {
-        DEBUG_PRINT("radio code: %06X\n", value);
+        DEBUG_PRINT("%d - bit: %d - Protocol: %d\n", value,
+                    rfHandle.getReceivedBitlength(),
+                    rfHandle.getReceivedProtocol());
+        DEBUG_PRINT("radio code: %d\n", value);
         RadioEv = true;
         RadioCode = value;
-        RFRcvTimer.attach_ms(1000, RF_Unmask);
+        RadioCodeLen = rfHandle.getReceivedBitlength();
       } else {
         DEBUG_PRINT(".\n");
       }
@@ -93,35 +99,42 @@ void RF_Loop() {
   }
 }
 
-uint8_t RF_checkRadioInCodeDB(uint32_t radioid) {
-  uint8_t i = 0;
-  uint8_t id = 0xFF;
-
-  uint8_t len = FB_getIoEntryLen();
-
-  DEBUG_PRINT("RF_CheckRadioCodeDB: code %06X\n", radioid);
-  while ((i < len) && (id == 0xFF)) {
-    IoEntry entry = FB_getIoEntry(i);
-    uint32_t v = atoi(entry.value.c_str());
-    if ((radioid == v) && (entry.code == kRadioIn)) {
-      DEBUG_PRINT("radio code found in table %06X\n", radioid);
-      id = i;
-    }
-    i++;
-  }
-
-  return id;
-}
-
 /* main function task */
 void RF_Service(void) {
   uint32_t ev = RF_GetRadioEv();
   if (ev == true) {
-    uint8_t id = RF_checkRadioInCodeDB(RadioCode);
-    DEBUG_PRINT("RF_Service %d\n", id);
-    if (id != 0xFF) {
-      IoEntryVec[id].ev = true;
-      IoEntryVec[id].ev_value = RadioCode;
+    uint32_t current_time = millis();
+    uint32_t RadioId = RadioCode;
+    uint8_t data_bits = (RadioCodeLen > 24) ? (RadioCodeLen - 24) : (0);
+    RadioId = RadioCode >> data_bits;
+
+    for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
+      IoEntry &entry = FB_getIoEntry(id);
+      if ((entry.code == kRadioRx) &&
+          ((current_time - entry.ev_tmstamp) > RF_SUSPEND_TO)) {
+        DEBUG_PRINT("RF_Service [%d]: %s, %d\n", id, entry.key.c_str(),
+                    RadioCode);
+        entry.value = RadioCode;
+        entry.ev = true;
+        entry.ev_value = RadioCode;
+        entry.ev_tmstamp = current_time;
+        entry.wb = true;
+      }
+
+      if ((entry.code == kRadioIn) && (entry.ioctl == RadioId) &&
+          ((current_time - entry.ev_tmstamp) > RF_SUSPEND_TO)) {
+        uint8_t value = 0;
+        if (data_bits > 0) {
+          value = RadioCode & ((1 << data_bits) - 1);
+        }
+        DEBUG_PRINT("RF_Service [%d]: %s, %d\n", id, entry.key.c_str(),
+                    RadioCode);
+        entry.value = String(value);
+        entry.ev = true;
+        entry.ev_value = value;
+        entry.ev_tmstamp = current_time;
+        entry.wb = true;
+      }
     }
   }
 }

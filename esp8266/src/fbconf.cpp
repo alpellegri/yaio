@@ -4,13 +4,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fbutils.h"
 #include "fcm.h"
 #include "firebase.h"
 #include "rf.h"
-#include "debug.h"
 
 static const char _kstartup[] PROGMEM = "startup";
 static const char _kcontrol[] PROGMEM = "control";

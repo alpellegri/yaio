@@ -13,10 +13,10 @@
 #include <WiFiUdp.h>
 #include <stdlib.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fota.h"
 #include "vers.h"
-#include "debug.h"
 
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
@@ -118,7 +118,7 @@ bool FOTAService(void) {
         state = FOTA_Sm_ERROR;
       }
     } else {
-      DEBUG_PRINT("[HTTP] begin... failed, error: %s\n", res);
+      DEBUG_PRINT("[HTTP] begin... failed, error: %d\n", res);
       state = FOTA_Sm_ERROR;
     }
   } break;
@@ -161,9 +161,9 @@ bool FOTAService(void) {
   case FOTA_Sm_GET_BLOCK: {
     bool res = http->begin(addr, storage_fingerprint);
     if (res == true) {
-      String range = "bytes=" + String(block * block_size) + "-" +
-                     String(((block + 1) * block_size) - 1);
-      http->addHeader("Range", range);
+      String range = String(F("bytes=")) + String(block * block_size) +
+                     String(F("-")) + String(((block + 1) * block_size) - 1);
+      http->addHeader(String(F("Range")), range);
       int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {

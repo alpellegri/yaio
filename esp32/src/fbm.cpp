@@ -1,31 +1,24 @@
 #include <Arduino.h>
 #include <WiFiUDP.h>
 
-#include <DHT.h>
-
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fbconf.h"
 #include "fblog.h"
 #include "fbm.h"
-#include "fbutils.h"
 #include "fcm.h"
 #include "firebase.h"
-#include "rf.h"
 #include "sta.h"
-#include "timers.h"
 #include "timesrv.h"
 #include "vers.h"
 #include "vm.h"
-#include "debug.h"
 #include <rom/rtc.h>
 
-#define FBM_UPDATE_TH (30 * 60)
 #define FBM_UPDATE_MONITOR_FAST (1)
 #define FBM_UPDATE_MONITOR_SLOW (5)
-#define FBM_MONITOR_TIMERS (15)
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
@@ -36,6 +29,8 @@ static uint16_t bootcnt = 0;
 static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
+
+bool FBM_monitorActive(void) { return fbm_monitor_run; }
 
 String verbose_print_reset_reason(RESET_REASON reason) {
   String result;
@@ -103,6 +98,7 @@ String FBM_getResetReason(void) {
 
 /* main function task */
 void FbmService(void) {
+  DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
   switch (boot_sm) {
   // firebase init
   case 0: {
@@ -181,7 +177,6 @@ void FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
-      DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       String kcontrol;

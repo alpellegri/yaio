@@ -91,20 +91,25 @@ int clearBits(int v, int pos, int len) {
   return v;
 }
 
-dynamic getValueCtrl1(code, value) {
-  dynamic v;
-  switch (DataCode.values[code]) {
+String getValueCtrl1(IoEntry data) {
+  String v;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
+    case DataCode.RadioMach:
+      v = (data.ioctl).toString();
+      break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(value, 24, 8);
+      v = getBits(data.ioctl, 0, 8).toString();
       break;
     case DataCode.Timer:
       DateTime now = new DateTime.now();
-      v = (24 + getBits(value, 8, 8) + now.timeZoneOffset.inHours) % 24;
+      // compensate timezone
+      v = ((24 + (data.value ~/ 60) + now.timeZoneOffset.inHours) % 24)
+          .toString();
       break;
     default:
   }
@@ -112,137 +117,149 @@ dynamic getValueCtrl1(code, value) {
   return v;
 }
 
-dynamic getValueCtrl2(int code, dynamic value) {
-  dynamic v;
-  switch (DataCode.values[code]) {
+String getValueCtrl2(IoEntry data) {
+  String v;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      v = getBits(value, 0, 24);
-      break;
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      v = getBits(value, 16, 8);
-      break;
     case DataCode.RadioMach:
     case DataCode.Int:
     case DataCode.Float:
+      v = data.value.toString();
+      break;
     case DataCode.Messaging:
-      v = value;
+      v = data.value;
+      break;
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(data.ioctl, 8, 8).toString();
       break;
     case DataCode.Bool:
-      if (value == false) {
-        v = '0';
-      } else if (value == true) {
-        v = '1';
-      } else {
-        print('_controller_2.text error');
-        v = '0';
-      }
+      v = data.value.toString();
       break;
     case DataCode.Timer:
-      v = getBits(value, 0, 8);
+      v = (data.value % 60).toString();
       break;
     default:
   }
   return v;
 }
 
-dynamic getValueCtrl3(int code, dynamic value) {
-  dynamic v;
-  switch (DataCode.values[code]) {
+int getValueCtrl3(IoEntryControl data) {
+  int v;
+  switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      v = getBits(value, 16, 9);
+      v = getBits(data.ioctl, 16, 9);
       break;
     default:
   }
   return v;
 }
 
-dynamic setValueCtrl1(dynamic value, int code, dynamic v) {
-  switch (DataCode.values[code]) {
+IoEntry setValueCtrl1(IoEntry data, String v) {
+  IoEntry local = data;
+  local.ioctl ??= 0;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      value = clearBits(value, 24, 8);
-      value |= setBits(24, 8, int.parse(v));
+    case DataCode.RadioMach:
+      local.value ??= 0;
+      local.ioctl = int.parse(v);
       break;
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      value = clearBits(value, 24, 8);
-      value |= setBits(24, 8, int.parse(v));
+      // pin
+      local.value ??= 0;
+      local.ioctl = clearBits(local.ioctl, 0, 8);
+      local.ioctl |= setBits(0, 8, int.parse(v));
+      break;
+    case DataCode.Bool:
+      // binary values
+      print('${local.value}');
+      local.value = (v == 'true');
       break;
     case DataCode.Timer:
+      // binary values
+      local.value ??= 0;
       DateTime now = new DateTime.now();
-      value = clearBits(value, 8, 8);
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
-      value |= setBits(8, 8, h);
+      local.value = (60 * h) + (local.value % 60);
       break;
     default:
   }
-  return value;
+  return local;
 }
 
-dynamic setValueCtrl2(dynamic value, int code, dynamic v) {
-  switch (DataCode.values[code]) {
+IoEntry setValueCtrl2(IoEntry data, String v) {
+  IoEntry local = data;
+  local.ioctl ??= 0;
+  switch (DataCode.values[data.code]) {
     case DataCode.PhyIn:
     case DataCode.PhyOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
-      // binary values
-      value = clearBits(value, 0, 24);
-      value |= setBits(0, 24, int.parse(v));
-      break;
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      // binary values
-      value = clearBits(value, 16, 8);
-      value |= setBits(16, 8, int.parse(v));
-      break;
     case DataCode.RadioMach:
     case DataCode.Int:
     case DataCode.Float:
+      // binary values
+      local.value = int.parse(v);
+      break;
+    case DataCode.Bool:
+      // binary values
+      local.value = (v == 'true');
+      break;
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      // binary values
+      // period
+      local.value ??= 0;
+      local.ioctl = clearBits(local.ioctl, 8, 8);
+      local.ioctl |= setBits(8, 8, int.parse(v));
+      break;
     case DataCode.Messaging:
       // string values
-      value = v;
-      break;
-    case DataCode.Bool:
-      if (v == '0') {
-        value = false;
-      } else if (v == '1') {
-        value = true;
-      } else {
-        print('ctrl_2.text error');
-      }
+      local.value = v;
       break;
     case DataCode.Timer:
       // binary values
-      value = clearBits(value, 0, 8);
-      value |= setBits(0, 8, int.parse(v));
+      local.value ??= 0;
+      int value = local.value;
+      local.value = (value - (value % 60)) + int.parse(v);
       break;
     default:
   }
-  return value;
+  return local;
 }
 
-dynamic setValueCtrl3(dynamic value, int code, dynamic v) {
-  switch (DataCode.values[code]) {
+IoEntryControl setValueCtrl3(IoEntryControl data, String v) {
+  IoEntryControl local = data;
+  local.ioctl ??= 0;
+  switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      value = clearBits(value, 16, 9);
-      value |= setBits(16, 9, int.parse(v));
+      local.ioctl = clearBits(local.ioctl, 16, 9);
+      local.ioctl |= setBits(16, 9, int.parse(v));
       break;
     default:
   }
-  return value;
+  return local;
+}
+
+class IoEntryControl {
+  int code;
+  dynamic value;
+  int ioctl;
+
+  IoEntryControl(this.code, this.value, this.ioctl);
 }
 
 class IoEntry {
-  static const int shift = 24;
-  static const int mask = (1 << shift) - 1;
   DatabaseReference reference;
   bool exist = false;
+  bool aog = false;
   bool drawWr = false;
   bool drawRd = false;
   bool enLog = false;
@@ -250,26 +267,10 @@ class IoEntry {
   String owner;
   int code;
   dynamic value;
+  int ioctl;
   String cb;
 
-  IoEntry(DatabaseReference ref) : reference = ref;
-
-  IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
-    reference = ref;
-    exist = true;
-    key = k;
-    owner = v['owner'];
-    code = v['code'];
-    value = v['value'];
-    cb = v['cb'];
-    if (v['drawWr'] != null) {
-      drawWr = v['drawWr'];
-    }
-    if (v['drawRd'] != null) {
-      drawRd = v['drawRd'];
-    }
-    enLog = v['enLog'];
-  }
+  IoEntry.setReference(DatabaseReference ref) : reference = ref;
 
   dynamic getValue() {
     dynamic v;
@@ -278,29 +279,24 @@ class IoEntry {
       case DataCode.PhyOut:
       case DataCode.RadioRx:
       case DataCode.RadioTx:
-        // binary values
-        v = getBits(value, 0, 24);
-        break;
-      case DataCode.DhtTemperature:
-      case DataCode.DhtHumidity:
-        // binary values
-        v = getBits(value, 0, 16) / 10;
-        break;
-      case DataCode.Timer:
-        // binary values
-        DateTime now = new DateTime.now();
-        int h = (24 + getBits(value, 8, 8) + now.timeZoneOffset.inHours) % 24;
-        int m = getBits(value, 0, 8);
-        DateTime dtset = new DateTime(0, 0, 0, h, m);
-        v = new DateFormat('Hm').format(dtset);
-        break;
       case DataCode.RadioMach:
       case DataCode.Bool:
       case DataCode.Int:
       case DataCode.Float:
       case DataCode.Messaging:
-        // string values
         v = value;
+        break;
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+        v = (.01 * value).toStringAsFixed(1);
+        break;
+      case DataCode.Timer:
+        // binary values
+        DateTime now = new DateTime.now();
+        int h = ((24 + (value ~/ 60)) + now.timeZoneOffset.inHours) % 24;
+        int m = value % 60;
+        DateTime dtset = new DateTime(0, 0, 0, h, m);
+        v = new DateFormat('Hm').format(dtset);
         break;
     }
     return v;
@@ -310,13 +306,34 @@ class IoEntry {
     owner = _owner;
   }
 
+  IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
+    reference = ref;
+    exist = true;
+    key = k;
+    owner = v['owner'];
+    code = v['code'];
+    value = v['value'];
+    ioctl = v['ioctl'];
+    cb = v['cb'];
+    aog = v['aog'];
+    if (v['drawWr'] != null) {
+      drawWr = v['drawWr'];
+    }
+    if (v['drawRd'] != null) {
+      drawRd = v['drawRd'];
+    }
+    enLog = v['enLog'];
+  }
+
   Map toJson() {
     exist = true;
     Map<String, dynamic> map = new Map<String, dynamic>();
     map['owner'] = owner;
     map['code'] = code;
     map['value'] = value;
+    map['ioctl'] = ioctl;
     map['cb'] = cb;
+    map['aog'] = aog;
     if (drawWr != false) {
       map['drawWr'] = drawWr;
     }
@@ -328,11 +345,11 @@ class IoEntry {
   }
 }
 
-const String kOpCodeStringex0 = 'ex0';
+const String kOpCodeStringnop = 'nop';
 const String kOpCodeStringldi = 'ldi';
-const String kOpCodeStringld24 = 'ld24';
+const String kOpCodeStringres1 = 'res1';
 const String kOpCodeStringld = 'ld';
-const String kOpCodeStringst24 = 'st24';
+const String kOpCodeStringres2 = 'res2';
 const String kOpCodeStringst = 'st';
 const String kOpCodeStringlt = 'lt';
 const String kOpCodeStringgt = 'gt';
@@ -341,18 +358,22 @@ const String kOpCodeStringeq = 'eq';
 const String kOpCodeStringbz = 'bz';
 const String kOpCodeStringbnz = 'bnz';
 const String kOpCodeStringdly = 'dly';
-const String kOpCodeStringstne = 'stne';
+const String kOpCodeStringres3 = 'res3';
 const String kOpCodeStringlte = 'lte';
 const String kOpCodeStringgte = 'gte';
 const String kOpCodeStringhalt = 'halt';
 const String kOpCodeStringjmp = 'jmp';
+const String kOpCodeStringaddi = 'addi';
+const String kOpCodeStringadd = 'add';
+const String kOpCodeStringsubi = 'subi';
+const String kOpCodeStringsub = 'sub';
 
 enum OpCode {
-  ex0,
+  nop,
   ldi,
-  ld24,
+  res1,
   ld,
-  st24,
+  res2,
   st,
   lt,
   gt,
@@ -361,19 +382,23 @@ enum OpCode {
   bz,
   bnz,
   dly,
-  stne,
+  res3,
   lte,
   gte,
   halt,
   jmp,
+  addi,
+  add,
+  subi,
+  sub,
 }
 
 const Map<OpCode, bool> kOpCodeIsImmediate = const {
-  OpCode.ex0: true,
+  OpCode.nop: true,
   OpCode.ldi: true,
-  OpCode.ld24: false,
+  OpCode.res1: true,
   OpCode.ld: false,
-  OpCode.st24: false,
+  OpCode.res2: true,
   OpCode.st: false,
   OpCode.lt: false,
   OpCode.gt: false,
@@ -382,19 +407,23 @@ const Map<OpCode, bool> kOpCodeIsImmediate = const {
   OpCode.bz: true,
   OpCode.bnz: true,
   OpCode.dly: true,
-  OpCode.stne: false,
+  OpCode.res3: true,
   OpCode.lte: false,
   OpCode.gte: false,
   OpCode.halt: true,
   OpCode.jmp: true,
+  OpCode.addi: true,
+  OpCode.add: false,
+  OpCode.subi: true,
+  OpCode.sub: false,
 };
 
 const Map<OpCode, String> kOpCode2Name = const {
-  OpCode.ex0: kOpCodeStringex0,
+  OpCode.nop: kOpCodeStringnop,
   OpCode.ldi: kOpCodeStringldi,
-  OpCode.ld24: kOpCodeStringld24,
+  OpCode.res1: kOpCodeStringres1,
   OpCode.ld: kOpCodeStringld,
-  OpCode.st24: kOpCodeStringst24,
+  OpCode.res2: kOpCodeStringres2,
   OpCode.st: kOpCodeStringst,
   OpCode.lt: kOpCodeStringlt,
   OpCode.gt: kOpCodeStringgt,
@@ -403,19 +432,23 @@ const Map<OpCode, String> kOpCode2Name = const {
   OpCode.bz: kOpCodeStringbz,
   OpCode.bnz: kOpCodeStringbnz,
   OpCode.dly: kOpCodeStringdly,
-  OpCode.stne: kOpCodeStringstne,
+  OpCode.res3: kOpCodeStringres3,
   OpCode.lte: kOpCodeStringlte,
   OpCode.gte: kOpCodeStringgte,
   OpCode.halt: kOpCodeStringhalt,
   OpCode.jmp: kOpCodeStringjmp,
+  OpCode.addi: kOpCodeStringaddi,
+  OpCode.add: kOpCodeStringadd,
+  OpCode.subi: kOpCodeStringsubi,
+  OpCode.sub: kOpCodeStringsub,
 };
 
 const Map<String, OpCode> kName2Opcode = const {
-  kOpCodeStringex0: OpCode.ex0,
+  kOpCodeStringnop: OpCode.nop,
   kOpCodeStringldi: OpCode.ldi,
-  kOpCodeStringld24: OpCode.ld24,
+  kOpCodeStringres1: OpCode.res1,
   kOpCodeStringld: OpCode.ld,
-  kOpCodeStringst24: OpCode.st24,
+  kOpCodeStringres2: OpCode.res2,
   kOpCodeStringst: OpCode.st,
   kOpCodeStringlt: OpCode.lt,
   kOpCodeStringgt: OpCode.gt,
@@ -424,11 +457,15 @@ const Map<String, OpCode> kName2Opcode = const {
   kOpCodeStringbz: OpCode.bz,
   kOpCodeStringbnz: OpCode.bnz,
   kOpCodeStringdly: OpCode.dly,
-  kOpCodeStringstne: OpCode.stne,
+  kOpCodeStringres3: OpCode.res3,
   kOpCodeStringlte: OpCode.lte,
   kOpCodeStringgte: OpCode.gte,
   kOpCodeStringhalt: OpCode.halt,
   kOpCodeStringjmp: OpCode.jmp,
+  kOpCodeStringaddi: OpCode.addi,
+  kOpCodeStringadd: OpCode.add,
+  kOpCodeStringsubi: OpCode.subi,
+  kOpCodeStringsub: OpCode.sub,
 };
 
 class InstrEntry {

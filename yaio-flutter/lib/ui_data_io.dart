@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'entries.dart';
 
-class DynamicDataWidget extends StatelessWidget {
+class DataValueWidget extends StatelessWidget {
   final IoEntry entry;
 
-  DynamicDataWidget(this.entry);
+  DataValueWidget(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class DynamicDataWidget extends StatelessWidget {
       children: <Widget>[
         new Text(
           entry.getValue().toString(),
-          textScaleFactor: 1.2,
+          // textScaleFactor: 1.2,
           textAlign: TextAlign.right,
         ),
       ],
@@ -22,10 +22,10 @@ class DynamicDataWidget extends StatelessWidget {
   }
 }
 
-class DataIoItemWidget extends StatelessWidget {
+class DataItemWidget extends StatelessWidget {
   final IoEntry entry;
 
-  DataIoItemWidget(this.entry);
+  DataItemWidget(this.entry);
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +46,12 @@ class DataIoItemWidget extends StatelessWidget {
                   children: <Widget>[
                     new Text(
                       entry.key,
-                      textScaleFactor: 1.2,
+                      // textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                     new Text(
                       '${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textScaleFactor: 1.0,
+                      // textScaleFactor: 1.0,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -59,7 +59,7 @@ class DataIoItemWidget extends StatelessWidget {
                     ),
                   ],
                 )),
-                new DynamicDataWidget(entry),
+                new DataValueWidget(entry),
               ],
             ),
           ),
@@ -69,39 +69,35 @@ class DataIoItemWidget extends StatelessWidget {
   }
 }
 
-class DynamicEditWidget extends StatefulWidget {
-  final int type;
-  final dynamic value;
-  final ValueChanged<dynamic> onChanged;
+class DataConfigWidget extends StatefulWidget {
+  final IoEntry data;
+  final ValueChanged<IoEntry> onChangedValue;
 
-  DynamicEditWidget({Key key, this.type, this.value, this.onChanged})
-      : super(key: key);
+  DataConfigWidget({Key key, this.data, this.onChangedValue}) : super(key: key);
 
   @override
-  _DynamicEditWidget createState() => new _DynamicEditWidget();
+  _DataConfigWidget createState() => new _DataConfigWidget();
 }
 
-class _DynamicEditWidget extends State<DynamicEditWidget> {
-  int type;
-  dynamic value = 0;
+class _DataConfigWidget extends State<DataConfigWidget> {
+  IoEntry data;
   TextEditingController ctrl_1 = new TextEditingController();
   TextEditingController ctrl_2 = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    type = widget.type;
-    if (widget.value != null) {
-      value = widget.value;
-      print('_DynamicEditWidget initState $value, $type');
-      ctrl_1.text = getValueCtrl1(type, value).toString();
-      ctrl_2.text = getValueCtrl2(type, value).toString();
+    data = widget.data;
+    data.ioctl ??= 0;
+    if (widget.data.value != null) {
+      ctrl_1.text = getValueCtrl1(data);
+      ctrl_2.text = getValueCtrl2(data);
     }
   }
 
   Widget build(BuildContext context) {
     Widget w;
-    switch (DataCode.values[type]) {
+    switch (DataCode.values[data.code]) {
       case DataCode.PhyIn:
       case DataCode.RadioRx:
         w = new Column(
@@ -112,9 +108,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data = setValueCtrl1(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -134,9 +130,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data = setValueCtrl1(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -148,9 +144,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data = setValueCtrl2(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -170,9 +166,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data = setValueCtrl1(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -184,9 +180,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data = setValueCtrl2(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -197,6 +193,26 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             ]);
         break;
       case DataCode.RadioMach:
+        w = new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                controller: ctrl_1,
+                onSubmitted: (v) {
+                  setState(() {
+                    data = setValueCtrl1(data, v);
+                  });
+                  widget.onChangedValue(data);
+                },
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: 'identifier',
+                  labelText: 'ID',
+                ),
+              ),
+            ]);
+        break;
       case DataCode.Int:
       case DataCode.Float:
         w = new Column(
@@ -207,9 +223,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data = setValueCtrl2(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -228,9 +244,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data.value = v;
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 decoration: const InputDecoration(
                   hintText: 'value',
@@ -240,37 +256,19 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
             ]);
         break;
       case DataCode.Bool:
-        if (value is int) {
-          value = false;
-        }
+        data.value ??= false;
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Switch(
-                  value: value,
+                  value: data.value,
                   onChanged: (bool v) {
                     setState(() {
-                      value = v;
+                      data = setValueCtrl1(data, v.toString());
                     });
-                    widget.onChanged(value);
+                    widget.onChangedValue(data);
                   }),
-              /* new TextFieldWidget(
-                first: new Text('Value'),
-                second: new TextField(
-                  controller: ctrl_2,
-                  onSubmitted: (v) {
-                    setState(() {
-                      value = setValueCtrl2(value, type, v);
-                    });
-                    widget.onChanged(value);
-                  },
-                  keyboardType: TextInputType.number,
-                  decoration: new InputDecoration(
-                    hintText: 'value',
-                  ),
-                ),
-              ),*/
             ]);
         break;
       case DataCode.Timer:
@@ -282,9 +280,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl1(value, type, v);
+                    data = setValueCtrl1(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -296,9 +294,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
-                    value = setValueCtrl2(value, type, v);
+                    data = setValueCtrl2(data, v);
                   });
-                  widget.onChanged(value);
+                  widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -306,7 +304,8 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
                   labelText: 'Minutes',
                 ),
               ),
-              new TimerOptWidget(value: value, onChanged: _handleTimerChanged),
+              new TimerOptWidget(
+                  value: data.ioctl, onChanged: _handleTimerChanged),
             ]);
         break;
       default:
@@ -325,9 +324,9 @@ class _DynamicEditWidget extends State<DynamicEditWidget> {
 
   void _handleTimerChanged(int newValue) {
     setState(() {
-      value = newValue;
+      data.ioctl = newValue;
     });
-    widget.onChanged(value);
+    widget.onChangedValue(data);
   }
 }
 
@@ -369,6 +368,7 @@ class TimerOptWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('TimerOptWidget $value');
     return new Container(
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,

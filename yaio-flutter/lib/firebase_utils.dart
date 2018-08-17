@@ -34,7 +34,7 @@ FirebaseUser getFirebaseUser() {
   return _user;
 }
 
-Future<String> signInWithGoogle() async {
+Future<FirebaseUser> signInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
   final FirebaseUser user = await _auth.signInWithGoogle(
@@ -50,7 +50,7 @@ Future<String> signInWithGoogle() async {
   assert(user.uid == currentUser.uid);
   print(user);
   _user = user;
-  return 'signInWithGoogle succeeded: $user';
+  return user;
 }
 
 void updateUserRef() {
@@ -81,14 +81,14 @@ void updateNodeRef(Map config) {
   dTHRef = '$prefixData/$kTHRef';
   dDomain = config['domain'];
   dNodeName = config['nodename'];
-  print('dControlRef: $dControlRef');
-  print('dStatusRef: $dStatusRef');
-  print('dStartupRef: $dStartupRef');
-  print('dDataRef: $dDataRef');
-  print('dExecRef: $dExecRef');
-  print('dMessagesRef: $dMessagesRef');
-  print('dLogRef: $dLogRef');
-  print('dTHRef: $dTHRef');
+  // print('dControlRef: $dControlRef');
+  // print('dStatusRef: $dStatusRef');
+  // print('dStartupRef: $dStartupRef');
+  // print('dDataRef: $dDataRef');
+  // print('dExecRef: $dExecRef');
+  // print('dMessagesRef: $dMessagesRef');
+  // print('dLogRef: $dLogRef');
+  // print('dTHRef: $dTHRef');
 }
 
 String getOwner() {
@@ -97,6 +97,10 @@ String getOwner() {
 
 String getDomain() {
   return dDomain;
+}
+
+String getNode() {
+  return dNodeName;
 }
 
 Future<Map> loadPreferences() async {
@@ -144,16 +148,6 @@ void savePreferencesSP(String ssid, String password) {
 
   _nodeConfigJson = json.encode(_nodeConfigMap);
   _prefs.setString('node_config_json', _nodeConfigJson);
-}
-
-String _token;
-
-String getFbToken() {
-  return _token;
-}
-
-void setFbToken(String token) {
-  _token = token;
 }
 
 String getRootRef() {

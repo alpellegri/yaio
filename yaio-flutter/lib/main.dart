@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'drawer.dart';
-import 'device.dart';
+import 'login.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -8,15 +8,17 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Yaio',
       theme: new ThemeData(
-        brightness: Brightness.dark,
-        accentColor: Colors.amber[200],
-        toggleableActiveColor: Colors.amber[200],
+        fontFamily: 'Raleway',
+        primaryColor: Colors.blue[800],
+        // brightness: Brightness.dark,
+        accentColor: Colors.blueAccent[600],
+        //toggleableActiveColor: Colors.deepPurple[200],
         // buttonColor: Colors.amber[200],
         buttonTheme: const ButtonThemeData(
-          textTheme: ButtonTextTheme.accent,
+          // textTheme: ButtonTextTheme.accent,
         ),
       ),
-      home: new Device(title: 'Device'),
+      home: new Login(title: 'Login'),
       routes: menuRoutes,
     );
   }

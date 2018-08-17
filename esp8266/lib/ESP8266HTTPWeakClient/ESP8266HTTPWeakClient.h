@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef ESP8266HTTPClient_H_
-#define ESP8266HTTPClient_H_
+#ifndef ESP8266HTTPWeakClient_H_
+#define ESP8266HTTPWeakClient_H_
 
 #include <memory>
 #include <Arduino.h>

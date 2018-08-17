@@ -6,11 +6,6 @@
 #include "firebase.h"
 #include "debug.h"
 
-// Use web browser to view and copy
-// SHA1 fingerprint of the certificate
-static const char _fingerprint[] PROGMEM =
-    "B8:4F:40:70:0C:63:90:E0:07:E8:7D:BD:B4:11:D0:4A:EA:9C:90:F6";
-
 static const char *RestMethods[5] = {
     "GET", "PUT", "POST", "PATCH", "DELETE",
 };
@@ -146,7 +141,7 @@ String FirebaseRest::getString(const String &path) {
 
 bool FirebaseRest::getBool(const String &path) {
   String res = RestApi(METHOD_GET, path.c_str(), "").c_str();
-  return res.toInt();
+  return res.equals("true");
 }
 
 void FirebaseRest::remove(const String &path) {

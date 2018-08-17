@@ -3,31 +3,38 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <Adafruit_Sensor.h>
 #include <DHT.h>
 
-#include "pht.h"
 #include "debug.h"
+#include "fbutils.h"
+#include "pht.h"
 
-#define DHTPIN D6
+#define SAMPLE_PERIOD 60000
+
+#define fir(y, x) (0.95 * (y) + 0.05 * (x))
+
+// #define DHTPIN D6 // 12
 #define DHTTYPE DHT22
 
-DHT *dht;
+static DHT *dht;
 static uint8_t pht_state;
+static bool pht_init;
 static uint8_t pht_pin;
 static uint32_t pht_period;
+static uint32_t sample_time;
 static uint32_t schedule_time;
-static uint32_t humidity_data;
-static uint32_t temperature_data;
+static uint16_t pht_humidity;
+static uint16_t pht_temperature;
+static float humidity;
+static float temperature;
 
 void PHT_Set(uint8_t pin, uint32_t period) {
-  DEBUG_PRINT("DHT_Set %d, %d\n", pin, period);
   pht_pin = pin;
   pht_period = period * 60 * 1000;
   pht_state = 1;
+  DEBUG_PRINT("PHT_Set %d, %d, %d\n", pin, period, pht_period);
 }
-
-uint32_t PHT_GetTemperature(void) { return temperature_data; }
-uint32_t PHT_GetHumidity(void) { return humidity_data; }
 
 /* main function task */
 void PHT_Service(void) {
@@ -40,17 +47,75 @@ void PHT_Service(void) {
     dht = new DHT(pht_pin, DHTTYPE);
     dht->begin();
     pht_state = 2;
+    pht_init = false;
+    schedule_time = current_time;
     break;
-  case 2:
+  case 2: {
+    float h = dht->readHumidity();
+    float t = dht->readTemperature();
+    if (isnan(h) || isnan(t)) {
+      DEBUG_PRINT("dht sensor error\n");
+    } else {
+      pht_state = 3;
+      pht_init = true;
+      humidity = h;
+      temperature = t;
+    }
+  } break;
+  case 3:
+    if ((current_time - sample_time) > SAMPLE_PERIOD) {
+      sample_time = current_time;
+      float h = dht->readHumidity();
+      float t = dht->readTemperature();
+      if (isnan(h) || isnan(t)) {
+        DEBUG_PRINT("dht sensor error\n");
+      } else {
+        humidity = fir(humidity, h);
+        temperature = fir(temperature, t);
+        // DEBUG_PRINT("pht: %f, %f\n", humidity, temperature);
+
+        uint8_t len = FB_getIoEntryLen();
+        uint16_t i = 0;
+        while (i < len) {
+          IoEntry &entry = FB_getIoEntry(i);
+          // uint32_t v = entry.ioctl;
+          if (entry.code == kDhtHumidity) {
+            pht_humidity = 100 * (humidity + 0.05);
+            entry.value = String(pht_humidity);
+            entry.wb = true;
+          }
+          if (entry.code == kDhtTemperature) {
+            pht_temperature = 100 * (temperature + 0.05);
+            entry.value = String(pht_temperature);
+            entry.wb = true;
+          }
+          i++;
+        }
+      }
+    }
+
     if ((current_time - schedule_time) > pht_period) {
       schedule_time = current_time;
-      float h = dht->readHumidity() + 0.05;
-      float t = dht->readTemperature() + 0.05;
-      DEBUG_PRINT("pht_period %d, t: %f - h: %f\n", pht_period, t, h);
-      if (isnan(h) || isnan(t)) {
-      } else {
-        humidity_data = 10 * h;
-        temperature_data = 10 * t;
+      DEBUG_PRINT("pht event: %f, %f\n", humidity, temperature);
+
+      uint8_t len = FB_getIoEntryLen();
+      uint16_t i = 0;
+      while (i < len) {
+        IoEntry &entry = FB_getIoEntry(i);
+        // uint32_t v = entry.ioctl;
+        if (entry.code == kDhtHumidity) {
+          pht_humidity = 100 * (humidity + 0.05);
+          entry.value = String(pht_humidity);
+          entry.ev = true;
+          entry.wb = true;
+        }
+        if (entry.code == kDhtTemperature) {
+          pht_temperature = 100 * (temperature + 0.05);
+          entry.value = String(pht_temperature);
+          entry.ev = true;
+          entry.wb = true;
+        }
+        i++;
       }
     }
     break;

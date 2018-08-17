@@ -29,11 +29,11 @@ class LogListItem extends StatelessWidget {
                   children: <Widget>[
                     new Text(
                       new DateFormat('dd/MM/yy').format(messageEntry.dateTime),
-                      textScaleFactor: 1.0,
+                      // textScaleFactor: 1.0,
                     ),
                     new Text(
                       new DateFormat('Hm').format(messageEntry.dateTime),
-                      textScaleFactor: 1.0,
+                      // textScaleFactor: 1.0,
                       style: new TextStyle(
                         color: Colors.grey,
                       ),
@@ -47,11 +47,11 @@ class LogListItem extends StatelessWidget {
                 children: [
                   new Text(
                     messageEntry.source.toString(),
-                    textScaleFactor: 1.0,
+                    // textScaleFactor: 1.0,
                   ),
                   new Text(
                     messageEntry.message.toString(),
-                    textScaleFactor: 0.8,
+                    // textScaleFactor: 0.8,
                   ),
                 ],
               ),

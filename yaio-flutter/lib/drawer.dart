@@ -40,33 +40,38 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
         ),
         new ListTile(
-            leading: const Icon(Icons.home),
+            leading: const Icon(Icons.dashboard),
             title: const Text('Home'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(Home.routeName);
             }),
         new ListTile(
             leading: const Icon(Icons.developer_board),
             title: const Text('Device'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(Device.routeName);
             }),
         new ListTile(
             leading: const Icon(Icons.label_outline),
             title: const Text('Data IO'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(DataIO.routeName);
             }),
         new ListTile(
             leading: const Icon(Icons.code),
             title: const Text('Routine'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(Exec.routeName);
             }),
         new ListTile(
             leading: const Icon(Icons.message),
             title: const Text('Messages'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(Messages.routeName);
             }),
       ]),

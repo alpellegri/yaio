@@ -28,14 +28,24 @@ enum {
 
 class IoEntry {
 public:
-  uint8_t code;
-  bool ev;
-  bool wb;
-  bool enLog;
+  /* snapshot DB data */
   String key;
+  uint8_t code;
   String value;
+  uint32_t ioctl;
   String cb;
+  bool enLog;
+  bool enWrite;
+  bool enRead;
+  /* internal data */
+  /* event notification flag */
+  bool ev;
+  /* event value */
   uint32_t ev_value;
+  /* event timestamp */
+  uint32_t ev_tmstamp;
+  /* write back request */
+  bool wb;
 };
 
 class FuncEntry {
@@ -50,9 +60,6 @@ public:
   std::vector<FuncEntry> funcvec;
 };
 
-extern std::vector<IoEntry> IoEntryVec;
-extern std::vector<ProgEntry> ProgVec;
-
 extern void FB_deinitIoEntryDB(void);
 extern void FB_deinitProgDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);
@@ -63,6 +70,7 @@ extern String &FB_getIoEntryNameById(uint8_t i);
 
 extern void FB_addProgDB(String key, JsonObject &obj);
 extern uint8_t FB_getProgIdx(const char *key);
+extern ProgEntry &FB_getProg(uint8_t i);
 
 extern uint8_t FB_checkRadioCodeDB(uint32_t code);
 extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);

@@ -1,5 +1,5 @@
-#ifndef TIMERS_H
-#define TIMERS_H
+#ifndef MYTIMERS_H
+#define MYTIMERS_H
 
 #include <Arduino.h>
 

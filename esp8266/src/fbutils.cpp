@@ -20,11 +20,11 @@ void FB_deinitIoEntryDB(void) {
 
 void FB_deinitProgDB(void) { ProgVec.erase(ProgVec.begin(), ProgVec.end()); }
 
-IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
+IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec.at(i); }
 
 uint8_t FB_getIoEntryLen(void) { return IoEntryVec.size(); }
 
-ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
+ProgEntry &FB_getProg(uint8_t i) { return ProgVec.at(i); }
 
 uint8_t FB_getProgLen(void) { return ProgVec.size(); }
 
@@ -34,40 +34,42 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.key = key;
     entry.code = obj["code"].as<uint8_t>();
     entry.value = obj["value"].as<String>();
+    entry.ioctl = obj["ioctl"].as<uint32_t>();
     entry.enLog = obj["enLog"].as<bool>();
+    entry.enWrite = obj["drawWr"].as<bool>();
+    entry.enRead = obj["drawRd"].as<bool>();
+    // TODO: can be done a setup here
+    entry.ev = false;
+    entry.ev_value = 0;
+    entry.wb = false;
+    entry.cb = obj["cb"].as<String>();
 
     // post process data value for some case
     switch (entry.code) {
     case kPhyIn: {
-      uint32_t value = atoi(entry.value.c_str());
-      uint8_t pin = value >> 24;
-      pinMode(pin, INPUT);
+      uint16_t ioctl = entry.ioctl;
+      pinMode(ioctl, INPUT);
     } break;
     case kPhyOut: {
       uint32_t value = atoi(entry.value.c_str());
-      uint8_t pin = value >> 24;
-      value &= (1U << 24) - 1;
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, !!value);
+      uint16_t ioctl = entry.ioctl;
+      pinMode(ioctl, OUTPUT);
+      digitalWrite(ioctl, !!value);
     } break;
     case kDhtTemperature:
     case kDhtHumidity: {
-      // 31..24 pin
-      // 23..16 period
-      // 15..0 value
-      uint32_t value = atoi(entry.value.c_str());
-      uint8_t pin = value >> 24;
-      uint32_t mask = ((1 << 8) - 1) << 16;
-      uint32_t period = (value & mask) >> 16;
+      uint16_t ioctl = entry.ioctl;
+      uint8_t pin = ioctl & 0xFF;
+      uint32_t period = ioctl >> 8;
       PHT_Set(pin, period);
     } break;
     case kRadioRx: {
-      uint8_t pin = atoi(entry.value.c_str()) >> 24;
-      RF_SetRxPin(pin);
+      uint16_t ioctl = entry.ioctl;
+      RF_SetRxPin(ioctl);
     } break;
     case kRadioTx: {
-      uint8_t pin = atoi(entry.value.c_str()) >> 24;
-      RF_SetTxPin(pin);
+      uint16_t ioctl = entry.ioctl;
+      RF_SetTxPin(ioctl);
     } break;
     case kBool: {
       if (entry.value == F("false")) {
@@ -82,11 +84,6 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     default:
       break;
     }
-    entry.cb = obj["cb"].as<String>();
-    // TODO: can be done a setup here
-    entry.ev = false;
-    entry.ev_value = 0;
-    entry.wb = false;
     IoEntryVec.push_back(entry);
   }
 }
@@ -147,9 +144,11 @@ uint8_t FB_getProgIdx(const char *key) {
 void FB_dumpIoEntry(void) {
   DEBUG_PRINT("FB_dumpIoEntry\n");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    DEBUG_PRINT("%d: key=%s, code=%d, value=%s, cb=%s\n", i,
-                IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
-                IoEntryVec[i].value.c_str(), IoEntryVec[i].cb.c_str());
+    DEBUG_PRINT(
+        "%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, cb=%s\n",
+        i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
+        IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl, IoEntryVec[i].ev,
+        IoEntryVec[i].ev_value, IoEntryVec[i].cb.c_str());
   }
 }
 
