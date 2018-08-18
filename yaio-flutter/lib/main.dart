@@ -6,19 +6,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Yaio',
       theme: new ThemeData(
         fontFamily: 'Raleway',
-        primaryColor: Colors.blue[800],
-        // brightness: Brightness.dark,
-        accentColor: Colors.blueAccent[600],
-        //toggleableActiveColor: Colors.deepPurple[200],
-        // buttonColor: Colors.amber[200],
-        buttonTheme: const ButtonThemeData(
-          // textTheme: ButtonTextTheme.accent,
+        primarySwatch: Colors.indigo,
         ),
-      ),
-      home: new Login(title: 'Login'),
+      home: new Login(title: 'Yaio'),
       routes: menuRoutes,
     );
   }

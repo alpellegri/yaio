@@ -24,7 +24,6 @@ class _DataIOState extends State<DataIO> {
   @override
   void initState() {
     super.initState();
-    print('_DigitalIOState');
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);

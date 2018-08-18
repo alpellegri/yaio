@@ -34,7 +34,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    print('_MyHomePageState');
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
