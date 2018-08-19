@@ -55,8 +55,6 @@ void PHT_Service(void) {
     float t = dht->readTemperature();
     if (isnan(h) || isnan(t)) {
       DEBUG_PRINT("dht sensor error\n");
-      pht_state = 3;
-      pht_init = true;
     } else {
       pht_state = 3;
       pht_init = true;
@@ -69,7 +67,7 @@ void PHT_Service(void) {
       sample_time = current_time;
       float h = dht->readHumidity();
       float t = dht->readTemperature();
-      if (0) { // (isnan(h) || isnan(t)) {
+      if (isnan(h) || isnan(t)) {
         DEBUG_PRINT("dht sensor error\n");
       } else {
         humidity = lpfilter(humidity, h);
