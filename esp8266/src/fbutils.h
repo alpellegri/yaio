@@ -44,8 +44,10 @@ public:
   uint32_t ev_value;
   /* event timestamp */
   uint32_t ev_tmstamp;
-  /* write back request */
+  /* value write back request */
   bool wb;
+  /* log write back request */
+  bool wblog;
 };
 
 class FuncEntry {

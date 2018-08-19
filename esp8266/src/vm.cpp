@@ -39,6 +39,7 @@ void VM_readIn(void) {
         entry.ev = true;
         entry.ev_value = value;
         entry.wb = true;
+        entry.wblog = true;
       }
     } break;
     case kPhyOut: {
@@ -77,6 +78,7 @@ void VM_readIn(void) {
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
+            entry.wblog = true;
           }
         }
       }
@@ -97,6 +99,7 @@ void VM_readIn(void) {
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
+            entry.wblog = true;
           }
         }
       }
@@ -149,7 +152,7 @@ void VM_writeOut(void) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());
           } else {
-            if (entry.enLog == true) {
+            if ((entry.enLog == true) && (entry.wblog == true)) {
               DynamicJsonBuffer jsonBuffer;
               JsonObject &json = jsonBuffer.createObject();
               json["t"] = getTime();
@@ -163,6 +166,7 @@ void VM_writeOut(void) {
                             entry.key.c_str());
               } else {
                 entry.wb = false;
+                entry.wblog = false;
               }
             } else {
               entry.wb = false;

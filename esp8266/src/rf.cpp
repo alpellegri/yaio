@@ -119,6 +119,7 @@ void RF_Service(void) {
         entry.ev_value = RadioCode;
         entry.ev_tmstamp = current_time;
         entry.wb = true;
+        entry.wblog = true;
       }
 
       if ((entry.code == kRadioIn) && (entry.ioctl == RadioId) &&
@@ -134,6 +135,7 @@ void RF_Service(void) {
         entry.ev_value = value;
         entry.ev_tmstamp = current_time;
         entry.wb = true;
+        entry.wblog = true;
       }
     }
   }
