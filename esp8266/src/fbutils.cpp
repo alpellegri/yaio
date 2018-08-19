@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
