@@ -114,7 +114,7 @@ bool FbGetDB(void) {
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
-      FcmResetRegIDsDB();
+      FcmDeinitRegIDsDB();
       DynamicJsonBuffer jsonBuffer;
       JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {

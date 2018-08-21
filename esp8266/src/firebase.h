@@ -11,6 +11,7 @@
 #endif
 
 #include <string>
+#include <vector>
 
 typedef enum {
   METHOD_GET,
@@ -50,6 +51,7 @@ public:
   String readEvent();
   bool failed();
   String error();
+  void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
 
 private:
   std::string restReqApi(RestMethod_t method, const std::string path,

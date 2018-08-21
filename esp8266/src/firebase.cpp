@@ -14,6 +14,8 @@
 #include "debug.h"
 #include "firebase.h"
 
+static const char FcmServer[] PROGMEM = "fcm.googleapis.com";
+
 // Use web browser to view and copy
 // SHA1 fingerprint of the certificate
 static const char _fingerprint[] PROGMEM =
@@ -250,5 +252,68 @@ String FirebaseRest::readEvent() {
 bool FirebaseRest::failed() { return httpCode_ != HTTP_CODE_OK; }
 
 String FirebaseRest::error() { return HTTPClient::errorToString(httpCode_); }
+
+void FirebaseRest::sendMessage(String &message, String &key,
+                               std::vector<String> &RegIDs) {
+  int i;
+  String fcm_host = String(FPSTR(FcmServer));
+
+  //  DATA='{
+  //  "notification": {
+  //    "body": "this is a body",
+  //    "title": "this is a title"
+  //  },
+  //  "priority": "high",
+  //  "data": {
+  //    "click_action": "FLUTTER_NOTIFICATION_CLICK",
+  //    "id": "1",
+  //    "status": "done"
+  //  },
+  //  "to": "<FCM TOKEN>"}'
+  //
+  //  curl https://fcm.googleapis.com/fcm/send -H
+  //  "Content-Type:application/json" -X POST -d "$DATA" -H "Authorization:
+  //  key=<FCM SERVER KEY>"
+
+  /* json data: the notification message multiple devices */
+  String json;
+  json = F("{");
+  json += F("\"notification\":{");
+  json += F("\"title\":\"Yaio\",");
+  json += F("\"body\":\"");
+  json += message;
+  json += F("\",");
+  json += F("\"sound\":\"default\"");
+  json += F("},");
+
+  json += F("\"data\":{");
+  json += F("\"click_action\":\"FLUTTER_NOTIFICATION_CLICK\",");
+  json += F("\"id\":\"1\",");
+  json += F("\"status\":\"done\",");
+  json += F("},");
+
+  json += F("\"registration_ids\":[");
+  for (i = 0; i < ((int)RegIDs.size() - 1); i++) {
+    json += String(F("\"")) + RegIDs[i] + F("\",");
+  }
+  json += String(F("\"")) + RegIDs[i] + F("\"");
+  json += F("]}");
+
+  String addr = String(F("http://")) + fcm_host + String(F("/fcm/send"));
+  HTTPClient http;
+  http.begin(addr);
+  http.addHeader("Accept", "*/");
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Authorization", "key=" + key);
+  int httpCode = http.POST(json);
+  if (httpCode == HTTP_CODE_OK) {
+    String result = http.getString();
+    DEBUG_PRINT("[HTTP] response: %s\n", result.c_str());
+  } else {
+    DEBUG_PRINT("[HTTP] POST... failed, error: %d, %s\n", httpCode,
+                http.errorToString(httpCode).c_str());
+  }
+  http.end();
+}
 
 FirebaseRest Firebase;
