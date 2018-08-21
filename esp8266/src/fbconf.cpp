@@ -10,6 +10,7 @@
 #include "fbutils.h"
 #include "fcm.h"
 #include "firebase.h"
+#include "pht.h"
 #include "rf.h"
 
 static const char _kstartup[] PROGMEM = "startup";
@@ -156,6 +157,7 @@ bool FbGetDB(void) {
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
+      PHT_Deinit();
       FB_deinitIoEntryDB();
       DynamicJsonBuffer jsonBuffer;
       JsonObject &object = jsonBuffer.parseObject(json);
