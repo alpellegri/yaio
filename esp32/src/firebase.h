@@ -2,9 +2,11 @@
 #define firebase_h
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
+
+#include <HTTPClient.h>
 
 #include <string>
+#include <vector>
 
 typedef enum {
   METHOD_GET,
@@ -38,17 +40,27 @@ public:
   bool getBool(const String &path);
   String getJSON(const String &path);
   void remove(const String &path);
+  void stream(const String &path);
+  bool available();
+  bool connected();
+  String readEvent();
   bool failed();
   String error();
+  void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
 
 private:
-  std::string RestApi(RestMethod_t method, const std::string path,
-                      const std::string value);
+  std::string restReqApi(RestMethod_t method, const std::string path,
+                         const std::string value);
+  std::string _restReqApi(RestMethod_t method, const std::string path,
+                          const std::string value);
+  void restStreamApi(const std::string path);
 
   std::string host_;
   std::string auth_;
   std::string result_;
   int httpCode_;
+  HTTPClient http_req;
+  HTTPClient http_stream;
 };
 
 extern FirebaseRest Firebase;

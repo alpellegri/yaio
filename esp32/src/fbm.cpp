@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <WiFiUDP.h>
 
 #include <stdio.h>
@@ -98,10 +99,11 @@ String FBM_getResetReason(void) {
 
 /* main function task */
 void FbmService(void) {
-  DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
+
   switch (boot_sm) {
   // firebase init
   case 0: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     String firebase_url = EE_GetFirebaseUrl();
     String firebase_secret = EE_GetFirebaseSecret();
     Firebase.begin(firebase_url, firebase_secret);
@@ -112,6 +114,7 @@ void FbmService(void) {
 
   // firebase control/status init
   case 1: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     String kstartup;
     FbSetPath_startup(kstartup);
     String json = Firebase.getJSON(kstartup);
@@ -145,6 +148,7 @@ void FbmService(void) {
 
   // firebase init DB
   case 2: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     bool res = FbGetDB();
     if (res == true) {
       if (boot_first == false) {
@@ -160,6 +164,7 @@ void FbmService(void) {
   } break;
 
   case 21: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     String kcontrol;
     FbSetPath_control(kcontrol);
     Firebase.setInt((kcontrol + F("/reboot")), 0);
@@ -177,6 +182,7 @@ void FbmService(void) {
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
                                              : (FBM_UPDATE_MONITOR_SLOW))) {
+      DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
       fbm_update_last = time_now;
 
       String kcontrol;
@@ -244,15 +250,19 @@ void FbmService(void) {
   } break;
 
   case 4:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     STA_FotaReq();
     boot_sm = 50;
     break;
+
   case 5:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     EE_EraseData();
     DEBUG_PRINT("EEPROM erased\n");
     ESP.restart();
     boot_sm = 50;
     break;
+
   default:
     break;
   }
