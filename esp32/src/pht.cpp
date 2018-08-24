@@ -29,13 +29,16 @@ static uint16_t pht_temperature;
 static float humidity;
 static float temperature;
 
-void PHT_Deinit(void) { delete dht; }
+void PHT_Deinit(void) {
+  pht_state = 0;
+  delete dht;
+}
 
 void PHT_Set(uint8_t pin, uint32_t period) {
   pht_pin = pin;
   pht_period = period * 60 * 1000;
   pht_state = 1;
-  dht = new DHT(pht_pin, DHTTYPE);
+
   DEBUG_PRINT("PHT_Set %d, %d, %d\n", pin, period, pht_period);
 }
 
@@ -47,6 +50,7 @@ void PHT_Service(void) {
   case 0:
     break;
   case 1:
+    dht = new DHT(pht_pin, DHTTYPE);
     dht->begin();
     pht_state = 2;
     pht_init = false;
