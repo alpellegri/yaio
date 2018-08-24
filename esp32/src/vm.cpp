@@ -160,6 +160,8 @@ void VM_writeOut(void) {
               String strdata;
               json.printTo(strdata);
               FbSetPath_log(ref);
+              DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(),
+                          value);
               Firebase.pushJSON(ref + "/" + entry.key, strdata);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
