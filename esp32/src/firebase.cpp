@@ -190,24 +190,24 @@ void FirebaseRest::restStreamApi(const std::string path) {
   std::string addr = String(F("https://")).c_str() + host_ +
                      String(F("/")).c_str() + path + post;
 
-  http_stream.setTimeout(3000);
-  http_stream.setReuse(true);
-  http_stream.begin(addr.c_str(), _fingerprint);
+  http_req.setTimeout(3000);
+  http_req.setReuse(true);
+  http_req.begin(addr.c_str(), _fingerprint);
 
-  http_stream.addHeader("Accept", "text/event-stream");
+  http_req.addHeader("Accept", "text/event-stream");
   const char *headers[] = {"Location"};
-  http_stream.collectHeaders(headers, 1);
+  http_req.collectHeaders(headers, 1);
 
-  httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], "");
+  httpCode_ = http_req.sendRequest(RestMethods[METHOD_GET], "");
 
   while (httpCode_ == HTTP_CODE_TEMPORARY_REDIRECT) {
-    String location = http_stream.header("Location");
+    String location = http_req.header("Location");
     DEBUG_PRINT("redirect %s\n", location.c_str());
-    http_stream.setReuse(false);
-    http_stream.end();
-    http_stream.setReuse(true);
-    http_stream.begin(location);
-    httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], "");
+    http_req.setReuse(false);
+    http_req.end();
+    http_req.setReuse(true);
+    http_req.begin(location);
+    httpCode_ = http_req.sendRequest(RestMethods[METHOD_GET], "");
   }
 
   result_ = String(F("")).c_str();
@@ -215,25 +215,25 @@ void FirebaseRest::restStreamApi(const std::string path) {
     DEBUG_PRINT("[HTTP] %d\n", httpCode_);
   } else {
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[METHOD_GET],
-                httpCode_, http_stream.errorToString(httpCode_).c_str());
-    http_stream.end();
+                httpCode_, http_req.errorToString(httpCode_).c_str());
+    http_req.end();
   }
 }
 
 void FirebaseRest::stream(const String &path) { restStreamApi(path.c_str()); }
 
 bool FirebaseRest::available() {
-  if (!http_stream.connected()) {
+  if (!http_req.connected()) {
     DEBUG_PRINT("[HTTP] %s\n", "Connection Lost");
   }
-  WiFiClient *client = http_stream.getStreamPtr();
+  WiFiClient *client = http_req.getStreamPtr();
   return (client == nullptr) ? false : client->available();
 }
 
-bool FirebaseRest::connected() { return http_stream.connected(); }
+bool FirebaseRest::connected() { return http_req.connected(); }
 
 String FirebaseRest::readEvent() {
-  WiFiClient *client = http_stream.getStreamPtr();
+  WiFiClient *client = http_req.getStreamPtr();
   if (client == nullptr) {
     return "";
   }

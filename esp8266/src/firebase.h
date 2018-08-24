@@ -65,7 +65,6 @@ private:
   std::string result_;
   int httpCode_;
   HTTPClient http_req;
-  HTTPClient http_stream;
 };
 
 extern FirebaseRest Firebase;
