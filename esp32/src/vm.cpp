@@ -143,11 +143,11 @@ void VM_writeOut(void) {
       case kRadioRx:
       case kInt: {
         if (entry.enRead == true) {
-          uint32_t value = atoi(entry.value.c_str());
-          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), value);
+          uint32_t v = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
           String ref;
           FbSetPath_data(ref);
-          Firebase.setInt(ref + "/" + entry.key + "/value", value);
+          Firebase.setInt(ref + "/" + entry.key + "/value", v);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());
@@ -156,12 +156,11 @@ void VM_writeOut(void) {
               DynamicJsonBuffer jsonBuffer;
               JsonObject &json = jsonBuffer.createObject();
               json["t"] = getTime();
-              json["v"] = value;
+              json["v"] = v;
               String strdata;
               json.printTo(strdata);
               FbSetPath_log(ref);
-              DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(),
-                          value);
+              DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(), v);
               Firebase.pushJSON(ref + "/" + entry.key, strdata);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
@@ -177,11 +176,11 @@ void VM_writeOut(void) {
         }
       } break;
       case kBool: {
-        bool value = atoi(entry.value.c_str());
-        DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
+        bool v = atoi(entry.value.c_str());
+        DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
         String ref;
         FbSetPath_data(ref);
-        Firebase.setBool(ref + "/" + entry.key + "/value", value);
+        Firebase.setBool(ref + "/" + entry.key + "/value", v);
         if (Firebase.failed() == true) {
           DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                       entry.key.c_str());

@@ -41,7 +41,7 @@ public:
   String getJSON(const String &path);
   void remove(const String &path);
   void stream(const String &path);
-  bool available();
+  int available();
   bool connected();
   String readEvent();
   bool failed();
@@ -60,6 +60,7 @@ private:
   std::string result_;
   int httpCode_;
   HTTPClient http_req;
+  HTTPClient http_stream;
 };
 
 extern FirebaseRest Firebase;

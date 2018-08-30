@@ -98,8 +98,9 @@ void STA_FotaReq(void) {
 bool STA_Task(void) {
   bool ret = true;
 
+  wl_status_t wifi_status = WiFi.status();
   uint32_t current_time = millis();
-  if (WiFi.status() == WL_CONNECTED) {
+  if (wifi_status == WL_CONNECTED) {
     last_wifi_time = current_time;
     // wait for time service is up
     if (fota_mode == true) {
@@ -113,7 +114,10 @@ bool STA_Task(void) {
       }
     }
   } else {
-    DEBUG_PRINT("WiFi.status != WL_CONNECTED\n");
+    DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
+    if (wifi_status == WL_DISCONNECTED) {
+      WiFi.reconnect();
+    }
     if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
       // force reboot
       ESP.restart();
