@@ -43,7 +43,7 @@ void VM_readIn(void) {
       }
     } break;
     case kPhyOut: {
-      if (VM_UpdateDataPending == true) {
+      if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
         DEBUG_PRINT("get: kPhyOut\n");
         String kdata;
         FbSetPath_data(kdata);
