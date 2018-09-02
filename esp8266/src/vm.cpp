@@ -129,7 +129,20 @@ void VM_writeOut(void) {
         uint8_t pin = entry.ioctl;
         pinMode(pin, OUTPUT);
         digitalWrite(pin, v);
-        entry.wb = false;
+        if (entry.enRead == true) {
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setInt(ref + "/" + entry.key + "/value", v);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            entry.wb = false;
+          }
+        } else {
+          entry.wb = false;
+        }
       } break;
       case kRadioTx: {
         uint32_t v = atoi(entry.value.c_str());
@@ -176,14 +189,18 @@ void VM_writeOut(void) {
         }
       } break;
       case kBool: {
-        bool v = atoi(entry.value.c_str());
-        DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
-        String ref;
-        FbSetPath_data(ref);
-        Firebase.setBool(ref + "/" + entry.key + "/value", v);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
-                      entry.key.c_str());
+        if (entry.enRead == true) {
+          bool v = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setBool(ref + "/" + entry.key + "/value", v);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            entry.wb = false;
+          }
         } else {
           entry.wb = false;
         }
