@@ -129,16 +129,4 @@ bool STA_Task(void) {
 
 void STA_Loop() {
   RF_Loop();
-#if 0
-  uint8_t in = digitalRead(BUTTON);
-
-  if (in != sta_button) {
-    sta_button = in;
-    if (in == false) {
-      // EE_EraseData();
-      // Serial.printf("EEPROM erased\n");
-      RF_executeIoEntryDB(1);
-    }
-  }
-#endif
 }
