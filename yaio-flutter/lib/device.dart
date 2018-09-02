@@ -543,7 +543,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                     textColor: Theme.of(context).accentColor,
                     child: const Text('ERASE'),
                     onPressed: () {
-                      _nodeActionRequest(kNodeFlash);
+                      _nodeActionRequest(kNodeErase);
                     },
                   ),
                 ),
