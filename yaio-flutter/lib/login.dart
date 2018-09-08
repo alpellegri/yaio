@@ -7,9 +7,7 @@ import 'firebase_utils.dart';
 
 class Login extends StatefulWidget {
   Login({Key key, this.title}) : super(key: key);
-
-  static const String routeName = '/setup';
-
+  static const String routeName = '/yaio';
   final String title;
 
   @override
@@ -24,7 +22,6 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    print('_LoginState');
     _connected = false;
     signInWithGoogle().then((onValue) {
       _fbMessaging.configure(
@@ -78,7 +75,7 @@ class _LoginState extends State<Login> {
             // at the end, not before
             // FirebaseDatabase.instance.setPersistenceEnabled(true);
             // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
-            Navigator.of(context).pushNamed(Device.routeName);
+            // Navigator.of(context).pushNamed(Device.routeName);
           });
         });
       });

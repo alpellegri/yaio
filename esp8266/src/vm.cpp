@@ -39,10 +39,11 @@ void VM_readIn(void) {
         entry.ev = true;
         entry.ev_value = value;
         entry.wb = true;
+        entry.wblog = true;
       }
     } break;
     case kPhyOut: {
-      if (VM_UpdateDataPending == true) {
+      if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
         DEBUG_PRINT("get: kPhyOut\n");
         String kdata;
         FbSetPath_data(kdata);
@@ -77,6 +78,7 @@ void VM_readIn(void) {
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
+            entry.wblog = true;
           }
         }
       }
@@ -97,6 +99,7 @@ void VM_readIn(void) {
             entry.value = value;
             entry.ev = true;
             entry.ev_value = value;
+            entry.wblog = true;
           }
         }
       }
@@ -126,7 +129,20 @@ void VM_writeOut(void) {
         uint8_t pin = entry.ioctl;
         pinMode(pin, OUTPUT);
         digitalWrite(pin, v);
-        entry.wb = false;
+        if (entry.enRead == true) {
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setInt(ref + "/" + entry.key + "/value", v);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            entry.wb = false;
+          }
+        } else {
+          entry.wb = false;
+        }
       } break;
       case kRadioTx: {
         uint32_t v = atoi(entry.value.c_str());
@@ -140,29 +156,31 @@ void VM_writeOut(void) {
       case kRadioRx:
       case kInt: {
         if (entry.enRead == true) {
-          uint32_t value = atoi(entry.value.c_str());
-          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), value);
+          uint32_t v = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
           String ref;
           FbSetPath_data(ref);
-          Firebase.setInt(ref + "/" + entry.key + "/value", value);
+          Firebase.setInt(ref + "/" + entry.key + "/value", v);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());
           } else {
-            if (entry.enLog == true) {
+            if ((entry.enLog == true) && (entry.wblog == true)) {
               DynamicJsonBuffer jsonBuffer;
               JsonObject &json = jsonBuffer.createObject();
               json["t"] = getTime();
-              json["v"] = value;
+              json["v"] = v;
               String strdata;
               json.printTo(strdata);
               FbSetPath_log(ref);
+              DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(), v);
               Firebase.pushJSON(ref + "/" + entry.key, strdata);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                             entry.key.c_str());
               } else {
                 entry.wb = false;
+                entry.wblog = false;
               }
             } else {
               entry.wb = false;
@@ -171,14 +189,18 @@ void VM_writeOut(void) {
         }
       } break;
       case kBool: {
-        bool value = atoi(entry.value.c_str());
-        DEBUG_PRINT("VM_writeOut: kBool %d\n", value);
-        String ref;
-        FbSetPath_data(ref);
-        Firebase.setBool(ref + "/" + entry.key + "/value", value);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
-                      entry.key.c_str());
+        if (entry.enRead == true) {
+          bool v = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setBool(ref + "/" + entry.key + "/value", v);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            entry.wb = false;
+          }
         } else {
           entry.wb = false;
         }

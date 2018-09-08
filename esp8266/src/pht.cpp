@@ -12,7 +12,7 @@
 
 #define SAMPLE_PERIOD 60000
 
-#define fir(y, x) (0.95 * (y) + 0.05 * (x))
+#define lpfilter(y, x) (0.95 * (y) + 0.05 * (x))
 
 // #define DHTPIN D6 // 12
 #define DHTTYPE DHT22
@@ -29,10 +29,16 @@ static uint16_t pht_temperature;
 static float humidity;
 static float temperature;
 
+void PHT_Deinit(void) {
+  pht_state = 0;
+  delete dht;
+}
+
 void PHT_Set(uint8_t pin, uint32_t period) {
   pht_pin = pin;
   pht_period = period * 60 * 1000;
   pht_state = 1;
+
   DEBUG_PRINT("PHT_Set %d, %d, %d\n", pin, period, pht_period);
 }
 
@@ -70,52 +76,34 @@ void PHT_Service(void) {
       if (isnan(h) || isnan(t)) {
         DEBUG_PRINT("dht sensor error\n");
       } else {
-        humidity = fir(humidity, h);
-        temperature = fir(temperature, t);
+        humidity = lpfilter(humidity, h);
+        temperature = lpfilter(temperature, t);
         // DEBUG_PRINT("pht: %f, %f\n", humidity, temperature);
+
+        bool wblog = false;
+        if ((current_time - schedule_time) > pht_period) {
+          schedule_time = current_time;
+          wblog = true;
+        }
 
         uint8_t len = FB_getIoEntryLen();
         uint16_t i = 0;
         while (i < len) {
           IoEntry &entry = FB_getIoEntry(i);
-          // uint32_t v = entry.ioctl;
           if (entry.code == kDhtHumidity) {
             pht_humidity = 100 * (humidity + 0.05);
             entry.value = String(pht_humidity);
             entry.wb = true;
-          }
-          if (entry.code == kDhtTemperature) {
+            entry.wblog = wblog;
+          } else if (entry.code == kDhtTemperature) {
             pht_temperature = 100 * (temperature + 0.05);
             entry.value = String(pht_temperature);
             entry.wb = true;
+            entry.wblog = wblog;
+          } else {
           }
           i++;
         }
-      }
-    }
-
-    if ((current_time - schedule_time) > pht_period) {
-      schedule_time = current_time;
-      DEBUG_PRINT("pht event: %f, %f\n", humidity, temperature);
-
-      uint8_t len = FB_getIoEntryLen();
-      uint16_t i = 0;
-      while (i < len) {
-        IoEntry &entry = FB_getIoEntry(i);
-        // uint32_t v = entry.ioctl;
-        if (entry.code == kDhtHumidity) {
-          pht_humidity = 100 * (humidity + 0.05);
-          entry.value = String(pht_humidity);
-          entry.ev = true;
-          entry.wb = true;
-        }
-        if (entry.code == kDhtTemperature) {
-          pht_temperature = 100 * (temperature + 0.05);
-          entry.value = String(pht_temperature);
-          entry.ev = true;
-          entry.wb = true;
-        }
-        i++;
       }
     }
     break;

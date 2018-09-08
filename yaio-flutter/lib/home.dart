@@ -34,7 +34,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    print('_MyHomePageState');
     _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
@@ -52,45 +51,37 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('${widget.title} @ ${getDomain()}'),
-        ),
-        body: new ListView(children: <Widget>[
-          new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new ListView.builder(
-                shrinkWrap: true,
-                reverse: true,
-                itemCount: entryList.length,
-                itemBuilder: (buildContext, index) {
-                  if (entryList[index].drawWr == true) {
-                    return new InkWell(
-                      onTap: () {
-                        _openEntryDialog(entryList[index]);
-                      },
-                      child: new DataItemWidget(entryList[index]),
-                    );
-                  } else {
-                    return new InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  new ChartHistory(entryList[index].key),
-                              fullscreenDialog: true,
-                            ));
-                      },
-                      child: new DataItemWidget(entryList[index]),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        ]));
+      appBar: new AppBar(
+        title: new Text('${widget.title} @ ${getDomain()}'),
+      ),
+      body: new ListView.builder(
+        shrinkWrap: true,
+        itemCount: entryList.length,
+        itemBuilder: (buildContext, index) {
+          if (entryList[index].drawWr == true) {
+            return new InkWell(
+              onTap: () {
+                _openEntryDialog(entryList[index]);
+              },
+              child: new DataItemWidget(entryList[index]),
+            );
+          } else {
+            return new InkWell(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          new ChartHistory(entryList[index].key),
+                      fullscreenDialog: true,
+                    ));
+              },
+              child: new DataItemWidget(entryList[index]),
+            );
+          }
+        },
+      ),
+    );
   }
 
   void _onEntryAdded(Event event) {

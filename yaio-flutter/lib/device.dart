@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'drawer.dart';
 import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
 
 class Device extends StatefulWidget {
   Device({Key key, this.title}) : super(key: key);
-
-  static const String routeName = '/setup';
-
+  static const String routeName = '/device';
   final String title;
 
   @override
@@ -30,7 +27,6 @@ class _DeviceState extends State<Device> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: drawer,
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
@@ -421,13 +417,15 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           int.parse(_status['time'].toString()) * 1000);
       diff = current.difference(_heartbeatTime);
       if (diff.inDays > 0) {
-        diffTime = '${diff.inDays} days';
+        diffTime = '${diff.inDays} days ago';
       } else if (diff.inHours > 0) {
-        diffTime = '${diff.inHours} hours';
+        diffTime = '${diff.inHours} hours ago';
       } else if (diff.inMinutes > 0) {
-        diffTime = '${diff.inMinutes} minutes';
+        diffTime = '${diff.inMinutes} minutes ago';
       } else if (diff.inSeconds > 0) {
-        diffTime = '${diff.inSeconds} seconds';
+        diffTime = '${diff.inSeconds} seconds ago';
+      } else {
+        diffTime = 'now';
       }
     }
     return new ListView(children: <Widget>[
@@ -482,7 +480,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   leading: (diff > time_limit)
                       ? (new Icon(Icons.cloud_queue, color: Colors.red[400]))
                       : (new Icon(Icons.cloud_done, color: Colors.green[400])),
-                  title: new Text('HeartBeat: $diffTime ago'),
+                  title: new Text('HeartBeat: $diffTime'),
                   subtitle: new Text('Device Memory: ${_status["heap"]}'),
                 ),
                 new ListTile(
@@ -545,7 +543,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                     textColor: Theme.of(context).accentColor,
                     child: const Text('ERASE'),
                     onPressed: () {
-                      _nodeActionRequest(kNodeFlash);
+                      _nodeActionRequest(kNodeErase);
                     },
                   ),
                 ),

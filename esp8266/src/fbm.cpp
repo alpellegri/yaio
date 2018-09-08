@@ -149,7 +149,6 @@ void FbmService(void) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &object = jsonBuffer.parseObject(json);
             if (object.success()) {
-              // control_alarm = object["alarm"];
               control_time = object["time"];
 
               int control_reboot = object["reboot"];
@@ -169,7 +168,6 @@ void FbmService(void) {
 
           DynamicJsonBuffer jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
-          // status["alarm"] = status_alarm;
           status["heap"] = ESP.getFreeHeap();
           status["time"] = time_now;
           yield();

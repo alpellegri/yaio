@@ -2,16 +2,16 @@
 // use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
 #include <HTTPClient.h>
 
-#include <WiFi.h>
 #include <MD5Builder.h>
 #include <Update.h>
+#include <WiFi.h>
 #include <WiFiUdp.h>
 #include <stdlib.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "fota.h"
 #include "vers.h"
-#include "debug.h"
 
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
@@ -30,9 +30,9 @@ typedef enum {
 
 static HTTPClient *http;
 
-static const uint16_t block_size = 8*1500;
-static uint16_t block;
-static uint16_t num_blocks;
+static const uint32_t block_size = 64 * 1500;
+static uint32_t block;
+static uint32_t num_blocks;
 
 static uint8_t *buffer;
 

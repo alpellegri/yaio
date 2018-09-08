@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "ee.h"
 #include "sta.h"
-#include "debug.h"
 
 #define LED 13
 #define LED_OFF LOW
@@ -16,9 +16,7 @@
 static const char ap_ssid[] PROGMEM = "yaio-node";
 static const char ap_password[] PROGMEM = "123456789";
 
-static uint16_t ap_task_cnt;
 static bool enable_WiFi_Scan = false;
-static uint16_t ap_button = 0x55;
 
 // create sebsocket server
 static WebSocketsServer *webSocket = NULL;
@@ -30,15 +28,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 
   switch (type) {
   case WStype_DISCONNECTED:
-    /* try to enable wifi scan when locally diconnected */
-    enable_WiFi_Scan = EE_LoadData();
-    DEBUG_PRINT("[%d] disconnected!\n", num);
     ESP.restart();
     break;
 
   case WStype_CONNECTED: {
     /* disable wifi scan when locally connected */
-    enable_WiFi_Scan = false;
     IPAddress ip = webSocket->remoteIP(num);
     DEBUG_PRINT("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1],
                 ip[2], ip[3], payload);
@@ -68,34 +62,31 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 bool AP_Setup(void) {
   bool ret = true;
 
-  ap_task_cnt = 0;
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LED_ON);
-
-  // static ip for AP mode
-  IPAddress ip(192, 168, 2, 1);
-
-  WiFi.disconnect();
-  // WiFi.softAPdisconnect(true);
 
   enable_WiFi_Scan = EE_LoadData();
 
   if (enable_WiFi_Scan == false) {
+    // static ip for AP mode
+    IPAddress ip(192, 168, 2, 1);
     port_id = 0xFF;
     DEBUG_PRINT("Connecting mode AP\n");
 
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
+    // AP Static IP
+    if (!WiFi.softAP(String(FPSTR(ap_ssid)).c_str(),
+                     String(FPSTR(ap_password)).c_str())) {
+      Serial.println("AP Start Failed");
+    }
     delay(100);
-    WiFi.mode(WIFI_AP_STA);
+    if (!WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0))) {
+      Serial.println("AP Config Failed");
+    }
 
-    WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
-    WiFi.softAP(String(FPSTR(ap_ssid)).c_str(),
-                String(FPSTR(ap_password)).c_str());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.softAPIP());
 
     DEBUG_PRINT("AP mode enabled\n");
-    // IPAddress myIP = WiFi.softAPIP();
-    // DEBUG_PRINT("IP address: %d\n", myIP.c_str());
     webSocket = new WebSocketsServer(80);
     webSocket->begin();
     webSocket->onEvent(webSocketEvent);
@@ -105,22 +96,11 @@ bool AP_Setup(void) {
 }
 
 bool AP_Loop(void) {
-// uint8_t in = digitalRead(BUTTON);
-
-#if 0
-  if (in != ap_button) {
-    ap_button = in;
-    if (in == false) {
-      EE_EraseData();
-      DEBUG_PRINT("EEPROM erased\n");
-    }
-  }
-#endif
-
   /* websocket only in mode 0 */
   if (webSocket != NULL) {
     webSocket->loop();
   }
+  return true;
 }
 
 /* main function task */
@@ -130,28 +110,24 @@ bool AP_Task(void) {
 
   if (enable_WiFi_Scan == true) {
     DEBUG_PRINT("networks scan\n");
-    if (ap_task_cnt-- == 0) {
-      ap_task_cnt = 10;
-      int n = WiFi.scanNetworks();
-      DEBUG_PRINT("scan done\n");
-      if (n == 0) {
-        DEBUG_PRINT("no networks found\n");
-        ESP.restart();
-      } else {
-        String sta_ssid = EE_GetSSID();
+    int n = WiFi.scanNetworks();
+    DEBUG_PRINT("scan done\n");
+    String sta_ssid = EE_GetSSID();
 
-        for (int i = 0; i < n; ++i) {
-          yield();
-          int test = WiFi.SSID(i).compareTo(sta_ssid);
-          Serial.println(WiFi.SSID(i));
-          if (test == 0) {
-            DEBUG_PRINT("network found: ");
-            Serial.println(WiFi.SSID(i));
-            ret = false;
-            i = n; // exit for
-          }
-        }
+    for (int i = 0; i < n; ++i) {
+      yield();
+      int test = WiFi.SSID(i).compareTo(sta_ssid);
+      Serial.println(WiFi.SSID(i));
+      if (test == 0) {
+        DEBUG_PRINT("network found: ");
+        Serial.println(WiFi.SSID(i));
+        ret = false;
+        i = n; // exit for
       }
+    }
+    if (ret == true) {
+      DEBUG_PRINT("no networks found: restart\n");
+      ESP.restart();
     }
   }
 

@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Ticker.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -11,8 +10,8 @@
 #include "pht.h"
 #include "rf.h"
 
-std::vector<IoEntry> IoEntryVec;
-std::vector<ProgEntry> ProgVec;
+static std::vector<IoEntry> IoEntryVec;
+static std::vector<ProgEntry> ProgVec;
 
 void FB_deinitIoEntryDB(void) {
   IoEntryVec.erase(IoEntryVec.begin(), IoEntryVec.end());
@@ -20,11 +19,11 @@ void FB_deinitIoEntryDB(void) {
 
 void FB_deinitProgDB(void) { ProgVec.erase(ProgVec.begin(), ProgVec.end()); }
 
-IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec.at(i); }
+IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
 
 uint8_t FB_getIoEntryLen(void) { return IoEntryVec.size(); }
 
-ProgEntry &FB_getProg(uint8_t i) { return ProgVec.at(i); }
+ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
 
 uint8_t FB_getProgLen(void) { return ProgVec.size(); }
 

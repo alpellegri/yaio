@@ -1,4 +1,5 @@
 *.bak
 *.bin
 *.md5
+*.vscode
 google-services.json
