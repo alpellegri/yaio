@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'entries.dart';
+import 'firebase_utils.dart';
 
 class DataValueWidget extends StatelessWidget {
   final IoEntry entry;
@@ -30,19 +32,19 @@ class DataItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+      padding: new EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           new Expanded(
             child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 new Expanded(
                     child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     new Text(
                       entry.key,
@@ -51,7 +53,7 @@ class DataItemWidget extends StatelessWidget {
                     ),
                     new Text(
                       '${kEntryId2Name[DataCode.values[entry.code]]}',
-                      // textScaleFactor: 1.0,
+                      textScaleFactor: 0.8,
                       textAlign: TextAlign.left,
                       style: new TextStyle(
                         color: Colors.grey,
@@ -410,5 +412,73 @@ class TimerOptWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class DataIoShortDialogWidget extends StatefulWidget {
+  final String domain;
+  final String node;
+  final IoEntry data;
+
+  DataIoShortDialogWidget({this.domain, this.node, this.data});
+
+  @override
+  _DataIoShortDialogWidgetState createState() =>
+      new _DataIoShortDialogWidgetState(domain, node, data);
+}
+
+class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
+  final String domain;
+  final String node;
+  final IoEntry data;
+
+  void _handleChangedValue(IoEntry newValue) {
+    print('_handleTapboxChanged ${newValue.value}');
+    data.value = newValue.value;
+  }
+
+  _DataIoShortDialogWidgetState(this.domain, this.node, this.data);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+        title: new Text('Edit'),
+        content: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new DataConfigWidget(
+                data: data,
+                onChangedValue: _handleChangedValue,
+              ),
+            ]),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('SAVE'),
+              onPressed: () {
+                try {
+                  data.reference.child(data.key).set(data.toJson());
+                  nodeRefresh(domain, node);
+                } catch (exception) {
+                  print('bug');
+                }
+                Navigator.pop(context, null);
+              }),
+          new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.pop(context, null);
+              }),
+        ]);
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home.dart';
 import 'device.dart';
-import 'node_setup.dart';
 import 'data_io.dart';
 import 'exec.dart';
 import 'log_history.dart';
@@ -10,10 +8,7 @@ import 'firebase_utils.dart';
 final MyDrawer drawer = new MyDrawer();
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
-  Home.routeName: (BuildContext context) => new Home(title: 'Home'),
   Device.routeName: (BuildContext context) => new Device(title: 'Device'),
-  NodeSetup.routeName: (BuildContext context) =>
-      new NodeSetup(title: 'Device Setup'),
   DataIO.routeName: (BuildContext context) => new DataIO(title: 'DataIO'),
   Exec.routeName: (BuildContext context) => new Exec(title: 'Routine'),
   Messages.routeName: (BuildContext context) =>
@@ -39,13 +34,6 @@ class _MyDrawerState extends State<MyDrawer> {
             ),
           ),
         ),
-        new ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: const Text('Home'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushNamed(Home.routeName);
-            }),
         new ListTile(
             leading: const Icon(Icons.developer_board),
             title: const Text('Device'),

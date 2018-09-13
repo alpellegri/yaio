@@ -5,7 +5,6 @@ import 'entries.dart';
 import 'firebase_utils.dart';
 
 class ExecEdit extends StatefulWidget {
-  static const String routeName = '/exec_edit';
   final String title;
   final ExecEntry entry;
   final List<ExecEntry> execList;

@@ -465,7 +465,13 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 onPressed: (_isNeedCreate == true)
                     ? null
                     : () {
-                        Navigator.of(context).pushNamed(NodeSetup.routeName);
+                        Navigator.push(
+                            context,
+                            new MaterialPageRoute(
+                              builder: (BuildContext context) => new NodeSetup(
+                                  domain: _ctrlDomainName, node: _ctrlNodeName),
+                              fullscreenDialog: true,
+                            ));
                       },
               ),
             ),

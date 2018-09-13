@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'const.dart';
@@ -150,6 +151,10 @@ void savePreferencesSP(String ssid, String password) {
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
+String getUserRef() {
+  return dUserRef;
+}
+
 String getRootRef() {
   return dRootRef;
 }
@@ -212,4 +217,13 @@ Map<String, Object> getStartupDefault() {
 
 Map<String, Object> getStatusDefault() {
   return _statusDefault;
+}
+
+void nodeRefresh(String domain, String node) {
+  print('nodeRefresh: $domain/$node');
+  DatabaseReference _rootRef =
+      FirebaseDatabase.instance.reference().child(getRootRef());
+  DateTime now = new DateTime.now();
+  int time = now.millisecondsSinceEpoch ~/ 1000;
+  _rootRef.child('$domain/$node/control/time').set(time);
 }
