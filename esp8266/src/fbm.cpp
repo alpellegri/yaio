@@ -30,8 +30,6 @@ static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
-bool FBM_monitorActive(void) { return fbm_monitor_run; }
-
 String FBM_getResetReason(void) { return ESP.getResetReason(); }
 
 /* main function task */
