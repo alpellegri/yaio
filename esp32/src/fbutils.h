@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#define NUM_IO_ENTRY_MAX 20
-#define NUM_IO_FUNCTION_MAX 20
+#define NUM_IO_ENTRY_MAX 40
+#define NUM_IO_FUNCTION_MAX 40
 
 enum {
   /*  0 */ kPhyIn = 0,
