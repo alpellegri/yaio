@@ -113,9 +113,6 @@ bool STA_Task(void) {
     }
   } else {
     DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if (wifi_status == WL_DISCONNECTED) {
-      WiFi.reconnect();
-    }
     if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
       // force reboot
       ESP.restart();
@@ -127,16 +124,4 @@ bool STA_Task(void) {
 
 void STA_Loop() {
   RF_Loop();
-#if 0
-  uint8_t in = digitalRead(BUTTON);
-
-  if (in != sta_button) {
-    sta_button = in;
-    if (in == false) {
-      // EE_EraseData();
-      // Serial.printf("EEPROM erased\n");
-      RF_executeIoEntryDB(1);
-    }
-  }
-#endif
 }

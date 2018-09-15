@@ -115,9 +115,6 @@ bool STA_Task(void) {
     }
   } else {
     DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if (wifi_status == WL_DISCONNECTED) {
-      WiFi.reconnect();
-    }
     if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
       // force reboot
       ESP.restart();
