@@ -77,7 +77,7 @@ class _ChartHistoryState extends State<ChartHistory> {
       // print(k);
       // print(dt);
       if (dt.isAfter(start) == true) {
-        data.add(new TimeSeries(dt, (v['v'] * .01)));
+        data.add(new TimeSeries(dt, (v['v'] + 0.0)));
         data.sort((a, b) => a.time.compareTo(b.time));
       }
     });
