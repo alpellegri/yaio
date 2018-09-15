@@ -24,8 +24,6 @@ static uint8_t pht_pin;
 static uint32_t pht_period;
 static uint32_t sample_time;
 static uint32_t schedule_time;
-static uint16_t pht_humidity;
-static uint16_t pht_temperature;
 static float humidity;
 static float temperature;
 
@@ -91,13 +89,11 @@ void PHT_Service(void) {
         while (i < len) {
           IoEntry &entry = FB_getIoEntry(i);
           if (entry.code == kDhtHumidity) {
-            pht_humidity = 100 * (humidity + 0.05);
-            entry.value = String(pht_humidity);
+            entry.value = String(humidity);
             entry.wb = true;
             entry.wblog = wblog;
           } else if (entry.code == kDhtTemperature) {
-            pht_temperature = 100 * (temperature + 0.05);
-            entry.value = String(pht_temperature);
+            entry.value = String(temperature);
             entry.wb = true;
             entry.wblog = wblog;
           } else {

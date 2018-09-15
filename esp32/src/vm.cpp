@@ -150,8 +150,6 @@ void VM_writeOut(void) {
         entry.wb = false;
       } break;
       case kPhyIn:
-      case kDhtTemperature:
-      case kDhtHumidity:
       case kRadioIn:
       case kRadioRx:
       case kInt: {
@@ -174,6 +172,42 @@ void VM_writeOut(void) {
               json.printTo(strdata);
               FbSetPath_log(ref);
               DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(), v);
+              Firebase.pushJSON(ref + "/" + entry.key, strdata);
+              if (Firebase.failed() == true) {
+                DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
+                            entry.key.c_str());
+              } else {
+                entry.wb = false;
+                entry.wblog = false;
+              }
+            } else {
+              entry.wb = false;
+            }
+          }
+        }
+      } break;
+      case kDhtTemperature:
+      case kDhtHumidity:
+      case kFloat: {
+        if (entry.enRead == true) {
+          float v = atof(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %f\n", entry.key.c_str(), v);
+          String ref;
+          FbSetPath_data(ref);
+          Firebase.setFloat(ref + "/" + entry.key + "/value", v);
+          if (Firebase.failed() == true) {
+            DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
+                        entry.key.c_str());
+          } else {
+            if ((entry.enLog == true) && (entry.wblog == true)) {
+              DynamicJsonBuffer jsonBuffer;
+              JsonObject &json = jsonBuffer.createObject();
+              json["t"] = getTime();
+              json["v"] = v;
+              String strdata;
+              json.printTo(strdata);
+              FbSetPath_log(ref);
+              DEBUG_PRINT("VM_writeOut-log: %s: %f\n", entry.key.c_str(), v);
               Firebase.pushJSON(ref + "/" + entry.key, strdata);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
