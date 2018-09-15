@@ -117,10 +117,9 @@ bool AP_Task(void) {
     for (int i = 0; i < n; ++i) {
       yield();
       int test = WiFi.SSID(i).compareTo(sta_ssid);
-      Serial.println(WiFi.SSID(i));
+      DEBUG_PRINT("%s | %d dBm\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i));
       if (test == 0) {
         DEBUG_PRINT("network found: ");
-        Serial.println(WiFi.SSID(i));
         ret = false;
         i = n; // exit for
       }
