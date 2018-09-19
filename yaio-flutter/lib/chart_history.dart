@@ -27,7 +27,7 @@ class _ChartHistoryState extends State<ChartHistory> {
     _entryRef =
         FirebaseDatabase.instance.reference().child('${getLogRef()}/$name');
     _onAddSubscription =
-        _entryRef.limitToLast(300).onValue.listen(_onEntryAdded);
+        _entryRef.onValue.listen(_onEntryAdded);
   }
 
   @override
@@ -53,45 +53,62 @@ class _ChartHistoryState extends State<ChartHistory> {
               padding: const EdgeInsets.all(8.0),
               child: new SizedBox(
                 height: 300.0,
-                child: new charts.TimeSeriesChart(seriesList,
-                    animate: true,
-                    // Optionally pass in a [DateTimeFactory] used by the chart. The factory
-                    // should create the same type of [DateTime] as the data provided. If none
-                    // specified, the default creates local date time.
-                    // dateTimeFactory: const charts.LocalDateTimeFactory(),
-                    primaryMeasureAxis: new charts.NumericAxisSpec(
-                        tickProviderSpec:
-                            new charts.BasicNumericTickProviderSpec(
-                                zeroBound: false))),
+                child: new charts.TimeSeriesChart(
+                  seriesList,
+                  animate: true,
+                  // Optionally pass in a [DateTimeFactory] used by the chart. The factory
+                  // should create the same type of [DateTime] as the data provided. If none
+                  // specified, the default creates local date time.
+                  // dateTimeFactory: const charts.LocalDateTimeFactory(),
+                  primaryMeasureAxis: new charts.NumericAxisSpec(
+                      tickProviderSpec: new charts.BasicNumericTickProviderSpec(
+                          zeroBound: false)),
+                ),
               ),
             )),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: _onFloatingActionButtonPressed,
+        tooltip: 'delete',
+        child: new Icon(Icons.delete),
+      ),
     );
   }
 
   void _onEntryAdded(Event event) {
-    // print('_onValueStartup ${event.snapshot.key} ${event.snapshot.value}');
+    print('_onEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     List<TimeSeries> data = new List<TimeSeries>();
-    event.snapshot.value.forEach((k, v) {
-      DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
-      DateTime start = DateTime.now().subtract(Duration(days: 3));
-      // print(k);
-      // print(dt);
-      if (dt.isAfter(start) == true) {
-        data.add(new TimeSeries(dt, (v['v'] + 0.0)));
-        data.sort((a, b) => a.time.compareTo(b.time));
-      }
-    });
+    if (event.snapshot.key != null) {
+      event.snapshot.value.forEach((k, v) {
+        DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
+        DateTime start = DateTime.now().subtract(Duration(days: 3));
+        if (dt.isAfter(start) == true) {
+          data.add(new TimeSeries(dt, (v['v'] + 0.0)));
+          data.sort((a, b) => a.time.compareTo(b.time));
+        } else {
+          // remove the object
+          print('remove $k');
+          //_entryRef.child(k).remove();
+        }
+      });
 
-    charts.Series<TimeSeries, DateTime> Serie =
-        new charts.Series<TimeSeries, DateTime>(
-      id: 'Sales',
-      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      domainFn: (TimeSeries sales, _) => sales.time,
-      measureFn: (TimeSeries sales, _) => sales.value,
-      data: data,
-    );
+      charts.Series<TimeSeries, DateTime> Serie =
+          new charts.Series<TimeSeries, DateTime>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.indigo.shadeDefault,
+        domainFn: (TimeSeries sales, _) => sales.time,
+        measureFn: (TimeSeries sales, _) => sales.value,
+        data: data,
+      );
+      setState(() {
+        seriesList.add(Serie);
+      });
+    }
+  }
+
+  void _onFloatingActionButtonPressed() {
+    _entryRef.remove();
     setState(() {
-      seriesList.add(Serie);
+      seriesList.clear();
     });
   }
 }

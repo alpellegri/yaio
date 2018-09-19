@@ -117,7 +117,7 @@ class _MessagesState extends State<Messages> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'remove all',
-        child: new Icon(Icons.delete_forever),
+        child: new Icon(Icons.delete),
       ),
     );
   }
