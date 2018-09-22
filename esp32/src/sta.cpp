@@ -54,7 +54,7 @@ bool STA_Setup(void) {
     DEBUG_PRINT(".");
     delay(500);
   }
-  Serial.println();
+  DEBUG_PRINT("\n");
 
   preferences.begin("my-app", false);
 
@@ -124,6 +124,4 @@ bool STA_Task(void) {
   return ret;
 }
 
-void STA_Loop() {
-  RF_Loop();
-}
+void STA_Loop() { RF_Loop(); }

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#define USE_HTTP_REUSE
+
 typedef enum {
   METHOD_GET,
   METHOD_SET,
@@ -41,9 +43,7 @@ public:
   String getJSON(const String &path);
   void remove(const String &path);
   void stream(const String &path);
-  int available();
-  bool connected();
-  String readEvent();
+  int readEvent(String &response);
   bool failed();
   String error();
   void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
@@ -51,15 +51,15 @@ public:
 private:
   std::string restReqApi(RestMethod_t method, const std::string path,
                          const std::string value);
-  std::string _restReqApi(RestMethod_t method, const std::string path,
-                          const std::string value);
   void restStreamApi(const std::string path);
 
   std::string host_;
   std::string auth_;
   std::string result_;
   int httpCode_;
+#ifdef USE_HTTP_REUSE
   HTTPClient http_req;
+#endif
   HTTPClient http_stream;
 };
 
