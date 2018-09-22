@@ -18,7 +18,7 @@
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define STA_WIFI_TIMEOUT (1 * 60 * 1000)
+#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
 
 static bool fota_mode = false;
 static uint32_t last_wifi_time;
@@ -53,7 +53,7 @@ bool STA_Setup(void) {
     DEBUG_PRINT(".");
     delay(500);
   }
-  Serial.println();
+  DEBUG_PRINT("\n");
 
   if (WiFi.status() == WL_CONNECTED) {
     TimeSetup();
@@ -122,6 +122,4 @@ bool STA_Task(void) {
   return ret;
 }
 
-void STA_Loop() {
-  RF_Loop();
-}
+void STA_Loop() { RF_Loop(); }

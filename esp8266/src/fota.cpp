@@ -52,12 +52,8 @@ static String addr;
 static char *digest_MD5 = NULL;
 static uint8_t http_fail_cnt;
 
-void FOTA_Init(void) {
-  //
-}
-
 bool FOTA_UpdateReq(void) {
-  Serial.println(F("FOTA_UpdateReq"));
+  DEBUG_PRINT("FOTA_UpdateReq");
   bool ret = false;
   if (state == FOTA_Sm_IDLE) {
     state = FOTA_Sm_GET_MD5;
@@ -100,7 +96,7 @@ bool FOTAService(void) {
           if (size == DIGEST_MD5_SIZE) {
             DEBUG_PRINT("md5file size %d\n", size);
             String payload = http->getString();
-            Serial.println(payload);
+            DEBUG_PRINT("%s\n", payload.c_str());
             digest_MD5 = (char *)malloc(DIGEST_MD5_SIZE);
             memcpy(digest_MD5, payload.c_str(), DIGEST_MD5_SIZE);
             state = FOTA_Sm_CHECK;

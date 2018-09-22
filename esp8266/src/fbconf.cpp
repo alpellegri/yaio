@@ -121,7 +121,7 @@ bool FbGetDB(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         String id = i->value.as<String>();
-        Serial.println(id);
+        DEBUG_PRINT("%s\n", id.c_str());
         FcmAddRegIDsDB(id);
       }
     }

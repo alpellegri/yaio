@@ -1,11 +1,14 @@
 #include <string.h>
 #include <sys/time.h> // struct timeval
 #include <time.h>
+#include <WiFiUdp.h>
+#include <ESP8266WiFi.h>
 
 #include "debug.h"
 #include "timesrv.h"
 
-bool time_init = false;
+static bool time_init = false;
+static uint32_t last;
 
 uint8_t getWeekDay(void) {
   time_t now = time(nullptr);
@@ -27,6 +30,20 @@ bool TimeService(void) {
     } else {
       time_init = true;
       DEBUG_PRINT("UTC time: %d\n", current);
+    }
+  } else {
+    uint32_t curr = millis();
+    if ((curr - last) > 15000) {
+      last = curr;
+      IPAddress computer_ip(192, 168, 1, 1);
+      WiFiUDP udp;
+      const byte preamble[] = {0x00};
+
+      // all NTP fields have been given values, now
+      // you can send a packet requesting a timestamp:
+      udp.beginPacket(computer_ip, 80); // NTP requests are to port 123
+      udp.write(preamble, sizeof(preamble));
+      udp.endPacket();
     }
   }
   return time_init;
