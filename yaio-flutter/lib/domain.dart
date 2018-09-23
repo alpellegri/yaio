@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'device2.dart';
+import 'data_io.dart';
+import 'exec.dart';
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'firebase_utils.dart';
@@ -137,7 +139,13 @@ class _DeviceCardState extends State<DeviceCard> {
       DateTime controlTime = new DateTime.fromMillisecondsSinceEpoch(
           int.parse(value['control']['time'].toString()) * 1000);
       Duration diff = statusTime.difference(controlTime);
-      online = (diff.inSeconds >= 0);
+      online = (diff.inSeconds >= -10);
+      /*print('${this.name} $online ----------');
+      print(value['status']['time']);
+      print(value['control']['time']);
+      print(diff.inSeconds);
+      DateTime now = new DateTime.now();
+      print(now);*/
     }
     // extract only data related to a node
     var query = data.where((e) => (e.owner == name)).toList();
@@ -152,8 +160,8 @@ class _DeviceCardState extends State<DeviceCard> {
         children: <Widget>[
           new Container(
             decoration: new BoxDecoration(
-              // color: Colors.grey[100],
-            ),
+                // color: Colors.grey[100],
+                ),
             child: new Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -162,35 +170,32 @@ class _DeviceCardState extends State<DeviceCard> {
                     ? new Icon(Icons.link, color: Colors.green[400])
                     : new Icon(Icons.link_off, color: Colors.grey[400]),
                 const SizedBox(width: 8.0),
-                new Text(
-                  name,
-                  style: new TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  )
-                ),
+                new Text(name,
+                    style: new TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    )),
                 const SizedBox(width: 8.0),
                 new Expanded(
                   child: new Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
-                      new IconButton(
-                        padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                        // alignment: Alignment.topRight,
-                        icon: Icon(Icons.more_vert, color: Colors.grey),
-                        onPressed: () => Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    new DeviceConfig(
-                                        domain: domain,
-                                        name: name,
-                                        value: value),
-                                fullscreenDialog: true,
-                              ),
-                            ),
-                      ),
+                      new PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          onSelected: _routeSelection,
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuItem<String>>[
+                                new PopupMenuItem<String>(
+                                    value: 'Settings',
+                                    child: const Text('Settings')),
+                                new PopupMenuItem<String>(
+                                    value: 'Data IO',
+                                    child: const Text('Data IO')),
+                                new PopupMenuItem<String>(
+                                    value: 'Routine',
+                                    child: const Text('Routine')),
+                              ]),
                     ],
                   ),
                 ),
@@ -232,6 +237,37 @@ class _DeviceCardState extends State<DeviceCard> {
         ],
       ),
     );
+  }
+
+  _routeSelection(String string) {
+    if (string == 'Settings') {
+      Navigator.push(
+        context,
+        new MaterialPageRoute(
+          builder: (BuildContext context) =>
+              new DeviceConfig(domain: domain, name: name, value: value),
+          fullscreenDialog: true,
+        ),
+      );
+    } else if (string == 'Data IO') {
+      Navigator.push(
+        context,
+        new MaterialPageRoute(
+          builder: (BuildContext context) =>
+              new DataIO(domain: domain, node: name),
+          fullscreenDialog: true,
+        ),
+      );
+    } else if (string == 'Routine') {
+      Navigator.push(
+        context,
+        new MaterialPageRoute(
+          builder: (BuildContext context) =>
+              new Exec(domain: domain, node: name),
+          fullscreenDialog: true,
+        ),
+      );
+    }
   }
 
   void _openEntryDialog(String node, IoEntry entry) {

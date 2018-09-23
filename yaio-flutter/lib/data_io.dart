@@ -6,25 +6,34 @@ import 'firebase_utils.dart';
 import 'ui_data_io.dart';
 
 class DataIO extends StatefulWidget {
-  DataIO({Key key, this.title}) : super(key: key);
-  static const String routeName = '/data_io';
-  final String title;
+  final String domain;
+  final String node;
+
+  DataIO({Key key, this.domain, this.node}) : super(key: key);
 
   @override
-  _DataIOState createState() => new _DataIOState();
+  _DataIOState createState() => new _DataIOState(domain, node);
 }
 
 class _DataIOState extends State<DataIO> {
+  final String domain;
+  final String node;
   List<IoEntry> entryList = new List();
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
+  _DataIOState(this.domain, this.node);
+
   @override
   void initState() {
     super.initState();
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _dataRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/data')
+        .child(domain);
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
     _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
@@ -42,7 +51,7 @@ class _DataIOState extends State<DataIO> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Data IO @ ${getDomain()}/${getOwner()}'),
+        title: new Text('Data IO $domain/$node'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
@@ -63,7 +72,7 @@ class _DataIOState extends State<DataIO> {
 
   void _onEntryAdded(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       setState(() {
         IoEntry entry = new IoEntry.fromMap(
             _dataRef, event.snapshot.key, event.snapshot.value);
@@ -75,7 +84,7 @@ class _DataIOState extends State<DataIO> {
   void _onEntryChanged(Event event) {
     print('_onEntryChanged');
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -87,7 +96,7 @@ class _DataIOState extends State<DataIO> {
 
   void _onEntryRemoved(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {

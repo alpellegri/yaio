@@ -43,27 +43,36 @@ class ExecListItem extends StatelessWidget {
 }
 
 class Exec extends StatefulWidget {
-  Exec({Key key, this.title}) : super(key: key);
-  static const String routeName = '/exec';
-  final String title;
+  final String domain;
+  final String node;
+
+  Exec({Key key, this.domain, this.node}) : super(key: key);
 
   @override
-  _ExecState createState() => new _ExecState();
+  _ExecState createState() => new _ExecState(domain, node);
 }
 
 class _ExecState extends State<Exec> {
+  final String domain;
+  final String node;
+
   List<ExecEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
-  _ExecState();
+  _ExecState(this.domain, this.node);
 
   @override
   void initState() {
     super.initState();
-    _entryRef = FirebaseDatabase.instance.reference().child(getExecRef());
+    _entryRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/exec')
+        .child(domain)
+        .child(node);
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
@@ -85,7 +94,7 @@ class _ExecState extends State<Exec> {
     });*/
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
+        title: new Text('Routine $domain/$node'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
@@ -143,7 +152,9 @@ class _ExecState extends State<Exec> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) => new ExecEdit(
-              title: widget.title, entry: entry, execList: entryList),
+              title: 'Routine $domain/$node',
+              entry: entry,
+              execList: entryList),
         ));
   }
 

@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Yaio',
       theme: new ThemeData(
-        fontFamily: 'Raleway',
+        // fontFamily: 'Raleway',
         primarySwatch: Colors.indigo,
         ),
       home: new Login(title: 'Yaio'),
