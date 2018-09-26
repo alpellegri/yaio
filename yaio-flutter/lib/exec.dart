@@ -28,7 +28,6 @@ class ExecListItem extends StatelessWidget {
                   children: <Widget>[
                     new Text(
                       '${entry.key}',
-                      // textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                   ],
@@ -116,7 +115,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryAdded(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       setState(() {
         entryList.add(new ExecEntry.fromMap(
             _entryRef, event.snapshot.key, event.snapshot.value));
@@ -126,7 +125,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryEdited(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -138,7 +137,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryRemoved(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
