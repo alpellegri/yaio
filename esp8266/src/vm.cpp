@@ -44,10 +44,11 @@ void VM_readIn(void) {
     } break;
     case kPhyOut: {
       if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
-        DEBUG_PRINT("get: kPhyOut\n");
+        DEBUG_PRINT("get: kPhyOut %s\n", entry.key.c_str());
         String kdata;
         FbSetPath_data(kdata);
-        uint32_t value = Firebase.getInt(kdata + "/" + entry.key + "/value");
+        uint32_t value =
+            Firebase.getInt(kdata + F("/") + entry.key + F("/value"));
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kPhyOut %s\n", entry.key.c_str());
         } else {
@@ -64,10 +65,10 @@ void VM_readIn(void) {
     } break;
     case kBool: {
       if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
-        DEBUG_PRINT("get: kBool\n");
+        DEBUG_PRINT("get: kBool %s\n", entry.key.c_str());
         String kdata;
         FbSetPath_data(kdata);
-        bool value = Firebase.getBool(kdata + "/" + entry.key + "/value");
+        bool value = Firebase.getBool(kdata + F("/") + entry.key + F("/value"));
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kBool %s\n", entry.key.c_str());
           UpdateDataFault = true;
@@ -85,10 +86,11 @@ void VM_readIn(void) {
     } break;
     case kInt: {
       if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
-        DEBUG_PRINT("get: kInt\n");
+        DEBUG_PRINT("get: kInt %s\n", entry.key.c_str());
         String kdata;
         FbSetPath_data(kdata);
-        uint32_t value = Firebase.getInt(kdata + "/" + entry.key + "/value");
+        uint32_t value =
+            Firebase.getInt(kdata + F("/") + entry.key + F("/value"));
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kInt %s\n", entry.key.c_str());
           UpdateDataFault = true;
@@ -114,7 +116,7 @@ void VM_readIn(void) {
 
 void VM_writeOutMessage(vm_context_t &ctx, String value) {
   DEBUG_PRINT("VM_writeOutMessage: %s\n", value.c_str());
-  String message = value + " " + ctx.ev_name;
+  String message = value + F(" ") + ctx.ev_name;
   fblog_log(message, true);
 }
 
@@ -133,7 +135,7 @@ void VM_writeOut(void) {
           DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
           String ref;
           FbSetPath_data(ref);
-          Firebase.setInt(ref + "/" + entry.key + "/value", v);
+          Firebase.setInt(ref + F("/") + entry.key + F("/value"), v);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());
@@ -158,7 +160,7 @@ void VM_writeOut(void) {
           DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
           String ref;
           FbSetPath_data(ref);
-          Firebase.setInt(ref + "/" + entry.key + "/value", v);
+          Firebase.setInt(ref + F("/") + entry.key + F("/value"), v);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());
@@ -166,13 +168,13 @@ void VM_writeOut(void) {
             if ((entry.enLog == true) && (entry.wblog == true)) {
               DynamicJsonBuffer jsonBuffer;
               JsonObject &json = jsonBuffer.createObject();
-              json["t"] = getTime();
-              json["v"] = v;
+              json[F("t")] = getTime();
+              json[F("v")] = v;
               String strdata;
               json.printTo(strdata);
               FbSetPath_log(ref);
               DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(), v);
-              Firebase.pushJSON(ref + "/" + entry.key, strdata);
+              Firebase.pushJSON(ref + F("/") + entry.key, strdata);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                             entry.key.c_str());
@@ -194,7 +196,7 @@ void VM_writeOut(void) {
           DEBUG_PRINT("VM_writeOut: %s: %f\n", entry.key.c_str(), v);
           String ref;
           FbSetPath_data(ref);
-          Firebase.setFloat(ref + "/" + entry.key + "/value", v);
+          Firebase.setFloat(ref + F("/") + entry.key + F("/value"), v);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());
@@ -202,13 +204,13 @@ void VM_writeOut(void) {
             if ((entry.enLog == true) && (entry.wblog == true)) {
               DynamicJsonBuffer jsonBuffer;
               JsonObject &json = jsonBuffer.createObject();
-              json["t"] = getTime();
-              json["v"] = v;
+              json[F("t")] = getTime();
+              json[F("v")] = v;
               String strdata;
               json.printTo(strdata);
               FbSetPath_log(ref);
               DEBUG_PRINT("VM_writeOut-log: %s: %f\n", entry.key.c_str(), v);
-              Firebase.pushJSON(ref + "/" + entry.key, strdata);
+              Firebase.pushJSON(ref + F("/") + entry.key, strdata);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                             entry.key.c_str());
@@ -228,7 +230,7 @@ void VM_writeOut(void) {
           DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
           String ref;
           FbSetPath_data(ref);
-          Firebase.setBool(ref + "/" + entry.key + "/value", v);
+          Firebase.setBool(ref + F("/") + entry.key + F("/value"), v);
           if (Firebase.failed() == true) {
             DEBUG_PRINT("Firebase set failed: VM_writeOut %s\n",
                         entry.key.c_str());

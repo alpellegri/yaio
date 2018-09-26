@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#define NUM_REGIDS_MAX 5
 #define NUM_IO_ENTRY_MAX 40
 #define NUM_IO_FUNCTION_MAX 40
 
@@ -62,21 +63,21 @@ public:
   std::vector<FuncEntry> funcvec;
 };
 
+extern void FB_deinitRegIDsDB(void);
+extern void FB_addRegIDsDB(String string);
+extern std::vector<String> &FB_getRegIDs();
+
 extern void FB_deinitIoEntryDB(void);
-extern void FB_deinitProgDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);
 extern uint8_t FB_getIoEntryLen(void);
-
 extern void FB_addIoEntryDB(String key, JsonObject &obj);
 extern String &FB_getIoEntryNameById(uint8_t i);
+extern uint8_t FB_getIoEntryIdx(const char *key);
 
+extern void FB_deinitProgDB(void);
 extern void FB_addProgDB(String key, JsonObject &obj);
 extern uint8_t FB_getProgIdx(const char *key);
 extern ProgEntry &FB_getProg(uint8_t i);
-
-extern uint8_t FB_checkRadioCodeDB(uint32_t code);
-extern uint8_t FB_checkRadioCodeTxDB(uint32_t code);
-extern uint8_t FB_getIoEntryIdx(const char *key);
 extern uint8_t FB_getFunctionIdx(const char *key);
 
 extern void FB_dumpIoEntry(void);

@@ -60,10 +60,10 @@ void FbmService(void) {
       DynamicJsonBuffer jsonBuffer;
       JsonObject &object = jsonBuffer.parseObject(json);
       if (object.success()) {
-        bootcnt = object["bootcnt"];
-        object["bootcnt"] = ++bootcnt;
-        object["time"] = getTime();
-        object["version"] = String(VERS_getVersion());
+        bootcnt = object[F("bootcnt")];
+        object[F("bootcnt")] = ++bootcnt;
+        object[F("time")] = getTime();
+        object[F("version")] = VERS_getVersion();
         yield();
         Firebase.updateJSON(kstartup, JsonVariant(object));
         if (Firebase.failed()) {
@@ -147,9 +147,9 @@ void FbmService(void) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &object = jsonBuffer.parseObject(json);
             if (object.success()) {
-              control_time = object["time"];
+              control_time = object[F("time")];
 
-              int control_reboot = object["reboot"];
+              int control_reboot = object[F("reboot")];
               if (control_reboot == 1) {
                 ESP.restart();
               } else if (control_reboot == 2) {
@@ -166,8 +166,8 @@ void FbmService(void) {
 
           DynamicJsonBuffer jsonBuffer;
           JsonObject &status = jsonBuffer.createObject();
-          status["heap"] = ESP.getFreeHeap();
-          status["time"] = time_now;
+          status[F("heap")] = ESP.getFreeHeap();
+          status[F("time")] = time_now;
           yield();
           String kstatus;
           FbSetPath_status(kstatus);
@@ -197,6 +197,7 @@ void FbmService(void) {
     break;
 
   default:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     break;
   }
 }

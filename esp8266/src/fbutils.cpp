@@ -10,38 +10,43 @@
 #include "pht.h"
 #include "rf.h"
 
+static std::vector<String> RegIDs;
 static std::vector<IoEntry> IoEntryVec;
 static std::vector<ProgEntry> ProgVec;
+
+void FB_deinitRegIDsDB(void) { RegIDs.erase(RegIDs.begin(), RegIDs.end()); }
+
+void FB_addRegIDsDB(String string) {
+  if (RegIDs.size() < NUM_REGIDS_MAX) {
+    RegIDs.push_back(string);
+  }
+}
+
+std::vector<String> &FB_getRegIDs() { return RegIDs; }
 
 void FB_deinitIoEntryDB(void) {
   IoEntryVec.erase(IoEntryVec.begin(), IoEntryVec.end());
 }
 
-void FB_deinitProgDB(void) { ProgVec.erase(ProgVec.begin(), ProgVec.end()); }
-
 IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
 
 uint8_t FB_getIoEntryLen(void) { return IoEntryVec.size(); }
-
-ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
-
-uint8_t FB_getProgLen(void) { return ProgVec.size(); }
 
 void FB_addIoEntryDB(String key, JsonObject &obj) {
   if (IoEntryVec.size() < NUM_IO_ENTRY_MAX) {
     IoEntry entry;
     entry.key = key;
-    entry.code = obj["code"].as<uint8_t>();
-    entry.value = obj["value"].as<String>();
-    entry.ioctl = obj["ioctl"].as<uint32_t>();
-    entry.enLog = obj["enLog"].as<bool>();
-    entry.enWrite = obj["drawWr"].as<bool>();
-    entry.enRead = obj["drawRd"].as<bool>();
+    entry.code = obj[F("code")].as<uint8_t>();
+    entry.value = obj[F("value")].as<String>();
+    entry.ioctl = obj[F("ioctl")].as<uint32_t>();
+    entry.enLog = obj[F("enLog")].as<bool>();
+    entry.enWrite = obj[F("drawWr")].as<bool>();
+    entry.enRead = obj[F("drawRd")].as<bool>();
     // TODO: can be done a setup here
     entry.ev = false;
     entry.ev_value = 0;
     entry.wb = false;
-    entry.cb = obj["cb"].as<String>();
+    entry.cb = obj[F("cb")].as<String>();
 
     // post process data value for some case
     switch (entry.code) {
@@ -92,23 +97,6 @@ String &FB_getIoEntryNameById(uint8_t i) {
   return entry.key;
 }
 
-void FB_addProgDB(String key, JsonObject &obj) {
-  ProgEntry entry;
-  entry.key = key;
-  DEBUG_PRINT("FB_addProgDB: key=%s\n", entry.key.c_str());
-
-  JsonArray &nest = obj["p"].as<JsonArray>();
-  for (uint32_t i = 0; i < nest.size(); ++i) {
-    FuncEntry fentry;
-    fentry.code = nest[i]["i"].as<int>();
-    if (nest[i]["v"].as<String>()) {
-      fentry.value = nest[i]["v"].as<String>();
-    }
-    entry.funcvec.push_back(fentry);
-  }
-  ProgVec.push_back(entry);
-}
-
 uint8_t FB_getIoEntryIdx(const char *key) {
   uint8_t i = 0;
   uint8_t idx = 0xFF;
@@ -123,6 +111,29 @@ uint8_t FB_getIoEntryIdx(const char *key) {
   }
 
   return idx;
+}
+
+void FB_deinitProgDB(void) { ProgVec.erase(ProgVec.begin(), ProgVec.end()); }
+
+ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
+
+uint8_t FB_getProgLen(void) { return ProgVec.size(); }
+
+void FB_addProgDB(String key, JsonObject &obj) {
+  ProgEntry entry;
+  entry.key = key;
+  DEBUG_PRINT("FB_addProgDB: key=%s\n", entry.key.c_str());
+
+  JsonArray &nest = obj[F("p")].as<JsonArray>();
+  for (uint32_t i = 0; i < nest.size(); ++i) {
+    FuncEntry fentry;
+    fentry.code = nest[i][F("i")].as<int>();
+    if (nest[i][F("v")].as<String>()) {
+      fentry.value = nest[i][F("v")].as<String>();
+    }
+    entry.funcvec.push_back(fentry);
+  }
+  ProgVec.push_back(entry);
 }
 
 uint8_t FB_getProgIdx(const char *key) {

@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 
-extern void FcmDeinitRegIDsDB(void);
-extern void FcmAddRegIDsDB(String string);
 extern void FcmSendPush(String &message);
 
 #endif
