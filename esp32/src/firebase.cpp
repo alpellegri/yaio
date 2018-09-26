@@ -13,9 +13,20 @@ static const char FcmServer[] PROGMEM = "fcm.googleapis.com";
 static const char _fingerprint[] PROGMEM =
     "B8:4F:40:70:0C:63:90:E0:07:E8:7D:BD:B4:11:D0:4A:EA:9C:90:F6";
 
-static const char *RestMethods[5] = {
+#if 1
+static const char *RestMethods[] = {
     "GET", "PUT", "POST", "PATCH", "DELETE",
 };
+#else
+static const char _get[] PROGMEM = "GET";
+static const char _put[] PROGMEM = "PUT";
+static const char _post[] PROGMEM = "POST";
+static const char _patch[] PROGMEM = "PATCH";
+static const char _delete[] PROGMEM = "DELETE";
+static const char *RestMethods[] = {
+    _get, _put, _post, _patch, _delete,
+};
+#endif
 
 void FirebaseRest::begin(const String &host, const String &auth) {
   host_ = host.c_str();
@@ -36,11 +47,12 @@ std::string FirebaseRest::restReqApi(RestMethod_t method,
   http_req.begin(addr.c_str());
   httpCode_ = http_req.sendRequest(RestMethods[method],
                                    (uint8_t *)value.c_str(), value.length());
-  result_ = String(F("")).c_str();
+
   if (httpCode_ == HTTP_CODE_OK) {
     result_ = http_req.getString().c_str();
-    // DEBUG_PRINT("[HTTP] %s\n", result_.c_str());
+    // DEBUG_PRINT("[HTTP] result_: %s\n", result_.c_str());
   } else {
+    result_ = String(F("")).c_str();
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
                 httpCode_, http_req.errorToString(httpCode_).c_str());
     http_req.end();
@@ -54,20 +66,18 @@ std::string FirebaseRest::restReqApi(RestMethod_t method,
                                      const std::string value) {
   HTTPClient http;
 
-  // DEBUG_PRINT("restReqApi %s\n", path.c_str());
   std::string post = String(F(".json?auth=")).c_str() + auth_;
   std::string addr = String(F("https://")).c_str() + host_ +
                      String(F("/")).c_str() + path + post;
 
-  // http.setReuse(true);
   http.begin(addr.c_str());
   httpCode_ = http.sendRequest(RestMethods[method], (uint8_t *)value.c_str(),
                                value.length());
-  result_ = String(F("")).c_str();
   if (httpCode_ == HTTP_CODE_OK) {
     result_ = http.getString().c_str();
     // DEBUG_PRINT("[HTTP] %s\n", result_.c_str());
   } else {
+    result_ = String(F("")).c_str();
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
                 httpCode_, http.errorToString(httpCode_).c_str());
   }
@@ -190,7 +200,7 @@ void FirebaseRest::remove(const String &path) {
 
 void FirebaseRest::restStreamApi(const std::string path) {
 
-  DEBUG_PRINT("restStreamApi %s\n", path.c_str());
+  // DEBUG_PRINT("restStreamApi %s\n", path.c_str());
   std::string post = String(F(".json?auth=")).c_str() + auth_;
   std::string addr = String(F("https://")).c_str() + host_ +
                      String(F("/")).c_str() + path + post;
@@ -207,7 +217,7 @@ void FirebaseRest::restStreamApi(const std::string path) {
   httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], F(""));
 
   while (httpCode_ == HTTP_CODE_TEMPORARY_REDIRECT) {
-    String location = http_stream.header("Location");
+    String location = http_stream.header(String(FPSTR("Location")).c_str());
     DEBUG_PRINT("redirect %s\n", location.c_str());
     http_stream.setReuse(false);
     http_stream.end();
@@ -251,15 +261,16 @@ int FirebaseRest::readEvent(String &response) {
 #else
 int FirebaseRest::readEvent(String &response) {
   int ret = 0;
-  response = "";
   WiFiClient *client = http_stream.getStreamPtr();
+  response = F("");
   if (client == nullptr) {
     DEBUG_PRINT("client == nullptr\n");
     ret = -1;
   } else {
-    uint8_t buff[128] = {0};
-    while (http_stream.connected() && client->available()) {
-      client->read(buff, client->available());
+    uint8_t buff[64] = {0};
+    size_t size;
+    while (http_stream.connected() && (size = client->available())) {
+      client->read(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
       String line = String((const char *)buff);
       response += line;
       delay(1);
@@ -323,9 +334,10 @@ void FirebaseRest::sendMessage(String &message, String &key,
   String addr = String(F("http://")) + fcm_host + String(F("/fcm/send"));
   HTTPClient http;
   http.begin(addr);
-  http.addHeader("Accept", "*/");
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("Authorization", "key=" + key);
+  http.addHeader(String(F("Accept")), String(F("*/")));
+  http.addHeader(String(F("Content-Type")), String(F("application/json")));
+  http.addHeader(String(F("Authorization")), String(F("key=")) + key);
+  // DEBUG_PRINT("json: %s\n", json.c_str());
   int httpCode = http.POST(json);
   if (httpCode == HTTP_CODE_OK) {
     String result = http.getString();

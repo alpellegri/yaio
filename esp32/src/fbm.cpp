@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "debug.h"
 #include "ee.h"
@@ -114,10 +115,10 @@ void FbmService(void) {
       DynamicJsonBuffer jsonBuffer;
       JsonObject &object = jsonBuffer.parseObject(json);
       if (object.success()) {
-        bootcnt = object["bootcnt"];
-        object["bootcnt"] = ++bootcnt;
-        object["time"] = getTime();
-        object["version"] = String(VERS_getVersion());
+        bootcnt = object[F("bootcnt")];
+        object[F("bootcnt")] = ++bootcnt;
+        object[F("time")] = getTime();
+        object[F("version")] = VERS_getVersion();
         yield();
         Firebase.updateJSON(kstartup, JsonVariant(object));
         if (Firebase.failed()) {
@@ -181,8 +182,8 @@ void FbmService(void) {
       DEBUG_PRINT("response: _%s_\n", response.c_str());
 #if 1
       String line = response.substring(7, response.indexOf('\n'));
-      if (line.compareTo("put") == 0) {
-        DEBUG_PRINT("preocessing\n");
+      if (line.compareTo(F("put")) == 0) {
+        DEBUG_PRINT("processing\n");
         VM_UpdateDataReq();
         String kcontrol;
         FbSetPath_control(kcontrol);
@@ -195,7 +196,7 @@ void FbmService(void) {
           JsonObject &object = jsonBuffer.parseObject(json);
           if (object.success()) {
 
-            int control_reboot = object["reboot"];
+            int control_reboot = object[F("reboot")];
             if (control_reboot == 1) {
               ESP.restart();
             } else if (control_reboot == 2) {
@@ -209,11 +210,16 @@ void FbmService(void) {
             DEBUG_PRINT("parseObject() failed\n");
           }
         }
-
+#if 1
         DynamicJsonBuffer jsonBuffer;
         JsonObject &status = jsonBuffer.createObject();
-        status["heap"] = ESP.getFreeHeap();
-        status["time"] = getTime();
+        status[F("heap")] = ESP.getFreeHeap();
+        status[F("time")] = getTime();
+        struct tm timeinfo;
+        time_t now = time(nullptr);
+        gmtime_r(&now, &timeinfo);
+        Serial.print("Current time: ");
+        Serial.print(asctime(&timeinfo));
 
         DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
 
@@ -225,6 +231,7 @@ void FbmService(void) {
           DEBUG_PRINT("set failed: kstatus\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         }
+#endif
       }
 #endif
     }

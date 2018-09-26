@@ -15,9 +15,9 @@ void fblog_log(String message, boolean fcm_notify) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &log = jsonBuffer.createObject();
 
-  log["time"] = getTime();
-  log["source"] = EE_GetNodeName();
-  log["msg"] = message;
+  log[F("time")] = getTime();
+  log[F("source")] = EE_GetNodeName();
+  log[F("msg")] = message;
 
   String source = EE_GetDomain() + F("/") + EE_GetNodeName();
   String msg = source + F(" ") + message;

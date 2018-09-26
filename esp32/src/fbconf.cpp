@@ -108,21 +108,20 @@ bool FbGetDB(void) {
   if (ret == true) {
     String kfcmtoken;
     FbSetPath_fcmtoken(kfcmtoken);
-    DEBUG_PRINT("%s\n", kfcmtoken.c_str());
+    DEBUG_PRINT("token path: %s\n", kfcmtoken.c_str());
     String json = Firebase.getJSON(kfcmtoken);
     if (Firebase.failed() == true) {
       DEBUG_PRINT("get failed: kfcmtoken\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
-      FcmDeinitRegIDsDB();
+      FB_deinitRegIDsDB();
       DynamicJsonBuffer jsonBuffer;
       JsonObject &object = jsonBuffer.parseObject(json);
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         String id = i->value.as<String>();
-        DEBUG_PRINT("%s\n", id.c_str());
-        FcmAddRegIDsDB(id);
+        FB_addRegIDsDB(id);
       }
     }
   }
@@ -164,7 +163,7 @@ bool FbGetDB(void) {
       for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
         yield();
         JsonObject &nestedObject = i->value;
-        if (nestedObject["owner"] == owner) {
+        if (nestedObject[F("owner")] == owner) {
           FB_addIoEntryDB(i->key, i->value);
         }
       }

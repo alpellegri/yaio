@@ -20,7 +20,7 @@ void setup() {
 
   EE_Setup();
 
-  DEBUG_PRINT("\nSW version: %s\n", VERS_getVersion());
+  DEBUG_PRINT("\nSW version: %s\n", VERS_getVersion().c_str());
   DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
   mode = 0;
