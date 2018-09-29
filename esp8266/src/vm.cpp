@@ -255,7 +255,6 @@ void VM_writeOut(void) {
 }
 
 void VM_run(void) {
-
   // update inputs
   VM_readIn();
 

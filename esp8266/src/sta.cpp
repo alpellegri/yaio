@@ -88,16 +88,13 @@ bool STA_Setup(void) {
 
 void STA_FotaReq(void) {
   SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("w")).c_str());
-  delay(500);
-  ESP.restart();
 }
 
 /* main function task */
-bool STA_Task(void) {
+bool STA_Task(uint32_t current_time) {
   bool ret = true;
 
   wl_status_t wifi_status = WiFi.status();
-  uint32_t current_time = millis();
   if (wifi_status == WL_CONNECTED) {
     last_wifi_time = current_time;
     // wait for time service is up

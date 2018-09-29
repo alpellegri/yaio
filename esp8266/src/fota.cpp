@@ -49,7 +49,7 @@ static FOTA_StateMachine_t state_last = FOTA_Sm_IDLE;
 
 static String addr;
 #define DIGEST_MD5_SIZE 32
-static char *digest_MD5 = NULL;
+static uint8_t *digest_MD5 = NULL;
 static uint8_t http_fail_cnt;
 
 bool FOTA_UpdateReq(void) {
@@ -95,10 +95,9 @@ bool FOTAService(void) {
           int size = http->getSize();
           if (size == DIGEST_MD5_SIZE) {
             DEBUG_PRINT("md5file size %d\n", size);
-            String payload = http->getString();
-            DEBUG_PRINT("%s\n", payload.c_str());
-            digest_MD5 = (char *)malloc(DIGEST_MD5_SIZE);
-            memcpy(digest_MD5, payload.c_str(), DIGEST_MD5_SIZE);
+            WiFiClient *stream = http->getStreamPtr();
+            digest_MD5 = (uint8_t *)malloc(DIGEST_MD5_SIZE);
+            stream->read(digest_MD5, size);
             state = FOTA_Sm_CHECK;
           } else {
             DEBUG_PRINT("md5file size error: %d\n", size);
@@ -125,6 +124,7 @@ bool FOTAService(void) {
                       String(F("?alt=media"));
     addr = String(F("https://")) + String(FPSTR(storage_host)) + file_url;
     DEBUG_PRINT("FOTA_Sm_CHECK %s\n", addr.c_str());
+    http->setReuse(true);
     bool res = http->begin(addr, storage_fingerprint);
     if (res == true) {
       int httpCode = http->GET();
@@ -139,7 +139,7 @@ bool FOTAService(void) {
         block = 0;
         num_blocks = (size + block_size - 1) / block_size;
         if (Update.begin(size, 0)) {
-          Update.setMD5(digest_MD5);
+          Update.setMD5((char *)digest_MD5);
           buffer = (uint8_t *)malloc(block_size);
           state = FOTA_Sm_GET_BLOCK;
         } else {
@@ -155,6 +155,7 @@ bool FOTAService(void) {
   } break;
 
   case FOTA_Sm_GET_BLOCK: {
+    http->setReuse(true);
     bool res = http->begin(addr, storage_fingerprint);
     if (res == true) {
       String range = String(F("bytes=")) + String(block * block_size) +

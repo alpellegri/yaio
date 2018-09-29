@@ -185,7 +185,8 @@ void FbmService(void) {
   case 4:
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     STA_FotaReq();
-    boot_sm = 50;
+    delay(500);
+    ESP.restart();
     break;
 
   case 5:
@@ -193,7 +194,6 @@ void FbmService(void) {
     EE_EraseData();
     DEBUG_PRINT("EEPROM erased\n");
     ESP.restart();
-    boot_sm = 50;
     break;
 
   default:
