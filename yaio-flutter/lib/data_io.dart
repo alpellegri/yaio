@@ -116,6 +116,7 @@ class _DataIOState extends State<DataIO> {
 
   void _onFloatingActionButtonPressed() {
     final IoEntry entry = new IoEntry.setReference(_dataRef);
+    entry.setOwner(node);
     _openEntryEdit(entry);
   }
 }
@@ -126,10 +127,10 @@ class DataEditScreen extends StatefulWidget {
   DataEditScreen(this.entry);
 
   @override
-  _DataDataEditScreenState createState() => new _DataDataEditScreenState(entry);
+  _DataEditScreenState createState() => new _DataEditScreenState(entry);
 }
 
-class _DataDataEditScreenState extends State<DataEditScreen> {
+class _DataEditScreenState extends State<DataEditScreen> {
   final IoEntry entry;
   final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getExecRef());
@@ -141,7 +142,7 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
 
-  _DataDataEditScreenState(this.entry);
+  _DataEditScreenState(this.entry);
 
   void _handleChangedValue(IoEntry newValue) {
     setState(() {
@@ -193,7 +194,7 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
                   entry.key = _controllerName.text;
                   try {
                     entry.cb = _selectedExec?.key;
-                    entry.setOwner(getOwner());
+                    // entry.setOwner(getOwner());
                     if (entry.value != null) {
                       print('saving');
                       entry.reference.child(entry.key).set(entry.toJson());
