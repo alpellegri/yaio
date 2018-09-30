@@ -107,12 +107,12 @@ void FbmService(void) {
       DEBUG_PRINT("set failed: kcontrol/reboot\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      boot_sm = 3;
+      boot_sm = 31;
     }
   } break;
 
   // firebase monitoring
-  case 3: {
+  case 31: {
     uint32_t time_now = getTime();
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
@@ -133,52 +133,60 @@ void FbmService(void) {
           fbm_monitor_last = time_now;
           VM_UpdateDataReq();
           fbm_monitor_run = true;
+          boot_sm = 32;
         }
         if (fbm_monitor_run == true) {
           if ((time_now - fbm_monitor_last) > FBM_UPDATE_MONITOR_SLOW) {
             fbm_monitor_run = false;
           }
-
-          String json = Firebase.getJSON(kcontrol);
-          if (Firebase.failed() == true) {
-            DEBUG_PRINT("get failed: kcontrol\n");
-            DEBUG_PRINT("%s\n", Firebase.error().c_str());
-          } else {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &object = jsonBuffer.parseObject(json);
-            if (object.success()) {
-              control_time = object[F("time")];
-
-              int control_reboot = object[F("reboot")];
-              if (control_reboot == 1) {
-                ESP.restart();
-              } else if (control_reboot == 2) {
-                boot_sm = 4;
-              } else if (control_reboot == 3) {
-                boot_sm = 2;
-              } else if (control_reboot == 4) {
-                boot_sm = 5;
-              }
-            } else {
-              DEBUG_PRINT("parseObject() failed\n");
-            }
-          }
-
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &status = jsonBuffer.createObject();
-          status[F("heap")] = ESP.getFreeHeap();
-          status[F("time")] = time_now;
-          yield();
-          String kstatus;
-          FbSetPath_status(kstatus);
-          Firebase.setJSON(kstatus, JsonVariant(status));
-          if (Firebase.failed()) {
-            DEBUG_PRINT("set failed: kstatus\n");
-            DEBUG_PRINT("%s\n", Firebase.error().c_str());
-          }
         }
         yield();
       }
+    }
+  } break;
+
+  // firebase monitoring
+  case 32: {
+    String kcontrol;
+    FbSetPath_control(kcontrol);
+    String json = Firebase.getJSON(kcontrol);
+    if (Firebase.failed() == true) {
+      DEBUG_PRINT("get failed: kcontrol\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
+    } else {
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject &object = jsonBuffer.parseObject(json);
+      if (object.success()) {
+        control_time = object[F("time")];
+
+        int control_reboot = object[F("reboot")];
+        if (control_reboot == 1) {
+          ESP.restart();
+        } else if (control_reboot == 2) {
+          boot_sm = 4;
+        } else if (control_reboot == 3) {
+          boot_sm = 2;
+        } else if (control_reboot == 4) {
+          boot_sm = 5;
+        } else {
+          boot_sm = 31;
+        }
+      } else {
+        DEBUG_PRINT("parseObject() failed\n");
+      }
+    }
+
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject &status = jsonBuffer.createObject();
+    status[F("heap")] = ESP.getFreeHeap();
+    status[F("time")] = getTime();
+    yield();
+    String kstatus;
+    FbSetPath_status(kstatus);
+    Firebase.setJSON(kstatus, JsonVariant(status));
+    if (Firebase.failed()) {
+      DEBUG_PRINT("set failed: kstatus\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
     }
   } break;
 

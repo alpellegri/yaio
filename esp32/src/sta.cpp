@@ -17,7 +17,7 @@
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
-#define STA_WIFI_TIMEOUT (1 * 60 * 1000)
+#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
 
 static bool fota_mode = false;
 

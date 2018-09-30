@@ -186,27 +186,19 @@ class DomainCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new ListTile(
-            leading:
-                new Icon(Icons.domain),
+            leading: const Icon(Icons.domain),
             title: new Text(name),
             subtitle: new Text('Currently ${map.keys.length} device present'),
-          ),
-          new ButtonTheme.bar(
-            // make buttons use the appropriate styles for cards
-            child: new ButtonBar(
-              children: <Widget>[
-                new FlatButton(
-                  child: const Text('VIEW'),
-                  onPressed: () => Navigator.push(
-                        context,
-                        new MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new Domain(domain: name, map: map),
-                          fullscreenDialog: true,
-                        ),
-                      ), //modified
-                ),
-              ],
+            trailing: new InkWell(
+              child: const Icon(Icons.more_vert),
+              onTap: () => Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          new Domain(domain: name, map: map),
+                      fullscreenDialog: true,
+                    ),
+                  ), //modified
             ),
           ),
         ],
