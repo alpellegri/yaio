@@ -16,7 +16,6 @@ class DataValueWidget extends StatelessWidget {
       children: <Widget>[
         new Text(
           entry.getValue().toString(),
-          // textScaleFactor: 1.2,
           textAlign: TextAlign.right,
         ),
       ],
@@ -83,6 +82,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
   IoEntry data;
   TextEditingController ctrl_1 = new TextEditingController();
   TextEditingController ctrl_2 = new TextEditingController();
+  TextEditingController ctrl_3 = new TextEditingController();
 
   @override
   void initState() {
@@ -376,7 +376,7 @@ class TimerOptWidget extends StatelessWidget {
           new Row(children: <Widget>[
             new Expanded(
               child: new Row(children: <Widget>[
-                new Text('Event Polarity'),
+                new Text('Polarity'),
                 new Checkbox(
                     value: ((value & (1 << 24)) != 0),
                     onChanged: (bool v) {

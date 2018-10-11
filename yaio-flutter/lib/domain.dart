@@ -140,12 +140,12 @@ class _DeviceCardState extends State<DeviceCard> {
           int.parse(value['control']['time'].toString()) * 1000);
       Duration diff = statusTime.difference(controlTime);
       online = (diff.inSeconds >= -10);
-      /*print('${this.name} $online ----------');
+      print('${this.name} $online ----------');
       print(value['status']['time']);
       print(value['control']['time']);
       print(diff.inSeconds);
       DateTime now = new DateTime.now();
-      print(now);*/
+      print(now);
     }
     // extract only data related to a node
     var query = data.where((e) => (e.owner == name)).toList();
@@ -203,7 +203,6 @@ class _DeviceCardState extends State<DeviceCard> {
             ),
           ),
           const SizedBox(height: 8.0),
-          // new Divider(height: 0.0),
           new ListView.builder(
             shrinkWrap: true,
             physics: ClampingScrollPhysics(),

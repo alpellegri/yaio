@@ -44,6 +44,7 @@ std::string FirebaseRest::restReqApi(RestMethod_t method,
                      String(F("/")).c_str() + path + post;
 
   http_req.setReuse(true);
+  http_req.setTimeout(3000);
   http_req.begin(addr.c_str());
   httpCode_ = http_req.sendRequest(RestMethods[method],
                                    (uint8_t *)value.c_str(), value.length());
@@ -70,6 +71,7 @@ std::string FirebaseRest::restReqApi(RestMethod_t method,
   std::string addr = String(F("https://")).c_str() + host_ +
                      String(F("/")).c_str() + path + post;
 
+  http_req.setTimeout(3000);
   http.begin(addr.c_str());
   httpCode_ = http.sendRequest(RestMethods[method], (uint8_t *)value.c_str(),
                                value.length());
@@ -208,6 +210,7 @@ void FirebaseRest::restStreamApi(const std::string path) {
   http_stream.setReuse(false);
   http_stream.end();
   http_stream.setReuse(true);
+  http_stream.setTimeout(3000);
   http_stream.begin(addr.c_str());
 
   http_stream.addHeader(String(F("Accept")), String(F("text/event-stream")));

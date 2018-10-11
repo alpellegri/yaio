@@ -13,6 +13,7 @@ const String kStringBool = 'Bool';
 const String kStringInt = 'Int';
 const String kStringFloat = 'Float';
 const String kStringMessaging = 'Messaging';
+const String kStringTimeout = 'Timeout';
 
 enum DataCode {
   PhyIn,
@@ -27,6 +28,7 @@ enum DataCode {
   Int,
   Float,
   Messaging,
+  Timeout,
 }
 
 const Map<DataCode, String> kEntryId2Name = const {
@@ -42,6 +44,7 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.Int: kStringInt,
   DataCode.Float: kStringFloat,
   DataCode.Messaging: kStringMessaging,
+  DataCode.Timeout: kStringTimeout,
 };
 
 const Map<String, DataCode> kEntryName2Id = const {
@@ -57,6 +60,7 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringInt: DataCode.Int,
   kStringFloat: DataCode.Float,
   kStringMessaging: DataCode.Messaging,
+  kStringTimeout: DataCode.Timeout,
 };
 
 // ......XXXXXX.........
@@ -108,8 +112,11 @@ String getValueCtrl1(IoEntry data) {
     case DataCode.Timer:
       DateTime now = new DateTime.now();
       // compensate timezone
-      v = ((24 + (data.value ~/ 60) + now.timeZoneOffset.inHours) % 24)
+      v = ((24 + (data.value ~/ 3600) + now.timeZoneOffset.inHours) % 24)
           .toString();
+      break;
+    case DataCode.Timeout:
+      v = ((data.value ~/ 3600) % 24).toString();
       break;
     default:
   }
@@ -140,18 +147,20 @@ String getValueCtrl2(IoEntry data) {
       v = data.value.toString();
       break;
     case DataCode.Timer:
-      v = (data.value % 60).toString();
+    case DataCode.Timeout:
+      v = ((data.value ~/ 60) % 60).toString();
       break;
     default:
   }
   return v;
 }
 
-int getValueCtrl3(IoEntryControl data) {
-  int v;
+String getValueCtrl3(IoEntry data) {
+  String v;
   switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      v = getBits(data.ioctl, 16, 9);
+    case DataCode.Timeout:
+      v = (data.value % 60).toString();
       break;
     default:
   }
@@ -187,7 +196,13 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
       local.value ??= 0;
       DateTime now = new DateTime.now();
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
-      local.value = (60 * h) + (local.value % 60);
+      local.value = (3600 * h) + (local.value % 3600);
+      break;
+    case DataCode.Timeout:
+      // binary values
+      local.value ??= 0;
+      int h = int.parse(v) % 24;
+      local.value = (3600 * h) + (local.value % 3600);
       break;
     default:
   }
@@ -225,23 +240,25 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
       local.value = v;
       break;
     case DataCode.Timer:
+    case DataCode.Timeout:
       // binary values
       local.value ??= 0;
       int value = local.value;
-      local.value = (value - (value % 60)) + int.parse(v);
+      local.value = (value - (value % 3600)) + (60 * int.parse(v));
       break;
     default:
   }
   return local;
 }
 
-IoEntryControl setValueCtrl3(IoEntryControl data, String v) {
-  IoEntryControl local = data;
+IoEntry setValueCtrl3(IoEntry data, String v) {
+  IoEntry local = data;
   local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      local.ioctl = clearBits(local.ioctl, 16, 9);
-      local.ioctl |= setBits(16, 9, int.parse(v));
+    case DataCode.Timeout:
+      int value = local.value;
+      local.value = (value - (value % 60)) + int.parse(v);
       break;
     default:
   }
@@ -291,9 +308,18 @@ class IoEntry {
       case DataCode.Timer:
         // binary values
         DateTime now = new DateTime.now();
-        int h = ((24 + (value ~/ 60)) + now.timeZoneOffset.inHours) % 24;
-        int m = value % 60;
-        DateTime dtset = new DateTime(0, 0, 0, h, m);
+        int h = ((24 + (value ~/ 3600)) + now.timeZoneOffset.inHours) % 24;
+        int m = (value ~/ 60) % 60;
+        int s = value % 60;
+        DateTime dtset = new DateTime(0, 0, 0, h, m, s);
+        v = new DateFormat('Hm').format(dtset);
+        break;
+      case DataCode.Timeout:
+        // binary values
+        int h = (value ~/ 3600) % 24;
+        int m = (value ~/ 60) % 60;
+        int s = value % 60;
+        DateTime dtset = new DateTime(0, 0, 0, h, m, s);
         v = new DateFormat('Hm').format(dtset);
         break;
     }

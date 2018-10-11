@@ -23,6 +23,7 @@ enum {
   /*  9 */ kInt,
   /* 10 */ kFloat,
   /* 11 */ kMessaging,
+  /* 12 */ kTimeout,
 };
 
 // template class std::basic_string<char>;

@@ -121,10 +121,14 @@ void VM_writeOutMessage(vm_context_t &ctx, String value) {
 }
 
 void VM_writeOut(void) {
+  uint32_t current = getTime();
+
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < FB_getIoEntryLen(); i++) {
     IoEntry &entry = FB_getIoEntry(i);
     if (entry.wb == true) {
+      /* set event timestamp */
+      entry.ev_tmstamp = current;
       switch (entry.code) {
       case kPhyOut: {
         uint32_t v = atoi(entry.value.c_str());
@@ -240,6 +244,11 @@ void VM_writeOut(void) {
         } else {
           entry.wb = false;
         }
+      } break;
+      case kTimer:
+      case kTimeout: {
+        DEBUG_PRINT("VM_writeOut: kTimer/kTimeout %s\n", entry.value.c_str());
+        entry.wb = false;
       } break;
       case kMessaging: {
         DEBUG_PRINT("VM_writeOut: kMessaging %s\n", entry.value.c_str());

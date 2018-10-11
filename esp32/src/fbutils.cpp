@@ -45,6 +45,7 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     // TODO: can be done a setup here
     entry.ev = false;
     entry.ev_value = 0;
+    entry.ev_tmstamp = 0;
     entry.wb = false;
     entry.cb = obj[F("cb")].as<String>();
 
