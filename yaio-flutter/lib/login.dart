@@ -43,8 +43,8 @@ class _LoginState extends State<Login> {
         onResume: (Map<String, dynamic> message) {
           print("onResume: $message");
           // _navigateToItemDetail(message);
-        },
-      */);
+        },*/
+      );
 
       _fbMessaging.requestNotificationPermissions(
           const IosNotificationSettings(sound: true, badge: true, alert: true));
@@ -83,9 +83,6 @@ class _LoginState extends State<Login> {
               _fcmRef.push().set(token);
               print('token saved: $token');
             }
-            setState(() {
-              // _connected = true;
-            });
             // at the end, not before
             // FirebaseDatabase.instance.setPersistenceEnabled(true);
             // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);

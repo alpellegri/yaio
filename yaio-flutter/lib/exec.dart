@@ -151,9 +151,7 @@ class _ExecState extends State<Exec> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) => new ExecEdit(
-              title: 'Routine $domain/$node',
-              entry: entry,
-              execList: entryList),
+              domain: domain, node: node, entry: entry, execList: entryList),
         ));
   }
 

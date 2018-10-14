@@ -109,7 +109,8 @@ class _DataIOState extends State<DataIO> {
     Navigator.push(
         context,
         new MaterialPageRoute(
-          builder: (BuildContext context) => new DataEditScreen(entry),
+          builder: (BuildContext context) =>
+              new DataEditScreen(domain: domain, node: node, entry: entry),
           fullscreenDialog: true,
         ));
   }
@@ -122,15 +123,20 @@ class _DataIOState extends State<DataIO> {
 }
 
 class DataEditScreen extends StatefulWidget {
+  final String domain;
+  final String node;
   final IoEntry entry;
 
-  DataEditScreen(this.entry);
+  DataEditScreen({this.domain, this.node, this.entry});
 
   @override
-  _DataEditScreenState createState() => new _DataEditScreenState(entry);
+  _DataEditScreenState createState() =>
+      new _DataEditScreenState(domain, node, entry);
 }
 
 class _DataEditScreenState extends State<DataEditScreen> {
+  final String domain;
+  final String node;
   final IoEntry entry;
   final DatabaseReference _execRef =
       FirebaseDatabase.instance.reference().child(getExecRef());
@@ -142,7 +148,7 @@ class _DataEditScreenState extends State<DataEditScreen> {
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
 
-  _DataEditScreenState(this.entry);
+  _DataEditScreenState(this.domain, this.node, this.entry);
 
   void _handleChangedValue(IoEntry newValue) {
     setState(() {
@@ -322,7 +328,7 @@ class _DataEditScreenState extends State<DataEditScreen> {
         // print('key: $k - value: ${v.toString()}');
         // filter only relative to the domain
         String owner = v["owner"];
-        if (owner == getOwner()) {
+        if (owner == node) {
           setState(() {
             ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
             _execList.add(e);

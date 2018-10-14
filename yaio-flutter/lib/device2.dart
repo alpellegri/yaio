@@ -22,7 +22,7 @@ class DeviceConfig extends StatefulWidget {
 
 class _DeviceConfigState extends State<DeviceConfig> {
   final String domain;
-  final String name;
+  final String node;
   final dynamic value;
   dynamic _startup;
   dynamic _control;
@@ -35,7 +35,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
   StreamSubscription<Event> _statusSub;
   StreamSubscription<Event> _startupSub;
 
-  _DeviceConfigState(this.domain, this.name, this.value);
+  _DeviceConfigState(this.domain, this.node, this.value);
 
   @override
   void initState() {
@@ -44,9 +44,9 @@ class _DeviceConfigState extends State<DeviceConfig> {
     _control = value['control'];
     _status = value['status'];
     _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
-    _controlRef = _rootRef.child(domain).child(name).child('control');
-    _statusRef = _rootRef.child(domain).child(name).child('status');
-    _startupRef = _rootRef.child(domain).child(name).child('startup');
+    _controlRef = _rootRef.child(domain).child(node).child('control');
+    _statusRef = _rootRef.child(domain).child(node).child('status');
+    _startupRef = _rootRef.child(domain).child(node).child('startup');
     _controlSub = _controlRef.onValue.listen(_onValueControl);
     _statusSub = _statusRef.onValue.listen(_onValueStatus);
     _startupSub = _startupRef.onValue.listen(_onValueStartup);
@@ -103,7 +103,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                     ? (const Icon(Icons.link_off))
                     : (const Icon(Icons.link)),
                 title: const Text('Selected Device'),
-                subtitle: new Text('$domain/$name'),
+                subtitle: new Text('$domain/$node'),
                 trailing: new FlatButton(
                   textColor: Theme.of(context).accentColor,
                   child: const Text('CONFIGURE'),
@@ -114,7 +114,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                               context,
                               new MaterialPageRoute(
                                 builder: (BuildContext context) =>
-                                    new NodeSetup(domain: domain, node: name),
+                                    new NodeSetup(domain: domain, node: node),
                                 fullscreenDialog: true,
                               ));
                         },
@@ -187,7 +187,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                     ))
                   : (const Icon(Icons.delete_forever)),
               title: const Text('Erase device'),
-              subtitle: new Text(name),
+              subtitle: new Text(node),
               trailing: new FlatButton(
                 textColor: Theme.of(context).accentColor,
                 child: const Text('ERASE'),
