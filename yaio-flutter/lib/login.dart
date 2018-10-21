@@ -31,7 +31,7 @@ class _LoginState extends State<Login> {
 
     _connected = false;
     signInWithGoogle().then((onValue) {
-      _fbMessaging.configure(/*
+      _fbMessaging.configure(
         onMessage: (Map<String, dynamic> message) {
           print("onMessage: $message");
           // _showItemDialog(message);
@@ -43,7 +43,7 @@ class _LoginState extends State<Login> {
         onResume: (Map<String, dynamic> message) {
           print("onResume: $message");
           // _navigateToItemDetail(message);
-        },*/
+        },
       );
 
       _fbMessaging.requestNotificationPermissions(
@@ -83,6 +83,9 @@ class _LoginState extends State<Login> {
               _fcmRef.push().set(token);
               print('token saved: $token');
             }
+            setState(() {
+              _connected = true;
+            });
             // at the end, not before
             // FirebaseDatabase.instance.setPersistenceEnabled(true);
             // FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10000000);
@@ -105,9 +108,6 @@ class _LoginState extends State<Login> {
     print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
-    setState(() {
-      _connected = true;
-    });
 
     setState(() {
       _map.putIfAbsent(domain, () => value);
