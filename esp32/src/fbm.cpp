@@ -88,7 +88,10 @@ String FBM_getResetReason(void) {
 }
 
 /* main function task */
-void FbmService(void) {
+bool FbmService(void) {
+  bool ret = false;
+
+  // DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
   switch (boot_sm) {
   // firebase init
   case 0: {
@@ -131,6 +134,7 @@ void FbmService(void) {
         }
       } else {
         DEBUG_PRINT("parseObject() failed\n");
+        boot_sm = 5;
       }
     }
   } break;
@@ -171,6 +175,7 @@ void FbmService(void) {
     FbSetPath_control(kcontrol);
     Firebase.stream(kcontrol + F("/time"));
     boot_sm = 31;
+    ret = true;
   } break;
   case 31: {
     String response;
@@ -234,6 +239,7 @@ void FbmService(void) {
       }
 #endif
     }
+    ret = true;
   } break;
 
   case 4:
@@ -254,4 +260,6 @@ void FbmService(void) {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     break;
   }
+
+  return ret;
 }

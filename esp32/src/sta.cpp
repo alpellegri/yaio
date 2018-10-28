@@ -88,8 +88,22 @@ bool STA_Setup(void) {
   return ret;
 }
 
-void STA_FotaReq(void) {
-  preferences.putUInt("fota-req", 1);
+void STA_FotaReq(void) { preferences.putUInt("fota-req", 1); }
+
+volatile bool vmSchedule = false;
+bool coreTaskCreate = false;
+
+void coreTask(void *pvParameters) {
+
+  while (true) {
+    // DEBUG_PRINT("/");
+    if (vmSchedule == true) {
+      // DEBUG_PRINT("+");
+      RF_Loop();
+      VM_run();
+    }
+    delay(5);
+  }
 }
 
 /* main function task */
@@ -104,10 +118,24 @@ bool STA_Task(uint32_t current_time) {
       FOTAService();
     } else {
       if (TimeService() == true) {
-        FbmService();
+        vmSchedule = FbmService();
+        if ((vmSchedule == true) && (coreTaskCreate == false)) {
+          coreTaskCreate = true;
+          xTaskCreatePinnedToCore(coreTask, /* Function to implement the task */
+                                  "coreTask", /* Name of the task */
+                                  10000,      /* Stack size in words */
+                                  NULL,       /* Task input parameter */
+                                  0,          /* Priority of the task */
+                                  NULL,       /* Task handle. */
+                                  0); /* Core where the task should run */
+
+          DEBUG_PRINT("Task created...\n");
+        }
         yield();
-        VM_run();
-        yield();
+        if (vmSchedule == true) {
+          VM_runNet();
+          yield();
+        }
       }
     }
   } else {
@@ -121,4 +149,4 @@ bool STA_Task(uint32_t current_time) {
   return ret;
 }
 
-void STA_Loop() { RF_Loop(); }
+void STA_Loop() {}

@@ -92,11 +92,11 @@ void PHT_Service(void) {
           IoEntry &entry = FB_getIoEntry(i);
           if (entry.code == kDhtHumidity) {
             entry.value = String(round2d(humidity));
-            entry.wb = true;
+            entry.wb = 1;
             entry.wblog = wblog;
           } else if (entry.code == kDhtTemperature) {
             entry.value = String(round2d(temperature));
-            entry.wb = true;
+            entry.wb = 1;
             entry.wblog = wblog;
           } else {
           }

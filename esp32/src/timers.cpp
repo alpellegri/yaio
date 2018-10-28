@@ -65,7 +65,6 @@ void Timers_Service(void) {
             DEBUG_PRINT("Timeout %s at time %d\n", entry.key.c_str(), t24);
             entry.ev = true;
             entry.ev_value = (ioctl & (1 << 24)) != 0;
-            entry.wb = true;
           }
         }
       } else {
