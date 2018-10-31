@@ -206,7 +206,11 @@ class _ExecProgState extends State<ExecProg> {
   void initState() {
     super.initState();
     print('_ExecProgState');
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _dataRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/data')
+        .child(domain);
     _onValueSubscription = _dataRef.onValue.listen(_onValueIoEntry);
   }
 

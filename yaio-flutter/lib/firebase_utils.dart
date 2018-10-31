@@ -23,8 +23,6 @@ String dControlRef;
 String dStatusRef;
 String dStartupRef;
 String dFcmTokenRef;
-String dDataRef;
-String dExecRef;
 String dMessagesRef;
 String dLogRef;
 String dTHRef;
@@ -75,21 +73,11 @@ void updateNodeRef(Map config) {
   dControlRef = '$prefixNode/$kControlRef';
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
-  dDataRef = '$prefixData/$kDataRef/${config['domain']}';
-  dExecRef = '$prefixData/$kExecRef/$dNodeSubPath';
   dMessagesRef = '$prefixData/$kMessagesRef/${config['domain']}';
   dLogRef = '$prefixData/$kLogRef/${config['domain']}';
   dTHRef = '$prefixData/$kTHRef';
   dDomain = config['domain'];
   dNodeName = config['nodename'];
-  // print('dControlRef: $dControlRef');
-  // print('dStatusRef: $dStatusRef');
-  // print('dStartupRef: $dStartupRef');
-  // print('dDataRef: $dDataRef');
-  // print('dExecRef: $dExecRef');
-  // print('dMessagesRef: $dMessagesRef');
-  // print('dLogRef: $dLogRef');
-  // print('dTHRef: $dTHRef');
 }
 
 String getOwner() {
@@ -173,14 +161,6 @@ String getStartupRef() {
 
 String getFcmTokenRef() {
   return dFcmTokenRef;
-}
-
-String getExecRef() {
-  return dExecRef;
-}
-
-String getDataRef() {
-  return dDataRef;
 }
 
 String getMessagesRef() {
