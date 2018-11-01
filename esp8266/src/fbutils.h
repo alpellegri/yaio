@@ -47,7 +47,7 @@ public:
   /* event timestamp */
   uint32_t ev_tmstamp;
   /* value write back request */
-  bool wb;
+  uint8_t wb;
   /* log write back request */
   bool wblog;
 };

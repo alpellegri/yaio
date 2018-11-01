@@ -10,17 +10,17 @@
 extern void VM_writeOutMessage(vm_context_t &ctx, String value);
 
 uint8_t vm_exec_nop(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_ex0 value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_ex0 value=%s\n", key_value);
   return pc + 1;
 }
 
 void vm_readi(vm_context_t &ctx, const char *value) {
-  DEBUG_PRINT("vm_readi value=%s\n", value);
+  // DEBUG_PRINT("vm_readi value=%s\n", value);
   ctx.V = atoi(value);
 }
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_read value=%s\n", key_value);
+  // DEBUG_PRINT("vm_read value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntry &entry = FB_getIoEntry(id);
   uint32_t v = atoi(entry.value.c_str());
@@ -28,60 +28,60 @@ void vm_read(vm_context_t &ctx, const char *key_value) {
 }
 
 uint8_t vm_exec_ldi(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_ldi value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_ldi value=%s\n", key_value);
   ctx.ACC = ctx.V;
   return pc + 1;
 }
 
 uint8_t vm_exec_addi(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_addi value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_addi value=%s\n", key_value);
   ctx.ACC += ctx.V;
   return pc + 1;
 }
 
 uint8_t vm_exec_subi(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_subi value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_subi value=%s\n", key_value);
   ctx.ACC -= ctx.V;
   return pc + 1;
 }
 
 uint8_t vm_exec_st(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_st value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_st value=%s\n", key_value);
   return pc + 1;
 }
 
 uint8_t vm_exec_lt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_lt value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_lt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC < ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_lte(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_lte value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_lte value=%s\n", key_value);
   ctx.ACC = (ctx.ACC <= ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_gt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_gt value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_gt value=%s\n", key_value);
   ctx.ACC = (ctx.ACC > ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_gte(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_gte value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_gte value=%s\n", key_value);
   ctx.ACC = (ctx.ACC >= ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_eqi(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_eq value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_eq value=%s\n", key_value);
   ctx.ACC = (ctx.ACC == ctx.V);
   return pc + 1;
 }
 
 uint8_t vm_exec_bz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_bz value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_bz value=%s\n", key_value);
   if (ctx.ACC == 0) {
     return atoi(key_value);
   }
@@ -89,7 +89,7 @@ uint8_t vm_exec_bz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
 }
 
 uint8_t vm_exec_bnz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_bnz value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_bnz value=%s\n", key_value);
   if (ctx.ACC != 0) {
     return atoi(key_value);
   }
@@ -97,24 +97,24 @@ uint8_t vm_exec_bnz(uint8_t pc, vm_context_t &ctx, const char *key_value) {
 }
 
 uint8_t vm_exec_jmp(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_jmp value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_jmp value=%s\n", key_value);
   return atoi(key_value);
 }
 
 uint8_t vm_exec_dly(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_dly value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_dly value=%s\n", key_value);
   delay(ctx.ACC);
   return pc + 1;
 }
 
 uint8_t vm_exec_halt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_exec_hlt value=%s\n", key_value);
+  // DEBUG_PRINT("vm_exec_hlt value=%s\n", key_value);
   ctx.HALT = true;
   return pc;
 }
 
 void vm_write(vm_context_t &ctx, const char *key_value) {
-  DEBUG_PRINT("vm_write value=%s\n", key_value);
+  // DEBUG_PRINT("vm_write value=%s\n", key_value);
   uint8_t id = FB_getIoEntryIdx(key_value);
   IoEntry &entry = FB_getIoEntry(id);
   if (entry.code == kMessaging) {
@@ -122,7 +122,7 @@ void vm_write(vm_context_t &ctx, const char *key_value) {
     VM_writeOutMessage(ctx, entry.value);
   } else {
     entry.value = ctx.ACC;
-    entry.wb = true;
+    entry.wb = 1;
   }
 }
 

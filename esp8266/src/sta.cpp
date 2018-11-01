@@ -102,10 +102,14 @@ bool STA_Task(uint32_t current_time) {
       FOTAService();
     } else {
       if (TimeService() == true) {
-        FbmService();
-        yield();
-        VM_run();
-        yield();
+        bool vmSchedule = FbmService();
+        if (vmSchedule == true) {
+          yield();
+          VM_run();
+          yield();
+          VM_runNet();
+          yield();
+        }
       }
     }
   } else {

@@ -1,7 +1,7 @@
-#include <string.h>
-#include <time.h>
 #include <HTTPClient.h>
 #include <WiFiUdp.h>
+#include <string.h>
+#include <time.h>
 
 #include "debug.h"
 #include "timesrv.h"

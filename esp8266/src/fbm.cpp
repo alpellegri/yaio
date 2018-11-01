@@ -33,7 +33,8 @@ static bool fbm_monitor_run = false;
 String FBM_getResetReason(void) { return ESP.getResetReason(); }
 
 /* main function task */
-void FbmService(void) {
+bool FbmService(void) {
+  bool ret = false;
 
   switch (boot_sm) {
   // firebase init
@@ -77,6 +78,7 @@ void FbmService(void) {
         }
       } else {
         DEBUG_PRINT("parseObject() failed\n");
+        boot_sm = 5;
       }
     }
   } break;
@@ -113,6 +115,7 @@ void FbmService(void) {
 
   // firebase monitoring
   case 31: {
+    ret = true;
     uint32_t time_now = getTime();
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
                                              ? (FBM_UPDATE_MONITOR_FAST)
@@ -147,6 +150,7 @@ void FbmService(void) {
 
   // firebase monitoring
   case 32: {
+    ret = true;
     String kcontrol;
     FbSetPath_control(kcontrol);
     String json = Firebase.getJSON(kcontrol);
@@ -208,4 +212,6 @@ void FbmService(void) {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     break;
   }
+
+  return ret;
 }
