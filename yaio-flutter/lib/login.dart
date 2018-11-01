@@ -182,21 +182,20 @@ class DomainCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new ListTile(
-            leading: const Icon(Icons.domain),
-            title: new Text(name),
-            subtitle: new Text('Currently ${map.keys.length} device present'),
-            trailing: new InkWell(
-              child: const Icon(Icons.more_vert),
-              onTap: () => Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          new Domain(domain: name, map: map),
-                      fullscreenDialog: true,
-                    ),
-                  ), //modified
+          new InkWell(
+            child: new ListTile(
+              leading: const Icon(Icons.domain),
+              title: new Text(name),
+              subtitle: new Text('${map.keys.length} device'),
             ),
+            onTap: () => Navigator.push(
+              context,
+              new MaterialPageRoute(
+                builder: (BuildContext context) =>
+                new Domain(domain: name, map: map),
+                fullscreenDialog: true,
+              ),
+            ), //modified
           ),
         ],
       ),
