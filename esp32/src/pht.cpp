@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include <Adafruit_Sensor.h>
-#include <DHT.h>
+#include <DHTesp.h>
 
 #include "debug.h"
 #include "fbutils.h"
@@ -18,9 +18,9 @@
 #define round2d(x) (roundf((x)*100) / 100)
 
 // #define DHTPIN D6 // 12
-#define DHTTYPE DHT22
+#define DHTTYPE DHTesp ::DHT22
 
-static DHT *dht;
+static DHTesp *dht;
 static uint8_t pht_state;
 static bool pht_init;
 static uint8_t pht_pin;
@@ -45,23 +45,24 @@ void PHT_Set(uint8_t pin, uint32_t period) {
 /* main function task */
 void PHT_Service(void) {
   uint32_t current_time = millis();
-  // DEBUG_PRINT("pht_state: %d %d %e %e\n", pht_state, current_time - sample_time,
+  // DEBUG_PRINT("pht_state: %d %d %e %e\n", pht_state, current_time -
+  // sample_time,
   //             humidity, temperature);
   switch (pht_state) {
   case 0:
     break;
   case 1:
     sample_time = current_time;
-    dht = new DHT(pht_pin, DHTTYPE);
-    dht->begin();
+    dht = new DHTesp();
+    dht->setup(pht_pin, DHTTYPE);
     pht_state = 2;
     pht_init = false;
     break;
   case 2: {
     if ((current_time - sample_time) > SAMPLE_PERIOD_DHT) {
       sample_time = current_time;
-      float h = dht->readHumidity();
-      float t = dht->readTemperature();
+      float h = dht->getHumidity();
+      float t = dht->getTemperature();
       if (isnan(h) || isnan(t)) {
         DEBUG_PRINT("dht sensor error\n");
       } else {
@@ -77,8 +78,8 @@ void PHT_Service(void) {
   case 3:
     if ((current_time - sample_time) > SAMPLE_PERIOD) {
       sample_time = current_time;
-      float h = dht->readHumidity();
-      float t = dht->readTemperature();
+      float h = dht->getHumidity();
+      float t = dht->getTemperature();
       if (isnan(h) || isnan(t)) {
         DEBUG_PRINT("dht sensor error\n");
       } else {

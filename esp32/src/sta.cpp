@@ -102,6 +102,7 @@ void coreTask(void *pvParameters) {
       RF_Loop();
       RF_Service();
       Timers_Service();
+      PHT_Service();
       VM_run();
     }
     delay(250);
@@ -135,7 +136,7 @@ bool STA_Task(uint32_t current_time) {
         }
         yield();
         if (vmSchedule == true) {
-          PHT_Service();
+          // PHT_Service();
           VM_runNet();
           yield();
         }
