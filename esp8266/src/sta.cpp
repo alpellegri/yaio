@@ -9,7 +9,9 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
+#include "pht.h"
 #include "rf.h"
+#include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
 
@@ -105,8 +107,11 @@ bool STA_Task(uint32_t current_time) {
         bool vmSchedule = FbmService();
         if (vmSchedule == true) {
           yield();
+          RF_Service();
+          Timers_Service();
           VM_run();
           yield();
+          PHT_Service();
           VM_runNet();
           yield();
         }

@@ -10,7 +10,9 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
+#include "pht.h"
 #include "rf.h"
+#include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
 
@@ -96,13 +98,13 @@ bool coreTaskCreate = false;
 void coreTask(void *pvParameters) {
 
   while (true) {
-    // DEBUG_PRINT("/");
     if (vmSchedule == true) {
-      // DEBUG_PRINT("+");
       RF_Loop();
+      RF_Service();
+      Timers_Service();
       VM_run();
     }
-    delay(5);
+    delay(250);
   }
 }
 
@@ -133,6 +135,7 @@ bool STA_Task(uint32_t current_time) {
         }
         yield();
         if (vmSchedule == true) {
+          PHT_Service();
           VM_runNet();
           yield();
         }

@@ -9,9 +9,7 @@
 #include "fbm.h"
 #include "fbutils.h"
 #include "firebase.h"
-#include "pht.h"
 #include "rf.h"
-#include "timers.h"
 #include "timesrv.h"
 #include "vmasm.h"
 
@@ -48,7 +46,6 @@ void VM_readIn(void) {
 
 void VM_readInNet(void) {
   bool UpdateDataFault = false;
-
   /* loop over data elements looking for events */
   for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
     IoEntry &entry = FB_getIoEntry(id);
@@ -171,7 +168,6 @@ void VM_writeOutMessage(vm_context_t &ctx, String value) {
 
 void VM_writeOutNet(void) {
   uint32_t current = getTime();
-
   /* loop over data elements looking for write-back requests */
   for (uint8_t i = 0; i < FB_getIoEntryLen(); i++) {
     IoEntry &entry = FB_getIoEntry(i);
@@ -260,8 +256,8 @@ void VM_writeOutNet(void) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                             entry.key.c_str());
               } else {
-                entry.wb = false;
-                entry.wblog = 0;
+                entry.wb = 0;
+                entry.wblog = false;
               }
             } else {
               entry.wb = 0;
@@ -300,18 +296,8 @@ void VM_writeOutNet(void) {
 }
 
 void VM_run(void) {
-  // DEBUG_PRINT("-");
-
-  RF_Service();
-  // DEBUG_PRINT("1");
-  PHT_Service();
-  // DEBUG_PRINT("2");
-  Timers_Service();
-  // DEBUG_PRINT("3");
-
   // update inputs
   VM_readIn();
-  // DEBUG_PRINT("4");
 
   uint8_t len = FB_getIoEntryLen();
   for (uint8_t i = 0; i < len; i++) {
