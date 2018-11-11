@@ -1,8 +1,8 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 
-const String kStringPhyIn = 'PhyIn';
-const String kStringPhyOut = 'PhyOut';
+const String kStringPhyDIn = 'PhyDIn';
+const String kStringPhyDOut = 'PhyDOut';
 const String kDhtTemperature = 'Temperature';
 const String kDhtHumidity = 'Humidity';
 const String kStringRadioRx = 'RadioRx';
@@ -14,10 +14,12 @@ const String kStringInt = 'Int';
 const String kStringFloat = 'Float';
 const String kStringMessaging = 'Messaging';
 const String kStringTimeout = 'Timeout';
+const String kStringPhyAIn = 'PhyAIn';
+const String kStringPhyAOut = 'PhyAOut';
 
 enum DataCode {
-  PhyIn,
-  PhyOut,
+  PhyDIn,
+  PhyDOut,
   DhtTemperature,
   DhtHumidity,
   RadioRx,
@@ -29,11 +31,13 @@ enum DataCode {
   Float,
   Messaging,
   Timeout,
+  PhyAIn,
+  PhyAOut,
 }
 
 const Map<DataCode, String> kEntryId2Name = const {
-  DataCode.PhyIn: kStringPhyIn,
-  DataCode.PhyOut: kStringPhyOut,
+  DataCode.PhyDIn: kStringPhyDIn,
+  DataCode.PhyDOut: kStringPhyDOut,
   DataCode.DhtTemperature: kDhtTemperature,
   DataCode.DhtHumidity: kDhtHumidity,
   DataCode.RadioRx: kStringRadioRx,
@@ -45,11 +49,13 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.Float: kStringFloat,
   DataCode.Messaging: kStringMessaging,
   DataCode.Timeout: kStringTimeout,
+  DataCode.PhyAIn: kStringPhyAIn,
+  DataCode.PhyAOut: kStringPhyAOut,
 };
 
 const Map<String, DataCode> kEntryName2Id = const {
-  kStringPhyIn: DataCode.PhyIn,
-  kStringPhyOut: DataCode.PhyOut,
+  kStringPhyDIn: DataCode.PhyDIn,
+  kStringPhyDOut: DataCode.PhyDOut,
   kDhtTemperature: DataCode.DhtTemperature,
   kDhtHumidity: DataCode.DhtHumidity,
   kStringRadioRx: DataCode.RadioRx,
@@ -61,6 +67,8 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringFloat: DataCode.Float,
   kStringMessaging: DataCode.Messaging,
   kStringTimeout: DataCode.Timeout,
+  kStringPhyAIn: DataCode.PhyAIn,
+  kStringPhyAOut: DataCode.PhyAOut,
 };
 
 // ......XXXXXX.........
@@ -98,8 +106,10 @@ int clearBits(int v, int pos, int len) {
 String getValueCtrl1(IoEntry data) {
   String v;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDIn:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAIn:
+    case DataCode.PhyAOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
@@ -127,8 +137,8 @@ String getValueCtrl1(IoEntry data) {
 String getValueCtrl2(IoEntry data) {
   String v;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
@@ -139,6 +149,8 @@ String getValueCtrl2(IoEntry data) {
     case DataCode.Messaging:
       v = data.value;
       break;
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       v = getBits(data.ioctl, 8, 8).toString();
@@ -171,14 +183,16 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
       local.value ??= 0;
       local.ioctl = int.parse(v);
       break;
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // pin
@@ -213,8 +227,8 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
@@ -227,6 +241,8 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
       // binary values
       local.value = (v == 'true');
       break;
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // binary values
@@ -292,8 +308,12 @@ class IoEntry {
   dynamic getValue() {
     dynamic v;
     switch (DataCode.values[code]) {
-      case DataCode.PhyIn:
-      case DataCode.PhyOut:
+      case DataCode.PhyDIn:
+      case DataCode.PhyDOut:
+      case DataCode.PhyAIn:
+      case DataCode.PhyAOut:
+      case DataCode.PhyAIn:
+      case DataCode.PhyAOut:
       case DataCode.RadioRx:
       case DataCode.RadioTx:
       case DataCode.RadioMach:

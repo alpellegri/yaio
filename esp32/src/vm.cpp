@@ -17,40 +17,13 @@ bool VM_UpdateDataPending;
 
 void VM_UpdateDataReq(void) { VM_UpdateDataPending = true; }
 
-void VM_readIn(void) {
-
-  /* loop over data elements looking for events */
-  for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
-    IoEntry &entry = FB_getIoEntry(id);
-    switch (entry.code) {
-    case kPhyIn: {
-      uint32_t v = atoi(entry.value.c_str());
-      uint8_t pin = entry.ioctl;
-      pinMode(pin, INPUT);
-      uint32_t value = digitalRead(pin);
-      if (v != value) {
-        DEBUG_PRINT("VM_readIn: %s, %d, %d\n", entry.key.c_str(), value, v);
-        entry.value = value;
-        entry.ev = true;
-        entry.ev_value = value;
-        entry.wb = 1;
-        entry.wblog = true;
-      }
-    } break;
-    default:
-      // DEBUG_PRINT("VM_readIn: error\n");
-      break;
-    }
-  }
-}
-
 void VM_readInNet(void) {
   bool UpdateDataFault = false;
   /* loop over data elements looking for events */
   for (uint8_t id = 0; id < FB_getIoEntryLen(); id++) {
     IoEntry &entry = FB_getIoEntry(id);
     switch (entry.code) {
-    case kPhyOut: {
+    case kPhyDOut: {
       if ((VM_UpdateDataPending == true) && (entry.enWrite == true)) {
         DEBUG_PRINT("get: kPhyOut %s\n", entry.key.c_str());
         String kdata;
@@ -131,9 +104,8 @@ void VM_writeOut(void) {
     IoEntry &entry = FB_getIoEntry(i);
     if (entry.wb == 1) {
       /* set event timestamp */
-      entry.ev_tmstamp = current;
       switch (entry.code) {
-      case kPhyOut: {
+      case kPhyDOut: {
         uint32_t v = atoi(entry.value.c_str());
         uint8_t pin = entry.ioctl;
         pinMode(pin, OUTPUT);
@@ -175,7 +147,7 @@ void VM_writeOutNet(void) {
       /* set event timestamp */
       entry.ev_tmstamp = current;
       switch (entry.code) {
-      case kPhyOut: {
+      case kPhyDOut: {
         uint32_t v = atoi(entry.value.c_str());
         if (entry.enRead == true) {
           DEBUG_PRINT("VM_writeOutNet: %s: %d\n", entry.key.c_str(), v);
@@ -192,7 +164,8 @@ void VM_writeOutNet(void) {
           entry.wb = 0;
         }
       } break;
-      case kPhyIn:
+      case kPhyDIn:
+      case kPhyAIn:
       case kRadioIn:
       case kRadioRx:
       case kInt: {
@@ -296,9 +269,6 @@ void VM_writeOutNet(void) {
 }
 
 void VM_run(void) {
-  // update inputs
-  VM_readIn();
-
   uint8_t len = FB_getIoEntryLen();
   for (uint8_t i = 0; i < len; i++) {
     IoEntry &entry = FB_getIoEntry(i);

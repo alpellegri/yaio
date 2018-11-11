@@ -8,6 +8,7 @@
 #include "debug.h"
 #include "fbutils.h"
 #include "pht.h"
+#include "pio.h"
 #include "rf.h"
 
 static std::vector<String> RegIDs;
@@ -46,16 +47,17 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.ev = false;
     entry.ev_value = 0;
     entry.ev_tmstamp = 0;
+    entry.ev_tmstamp_log = 0;
     entry.wb = false;
     entry.cb = obj[F("cb")].as<String>();
 
     // post process data value for some case
     switch (entry.code) {
-    case kPhyIn: {
-      uint16_t ioctl = entry.ioctl;
-      pinMode(ioctl, INPUT);
+    case kPhyDIn:
+    case kPhyAIn: {
+      PIO_Set(entry.code, entry.ioctl);
     } break;
-    case kPhyOut: {
+    case kPhyDOut: {
       uint32_t value = atoi(entry.value.c_str());
       uint16_t ioctl = entry.ioctl;
       pinMode(ioctl, OUTPUT);
@@ -63,18 +65,13 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     } break;
     case kDhtTemperature:
     case kDhtHumidity: {
-      uint16_t ioctl = entry.ioctl;
-      uint8_t pin = ioctl & 0xFF;
-      uint32_t period = ioctl >> 8;
-      PHT_Set(pin, period);
+      PHT_Set(entry.ioctl);
     } break;
     case kRadioRx: {
-      uint16_t ioctl = entry.ioctl;
-      RF_SetRxPin(ioctl);
+      RF_SetRxPin(entry.ioctl);
     } break;
     case kRadioTx: {
-      uint16_t ioctl = entry.ioctl;
-      RF_SetTxPin(ioctl);
+      RF_SetTxPin(entry.ioctl);
     } break;
     case kBool: {
       if (entry.value == F("false")) {

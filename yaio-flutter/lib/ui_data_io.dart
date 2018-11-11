@@ -98,7 +98,6 @@ class _DataConfigWidget extends State<DataConfigWidget> {
   Widget build(BuildContext context) {
     Widget w;
     switch (DataCode.values[data.code]) {
-      case DataCode.PhyIn:
       case DataCode.RadioRx:
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +119,8 @@ class _DataConfigWidget extends State<DataConfigWidget> {
               ),
             ]);
         break;
-      case DataCode.PhyOut:
+      case DataCode.PhyDOut:
+      case DataCode.PhyAOut:
       case DataCode.RadioTx:
         w = new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,6 +156,8 @@ class _DataConfigWidget extends State<DataConfigWidget> {
               ),
             ]);
         break;
+      case DataCode.PhyDIn:
+      case DataCode.PhyAIn:
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
         w = new Column(

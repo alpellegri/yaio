@@ -11,6 +11,7 @@
 #include "fbm.h"
 #include "fota.h"
 #include "pht.h"
+#include "pio.h"
 #include "rf.h"
 #include "timers.h"
 #include "timesrv.h"
@@ -103,6 +104,7 @@ void coreTask(void *pvParameters) {
       RF_Service();
       Timers_Service();
       PHT_Service();
+      PIO_Service();
       VM_run();
     }
     delay(250);
