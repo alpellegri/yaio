@@ -119,6 +119,7 @@ void VM_writeOut(void) {
       } break;
       case kTimer:
       case kTimeout: {
+        entry.ev_tmstamp = current;
         DEBUG_PRINT("VM_writeOut: kTimer/kTimeout %s %s\n", entry.key.c_str(),
                     entry.value.c_str());
         entry.wb = 0;
