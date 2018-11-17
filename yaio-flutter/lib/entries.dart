@@ -110,14 +110,14 @@ String getValueCtrl1(IoEntry data) {
     case DataCode.PhyDOut:
     case DataCode.PhyAIn:
     case DataCode.PhyAOut:
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(data.ioctl, 0, 8).toString();
+      break;
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
       v = (data.ioctl).toString();
-      break;
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      v = getBits(data.ioctl, 0, 8).toString();
       break;
     case DataCode.Timer:
       DateTime now = new DateTime.now();
@@ -139,6 +139,12 @@ String getValueCtrl2(IoEntry data) {
   switch (DataCode.values[data.code]) {
     case DataCode.PhyDOut:
     case DataCode.PhyAOut:
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(data.ioctl, 8, 8).toString();
+      break;
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
@@ -148,12 +154,6 @@ String getValueCtrl2(IoEntry data) {
       break;
     case DataCode.Messaging:
       v = data.value;
-      break;
-    case DataCode.PhyDIn:
-    case DataCode.PhyAIn:
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      v = getBits(data.ioctl, 8, 8).toString();
       break;
     case DataCode.Bool:
       v = data.value.toString();

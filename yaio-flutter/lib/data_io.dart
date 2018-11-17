@@ -326,19 +326,18 @@ class _DataEditScreenState extends State<DataEditScreen> {
   }
 
   void _onValueExec(Event event) {
-    print('_onValueExec');
+    // print('_onValueExec');
     Map data = event.snapshot.value;
-    print('node: $node');
+    // print('node: $node');
     if (data != null) {
       data.forEach((k, v) {
-        print('key: $k - value: ${v.toString()}');
+        // print('key: $k - value: ${v.toString()}');
         // filter only relative to the domain
         String owner = v["owner"];
         if (owner == node) {
           setState(() {
             ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
             _execList.add(e);
-            print('************');
             if (entry.cb == e.key) {
               _selectedExec = e;
             }
