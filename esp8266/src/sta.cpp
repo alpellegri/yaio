@@ -9,7 +9,10 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
+#include "pht.h"
+#include "pio.h"
 #include "rf.h"
+#include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
 
@@ -18,7 +21,7 @@
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define STA_WIFI_TIMEOUT (1 * 60 * 1000)
+#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
 
 static bool fota_mode = false;
 static uint32_t last_wifi_time;
@@ -53,7 +56,7 @@ bool STA_Setup(void) {
     DEBUG_PRINT(".");
     delay(500);
   }
-  Serial.println();
+  DEBUG_PRINT("\n");
 
   if (WiFi.status() == WL_CONNECTED) {
     TimeSetup();
@@ -88,16 +91,13 @@ bool STA_Setup(void) {
 
 void STA_FotaReq(void) {
   SPIFFS.open(String(FPSTR("/fota.req")).c_str(), String(FPSTR("w")).c_str());
-  delay(500);
-  ESP.restart();
 }
 
 /* main function task */
-bool STA_Task(void) {
+bool STA_Task(uint32_t current_time) {
   bool ret = true;
 
   wl_status_t wifi_status = WiFi.status();
-  uint32_t current_time = millis();
   if (wifi_status == WL_CONNECTED) {
     last_wifi_time = current_time;
     // wait for time service is up
@@ -105,17 +105,22 @@ bool STA_Task(void) {
       FOTAService();
     } else {
       if (TimeService() == true) {
-        FbmService();
-        yield();
-        VM_run();
-        yield();
+        bool vmSchedule = FbmService();
+        if (vmSchedule == true) {
+          yield();
+          RF_Service();
+          Timers_Service();
+          PHT_Service();
+          PIO_Service();
+          VM_run();
+          yield();
+          VM_runNet();
+          yield();
+        }
       }
     }
   } else {
     DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if (wifi_status == WL_DISCONNECTED) {
-      WiFi.reconnect();
-    }
     if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
       // force reboot
       ESP.restart();
@@ -125,18 +130,4 @@ bool STA_Task(void) {
   return ret;
 }
 
-void STA_Loop() {
-  RF_Loop();
-#if 0
-  uint8_t in = digitalRead(BUTTON);
-
-  if (in != sta_button) {
-    sta_button = in;
-    if (in == false) {
-      // EE_EraseData();
-      // Serial.printf("EEPROM erased\n");
-      RF_executeIoEntryDB(1);
-    }
-  }
-#endif
-}
+void STA_Loop() { RF_Loop(); }

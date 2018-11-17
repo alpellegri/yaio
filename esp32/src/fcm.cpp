@@ -1,28 +1,17 @@
 #include <Arduino.h>
-#include <HTTPClient.h>
+
 #include <string.h>
 #include <vector>
 
-#include "debug.h"
 #include "ee.h"
+#include "fbutils.h"
 #include "fcm.h"
 #include "firebase.h"
 
-#define FCM_NUM_REGIDS_MAX (5)
-
-static std::vector<String> RegIDs;
-
-void FcmDeinitRegIDsDB(void) { RegIDs.erase(RegIDs.begin(), RegIDs.end()); }
-
-void FcmAddRegIDsDB(String string) {
-  if (RegIDs.size() < FCM_NUM_REGIDS_MAX) {
-    RegIDs.push_back(string);
-  }
-}
-
 void FcmSendPush(String &message) {
-  if (RegIDs.size() > 0) {
+  std::vector<String> ids = FB_getRegIDs();
+  if (ids.size() > 0) {
     String fcm_server_key = EE_GetFirebaseServerKey();
-    Firebase.sendMessage(message, fcm_server_key, RegIDs);
+    Firebase.sendMessage(message, fcm_server_key, ids);
   }
 }

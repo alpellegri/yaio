@@ -5,18 +5,22 @@ import 'entries.dart';
 import 'firebase_utils.dart';
 
 class ExecEdit extends StatefulWidget {
-  static const String routeName = '/exec_edit';
-  final String title;
+  final String domain;
+  final String node;
   final ExecEntry entry;
   final List<ExecEntry> execList;
 
-  ExecEdit({Key key, this.title, this.entry, this.execList}) : super(key: key);
+  ExecEdit({Key key, this.domain, this.node, this.entry, this.execList})
+      : super(key: key);
 
   @override
-  _ExecEditState createState() => new _ExecEditState(entry, execList);
+  _ExecEditState createState() =>
+      new _ExecEditState(domain, node, entry, execList);
 }
 
 class _ExecEditState extends State<ExecEdit> {
+  final String domain;
+  final String node;
   final TextEditingController _controllerName = new TextEditingController();
   final ExecEntry entry;
   List<ExecEntry> execList;
@@ -25,7 +29,7 @@ class _ExecEditState extends State<ExecEdit> {
 
   List<IoEntry> entryIoList = new List();
 
-  _ExecEditState(this.entry, this.execList);
+  _ExecEditState(this.domain, this.node, this.entry, this.execList);
 
   @override
   void initState() {
@@ -50,7 +54,7 @@ class _ExecEditState extends State<ExecEdit> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Edit ${widget.title}'),
+        title: new Text('Edit'),
       ),
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +108,7 @@ class _ExecEditState extends State<ExecEdit> {
                         setState(() {
                           entry.key = _controllerName.text;
                           entry.cb = _selectedNext?.key;
-                          entry.setOwner(getOwner());
+                          entry.setOwner(node);
                           entry.reference.child(entry.key).set(entry.toJson());
                         });
                         Navigator.pop(context, null);
@@ -116,7 +120,7 @@ class _ExecEditState extends State<ExecEdit> {
                           context,
                           new MaterialPageRoute(
                             builder: (BuildContext context) => new ExecProg(
-                                title: widget.title, prog: entry.p),
+                                domain: domain, node: node, prog: entry.p),
                           ));
                     },
                   ),
@@ -177,29 +181,36 @@ class ExecProgListItem extends StatelessWidget {
 }
 
 class ExecProg extends StatefulWidget {
+  final String domain;
+  final String node;
   static const String routeName = '/exec_prog';
-  final String title;
   final List<InstrEntry> prog;
 
-  ExecProg({Key key, this.title, this.prog}) : super(key: key);
+  ExecProg({Key key, this.domain, this.node, this.prog}) : super(key: key);
 
   @override
-  _ExecProgState createState() => new _ExecProgState(prog);
+  _ExecProgState createState() => new _ExecProgState(domain, node, prog);
 }
 
 class _ExecProgState extends State<ExecProg> {
+  final String domain;
+  final String node;
   final List<InstrEntry> prog;
   List<IoEntry> entryIoList = new List();
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onValueSubscription;
 
-  _ExecProgState(this.prog);
+  _ExecProgState(this.domain, this.node, this.prog);
 
   @override
   void initState() {
     super.initState();
     print('_ExecProgState');
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _dataRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/data')
+        .child(domain);
     _onValueSubscription = _dataRef.onValue.listen(_onValueIoEntry);
   }
 
@@ -214,7 +225,7 @@ class _ExecProgState extends State<ExecProg> {
     print('_ExecProgState');
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Program ${widget.title}'),
+        title: new Text('Program'),
       ),
       body: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,7 +326,7 @@ class _ExecProgState extends State<ExecProg> {
       data.forEach((k, v) {
         // print('key: $k - value: ${v.toString()}');
         String owner = v["owner"];
-        if (owner == getOwner()) {
+        if (owner == node) {
           setState(() {
             IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
             entryIoList.add(e);

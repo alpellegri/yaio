@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'const.dart';
@@ -22,8 +23,6 @@ String dControlRef;
 String dStatusRef;
 String dStartupRef;
 String dFcmTokenRef;
-String dDataRef;
-String dExecRef;
 String dMessagesRef;
 String dLogRef;
 String dTHRef;
@@ -74,21 +73,11 @@ void updateNodeRef(Map config) {
   dControlRef = '$prefixNode/$kControlRef';
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
-  dDataRef = '$prefixData/$kDataRef/${config['domain']}';
-  dExecRef = '$prefixData/$kExecRef/$dNodeSubPath';
   dMessagesRef = '$prefixData/$kMessagesRef/${config['domain']}';
   dLogRef = '$prefixData/$kLogRef/${config['domain']}';
   dTHRef = '$prefixData/$kTHRef';
   dDomain = config['domain'];
   dNodeName = config['nodename'];
-  // print('dControlRef: $dControlRef');
-  // print('dStatusRef: $dStatusRef');
-  // print('dStartupRef: $dStartupRef');
-  // print('dDataRef: $dDataRef');
-  // print('dExecRef: $dExecRef');
-  // print('dMessagesRef: $dMessagesRef');
-  // print('dLogRef: $dLogRef');
-  // print('dTHRef: $dTHRef');
 }
 
 String getOwner() {
@@ -150,6 +139,10 @@ void savePreferencesSP(String ssid, String password) {
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
+String getUserRef() {
+  return dUserRef;
+}
+
 String getRootRef() {
   return dRootRef;
 }
@@ -168,14 +161,6 @@ String getStartupRef() {
 
 String getFcmTokenRef() {
   return dFcmTokenRef;
-}
-
-String getExecRef() {
-  return dExecRef;
-}
-
-String getDataRef() {
-  return dDataRef;
 }
 
 String getMessagesRef() {
@@ -212,4 +197,13 @@ Map<String, Object> getStartupDefault() {
 
 Map<String, Object> getStatusDefault() {
   return _statusDefault;
+}
+
+void nodeRefresh(String domain, String node) {
+  print('nodeRefresh: $domain/$node');
+  DatabaseReference _rootRef =
+      FirebaseDatabase.instance.reference().child(getRootRef());
+  DateTime now = new DateTime.now();
+  int time = now.millisecondsSinceEpoch ~/ 1000;
+  _rootRef.child('$domain/$node/control/time').set(time);
 }

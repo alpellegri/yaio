@@ -5,6 +5,7 @@
 
 // extern void FunctionReq(uint8_t src_idx, String key);
 extern void VM_run(void);
+extern void VM_runNet(void);
 extern void VM_UpdateDataReq(void);
 
 #endif

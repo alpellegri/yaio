@@ -10,14 +10,17 @@
 #include "ee.h"
 #include "fbm.h"
 #include "fota.h"
+#include "pht.h"
+#include "pio.h"
 #include "rf.h"
+#include "timers.h"
 #include "timesrv.h"
 #include "vm.h"
 
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
-#define STA_WIFI_TIMEOUT (1 * 60 * 1000)
+#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
 
 static bool fota_mode = false;
 
@@ -54,7 +57,7 @@ bool STA_Setup(void) {
     DEBUG_PRINT(".");
     delay(500);
   }
-  Serial.println();
+  DEBUG_PRINT("\n");
 
   preferences.begin("my-app", false);
 
@@ -88,18 +91,31 @@ bool STA_Setup(void) {
   return ret;
 }
 
-void STA_FotaReq(void) {
-  preferences.putUInt("fota-req", 1);
-  delay(500);
-  ESP.restart();
+void STA_FotaReq(void) { preferences.putUInt("fota-req", 1); }
+
+volatile bool vmSchedule = false;
+bool coreTaskCreate = false;
+
+void coreTask(void *pvParameters) {
+
+  while (true) {
+    if (vmSchedule == true) {
+      RF_Loop();
+      RF_Service();
+      Timers_Service();
+      PHT_Service();
+      PIO_Service();
+      VM_run();
+    }
+    delay(250);
+  }
 }
 
 /* main function task */
-bool STA_Task(void) {
+bool STA_Task(uint32_t current_time) {
   bool ret = true;
 
   wl_status_t wifi_status = WiFi.status();
-  uint32_t current_time = millis();
   if (wifi_status == WL_CONNECTED) {
     last_wifi_time = current_time;
     // wait for time service is up
@@ -107,17 +123,29 @@ bool STA_Task(void) {
       FOTAService();
     } else {
       if (TimeService() == true) {
-        FbmService();
+        vmSchedule = FbmService();
+        if ((vmSchedule == true) && (coreTaskCreate == false)) {
+          coreTaskCreate = true;
+          xTaskCreatePinnedToCore(coreTask, /* Function to implement the task */
+                                  "coreTask", /* Name of the task */
+                                  10000,      /* Stack size in words */
+                                  NULL,       /* Task input parameter */
+                                  0,          /* Priority of the task */
+                                  NULL,       /* Task handle. */
+                                  0); /* Core where the task should run */
+
+          DEBUG_PRINT("Task created...\n");
+        }
         yield();
-        VM_run();
-        yield();
+        if (vmSchedule == true) {
+          // PHT_Service();
+          VM_runNet();
+          yield();
+        }
       }
     }
   } else {
     DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if (wifi_status == WL_DISCONNECTED) {
-      WiFi.reconnect();
-    }
     if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
       // force reboot
       ESP.restart();
@@ -127,6 +155,4 @@ bool STA_Task(void) {
   return ret;
 }
 
-void STA_Loop() {
-  RF_Loop();
-}
+void STA_Loop() {}

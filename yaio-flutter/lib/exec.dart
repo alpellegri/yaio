@@ -28,7 +28,6 @@ class ExecListItem extends StatelessWidget {
                   children: <Widget>[
                     new Text(
                       '${entry.key}',
-                      // textScaleFactor: 1.2,
                       textAlign: TextAlign.left,
                     ),
                   ],
@@ -43,27 +42,36 @@ class ExecListItem extends StatelessWidget {
 }
 
 class Exec extends StatefulWidget {
-  Exec({Key key, this.title}) : super(key: key);
-  static const String routeName = '/exec';
-  final String title;
+  final String domain;
+  final String node;
+
+  Exec({Key key, this.domain, this.node}) : super(key: key);
 
   @override
-  _ExecState createState() => new _ExecState();
+  _ExecState createState() => new _ExecState(domain, node);
 }
 
 class _ExecState extends State<Exec> {
+  final String domain;
+  final String node;
+
   List<ExecEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
-  _ExecState();
+  _ExecState(this.domain, this.node);
 
   @override
   void initState() {
     super.initState();
-    _entryRef = FirebaseDatabase.instance.reference().child(getExecRef());
+    _entryRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/exec')
+        .child(domain)
+        .child(node);
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
@@ -85,7 +93,7 @@ class _ExecState extends State<Exec> {
     });*/
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('${widget.title} @ ${getDomain()}/${getOwner()}'),
+        title: new Text('Routine $domain/$node'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
@@ -107,7 +115,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryAdded(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       setState(() {
         entryList.add(new ExecEntry.fromMap(
             _entryRef, event.snapshot.key, event.snapshot.value));
@@ -117,7 +125,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryEdited(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -129,7 +137,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryRemoved(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -143,7 +151,7 @@ class _ExecState extends State<Exec> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) => new ExecEdit(
-              title: widget.title, entry: entry, execList: entryList),
+              domain: domain, node: node, entry: entry, execList: entryList),
         ));
   }
 

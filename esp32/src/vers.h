@@ -1,9 +1,11 @@
 #ifndef VERS_H
 #define VERS_H
 
-extern const char *VERS_getVersion(void);
+#include <Arduino.h>
+
+extern String VERS_getVersion(void);
 
 #define VERS_HW_VER "ESP32"
-#define VERS_SW_VER "0.3.3.0"
+#define VERS_SW_VER "0.3.8.0"
 
 #endif

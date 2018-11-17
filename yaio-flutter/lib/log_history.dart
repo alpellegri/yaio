@@ -101,7 +101,7 @@ class _MessagesState extends State<Messages> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('${widget.title} @ ${getDomain()}'),
+        title: new Text('${widget.title}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
@@ -117,7 +117,7 @@ class _MessagesState extends State<Messages> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'remove all',
-        child: new Icon(Icons.delete_forever),
+        child: new Icon(Icons.delete),
       ),
     );
   }

@@ -44,12 +44,13 @@ class ServiceWebSocket {
 }
 
 class NodeSetup extends StatefulWidget {
-  NodeSetup({Key key, this.title}) : super(key: key);
-  static const String routeName = '/node_setup';
-  final String title;
+  final String domain;
+  final String node;
+
+  NodeSetup({this.domain, this.node});
 
   @override
-  _NodeSetupState createState() => new _NodeSetupState();
+  _NodeSetupState createState() => new _NodeSetupState(domain, node);
 }
 
 class _NodeSetupState extends State<NodeSetup> {
@@ -61,8 +62,10 @@ class _NodeSetupState extends State<NodeSetup> {
   String _nodeConfigJson;
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
+  final String domain;
+  final String node;
 
-  _NodeSetupState() {
+  _NodeSetupState(this.domain, this.node) {
     _ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
   }
 
@@ -86,7 +89,7 @@ class _NodeSetupState extends State<NodeSetup> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(widget.title),
+        title: new Text('Configure $domain/$node'),
       ),
       body: new ListView(children: <Widget>[
         new Column(
@@ -144,8 +147,8 @@ class _NodeSetupState extends State<NodeSetup> {
           children: <Widget>[
             new ListTile(
               leading: const Icon(Icons.developer_board),
-              title: new Text('${_prefs["domain"]}'),
-              subtitle: new Text('${_prefs["nodename"]}'),
+              title: new Text('$domain'),
+              subtitle: new Text('$node'),
               trailing: new FlatButton(
                 textColor: Theme.of(context).accentColor,
                 child: const Text('SUBMIT'),

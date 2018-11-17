@@ -124,7 +124,7 @@ void RF_Service(void) {
         entry.ev = true;
         entry.ev_value = RadioCode;
         entry.ev_tmstamp = current_time;
-        entry.wb = true;
+        entry.wb = 1;
         entry.wblog = true;
       }
 
@@ -140,7 +140,7 @@ void RF_Service(void) {
         entry.ev = true;
         entry.ev_value = value;
         entry.ev_tmstamp = current_time;
-        entry.wb = true;
+        entry.wb = 1;
         entry.wblog = true;
       }
     }

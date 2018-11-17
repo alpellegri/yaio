@@ -6,25 +6,34 @@ import 'firebase_utils.dart';
 import 'ui_data_io.dart';
 
 class DataIO extends StatefulWidget {
-  DataIO({Key key, this.title}) : super(key: key);
-  static const String routeName = '/data_io';
-  final String title;
+  final String domain;
+  final String node;
+
+  DataIO({Key key, this.domain, this.node}) : super(key: key);
 
   @override
-  _DataIOState createState() => new _DataIOState();
+  _DataIOState createState() => new _DataIOState(domain, node);
 }
 
 class _DataIOState extends State<DataIO> {
+  final String domain;
+  final String node;
   List<IoEntry> entryList = new List();
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
 
+  _DataIOState(this.domain, this.node);
+
   @override
   void initState() {
     super.initState();
-    _dataRef = FirebaseDatabase.instance.reference().child(getDataRef());
+    _dataRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/data')
+        .child(domain);
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
     _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
@@ -42,7 +51,7 @@ class _DataIOState extends State<DataIO> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Data IO @ ${getDomain()}/${getOwner()}'),
+        title: new Text('Data IO $domain/$node'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
@@ -63,7 +72,7 @@ class _DataIOState extends State<DataIO> {
 
   void _onEntryAdded(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       setState(() {
         IoEntry entry = new IoEntry.fromMap(
             _dataRef, event.snapshot.key, event.snapshot.value);
@@ -75,7 +84,7 @@ class _DataIOState extends State<DataIO> {
   void _onEntryChanged(Event event) {
     print('_onEntryChanged');
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -87,7 +96,7 @@ class _DataIOState extends State<DataIO> {
 
   void _onEntryRemoved(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == getOwner()) {
+    if (owner == node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -100,30 +109,36 @@ class _DataIOState extends State<DataIO> {
     Navigator.push(
         context,
         new MaterialPageRoute(
-          builder: (BuildContext context) => new DataEditScreen(entry),
+          builder: (BuildContext context) =>
+              new DataEditScreen(domain: domain, node: node, entry: entry),
           fullscreenDialog: true,
         ));
   }
 
   void _onFloatingActionButtonPressed() {
     final IoEntry entry = new IoEntry.setReference(_dataRef);
+    entry.setOwner(node);
     _openEntryEdit(entry);
   }
 }
 
 class DataEditScreen extends StatefulWidget {
+  final String domain;
+  final String node;
   final IoEntry entry;
 
-  DataEditScreen(this.entry);
+  DataEditScreen({this.domain, this.node, this.entry});
 
   @override
-  _DataDataEditScreenState createState() => new _DataDataEditScreenState(entry);
+  _DataEditScreenState createState() =>
+      new _DataEditScreenState(domain, node, entry);
 }
 
-class _DataDataEditScreenState extends State<DataEditScreen> {
+class _DataEditScreenState extends State<DataEditScreen> {
+  final String domain;
+  final String node;
   final IoEntry entry;
-  final DatabaseReference _execRef =
-      FirebaseDatabase.instance.reference().child(getExecRef());
+  DatabaseReference _execRef;
   List<ExecEntry> _execList = new List();
   List<int> _opTypeMenu = new List<int>();
 
@@ -132,7 +147,7 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
   ExecEntry _selectedExec;
   StreamSubscription<Event> _onValueExecSubscription;
 
-  _DataDataEditScreenState(this.entry);
+  _DataEditScreenState(this.domain, this.node, this.entry);
 
   void _handleChangedValue(IoEntry newValue) {
     setState(() {
@@ -144,6 +159,12 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
   @override
   void initState() {
     super.initState();
+    print('domain $domain');
+    _execRef = FirebaseDatabase.instance
+        .reference()
+        .child(getUserRef())
+        .child('obj/exec')
+        .child(domain).child(node);
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (entry.value != null) {
       _controllerName.text = entry.key;
@@ -184,7 +205,7 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
                   entry.key = _controllerName.text;
                   try {
                     entry.cb = _selectedExec?.key;
-                    entry.setOwner(getOwner());
+                    // entry.setOwner(getOwner());
                     if (entry.value != null) {
                       print('saving');
                       entry.reference.child(entry.key).set(entry.toJson());
@@ -257,7 +278,7 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
                           }).toList(),
                         ),
                       )
-                    : const Text(''),
+                    : const Text('routine empty'),
                 new ListTile(
                   title: const Text('Enable on Google Home'),
                   leading: new Checkbox(
@@ -305,14 +326,15 @@ class _DataDataEditScreenState extends State<DataEditScreen> {
   }
 
   void _onValueExec(Event event) {
-    print('_onValueExec');
+    // print('_onValueExec');
     Map data = event.snapshot.value;
+    // print('node: $node');
     if (data != null) {
       data.forEach((k, v) {
         // print('key: $k - value: ${v.toString()}');
         // filter only relative to the domain
         String owner = v["owner"];
-        if (owner == getOwner()) {
+        if (owner == node) {
           setState(() {
             ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
             _execList.add(e);

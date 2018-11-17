@@ -1,8 +1,8 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 
-const String kStringPhyIn = 'PhyIn';
-const String kStringPhyOut = 'PhyOut';
+const String kStringPhyDIn = 'PhyDIn';
+const String kStringPhyDOut = 'PhyDOut';
 const String kDhtTemperature = 'Temperature';
 const String kDhtHumidity = 'Humidity';
 const String kStringRadioRx = 'RadioRx';
@@ -13,10 +13,13 @@ const String kStringBool = 'Bool';
 const String kStringInt = 'Int';
 const String kStringFloat = 'Float';
 const String kStringMessaging = 'Messaging';
+const String kStringTimeout = 'Timeout';
+const String kStringPhyAIn = 'PhyAIn';
+const String kStringPhyAOut = 'PhyAOut';
 
 enum DataCode {
-  PhyIn,
-  PhyOut,
+  PhyDIn,
+  PhyDOut,
   DhtTemperature,
   DhtHumidity,
   RadioRx,
@@ -27,11 +30,14 @@ enum DataCode {
   Int,
   Float,
   Messaging,
+  Timeout,
+  PhyAIn,
+  PhyAOut,
 }
 
 const Map<DataCode, String> kEntryId2Name = const {
-  DataCode.PhyIn: kStringPhyIn,
-  DataCode.PhyOut: kStringPhyOut,
+  DataCode.PhyDIn: kStringPhyDIn,
+  DataCode.PhyDOut: kStringPhyDOut,
   DataCode.DhtTemperature: kDhtTemperature,
   DataCode.DhtHumidity: kDhtHumidity,
   DataCode.RadioRx: kStringRadioRx,
@@ -42,11 +48,14 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.Int: kStringInt,
   DataCode.Float: kStringFloat,
   DataCode.Messaging: kStringMessaging,
+  DataCode.Timeout: kStringTimeout,
+  DataCode.PhyAIn: kStringPhyAIn,
+  DataCode.PhyAOut: kStringPhyAOut,
 };
 
 const Map<String, DataCode> kEntryName2Id = const {
-  kStringPhyIn: DataCode.PhyIn,
-  kStringPhyOut: DataCode.PhyOut,
+  kStringPhyDIn: DataCode.PhyDIn,
+  kStringPhyDOut: DataCode.PhyDOut,
   kDhtTemperature: DataCode.DhtTemperature,
   kDhtHumidity: DataCode.DhtHumidity,
   kStringRadioRx: DataCode.RadioRx,
@@ -57,6 +66,9 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringInt: DataCode.Int,
   kStringFloat: DataCode.Float,
   kStringMessaging: DataCode.Messaging,
+  kStringTimeout: DataCode.Timeout,
+  kStringPhyAIn: DataCode.PhyAIn,
+  kStringPhyAOut: DataCode.PhyAOut,
 };
 
 // ......XXXXXX.........
@@ -94,22 +106,27 @@ int clearBits(int v, int pos, int len) {
 String getValueCtrl1(IoEntry data) {
   String v;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDIn:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAIn:
+    case DataCode.PhyAOut:
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(data.ioctl, 0, 8).toString();
+      break;
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
       v = (data.ioctl).toString();
       break;
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      v = getBits(data.ioctl, 0, 8).toString();
-      break;
     case DataCode.Timer:
       DateTime now = new DateTime.now();
       // compensate timezone
-      v = ((24 + (data.value ~/ 60) + now.timeZoneOffset.inHours) % 24)
+      v = ((24 + (data.value ~/ 3600) + now.timeZoneOffset.inHours) % 24)
           .toString();
+      break;
+    case DataCode.Timeout:
+      v = ((data.value ~/ 3600) % 24).toString();
       break;
     default:
   }
@@ -120,8 +137,14 @@ String getValueCtrl1(IoEntry data) {
 String getValueCtrl2(IoEntry data) {
   String v;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAOut:
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
+    case DataCode.DhtTemperature:
+    case DataCode.DhtHumidity:
+      v = getBits(data.ioctl, 8, 8).toString();
+      break;
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
@@ -132,26 +155,24 @@ String getValueCtrl2(IoEntry data) {
     case DataCode.Messaging:
       v = data.value;
       break;
-    case DataCode.DhtTemperature:
-    case DataCode.DhtHumidity:
-      v = getBits(data.ioctl, 8, 8).toString();
-      break;
     case DataCode.Bool:
       v = data.value.toString();
       break;
     case DataCode.Timer:
-      v = (data.value % 60).toString();
+    case DataCode.Timeout:
+      v = ((data.value ~/ 60) % 60).toString();
       break;
     default:
   }
   return v;
 }
 
-int getValueCtrl3(IoEntryControl data) {
-  int v;
+String getValueCtrl3(IoEntry data) {
+  String v;
   switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      v = getBits(data.ioctl, 16, 9);
+    case DataCode.Timeout:
+      v = (data.value % 60).toString();
       break;
     default:
   }
@@ -162,14 +183,16 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
       local.value ??= 0;
       local.ioctl = int.parse(v);
       break;
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // pin
@@ -187,7 +210,13 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
       local.value ??= 0;
       DateTime now = new DateTime.now();
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
-      local.value = (60 * h) + (local.value % 60);
+      local.value = (3600 * h) + (local.value % 3600);
+      break;
+    case DataCode.Timeout:
+      // binary values
+      local.value ??= 0;
+      int h = int.parse(v) % 24;
+      local.value = (3600 * h) + (local.value % 3600);
       break;
     default:
   }
@@ -198,8 +227,8 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
-    case DataCode.PhyIn:
-    case DataCode.PhyOut:
+    case DataCode.PhyDOut:
+    case DataCode.PhyAOut:
     case DataCode.RadioRx:
     case DataCode.RadioTx:
     case DataCode.RadioMach:
@@ -212,6 +241,8 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
       // binary values
       local.value = (v == 'true');
       break;
+    case DataCode.PhyDIn:
+    case DataCode.PhyAIn:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
       // binary values
@@ -225,23 +256,25 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
       local.value = v;
       break;
     case DataCode.Timer:
+    case DataCode.Timeout:
       // binary values
       local.value ??= 0;
       int value = local.value;
-      local.value = (value - (value % 60)) + int.parse(v);
+      local.value = (value - (value % 3600)) + (60 * int.parse(v));
       break;
     default:
   }
   return local;
 }
 
-IoEntryControl setValueCtrl3(IoEntryControl data, String v) {
-  IoEntryControl local = data;
+IoEntry setValueCtrl3(IoEntry data, String v) {
+  IoEntry local = data;
   local.ioctl ??= 0;
   switch (DataCode.values[data.code]) {
     case DataCode.Timer:
-      local.ioctl = clearBits(local.ioctl, 16, 9);
-      local.ioctl |= setBits(16, 9, int.parse(v));
+    case DataCode.Timeout:
+      int value = local.value;
+      local.value = (value - (value % 60)) + int.parse(v);
       break;
     default:
   }
@@ -275,8 +308,10 @@ class IoEntry {
   dynamic getValue() {
     dynamic v;
     switch (DataCode.values[code]) {
-      case DataCode.PhyIn:
-      case DataCode.PhyOut:
+      case DataCode.PhyDIn:
+      case DataCode.PhyDOut:
+      case DataCode.PhyAIn:
+      case DataCode.PhyAOut:
       case DataCode.RadioRx:
       case DataCode.RadioTx:
       case DataCode.RadioMach:
@@ -284,19 +319,50 @@ class IoEntry {
       case DataCode.Int:
       case DataCode.Float:
       case DataCode.Messaging:
-        v = value;
-        break;
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
-        v = (.01 * value).toStringAsFixed(1);
+        v = value;
         break;
       case DataCode.Timer:
-        // binary values
         DateTime now = new DateTime.now();
-        int h = ((24 + (value ~/ 60)) + now.timeZoneOffset.inHours) % 24;
-        int m = value % 60;
-        DateTime dtset = new DateTime(0, 0, 0, h, m);
+        int h = ((24 + (value ~/ 3600)) + now.timeZoneOffset.inHours) % 24;
+        int m = (value ~/ 60) % 60;
+        int s = value % 60;
+        DateTime dtset = new DateTime(0, 0, 0, h, m, s);
         v = new DateFormat('Hm').format(dtset);
+        break;
+      case DataCode.Timeout:
+        int h = (value ~/ 3600) % 24;
+        int m = (value ~/ 60) % 60;
+        int s = value % 60;
+        DateTime dtset = new DateTime(0, 0, 0, h, m, s);
+        v = new DateFormat('Hm').format(dtset);
+        break;
+    }
+    return v;
+  }
+
+  String getStringValue() {
+    String v;
+    switch (DataCode.values[code]) {
+      case DataCode.PhyDIn:
+      case DataCode.PhyDOut:
+      case DataCode.PhyAIn:
+      case DataCode.PhyAOut:
+      case DataCode.Bool:
+      case DataCode.Int:
+      case DataCode.RadioRx:
+      case DataCode.RadioTx:
+      case DataCode.RadioMach:
+      case DataCode.Messaging:
+      case DataCode.Timer:
+      case DataCode.Timeout:
+        v = getValue().toString();
+        break;
+      case DataCode.Float:
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+        v = getValue().toStringAsFixed(1);
         break;
     }
     return v;

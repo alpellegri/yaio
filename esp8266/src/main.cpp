@@ -24,7 +24,7 @@ void setup() {
 
   EE_Setup();
 
-  DEBUG_PRINT("\nSW version: %s\n", VERS_getVersion());
+  DEBUG_PRINT("\nSW version: %s\n", VERS_getVersion().c_str());
   DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
   mode = 0;
@@ -51,7 +51,7 @@ void loop() {
   }
 
   uint32_t current_time = millis();
-  if ((current_time - schedule_time) > 250) {
+  if ((current_time - schedule_time) > 10) {
     schedule_time = current_time;
     if (mode == 0) {
       ret = AP_Task();
@@ -60,7 +60,7 @@ void loop() {
         mode = STA_Setup();
       }
     } else if (mode == 1) {
-      ret = STA_Task();
+      ret = STA_Task(current_time);
       if (ret == false) {
         mode = 0;
         AP_Setup();

@@ -76,14 +76,14 @@ bool AP_Setup(void) {
     // AP Static IP
     if (!WiFi.softAP(String(FPSTR(ap_ssid)).c_str(),
                      String(FPSTR(ap_password)).c_str())) {
-      Serial.println("AP Start Failed");
+      DEBUG_PRINT("AP Start Failed\n");
     }
     delay(100);
     if (!WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0))) {
-      Serial.println("AP Config Failed");
+      DEBUG_PRINT("AP Config Failed\n");
     }
 
-    Serial.print("IP address: ");
+    DEBUG_PRINT("IP address: ");
     Serial.println(WiFi.softAPIP());
 
     DEBUG_PRINT("AP mode enabled\n");
@@ -117,10 +117,9 @@ bool AP_Task(void) {
     for (int i = 0; i < n; ++i) {
       yield();
       int test = WiFi.SSID(i).compareTo(sta_ssid);
-      Serial.println(WiFi.SSID(i));
+      DEBUG_PRINT("%s | %d dBm\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i));
       if (test == 0) {
         DEBUG_PRINT("network found: ");
-        Serial.println(WiFi.SSID(i));
         ret = false;
         i = n; // exit for
       }
