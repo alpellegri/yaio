@@ -11,8 +11,8 @@
 #define NUM_IO_FUNCTION_MAX 40
 
 enum {
-  /*  0 */ kPhyIn = 0,
-  /*  1 */ kPhyOut,
+  /*  0 */ kPhyDIn = 0,
+  /*  1 */ kPhyDOut,
   /*  2 */ kDhtTemperature,
   /*  3 */ kDhtHumidity,
   /*  4 */ kRadioRx,
@@ -24,6 +24,8 @@ enum {
   /* 10 */ kFloat,
   /* 11 */ kMessaging,
   /* 12 */ kTimeout,
+  /* 13 */ kPhyAIn,
+  /* 14 */ kPhyAOut,
 };
 
 // template class std::basic_string<char>;
@@ -46,6 +48,8 @@ public:
   uint32_t ev_value;
   /* event timestamp */
   uint32_t ev_tmstamp;
+  /* event timestamp */
+  uint32_t ev_tmstamp_log;
   /* value write back request */
   uint8_t wb;
   /* log write back request */

@@ -35,14 +35,15 @@ void PHT_Deinit(void) {
   delete dht;
 }
 
-void PHT_Set(uint8_t pin, uint32_t period) {
+void PHT_Set(uint32_t ioctl) {
+  uint8_t pin = ioctl & 0xFF;
+  uint32_t period = ioctl >> 8;
   pht_pin = pin;
-  pht_period = period * 60 * 1000;
+  pht_period = period * SAMPLE_PERIOD;
   pht_state = 1;
   DEBUG_PRINT("PHT_Set %d, %d, %d\n", pin, period, pht_period);
 }
 
-/* main function task */
 void PHT_Service(void) {
   uint32_t current_time = millis();
   // DEBUG_PRINT("pht_state: %d %d %e %e\n", pht_state, current_time -

@@ -10,6 +10,7 @@
 #include "fbm.h"
 #include "fota.h"
 #include "pht.h"
+#include "pio.h"
 #include "rf.h"
 #include "timers.h"
 #include "timesrv.h"
@@ -109,9 +110,10 @@ bool STA_Task(uint32_t current_time) {
           yield();
           RF_Service();
           Timers_Service();
+          PHT_Service();
+          PIO_Service();
           VM_run();
           yield();
-          PHT_Service();
           VM_runNet();
           yield();
         }
