@@ -15,7 +15,7 @@ class DataValueWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         new Text(
-          entry.getValue().toString(),
+          entry.getStringValue(),
           textAlign: TextAlign.right,
         ),
       ],

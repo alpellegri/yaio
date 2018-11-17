@@ -10,9 +10,6 @@
 
 #define SAMPLE_PERIOD (60 * 1000)
 
-#define lpfilter(y, x) (0.95 * (y) + 0.05 * (x))
-#define round2d(x) (roundf((x)*100) / 100)
-
 void PIO_Set(uint8_t code, uint32_t ioctl) {
   uint8_t pin = ioctl & 0xFF;
   switch (code) {

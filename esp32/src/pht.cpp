@@ -15,7 +15,6 @@
 #define SAMPLE_PERIOD (60 * 1000)
 
 #define lpfilter(y, x) (0.95 * (y) + 0.05 * (x))
-#define round2d(x) (roundf((x)*100) / 100)
 
 // #define DHTPIN D6 // 12
 #define DHTTYPE DHTesp ::DHT22
@@ -99,11 +98,11 @@ void PHT_Service(void) {
         while (i < len) {
           IoEntry &entry = FB_getIoEntry(i);
           if (entry.code == kDhtHumidity) {
-            entry.value = String(round2d(humidity));
+            entry.value = String(humidity);
             entry.wb = 1;
             entry.wblog = wblog;
           } else if (entry.code == kDhtTemperature) {
-            entry.value = String(round2d(temperature));
+            entry.value = String(temperature);
             entry.wb = 1;
             entry.wblog = wblog;
           } else {

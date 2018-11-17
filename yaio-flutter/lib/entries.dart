@@ -312,8 +312,6 @@ class IoEntry {
       case DataCode.PhyDOut:
       case DataCode.PhyAIn:
       case DataCode.PhyAOut:
-      case DataCode.PhyAIn:
-      case DataCode.PhyAOut:
       case DataCode.RadioRx:
       case DataCode.RadioTx:
       case DataCode.RadioMach:
@@ -326,7 +324,6 @@ class IoEntry {
         v = value;
         break;
       case DataCode.Timer:
-        // binary values
         DateTime now = new DateTime.now();
         int h = ((24 + (value ~/ 3600)) + now.timeZoneOffset.inHours) % 24;
         int m = (value ~/ 60) % 60;
@@ -335,12 +332,37 @@ class IoEntry {
         v = new DateFormat('Hm').format(dtset);
         break;
       case DataCode.Timeout:
-        // binary values
         int h = (value ~/ 3600) % 24;
         int m = (value ~/ 60) % 60;
         int s = value % 60;
         DateTime dtset = new DateTime(0, 0, 0, h, m, s);
         v = new DateFormat('Hm').format(dtset);
+        break;
+    }
+    return v;
+  }
+
+  String getStringValue() {
+    String v;
+    switch (DataCode.values[code]) {
+      case DataCode.PhyDIn:
+      case DataCode.PhyDOut:
+      case DataCode.PhyAIn:
+      case DataCode.PhyAOut:
+      case DataCode.Bool:
+      case DataCode.Int:
+      case DataCode.RadioRx:
+      case DataCode.RadioTx:
+      case DataCode.RadioMach:
+      case DataCode.Messaging:
+      case DataCode.Timer:
+      case DataCode.Timeout:
+        v = getValue().toString();
+        break;
+      case DataCode.Float:
+      case DataCode.DhtTemperature:
+      case DataCode.DhtHumidity:
+        v = getValue().toStringAsFixed(1);
         break;
     }
     return v;
