@@ -587,7 +587,8 @@ class ExecEntry {
 class MessageEntry {
   String key;
   DateTime dateTime;
-  String source;
+  String domain;
+  String node;
   String message;
 
   MessageEntry(this.dateTime, this.message);
@@ -596,16 +597,9 @@ class MessageEntry {
       : key = snapshot.key,
         dateTime = new DateTime.fromMillisecondsSinceEpoch(
             snapshot.value["time"] * 1000),
-        source = snapshot.value["source"],
+        domain = snapshot.value["domain"],
+        node = snapshot.value["node"],
         message = snapshot.value["msg"];
-
-  Map toJson() {
-    return {
-      'source': message,
-      'message': message,
-      'date': dateTime.millisecondsSinceEpoch,
-    };
-  }
 }
 
 class LogEntry {

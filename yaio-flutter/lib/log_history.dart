@@ -46,7 +46,7 @@ class LogListItem extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   new Text(
-                    messageEntry.source.toString(),
+                    '${messageEntry.domain.toString()}/${messageEntry.node.toString()}',
                     // textScaleFactor: 1.0,
                   ),
                   new Text(

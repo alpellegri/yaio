@@ -6,26 +6,31 @@ import 'firebase_utils.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
 class ChartHistory extends StatefulWidget {
-  ChartHistory(this.name);
-
+  final String domain;
+  final String node;
   final String name;
 
+  ChartHistory({Key key, this.domain, this.node, this.name})
+      : super(key: key);
+
   @override
-  _ChartHistoryState createState() => new _ChartHistoryState(name);
+  _ChartHistoryState createState() => new _ChartHistoryState(domain, node, name);
 }
 
 class _ChartHistoryState extends State<ChartHistory> {
+  final String domain;
+  final String node;
+  final String name;
   List<LogEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
-  final String name;
   List<charts.Series<TimeSeries, DateTime>> seriesList =
       new List<charts.Series<TimeSeries, DateTime>>();
 
-  _ChartHistoryState(this.name) {
-    print('_ChartHistoryState: ${getLogRef()}/$name');
+  _ChartHistoryState(this.domain, this.node, this.name) {
+    print('_ChartHistoryState: ${getLogRef()}/$domain/$name');
     _entryRef =
-        FirebaseDatabase.instance.reference().child('${getLogRef()}/$name');
+        FirebaseDatabase.instance.reference().child('${getLogRef()}/$domain/$name');
     _onAddSubscription =
         _entryRef.onValue.listen(_onEntryAdded);
   }

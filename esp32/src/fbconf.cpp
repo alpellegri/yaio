@@ -29,7 +29,7 @@ void FbSetPath_fcmtoken(String &path) {
 
 void FbSetPath_startup(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_node =
       prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
   path = prefix_node + String(FPSTR(_kstartup));
@@ -37,7 +37,7 @@ void FbSetPath_startup(String &path) {
 
 void FbSetPath_control(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_node =
       prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
   path = prefix_node + String(FPSTR(_kcontrol));
@@ -45,7 +45,7 @@ void FbSetPath_control(String &path) {
 
 void FbSetPath_status(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_node =
       prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
   path = prefix_node + String(FPSTR(_kstatus));
@@ -53,7 +53,7 @@ void FbSetPath_status(String &path) {
 
 void FbSetPath_exec(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String subpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String subpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_kexec)) + String(F("/")) + subpath;
 }
@@ -69,7 +69,7 @@ void FbSetPath_message(String &path) {
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
-  path = prefix_data + String(FPSTR(_kmessages)) + String(F("/")) + subpath;
+  path = prefix_data + String(FPSTR(_kmessages));
 }
 
 void FbSetPath_log(String &path) {
@@ -102,7 +102,7 @@ void dump_path(void) {
 bool FbGetDB(void) {
   bool ret = true;
 
-  String owner = EE_GetNodeName();
+  String owner = EE_GetNode();
   String path;
 
   if (ret == true) {

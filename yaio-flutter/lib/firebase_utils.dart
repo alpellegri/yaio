@@ -73,8 +73,8 @@ void updateNodeRef(Map config) {
   dControlRef = '$prefixNode/$kControlRef';
   dStatusRef = '$prefixNode/$kStatusRef';
   dStartupRef = '$prefixNode/$kStartupRef';
-  dMessagesRef = '$prefixData/$kMessagesRef/${config['domain']}';
-  dLogRef = '$prefixData/$kLogRef/${config['domain']}';
+  dMessagesRef = '$prefixData/$kMessagesRef';
+  dLogRef = '$prefixData/$kLogRef';
   dTHRef = '$prefixData/$kTHRef';
   dDomain = config['domain'];
   dNodeName = config['nodename'];
