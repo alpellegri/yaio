@@ -33,7 +33,7 @@ String EE_GetSSID() { return ee_ssid; }
 String EE_GetPassword() { return ee_password; }
 String EE_GetUID() { return ee_uid; }
 String EE_GetDomain() { return ee_domain; }
-String EE_GetNodeName() { return ee_nodename; }
+String EE_GetNode() { return ee_nodename; }
 String EE_GetFirebaseUrl() { return FPSTR(ee_fb_url); }
 String EE_GetFirebaseSecret() { return FPSTR(ee_fb_secret); }
 String EE_GetFirebaseServerKey() {
