@@ -45,7 +45,7 @@ void Timers_Service(void) {
             // set event ev depending on polarity bit
             entry.ev = true;
             entry.ev_value = String((ioctl & (1 << 24)) != 0);
-            DEBUG_PRINT("entry: %d, %s\n", entry.ev, entry.ev_value);
+            DEBUG_PRINT("entry: %d, %s\n", entry.ev, entry.ev_value.c_str());
           }
         }
       } else if (entry.code == kTimeout) {

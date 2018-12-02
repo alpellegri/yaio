@@ -44,8 +44,8 @@ void Timers_Service(void) {
             DEBUG_PRINT("Timers %s at time %d\n", entry.key.c_str(), t24);
             // set event ev depending on polarity bit
             entry.ev = true;
-            entry.ev_value = (ioctl & (1 << 24)) != 0;
-            DEBUG_PRINT("entry: %d, %d\n", entry.ev, entry.ev_value);
+            entry.ev_value = String((ioctl & (1 << 24)) != 0);
+            DEBUG_PRINT("entry: %d, %s\n", entry.ev, entry.ev_value.c_str());
           }
         }
       } else if (entry.code == kTimeout) {
@@ -64,7 +64,7 @@ void Timers_Service(void) {
             entry.ev_tmstamp = 0;
             DEBUG_PRINT("Timeout %s at time %d\n", entry.key.c_str(), t24);
             entry.ev = true;
-            entry.ev_value = (ioctl & (1 << 24)) != 0;
+            entry.ev_value = String((ioctl & (1 << 24)) != 0);
           }
         }
       } else {

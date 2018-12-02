@@ -16,7 +16,7 @@
 #define USE_HTTP_REUSE
 
 typedef enum {
-  METHOD_GET,
+  METHOD_GET = 0,
   METHOD_SET,
   METHOD_PUSH,
   METHOD_UPDATE,

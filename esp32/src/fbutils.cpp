@@ -156,7 +156,7 @@ void FB_dumpIoEntry(void) {
         "%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, cb=%s\n",
         i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
         IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl, IoEntryVec[i].ev,
-        IoEntryVec[i].ev_value, IoEntryVec[i].cb.c_str());
+        IoEntryVec[i].ev_value.c_str(), IoEntryVec[i].cb.c_str());
   }
 }
 
