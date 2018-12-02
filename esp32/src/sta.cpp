@@ -26,6 +26,8 @@ static bool fota_mode = false;
 
 static Preferences preferences;
 static uint32_t last_wifi_time;
+static uint32_t core0_time;
+static uint32_t core0_time2;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -100,14 +102,16 @@ void coreTask(void *pvParameters) {
 
   while (true) {
     if (vmSchedule == true) {
+      core0_time = millis();
       RF_Loop();
       RF_Service();
       Timers_Service();
       PHT_Service();
       PIO_Service();
       VM_run();
+      core0_time2 = millis();
     }
-    delay(250);
+    delay(5);
   }
 }
 
@@ -126,6 +130,7 @@ bool STA_Task(uint32_t current_time) {
         vmSchedule = FbmService();
         if ((vmSchedule == true) && (coreTaskCreate == false)) {
           coreTaskCreate = true;
+          core0_time = current_time;
           xTaskCreatePinnedToCore(coreTask, /* Function to implement the task */
                                   "coreTask", /* Name of the task */
                                   10000,      /* Stack size in words */
@@ -141,6 +146,14 @@ bool STA_Task(uint32_t current_time) {
           // PHT_Service();
           VM_runNet();
           yield();
+          if ((int32_t)(current_time - core0_time) > 10) {
+            DEBUG_PRINT("hang: %d %d\n", current_time - core0_time,
+                        core0_time2 - core0_time);
+          }
+          if ((int32_t)(current_time - core0_time) > 8000) {
+            DEBUG_PRINT("reset hang: %d\n", current_time - core0_time);
+            ESP.restart();
+          }
         }
       }
     }

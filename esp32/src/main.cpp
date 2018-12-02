@@ -47,7 +47,7 @@ void loop() {
   }
 
   uint32_t current_time = millis();
-  if ((current_time - schedule_time) > 250) {
+  if ((current_time - schedule_time) > 50) {
     schedule_time = current_time;
     if (mode == 0) {
       ret = AP_Task();

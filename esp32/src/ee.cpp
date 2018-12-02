@@ -71,7 +71,7 @@ bool EE_LoadData(void) {
   for (i = 0; i < EE_SIZE; i++) {
     yield();
     data[i] = EEPROM.read(i);
-    DEBUG_PRINT("%c", data[i]);
+    // DEBUG_PRINT("%c", data[i]);
   }
   DEBUG_PRINT("\n");
 

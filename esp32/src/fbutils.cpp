@@ -45,7 +45,7 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.enRead = obj[F("drawRd")].as<bool>();
     // TODO: can be done a setup here
     entry.ev = false;
-    entry.ev_value = 0;
+    entry.ev_value = "";
     entry.ev_tmstamp = 0;
     entry.ev_tmstamp_log = 0;
     entry.wb = false;

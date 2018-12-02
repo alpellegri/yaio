@@ -37,9 +37,9 @@ void VM_readInNet(void) {
           if (v != value) {
             DEBUG_PRINT("VM_readInNet: %s, %d, %d\n", entry.key.c_str(), value,
                         v);
-            entry.value = value;
+            entry.value = String(value);
             entry.ev = true;
-            entry.ev_value = value;
+            entry.ev_value = String(value);
             entry.wb = 1;
           }
         }
@@ -58,9 +58,9 @@ void VM_readInNet(void) {
           uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
             DEBUG_PRINT("VM_readInNet: %s, %d\n", entry.key.c_str(), value);
-            entry.value = value;
+            entry.value = String(value);
             entry.ev = true;
-            entry.ev_value = value;
+            entry.ev_value = String(value);
             entry.wblog = true;
           }
         }
@@ -80,9 +80,9 @@ void VM_readInNet(void) {
           uint32_t v = atoi(entry.value.c_str());
           if (v != value) {
             DEBUG_PRINT("VM_readInNet: %s, %d\n", entry.key.c_str(), value);
-            entry.value = value;
+            entry.value = String(value);
             entry.ev = true;
-            entry.ev_value = value;
+            entry.ev_value = String(value);
             entry.wblog = true;
           }
         }
@@ -111,11 +111,6 @@ void VM_writeOut(void) {
         pinMode(pin, OUTPUT);
         digitalWrite(pin, v);
         entry.wb = 2;
-      } break;
-      case kRadioTx: {
-        uint32_t v = atoi(entry.value.c_str());
-        RF_Send(v, 24);
-        entry.wb = 0;
       } break;
       case kTimer:
       case kTimeout: {
@@ -164,6 +159,11 @@ void VM_writeOutNet(void) {
         } else {
           entry.wb = 0;
         }
+      } break;
+      case kRadioTx: {
+        uint32_t v = atoi(entry.value.c_str());
+        RF_Send(v, 24);
+        entry.wb = 0;
       } break;
       case kPhyDIn:
       case kPhyAIn:
@@ -286,7 +286,7 @@ void VM_run(void) {
 
         /* init ACC with event value */
         ctx.V = 0;
-        ctx.ACC = entry.ev_value;
+        ctx.ACC = entry.ev_value.toInt();
         ctx.HALT = false;
 
         /* keep the event name */
@@ -301,7 +301,7 @@ void VM_run(void) {
 
         uint8_t pc = 0;
         while ((pc < funcvec.size()) && (ctx.HALT == false)) {
-          DEBUG_PRINT("VM_run start [%d] code=%d, ACC=%d V=%d\n", pc,
+          DEBUG_PRINT("VM_run exec [%d] code=%d, ACC=%d V=%d\n", pc,
                       funcvec[pc].code, ctx.ACC, ctx.V);
 
           /* decode */
