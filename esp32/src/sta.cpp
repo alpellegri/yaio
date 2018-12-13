@@ -146,11 +146,11 @@ bool STA_Task(uint32_t current_time) {
           VM_runNet();
           yield();
           current_time = millis();
-          if ((int32_t)(current_time - core0_time) > 10) {
+          if ((int32_t)(current_time - core0_time) > 50) {
             DEBUG_PRINT("hang: %d %d\n", current_time - core0_time,
                         core0_time2 - core0_time);
           }
-          if ((int32_t)(current_time - core0_time) > 2000) {
+          if ((int32_t)(current_time - core0_time) > 500) {
             DEBUG_PRINT("reset hang: %d\n", current_time - core0_time);
             ESP.restart();
           }
