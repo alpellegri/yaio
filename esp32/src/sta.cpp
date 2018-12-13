@@ -103,15 +103,15 @@ void coreTask(void *pvParameters) {
   while (true) {
     if (vmSchedule == true) {
       core0_time = millis();
+      Timers_Service();
       RF_Loop();
       RF_Service();
-      Timers_Service();
       PHT_Service();
       PIO_Service();
       VM_run();
       core0_time2 = millis();
     }
-    delay(5);
+    delay(50);
   }
 }
 
@@ -135,7 +135,7 @@ bool STA_Task(uint32_t current_time) {
                                   "coreTask", /* Name of the task */
                                   10000,      /* Stack size in words */
                                   NULL,       /* Task input parameter */
-                                  0,          /* Priority of the task */
+                                  1,          /* Priority of the task */
                                   NULL,       /* Task handle. */
                                   0); /* Core where the task should run */
 
@@ -143,14 +143,14 @@ bool STA_Task(uint32_t current_time) {
         }
         yield();
         if (vmSchedule == true) {
-          // PHT_Service();
           VM_runNet();
           yield();
+          current_time = millis();
           if ((int32_t)(current_time - core0_time) > 10) {
             DEBUG_PRINT("hang: %d %d\n", current_time - core0_time,
                         core0_time2 - core0_time);
           }
-          if ((int32_t)(current_time - core0_time) > 8000) {
+          if ((int32_t)(current_time - core0_time) > 2000) {
             DEBUG_PRINT("reset hang: %d\n", current_time - core0_time);
             ESP.restart();
           }
