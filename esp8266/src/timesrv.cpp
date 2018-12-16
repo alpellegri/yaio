@@ -37,7 +37,7 @@ bool TimeService(void) {
       DEBUG_PRINT("UTC time: %d\n", current);
     }
   } else {
-#if 1
+#if 0
     uint32_t curr = millis();
     if ((curr - last) > 5000) {
       last = curr;
