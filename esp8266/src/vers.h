@@ -6,6 +6,6 @@
 extern String VERS_getVersion(void);
 
 #define VERS_HW_VER "ESP8266"
-#define VERS_SW_VER "0.3.11.2"
+#define VERS_SW_VER "0.3.11.3"
 
 #endif
