@@ -36,9 +36,13 @@ void FirebaseRest::begin(const String &host, const String &auth) {
 String FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                 const String value) {
 
-  // DEBUG_PRINT("restReqApi %s\n", path.c_str());
-  String post = String(F(".json?auth=")) + auth_;
-  String addr = String(F("https://")) + host_ + String(F("/")) + path + post;
+  String path_ = String(F("/")) + path + String(F(".json"));
+  String post = String(F("?auth=")) + auth_;
+  if (method != METHOD_GET) {
+    post += String(F("&print=silent"));
+  }
+  String addr = String(F("https://")) + host_ + path_ + post;
+  // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
 
   http_req.setReuse(true);
   // http_req.setTimeout(3000);
@@ -46,7 +50,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   httpCode_ = http_req.sendRequest(RestMethods[method],
                                    (uint8_t *)value.c_str(), value.length());
 
-  if (httpCode_ == HTTP_CODE_OK) {
+  if ((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT)) {
     result_ = http_req.getString();
     // DEBUG_PRINT("[HTTP] result_: %s\n", result_.c_str());
   } else {
@@ -209,7 +213,7 @@ void FirebaseRest::stream(const String &path) { restStreamApi(path); }
 #if 0
 int FirebaseRest::readEvent(String &response) {
   int ret = 0;
-  response = "";
+  response = F("");
   WiFiClient *client = http_stream.getStreamPtr();
   if (client == nullptr) {
     DEBUG_PRINT("client == nullptr\n");
@@ -219,7 +223,7 @@ int FirebaseRest::readEvent(String &response) {
       String line = client->readString();
       // DEBUG_PRINT("[HTTP] %s\n", line.c_str());
       response += line;
-      delay(1);
+      delay(10);
     }
     ret = response.length();
   }
@@ -235,13 +239,17 @@ int FirebaseRest::readEvent(String &response) {
     DEBUG_PRINT("client == nullptr\n");
     ret = -1;
   } else {
-    uint8_t buff[64] = {0};
+    uint8_t buff[64];
+    uint8_t bsize = sizeof(buff) - 1;
     size_t size;
     while (http_stream.connected() && (size = client->available())) {
-      client->read(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
-      String line = String((const char *)buff);
+      uint16_t rsize = ((size > bsize) ? bsize : size);
+      client->read(buff, rsize);
+      buff[rsize] = 0;
+      String line((char *)buff);
+      // DEBUG_PRINT("client: (%d,%d) %s\n", size, rsize, line.c_str());
       response += line;
-      delay(1);
+      delay(10);
     }
     ret = response.length();
   }
@@ -249,7 +257,9 @@ int FirebaseRest::readEvent(String &response) {
 }
 #endif
 
-bool FirebaseRest::failed() { return httpCode_ != HTTP_CODE_OK; }
+bool FirebaseRest::failed() {
+  return !((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT));
+}
 
 String FirebaseRest::error() { return HTTPClient::errorToString(httpCode_); }
 
