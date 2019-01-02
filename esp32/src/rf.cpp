@@ -120,9 +120,9 @@ void RF_Service(void) {
           ((current_time - entry.ev_tmstamp) > RF_SUSPEND_TO)) {
         DEBUG_PRINT("RF_Service [%d]: %s, %d\n", id, entry.key.c_str(),
                     RadioCode);
-        entry.value = RadioCode;
+        entry.value = String(RadioCode);
         entry.ev = true;
-        entry.ev_value = RadioCode;
+        entry.ev_value = String(RadioCode);
         entry.ev_tmstamp = current_time;
         entry.wb = 1;
         entry.wblog = true;
@@ -138,7 +138,7 @@ void RF_Service(void) {
                     RadioCode);
         entry.value = String(value);
         entry.ev = true;
-        entry.ev_value = value;
+        entry.ev_value = String(value);
         entry.ev_tmstamp = current_time;
         entry.wb = 1;
         entry.wblog = true;

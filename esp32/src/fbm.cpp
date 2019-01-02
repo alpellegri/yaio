@@ -107,8 +107,7 @@ bool FbmService(void) {
   // firebase control/status init
   case 1: {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-    String kstartup;
-    FbSetPath_startup(kstartup);
+    String kstartup = FbGetPath_startup();
     String json = Firebase.getJSON(kstartup);
     if (Firebase.failed()) {
       DEBUG_PRINT("get failed: kstartup\n");
@@ -157,8 +156,7 @@ bool FbmService(void) {
 
   case 21: {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-    String kcontrol;
-    FbSetPath_control(kcontrol);
+    String kcontrol = FbGetPath_control();
     Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
       DEBUG_PRINT("set failed: kcontrol/reboot\n");
@@ -171,8 +169,7 @@ bool FbmService(void) {
   // firebase monitoring
   case 3: {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-    String kcontrol;
-    FbSetPath_control(kcontrol);
+    String kcontrol = FbGetPath_control();
     Firebase.stream(kcontrol + F("/time"));
     boot_sm = 31;
     ret = true;
@@ -189,8 +186,7 @@ bool FbmService(void) {
       if (line.compareTo(F("put")) == 0) {
         DEBUG_PRINT("processing\n");
         VM_UpdateDataReq();
-        String kcontrol;
-        FbSetPath_control(kcontrol);
+        String kcontrol = FbGetPath_control();
         String json = Firebase.getJSON(kcontrol);
         if (Firebase.failed() == true) {
           DEBUG_PRINT("get failed: kcontrol\n");
@@ -228,8 +224,7 @@ bool FbmService(void) {
         DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
 
         yield();
-        String kstatus;
-        FbSetPath_status(kstatus);
+        String kstatus = FbGetPath_status();
         Firebase.setJSON(kstatus, JsonVariant(status));
         if (Firebase.failed()) {
           DEBUG_PRINT("set failed: kstatus\n");

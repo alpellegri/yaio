@@ -3,14 +3,15 @@
 
 #include <Arduino.h>
 
-extern void FbSetPath_startup(String &path);
-extern void FbSetPath_control(String &path);
-extern void FbSetPath_status(String &path);
-extern void FbSetPath_exec(String &path);
-extern void FbSetPath_fcmtoken(String &path);
-extern void FbSetPath_data(String &path);
-extern void FbSetPath_message(String &path);
-extern void FbSetPath_log(String &path);
+extern String FbGetPath_startup(void);
+extern String FbGetPath_control(void);
+extern String FbGetPath_status(void);
+extern String FbGetPath_exec(void);
+extern String FbGetPath_fcmtoken(void);
+extern String FbGetPath_data(void);
+extern String FbGetPath_message(void);
+extern String FbGetPath_log(void);
+
 extern bool FbGetDB(void);
 
 extern void dump_path(void);

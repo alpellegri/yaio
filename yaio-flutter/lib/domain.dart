@@ -64,7 +64,7 @@ class _DomainState extends State<Domain> {
         itemBuilder: (context, node) {
           String _node = map.keys.toList()[node];
           return new DeviceCard(
-              domain: domain, name: _node, value: map[_node], data: entryList);
+              domain: domain, node: _node, value: map[_node], data: entryList);
         },
       ),
     );
@@ -110,25 +110,25 @@ class _DomainState extends State<Domain> {
 
 class DeviceCard extends StatefulWidget {
   final String domain;
-  final String name;
+  final String node;
   final dynamic value;
   final List<IoEntry> data;
 
-  DeviceCard({Key key, this.domain, this.name, this.value, this.data})
+  DeviceCard({Key key, this.domain, this.node, this.value, this.data})
       : super(key: key);
 
   @override
   _DeviceCardState createState() =>
-      new _DeviceCardState(domain, name, value, data);
+      new _DeviceCardState(domain, node, value, data);
 }
 
 class _DeviceCardState extends State<DeviceCard> {
   final String domain;
-  final String name;
+  final String node;
   final dynamic value;
   final List<IoEntry> data;
 
-  _DeviceCardState(this.domain, this.name, this.value, this.data);
+  _DeviceCardState(this.domain, this.node, this.value, this.data);
 
   @override
   Widget build(BuildContext context) {
@@ -140,15 +140,15 @@ class _DeviceCardState extends State<DeviceCard> {
           int.parse(value['control']['time'].toString()) * 1000);
       Duration diff = statusTime.difference(controlTime);
       online = (diff.inSeconds >= -10);
-      print('${this.name} $online ----------');
-      print(value['status']['time']);
-      print(value['control']['time']);
-      print(diff.inSeconds);
+      // print('${this.name} $online ----------');
+      // print(value['status']['time']);
+      // print(value['control']['time']);
+      // print(diff.inSeconds);
       DateTime now = new DateTime.now();
-      print(now);
+      // print(now);
     }
     // extract only data related to a node
-    var query = data.where((e) => (e.owner == name)).toList();
+    var query = data.where((e) => (e.owner == node)).toList();
     return Card(
       elevation: 2.0,
       shape: new BeveledRectangleBorder(
@@ -170,7 +170,7 @@ class _DeviceCardState extends State<DeviceCard> {
                     ? new Icon(Icons.link, color: Colors.green[400])
                     : new Icon(Icons.link_off, color: Colors.grey[400]),
                 const SizedBox(width: 8.0),
-                new Text(name,
+                new Text(node,
                     style: new TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).primaryColor,
@@ -211,7 +211,7 @@ class _DeviceCardState extends State<DeviceCard> {
               if (query[index].drawWr == true) {
                 return new InkWell(
                   onTap: () {
-                    _openEntryDialog(name, query[index]);
+                    _openEntryDialog(node, query[index]);
                   },
                   child: new DataItemWidget(query[index]),
                 );
@@ -221,8 +221,10 @@ class _DeviceCardState extends State<DeviceCard> {
                     Navigator.push(
                         context,
                         new MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new ChartHistory(query[index].key),
+                          builder: (BuildContext context) => new ChartHistory(
+                              domain: domain,
+                              node: node,
+                              name: query[index].key),
                           fullscreenDialog: true,
                         ));
                   },
@@ -244,7 +246,7 @@ class _DeviceCardState extends State<DeviceCard> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) =>
-              new DeviceConfig(domain: domain, name: name, value: value),
+              new DeviceConfig(domain: domain, node: node, value: value),
           fullscreenDialog: true,
         ),
       );
@@ -253,7 +255,7 @@ class _DeviceCardState extends State<DeviceCard> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) =>
-              new DataIO(domain: domain, node: name),
+              new DataIO(domain: domain, node: node),
           fullscreenDialog: true,
         ),
       );
@@ -262,7 +264,7 @@ class _DeviceCardState extends State<DeviceCard> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) =>
-              new Exec(domain: domain, node: name),
+              new Exec(domain: domain, node: node),
           fullscreenDialog: true,
         ),
       );

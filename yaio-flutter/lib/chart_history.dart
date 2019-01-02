@@ -6,28 +6,33 @@ import 'firebase_utils.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
 class ChartHistory extends StatefulWidget {
-  ChartHistory(this.name);
-
+  final String domain;
+  final String node;
   final String name;
 
+  ChartHistory({Key key, this.domain, this.node, this.name}) : super(key: key);
+
   @override
-  _ChartHistoryState createState() => new _ChartHistoryState(name);
+  _ChartHistoryState createState() =>
+      new _ChartHistoryState(domain, node, name);
 }
 
 class _ChartHistoryState extends State<ChartHistory> {
+  final String domain;
+  final String node;
+  final String name;
   List<LogEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
-  final String name;
   List<charts.Series<TimeSeries, DateTime>> seriesList =
       new List<charts.Series<TimeSeries, DateTime>>();
 
-  _ChartHistoryState(this.name) {
-    print('_ChartHistoryState: ${getLogRef()}/$name');
-    _entryRef =
-        FirebaseDatabase.instance.reference().child('${getLogRef()}/$name');
-    _onAddSubscription =
-        _entryRef.onValue.listen(_onEntryAdded);
+  _ChartHistoryState(this.domain, this.node, this.name) {
+    print('_ChartHistoryState: ${getLogRef()}/$domain/$name');
+    _entryRef = FirebaseDatabase.instance
+        .reference()
+        .child('${getLogRef()}/$domain/$name');
+    _onAddSubscription = _entryRef.onValue.listen(_onEntryAdded);
   }
 
   @override
@@ -77,7 +82,7 @@ class _ChartHistoryState extends State<ChartHistory> {
   void _onEntryAdded(Event event) {
     print('_onEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     List<TimeSeries> data = new List<TimeSeries>();
-    if (event.snapshot.key != null) {
+    if ((event.snapshot.key != null) && (event.snapshot.value != null)) {
       event.snapshot.value.forEach((k, v) {
         DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
         DateTime start = DateTime.now().subtract(Duration(days: 3));
@@ -87,7 +92,7 @@ class _ChartHistoryState extends State<ChartHistory> {
         } else {
           // remove the object
           print('remove $k');
-          //_entryRef.child(k).remove();
+          _entryRef.child(k).remove();
         }
       });
 

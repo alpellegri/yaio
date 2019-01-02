@@ -10,14 +10,14 @@ import 'ui_data_io.dart';
 
 class DeviceConfig extends StatefulWidget {
   final String domain;
-  final String name;
+  final String node;
   final dynamic value;
 
-  DeviceConfig({Key key, this.domain, this.name, this.value}) : super(key: key);
+  DeviceConfig({Key key, this.domain, this.node, this.value}) : super(key: key);
 
   @override
   _DeviceConfigState createState() =>
-      new _DeviceConfigState(this.domain, this.name, this.value);
+      new _DeviceConfigState(this.domain, this.node, this.value);
 }
 
 class _DeviceConfigState extends State<DeviceConfig> {
@@ -91,7 +91,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(widget.name),
+        title: new Text(node),
       ),
       body: new ListView(children: <Widget>[
         new Column(
@@ -225,137 +225,5 @@ class _DeviceConfigState extends State<DeviceConfig> {
     DateTime now = new DateTime.now();
     _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(_control);
-  }
-}
-
-class DeviceView extends StatefulWidget {
-  final String domain;
-  final String name;
-  final dynamic value;
-
-  DeviceView({Key key, this.domain, this.name, this.value}) : super(key: key);
-
-  @override
-  _DeviceViewState createState() =>
-      new _DeviceViewState(this.domain, this.name, this.value);
-}
-
-class _DeviceViewState extends State<DeviceView> {
-  final String domain;
-  final String name;
-  final dynamic value;
-  List<IoEntry> entryList = new List();
-  DatabaseReference _dataRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onChangedSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
-
-  _DeviceViewState(this.domain, this.name, this.value);
-
-  @override
-  void initState() {
-    super.initState();
-    _dataRef = FirebaseDatabase.instance
-        .reference()
-        .child(getUserRef())
-        .child('obj/data')
-        .child(domain);
-    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
-    _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
-    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _onAddSubscription.cancel();
-    _onChangedSubscription.cancel();
-    _onRemoveSubscription.cancel();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.name),
-      ),
-      body: new ListView.builder(
-        shrinkWrap: true,
-        itemCount: entryList.length,
-        itemBuilder: (buildContext, index) {
-          if (entryList[index].drawWr == true) {
-            return new InkWell(
-              onTap: () {
-                _openEntryDialog(entryList[index]);
-              },
-              child: new DataItemWidget(entryList[index]),
-            );
-          } else {
-            return new InkWell(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          new ChartHistory(entryList[index].key),
-                      fullscreenDialog: true,
-                    ));
-              },
-              child: new DataItemWidget(entryList[index]),
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  void _onEntryAdded(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
-    String owner = event.snapshot.value['owner'];
-    if ((owner == name) && (((drawWr == true) || (drawRd == true)))) {
-      setState(() {
-        IoEntry entry = new IoEntry.fromMap(
-            _dataRef, event.snapshot.key, event.snapshot.value);
-        entryList.add(entry);
-      });
-    }
-  }
-
-  void _onEntryChanged(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
-    String owner = event.snapshot.value['owner'];
-    if ((owner == name) && (((drawWr == true) || (drawRd == true)))) {
-      IoEntry oldValue =
-          entryList.singleWhere((el) => el.key == event.snapshot.key);
-      setState(() {
-        entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
-            _dataRef, event.snapshot.key, event.snapshot.value);
-      });
-    }
-  }
-
-  void _onEntryRemoved(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
-    String owner = event.snapshot.value['owner'];
-    if ((owner == name) && (((drawWr == true) || (drawRd == true)))) {
-      IoEntry oldValue =
-          entryList.singleWhere((el) => el.key == event.snapshot.key);
-      setState(() {
-        entryList.remove(oldValue);
-      });
-    }
-  }
-
-  void _openEntryDialog(IoEntry entry) {
-    showDialog<Null>(
-      context: context,
-      builder: (BuildContext context) {
-        return new DataIoShortDialogWidget(
-            domain: domain, node: name, data: entry);
-      },
-    );
   }
 }

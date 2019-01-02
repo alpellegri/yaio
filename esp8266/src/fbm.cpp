@@ -36,6 +36,7 @@ String FBM_getResetReason(void) { return ESP.getResetReason(); }
 bool FbmService(void) {
   bool ret = false;
 
+  // DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
   switch (boot_sm) {
   // firebase init
   case 0: {
@@ -51,8 +52,7 @@ bool FbmService(void) {
   // firebase control/status init
   case 1: {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-    String kstartup;
-    FbSetPath_startup(kstartup);
+    String kstartup = FbGetPath_startup();
     String json = Firebase.getJSON(kstartup);
     if (Firebase.failed()) {
       DEBUG_PRINT("get failed: kstartup\n");
@@ -102,8 +102,7 @@ bool FbmService(void) {
 
   case 21: {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-    String kcontrol;
-    FbSetPath_control(kcontrol);
+    String kcontrol = FbGetPath_control();
     Firebase.setInt((kcontrol + F("/reboot")), 0);
     if (Firebase.failed()) {
       DEBUG_PRINT("set failed: kcontrol/reboot\n");
@@ -123,8 +122,7 @@ bool FbmService(void) {
       DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
       fbm_update_last = time_now;
 
-      String kcontrol;
-      FbSetPath_control(kcontrol);
+      String kcontrol = FbGetPath_control();
       yield();
       control_time = Firebase.getInt(kcontrol + F("/time"));
       if (Firebase.failed() == true) {
@@ -151,8 +149,7 @@ bool FbmService(void) {
   // firebase monitoring
   case 32: {
     ret = true;
-    String kcontrol;
-    FbSetPath_control(kcontrol);
+    String kcontrol = FbGetPath_control();
     String json = Firebase.getJSON(kcontrol);
     if (Firebase.failed() == true) {
       DEBUG_PRINT("get failed: kcontrol\n");
@@ -185,8 +182,7 @@ bool FbmService(void) {
     status[F("heap")] = ESP.getFreeHeap();
     status[F("time")] = getTime();
     yield();
-    String kstatus;
-    FbSetPath_status(kstatus);
+    String kstatus = FbGetPath_status();
     Firebase.setJSON(kstatus, JsonVariant(status));
     if (Firebase.failed()) {
       DEBUG_PRINT("set failed: kstatus\n");

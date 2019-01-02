@@ -45,7 +45,7 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.enRead = obj[F("drawRd")].as<bool>();
     // TODO: can be done a setup here
     entry.ev = false;
-    entry.ev_value = 0;
+    entry.ev_value = F("");
     entry.ev_tmstamp = 0;
     entry.ev_tmstamp_log = 0;
     entry.wb = false;
@@ -156,7 +156,7 @@ void FB_dumpIoEntry(void) {
         "%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, cb=%s\n",
         i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
         IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl, IoEntryVec[i].ev,
-        IoEntryVec[i].ev_value, IoEntryVec[i].cb.c_str());
+        IoEntryVec[i].ev_value.c_str(), IoEntryVec[i].cb.c_str());
   }
 }
 

@@ -11,7 +11,7 @@
 #define USE_HTTP_REUSE
 
 typedef enum {
-  METHOD_GET,
+  METHOD_GET = 0,
   METHOD_SET,
   METHOD_PUSH,
   METHOD_UPDATE,
@@ -49,13 +49,13 @@ public:
   void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
 
 private:
-  std::string restReqApi(RestMethod_t method, const std::string path,
-                         const std::string value);
-  void restStreamApi(const std::string path);
+  String restReqApi(RestMethod_t method, const String path,
+                         const String value);
+  void restStreamApi(const String path);
 
-  std::string host_;
-  std::string auth_;
-  std::string result_;
+  String host_;
+  String auth_;
+  String result_;
   int httpCode_;
 #ifdef USE_HTTP_REUSE
   HTTPClient http_req;

@@ -8,7 +8,7 @@ extern String EE_GetSSID();
 extern String EE_GetPassword();
 extern String EE_GetUID();
 extern String EE_GetDomain();
-extern String EE_GetNodeName();
+extern String EE_GetNode();
 extern String EE_GetFirebaseUrl();
 extern String EE_GetFirebaseSecret();
 extern String EE_GetFirebaseServerKey();

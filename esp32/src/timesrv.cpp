@@ -38,6 +38,7 @@ bool TimeService(void) {
       DEBUG_PRINT("UTC time: %d\n", current);
     }
   } else {
+#if 0
     uint32_t curr = millis();
     if ((curr - last) > 5000) {
       last = curr;
@@ -51,6 +52,7 @@ bool TimeService(void) {
       udp.write(preamble, sizeof(preamble));
       udp.endPacket();
     }
+#endif
   }
   return time_init;
 }

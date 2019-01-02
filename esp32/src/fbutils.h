@@ -45,7 +45,7 @@ public:
   /* event notification flag */
   bool ev;
   /* event value */
-  uint32_t ev_value;
+  String ev_value;
   /* event timestamp */
   uint32_t ev_tmstamp;
   /* event timestamp */

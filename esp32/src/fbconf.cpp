@@ -22,92 +22,107 @@ static const char _kdata[] PROGMEM = "data";
 static const char _kmessages[] PROGMEM = "messages";
 static const char _klogs[] PROGMEM = "logs";
 
-void FbSetPath_fcmtoken(String &path) {
+String FbGetPath_fcmtoken(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   path = prefix_user + String(FPSTR(_kfcmtoken));
+  return path;
 }
 
-void FbSetPath_startup(String &path) {
+String FbGetPath_startup(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_node =
       prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
   path = prefix_node + String(FPSTR(_kstartup));
+  return path;
 }
 
-void FbSetPath_control(String &path) {
+String FbGetPath_control(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_node =
       prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
   path = prefix_node + String(FPSTR(_kcontrol));
+  return path;
 }
 
-void FbSetPath_status(String &path) {
+String FbGetPath_status(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String nodesubpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_node =
       prefix_user + String(F("root/")) + nodesubpath + String(F("/"));
   path = prefix_node + String(FPSTR(_kstatus));
+  return path;
 }
 
-void FbSetPath_exec(String &path) {
+String FbGetPath_exec(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
-  String subpath = EE_GetDomain() + String(F("/")) + EE_GetNodeName();
+  String subpath = EE_GetDomain() + String(F("/")) + EE_GetNode();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_kexec)) + String(F("/")) + subpath;
+  return path;
 }
 
-void FbSetPath_data(String &path) {
+String FbGetPath_data(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_kdata)) + String(F("/")) + subpath;
+  return path;
 }
 
-void FbSetPath_message(String &path) {
+String FbGetPath_message(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
-  path = prefix_data + String(FPSTR(_kmessages)) + String(F("/")) + subpath;
+  path = prefix_data + String(FPSTR(_kmessages));
+  return path;
 }
 
-void FbSetPath_log(String &path) {
+String FbGetPath_log(void) {
+  String path;
   String prefix_user = String(F("users/")) + EE_GetUID() + String(F("/"));
   String subpath = EE_GetDomain();
   String prefix_data = prefix_user + String(F("obj/"));
   path = prefix_data + String(FPSTR(_klogs)) + String(F("/")) + subpath;
+  return path;
 }
 
 void dump_path(void) {
   String path;
-  FbSetPath_fcmtoken(path);
+  path = FbGetPath_fcmtoken();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_startup(path);
+  path = FbGetPath_startup();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_control(path);
+  path = FbGetPath_control();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_status(path);
+  path = FbGetPath_status();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_exec(path);
+  path = FbGetPath_exec();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_data(path);
+  path = FbGetPath_data();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_message(path);
+  path = FbGetPath_message();
   DEBUG_PRINT("%s\n", path.c_str());
-  FbSetPath_log(path);
+  path = FbGetPath_log();
   DEBUG_PRINT("%s\n", path.c_str());
 }
 
 bool FbGetDB(void) {
   bool ret = true;
 
-  String owner = EE_GetNodeName();
+  String owner = EE_GetNode();
   String path;
 
   if (ret == true) {
-    String kfcmtoken;
-    FbSetPath_fcmtoken(kfcmtoken);
+    String kfcmtoken = FbGetPath_fcmtoken();
     DEBUG_PRINT("token path: %s\n", kfcmtoken.c_str());
     String json = Firebase.getJSON(kfcmtoken);
     if (Firebase.failed() == true) {
@@ -127,8 +142,7 @@ bool FbGetDB(void) {
   }
 
   if (ret == true) {
-    String kexec;
-    FbSetPath_exec(kexec);
+    String kexec = FbGetPath_exec();
     DEBUG_PRINT("exex path: %s\n", kexec.c_str());
     String json = Firebase.getJSON(kexec);
     if (Firebase.failed() == true) {
@@ -147,8 +161,7 @@ bool FbGetDB(void) {
   }
 
   if (ret == true) {
-    String kdata;
-    FbSetPath_data(kdata);
+    String kdata = FbGetPath_data();
     DEBUG_PRINT("data path: %s\n", kdata.c_str());
     String json = Firebase.getJSON(kdata);
     if (Firebase.failed() == true) {
