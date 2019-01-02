@@ -2,7 +2,7 @@
 #define FBUTILS_H
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
+#include <cJSON.h>
 #include <string>
 #include <vector>
 
@@ -75,12 +75,12 @@ extern std::vector<String> &FB_getRegIDs();
 extern void FB_deinitIoEntryDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);
 extern uint8_t FB_getIoEntryLen(void);
-extern void FB_addIoEntryDB(String key, JsonObject &obj);
+extern void FB_addIoEntryDB(String key, cJSON *obj);
 extern String &FB_getIoEntryNameById(uint8_t i);
 extern uint8_t FB_getIoEntryIdx(const char *key);
 
 extern void FB_deinitProgDB(void);
-extern void FB_addProgDB(String key, JsonObject &obj);
+extern void FB_addProgDB(String key, cJSON *obj);
 extern uint8_t FB_getProgIdx(const char *key);
 extern ProgEntry &FB_getProg(uint8_t i);
 extern uint8_t FB_getFunctionIdx(const char *key);

@@ -33,25 +33,79 @@ IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
 
 uint8_t FB_getIoEntryLen(void) { return IoEntryVec.size(); }
 
-void FB_addIoEntryDB(String key, JsonObject &obj) {
+void FB_addIoEntryDB(String key, cJSON *obj) {
   if (IoEntryVec.size() < NUM_IO_ENTRY_MAX) {
+    cJSON *data;
     IoEntry entry;
     entry.key = key;
-    entry.code = obj[F("code")].as<uint8_t>();
-    entry.value = obj[F("value")].as<String>();
-    entry.ioctl = obj[F("ioctl")].as<uint32_t>();
-    entry.enLog = obj[F("enLog")].as<bool>();
-    entry.enWrite = obj[F("drawWr")].as<bool>();
-    entry.enRead = obj[F("drawRd")].as<bool>();
+    DEBUG_PRINT("FB_addIoEntryDB: key=%s\n", entry.key.c_str());
+    data = cJSON_GetObjectItemCaseSensitive(obj, FPSTR("code"));
+    entry.code = data->valueint;
+    // entry.value = data->valuestring;
+    data = cJSON_GetObjectItemCaseSensitive(obj, FPSTR("ioctl"));
+    entry.ioctl = data->valueint;
+    data = cJSON_GetObjectItem(obj, FPSTR("enLog"));
+    if (data != NULL) {
+      if (cJSON_IsTrue(data) == 1) {
+        entry.enLog = true;
+      } else if (cJSON_IsFalse(data) == 1) {
+        entry.enLog = false;
+      } else {
+        DEBUG_PRINT("FB_addIoEntryDB: bool error\n");
+      }
+    } else {
+      entry.enLog = false;
+    }
+    data = cJSON_GetObjectItem(obj, FPSTR("drawWr"));
+    if (data != NULL) {
+      if (cJSON_IsTrue(data) == 1) {
+        entry.enWrite = true;
+      } else if (cJSON_IsFalse(data) == 1) {
+        entry.enWrite = false;
+      } else {
+        DEBUG_PRINT("FB_addIoEntryDB: bool error\n");
+      }
+    } else {
+      entry.enWrite = false;
+    }
+    data = cJSON_GetObjectItem(obj, FPSTR("drawRd"));
+    if (data != NULL) {
+      if (cJSON_IsTrue(data) == 1) {
+        entry.enRead = true;
+      } else if (cJSON_IsFalse(data) == 1) {
+        entry.enRead = false;
+      } else {
+        DEBUG_PRINT("FB_addIoEntryDB: bool error\n");
+      }
+    } else {
+      entry.enRead = false;
+    }
+    data = cJSON_GetObjectItemCaseSensitive(obj, FPSTR("cb"));
+    if (data != NULL) {
+      entry.cb = data->valuestring;
+    } else {
+      entry.cb = F("");
+    }
     // TODO: can be done a setup here
     entry.ev = false;
     entry.ev_value = F("");
     entry.ev_tmstamp = 0;
     entry.ev_tmstamp_log = 0;
     entry.wb = false;
-    entry.cb = obj[F("cb")].as<String>();
 
     // post process data value for some case
+    data = cJSON_GetObjectItemCaseSensitive(obj, FPSTR("value"));
+    if (cJSON_IsString(data)) {
+      entry.value = data->valuestring;
+    } else if (cJSON_IsNumber(data)) {
+      entry.value = data->valueint;
+    } else if (cJSON_IsTrue(data)) {
+      entry.value = F("1");
+    } else if (cJSON_IsFalse(data)) {
+      entry.value = F("0");
+    } else {
+      DEBUG_PRINT("FB_addIoEntryDB: value error\n");
+    }
     switch (entry.code) {
     case kPhyDIn:
     case kPhyAIn: {
@@ -65,6 +119,12 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     } break;
     case kDhtTemperature:
     case kDhtHumidity: {
+      /* override with float */
+      if (cJSON_IsNumber(data)) {
+        entry.value = data->valuedouble;
+      } else {
+        DEBUG_PRINT("FB_addIoEntryDB: value error\n");
+      }
       PHT_Set(entry.ioctl);
     } break;
     case kRadioRx: {
@@ -73,14 +133,12 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     case kRadioTx: {
       RF_SetTxPin(entry.ioctl);
     } break;
-    case kBool: {
-      if (entry.value == F("false")) {
-        entry.value = F("0");
-      } else if (entry.value == F("true")) {
-        entry.value = F("1");
+    case kFloat: {
+      /* override with float */
+      if (cJSON_IsNumber(data)) {
+        entry.value = data->valuedouble;
       } else {
-        DEBUG_PRINT("kBool error\n");
-        entry.value = F("0");
+        DEBUG_PRINT("FB_addIoEntryDB: value error\n");
       }
     } break;
     default:
@@ -117,18 +175,19 @@ ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
 
 uint8_t FB_getProgLen(void) { return ProgVec.size(); }
 
-void FB_addProgDB(String key, JsonObject &obj) {
+void FB_addProgDB(String key, cJSON *obj) {
   ProgEntry entry;
   entry.key = key;
   DEBUG_PRINT("FB_addProgDB: key=%s\n", entry.key.c_str());
-
-  JsonArray &nest = obj[F("p")].as<JsonArray>();
-  for (uint32_t i = 0; i < nest.size(); ++i) {
+  cJSON *array = cJSON_GetObjectItemCaseSensitive(obj, FPSTR("p"));
+  int i;
+  for (i = 0; i < cJSON_GetArraySize(array); i++) {
+    cJSON *item = cJSON_GetArrayItem(array, i);
+    // handle subitem
     FuncEntry fentry;
-    fentry.code = nest[i][F("i")].as<int>();
-    if (nest[i][F("v")].as<String>()) {
-      fentry.value = nest[i][F("v")].as<String>();
-    }
+    fentry.code = cJSON_GetObjectItemCaseSensitive(item, FPSTR("i"))->valueint;
+    fentry.value =
+        cJSON_GetObjectItemCaseSensitive(item, FPSTR("v"))->valuestring;
     entry.funcvec.push_back(fentry);
   }
   ProgVec.push_back(entry);
@@ -153,7 +212,7 @@ void FB_dumpIoEntry(void) {
   DEBUG_PRINT("FB_dumpIoEntry\n");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
     DEBUG_PRINT(
-        "%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, cb=%s\n",
+        "%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%s, cb=%s\n",
         i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
         IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl, IoEntryVec[i].ev,
         IoEntryVec[i].ev_value.c_str(), IoEntryVec[i].cb.c_str());

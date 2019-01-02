@@ -1,6 +1,5 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
-
+#include <cJSON.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -119,7 +118,6 @@ bool FbGetDB(void) {
   bool ret = true;
 
   String owner = EE_GetNode();
-  String path;
 
   if (ret == true) {
     String kfcmtoken = FbGetPath_fcmtoken();
@@ -131,13 +129,16 @@ bool FbGetDB(void) {
       ret = false;
     } else {
       FB_deinitRegIDsDB();
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        String id = i->value.as<String>();
-        FB_addRegIDsDB(id);
+      cJSON *tokens = cJSON_Parse(json.c_str());
+      cJSON *item = NULL;
+      cJSON_ArrayForEach(item, tokens) {
+        char *key = item->string;
+        char *value = item->valuestring;
+        if ((key != NULL) && (value != NULL)) {
+          FB_addRegIDsDB(value);
+        }
       }
+      cJSON_Delete(tokens);
     }
   }
 
@@ -151,11 +152,15 @@ bool FbGetDB(void) {
       ret = false;
     } else {
       FB_deinitProgDB();
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        FB_addProgDB(i->key, i->value);
+      cJSON *exec = cJSON_Parse(json.c_str());
+      cJSON *item = NULL;
+      cJSON_ArrayForEach(item, exec) {
+        char *key = item->string;
+        if (key != NULL) {
+          cJSON *value = cJSON_GetObjectItemCaseSensitive(exec, key);
+          DEBUG_PRINT("exec item: %s\n", item->string);
+          FB_addProgDB(key, value);
+        }
       }
     }
   }
@@ -171,15 +176,21 @@ bool FbGetDB(void) {
     } else {
       PHT_Deinit();
       FB_deinitIoEntryDB();
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        JsonObject &nestedObject = i->value;
-        if (nestedObject[F("owner")] == owner) {
-          FB_addIoEntryDB(i->key, i->value);
+      cJSON *data = cJSON_Parse(json.c_str());
+      cJSON *item = NULL;
+      cJSON_ArrayForEach(item, data) {
+        char *key = item->string;
+        if (key != NULL) {
+          cJSON *value = cJSON_GetObjectItemCaseSensitive(data, key);
+          cJSON *_owner =
+              cJSON_GetObjectItemCaseSensitive(item, FPSTR("owner"));
+          if (strcmp(_owner->valuestring, owner.c_str()) == 0) {
+            DEBUG_PRINT("data item: %s\n", item->string);
+            FB_addIoEntryDB(key, value);
+          }
         }
       }
+      cJSON_Delete(data);
     }
   }
 

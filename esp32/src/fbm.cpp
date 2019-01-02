@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <WiFiUDP.h>
+#include <cJSON.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +21,6 @@
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
-static uint16_t bootcnt = 0;
 
 String verbose_print_reset_reason(RESET_REASON reason) {
   String result;
@@ -113,17 +112,27 @@ bool FbmService(void) {
       DEBUG_PRINT("get failed: kstartup\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      if (object.success()) {
-        bootcnt = object[F("bootcnt")];
-        object[F("bootcnt")] = ++bootcnt;
-        object[F("time")] = getTime();
-        object[F("version")] = VERS_getVersion();
+      cJSON *object = cJSON_Parse(json.c_str());
+      if (object != NULL) {
+        cJSON *data;
+        cJSON *newdata;
+        data = cJSON_GetObjectItemCaseSensitive(object, FPSTR("bootcnt"));
+        newdata = cJSON_CreateNumber(data->valueint + 1);
+        cJSON_ReplaceItemInObjectCaseSensitive(object, FPSTR("bootcnt"),
+                                               newdata);
+        data = cJSON_GetObjectItemCaseSensitive(object, FPSTR("time"));
+        newdata = cJSON_CreateNumber(getTime());
+        cJSON_ReplaceItemInObjectCaseSensitive(object, FPSTR("time"), newdata);
+        data = cJSON_GetObjectItemCaseSensitive(object, FPSTR("version"));
+        newdata = cJSON_CreateString((char *)VERS_getVersion().c_str());
+        cJSON_ReplaceItemInObjectCaseSensitive(object, FPSTR("version"),
+                                               newdata);
+        char *string = cJSON_Print(object);
         yield();
-        Firebase.updateJSON(kstartup, JsonVariant(object));
+        Firebase.updateJSON(kstartup, String(string));
+        free(string);
+        cJSON_Delete(object);
         if (Firebase.failed()) {
-          bootcnt--;
           DEBUG_PRINT("update failed: kstartup\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
@@ -192,11 +201,11 @@ bool FbmService(void) {
           DEBUG_PRINT("get failed: kcontrol\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &object = jsonBuffer.parseObject(json);
-          if (object.success()) {
-
-            int control_reboot = object[F("reboot")];
+          cJSON *control = cJSON_Parse(json.c_str());
+          if (control != NULL) {
+            cJSON *data =
+                cJSON_GetObjectItemCaseSensitive(control, FPSTR("reboot"));
+            int control_reboot = data->valueint;
             if (control_reboot == 1) {
               ESP.restart();
             } else if (control_reboot == 2) {
@@ -209,12 +218,15 @@ bool FbmService(void) {
           } else {
             DEBUG_PRINT("parseObject() failed\n");
           }
+          cJSON_Delete(control);
         }
 #if 1
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &status = jsonBuffer.createObject();
-        status[F("heap")] = ESP.getFreeHeap();
-        status[F("time")] = getTime();
+        cJSON *status = cJSON_CreateObject();
+        cJSON *data;
+        data = cJSON_CreateNumber(ESP.getFreeHeap());
+        cJSON_AddItemToObject(status, FPSTR("heap"), data);
+        data = cJSON_CreateNumber(getTime());
+        cJSON_AddItemToObject(status, FPSTR("time"), data);
         struct tm timeinfo;
         time_t now = time(nullptr);
         gmtime_r(&now, &timeinfo);
@@ -225,7 +237,10 @@ bool FbmService(void) {
 
         yield();
         String kstatus = FbGetPath_status();
-        Firebase.setJSON(kstatus, JsonVariant(status));
+        char *string = cJSON_Print(status);
+        Firebase.setJSON(kstatus, String(string));
+        free(string);
+        cJSON_Delete(status);
         if (Firebase.failed()) {
           DEBUG_PRINT("set failed: kstatus\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());

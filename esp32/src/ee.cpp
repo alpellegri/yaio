@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <EEPROM.h>
+#include <cJSON.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -75,20 +75,24 @@ bool EE_LoadData(void) {
   }
   DEBUG_PRINT("\n");
 
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(data);
+  cJSON *root = cJSON_Parse(data);
 
   // Test if parsing succeeds.
-  if (root.success() == 1) {
-    const char *ssid = root[FPSTR("ssid")];
+  if (root != NULL) {
+    const char *ssid =
+        cJSON_GetObjectItemCaseSensitive(root, FPSTR("ssid"))->valuestring;
     DEBUG_PRINT("ssid: %s\n", ssid);
-    const char *password = root[FPSTR("password")];
+    const char *password =
+        cJSON_GetObjectItemCaseSensitive(root, FPSTR("password"))->valuestring;
     DEBUG_PRINT("password: %s\n", password);
-    const char *uid = root[FPSTR("uid")];
+    const char *uid =
+        cJSON_GetObjectItemCaseSensitive(root, FPSTR("uid"))->valuestring;
     DEBUG_PRINT("uid: %s\n", uid);
-    const char *domain = root[FPSTR("domain")];
+    const char *domain =
+        cJSON_GetObjectItemCaseSensitive(root, FPSTR("domain"))->valuestring;
     DEBUG_PRINT("domain: %s\n", domain);
-    const char *nodename = root[FPSTR("nodename")];
+    const char *nodename =
+        cJSON_GetObjectItemCaseSensitive(root, FPSTR("nodename"))->valuestring;
     DEBUG_PRINT("nodename: %s\n", nodename);
     if ((ssid != NULL) && (password != NULL) && (uid != NULL) &&
         (domain != NULL) && (nodename != NULL)) {
@@ -105,6 +109,8 @@ bool EE_LoadData(void) {
   } else {
     DEBUG_PRINT("parseObject() failed\n");
   }
+
+  cJSON_Delete(root);
 
   return ret;
 }

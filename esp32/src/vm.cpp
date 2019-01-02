@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <cJSON.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -173,15 +174,18 @@ void VM_writeOutNet(void) {
                         entry.key.c_str());
           } else {
             if ((entry.enLog == true) && (entry.wblog == true)) {
-              DynamicJsonBuffer jsonBuffer;
-              JsonObject &json = jsonBuffer.createObject();
-              json[F("t")] = getTime();
-              json[F("v")] = v;
-              String strdata;
-              json.printTo(strdata);
+              cJSON *log = cJSON_CreateObject();
+              cJSON *data;
+              data = cJSON_CreateNumber(getTime());
+              cJSON_AddItemToObject(log, FPSTR("t"), data);
+              data = cJSON_CreateNumber(v);
+              cJSON_AddItemToObject(log, FPSTR("v"), data);
+              char *string = cJSON_Print(log);
               String klog = FbGetPath_log();
-              DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(), v);
-              Firebase.pushJSON(klog + F("/") + entry.key, strdata);
+              DEBUG_PRINT("VM_writeOutNet-log: %s: %d\n", entry.key.c_str(), v);
+              Firebase.pushJSON(klog + F("/") + entry.key, string);
+              free(string);
+              cJSON_Delete(log);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                             entry.key.c_str());
@@ -207,15 +211,18 @@ void VM_writeOutNet(void) {
                         entry.key.c_str());
           } else {
             if ((entry.enLog == true) && (entry.wblog == true)) {
-              DynamicJsonBuffer jsonBuffer;
-              JsonObject &json = jsonBuffer.createObject();
-              json[F("t")] = getTime();
-              json[F("v")] = v;
-              String strdata;
-              json.printTo(strdata);
+              cJSON *log = cJSON_CreateObject();
+              cJSON *data;
+              data = cJSON_CreateNumber(getTime());
+              cJSON_AddItemToObject(log, FPSTR("t"), data);
+              data = cJSON_CreateNumber(v);
+              cJSON_AddItemToObject(log, FPSTR("v"), data);
+              char *string = cJSON_Print(log);
               String klog = FbGetPath_log();
               DEBUG_PRINT("VM_writeOutNet-log: %s: %f\n", entry.key.c_str(), v);
-              Firebase.pushJSON(klog + F("/") + entry.key, strdata);
+              Firebase.pushJSON(klog + F("/") + entry.key, string);
+              free(string);
+              cJSON_Delete(log);
               if (Firebase.failed() == true) {
                 DEBUG_PRINT("Firebase push failed: VM_writeOut %s\n",
                             entry.key.c_str());
