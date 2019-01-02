@@ -162,6 +162,7 @@ bool FbGetDB(void) {
           FB_addProgDB(key, value);
         }
       }
+      cJSON_Delete(exec);
     }
   }
 
