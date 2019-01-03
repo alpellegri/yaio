@@ -92,7 +92,7 @@ class _ChartHistoryState extends State<ChartHistory> {
         } else {
           // remove the object
           print('remove $k');
-          // _entryRef.child(k).remove();
+          _entryRef.child(k).remove();
         }
       });
 
