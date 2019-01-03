@@ -92,20 +92,21 @@ class _ChartHistoryState extends State<ChartHistory> {
         } else {
           // remove the object
           print('remove $k');
-          _entryRef.child(k).remove();
+          // _entryRef.child(k).remove();
         }
       });
 
-      charts.Series<TimeSeries, DateTime> Serie =
+      charts.Series<TimeSeries, DateTime> serie =
           new charts.Series<TimeSeries, DateTime>(
-        id: 'Sales',
+        id: 'Data',
         colorFn: (_, __) => charts.MaterialPalette.indigo.shadeDefault,
-        domainFn: (TimeSeries sales, _) => sales.time,
-        measureFn: (TimeSeries sales, _) => sales.value,
+        domainFn: (TimeSeries values, _) => values.time,
+        measureFn: (TimeSeries values, _) => values.value,
         data: data,
       );
       setState(() {
-        seriesList.add(Serie);
+        seriesList.clear();
+        seriesList.add(serie);
       });
     }
   }
