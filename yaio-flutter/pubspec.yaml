@@ -1,5 +1,6 @@
 name: yaio
 description: A new Flutter project.
+version: 0.0.1+1
 
 dependencies:
   flutter:
@@ -11,6 +12,7 @@ dependencies:
   firebase_messaging:
   shared_preferences:
   charts_flutter:
+  package_info:
 
 dev_dependencies:
   flutter_test:

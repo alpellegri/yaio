@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'device.dart';
 import 'log_history.dart';
+import 'version.dart';
 import 'firebase_utils.dart';
 
 final MyDrawer drawer = new MyDrawer();
@@ -8,6 +9,8 @@ final MyDrawer drawer = new MyDrawer();
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Device.routeName: (BuildContext context) => new Device(title: 'Device'),
   Messages.routeName: (BuildContext context) => new Messages(title: 'Messages'),
+  VersionInfo.routeName: (BuildContext context) =>
+      new VersionInfo(title: 'Version'),
 };
 
 class MyDrawer extends StatefulWidget {
@@ -42,6 +45,13 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pop(context);
               Navigator.of(context).pushNamed(Messages.routeName);
+            }),
+        new ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Version'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamed(VersionInfo.routeName);
             }),
       ]),
     );
