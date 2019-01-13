@@ -15,7 +15,7 @@ static std::vector<String> RegIDs;
 static std::vector<IoEntry> IoEntryVec;
 static std::vector<ProgEntry> ProgVec;
 
-void FB_deinitRegIDsDB(void) { RegIDs.erase(RegIDs.begin(), RegIDs.end()); }
+void FB_deinitRegIDsDB(void) { RegIDs.clear(); }
 
 void FB_addRegIDsDB(String string) {
   if (RegIDs.size() < NUM_REGIDS_MAX) {
@@ -25,9 +25,7 @@ void FB_addRegIDsDB(String string) {
 
 std::vector<String> &FB_getRegIDs() { return RegIDs; }
 
-void FB_deinitIoEntryDB(void) {
-  IoEntryVec.erase(IoEntryVec.begin(), IoEntryVec.end());
-}
+void FB_deinitIoEntryDB(void) { IoEntryVec.clear(); }
 
 IoEntry &FB_getIoEntry(uint8_t i) { return IoEntryVec[i]; }
 
@@ -95,12 +93,12 @@ String &FB_getIoEntryNameById(uint8_t i) {
   return entry.key;
 }
 
-uint8_t FB_getIoEntryIdx(const char *key) {
+int16_t FB_getIoEntryIdx(const char *key) {
   uint8_t i = 0;
-  uint8_t idx = 0xFF;
+  int16_t idx = -1;
   uint8_t res;
 
-  while ((i < IoEntryVec.size()) && (idx == 0xFF)) {
+  while ((i < IoEntryVec.size()) && (idx == -1)) {
     res = strcmp(IoEntryVec[i].key.c_str(), key);
     if (res == 0) {
       idx = i;
@@ -111,7 +109,7 @@ uint8_t FB_getIoEntryIdx(const char *key) {
   return idx;
 }
 
-void FB_deinitProgDB(void) { ProgVec.erase(ProgVec.begin(), ProgVec.end()); }
+void FB_deinitProgDB(void) { ProgVec.clear(); }
 
 ProgEntry &FB_getProg(uint8_t i) { return ProgVec[i]; }
 
@@ -134,12 +132,12 @@ void FB_addProgDB(String key, JsonObject &obj) {
   ProgVec.push_back(entry);
 }
 
-uint8_t FB_getProgIdx(const char *key) {
+int16_t FB_getProgIdx(const char *key) {
   uint8_t i = 0;
-  uint8_t idx = 0xFF;
+  int16_t idx = -1;
   uint8_t res;
 
-  while ((i < ProgVec.size()) && (idx == 0xFF)) {
+  while ((i < ProgVec.size()) && (idx == -1)) {
     res = strcmp(ProgVec[i].key.c_str(), key);
     if (res == 0) {
       idx = i;

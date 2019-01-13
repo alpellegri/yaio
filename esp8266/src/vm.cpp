@@ -280,7 +280,7 @@ void VM_run(void) {
         /* keep the event name */
         ctx.ev_name = entry.key.c_str();
 
-        uint8_t id_prog = FB_getProgIdx(cbkey.c_str());
+        int16_t id_prog = FB_getProgIdx(cbkey.c_str());
         ProgEntry &prog = FB_getProg(id_prog);
         std::vector<FuncEntry> &funcvec = prog.funcvec;
 

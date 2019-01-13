@@ -21,7 +21,7 @@ void vm_readi(vm_context_t &ctx, const char *value) {
 
 void vm_read(vm_context_t &ctx, const char *key_value) {
   // DEBUG_PRINT("vm_read value=%s\n", key_value);
-  uint8_t id = FB_getIoEntryIdx(key_value);
+  int16_t id = FB_getIoEntryIdx(key_value);
   IoEntry &entry = FB_getIoEntry(id);
   uint32_t v = atoi(entry.value.c_str());
   ctx.V = v;
@@ -115,7 +115,7 @@ uint8_t vm_exec_halt(uint8_t pc, vm_context_t &ctx, const char *key_value) {
 
 void vm_write(vm_context_t &ctx, const char *key_value) {
   // DEBUG_PRINT("vm_write value=%s\n", key_value);
-  uint8_t id = FB_getIoEntryIdx(key_value);
+  int16_t id = FB_getIoEntryIdx(key_value);
   IoEntry &entry = FB_getIoEntry(id);
   if (entry.code == kMessaging) {
     //

@@ -7,7 +7,6 @@
 #include "timesrv.h"
 
 static bool time_init = false;
-static uint32_t last;
 
 uint8_t getWeekDay(void) {
   time_t now = time(nullptr);
