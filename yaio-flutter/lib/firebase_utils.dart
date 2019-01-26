@@ -36,10 +36,11 @@ FirebaseUser getFirebaseUser() {
 Future<FirebaseUser> signInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-  final FirebaseUser user = await _auth.signInWithGoogle(
+  final AuthCredential credential = GoogleAuthProvider.getCredential(
     accessToken: googleAuth.accessToken,
     idToken: googleAuth.idToken,
   );
+  final FirebaseUser user = await _auth.signInWithCredential(credential);
   assert(user.email != null);
   assert(user.displayName != null);
   assert(!user.isAnonymous);
@@ -47,7 +48,7 @@ Future<FirebaseUser> signInWithGoogle() async {
 
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
-  print(user);
+
   _user = user;
   return user;
 }
