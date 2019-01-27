@@ -21,7 +21,7 @@
 
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
-static uint16_t bootcnt = 0;
+static uint32_t stream_time = 0;
 
 String verbose_print_reset_reason(RESET_REASON reason) {
   String result;
@@ -116,14 +116,13 @@ bool FbmService(void) {
       DynamicJsonBuffer jsonBuffer;
       JsonObject &object = jsonBuffer.parseObject(json);
       if (object.success()) {
-        bootcnt = object[F("bootcnt")];
-        object[F("bootcnt")] = ++bootcnt;
+        uint32_t bootcnt = object[F("bootcnt")];
+        object[F("bootcnt")] = bootcnt + 1;
         object[F("time")] = getTime();
         object[F("version")] = VERS_getVersion();
         yield();
         Firebase.updateJSON(kstartup, JsonVariant(object));
         if (Firebase.failed()) {
-          bootcnt--;
           DEBUG_PRINT("update failed: kstartup\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
@@ -172,14 +171,47 @@ bool FbmService(void) {
     String kcontrol = FbGetPath_control();
     Firebase.stream(kcontrol + F("/time"));
     boot_sm = 31;
+    stream_time = millis();
     ret = true;
   } break;
   case 31: {
     String response;
     int code = Firebase.readEvent(response);
+    uint32_t current_time = millis();
     if (code == -1) {
       boot_sm = 3;
-    } else if (code > 0) {
+    } else if (code == 0) {
+      if ((current_time - stream_time) > (60 * 1000)) {
+        DEBUG_PRINT("delta fail %d\n", (current_time - stream_time));
+#if 0
+        String kstartup = FbGetPath_startup();
+        String json = Firebase.getJSON(kstartup);
+        if (Firebase.failed()) {
+          DEBUG_PRINT("get failed: kstartup\n");
+          DEBUG_PRINT("%s\n", Firebase.error().c_str());
+        } else {
+          DynamicJsonBuffer jsonBuffer;
+          JsonObject &object = jsonBuffer.parseObject(json);
+          if (object.success()) {
+            uint32_t streamcnt = object[F("streamcnt")];
+            object[F("streamcnt")] = streamcnt + 1;
+            yield();
+            Firebase.updateJSON(kstartup, JsonVariant(object));
+            if (Firebase.failed()) {
+              DEBUG_PRINT("update failed: kstartup\n");
+              DEBUG_PRINT("%s\n", Firebase.error().c_str());
+            } else {
+              boot_sm = 3;
+            }
+          } else {
+          }
+        }
+#else
+        boot_sm = 3;
+#endif
+      }
+    } else {
+      stream_time = current_time;
       DEBUG_PRINT("response: _%s_\n", response.c_str());
 #if 1
       String line = response.substring(7, response.indexOf('\n'));
