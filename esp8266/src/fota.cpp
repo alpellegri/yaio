@@ -15,9 +15,6 @@
 static const char storage_host[] PROGMEM = "firebasestorage.googleapis.com";
 static const int httpsPort = 443;
 
-static const char storage_fingerprint[] PROGMEM =
-    "C2:95:F5:7C:8F:23:0A:10:30:86:66:80:7E:83:80:48:E5:B0:06:FF";
-
 static const char file_name[] PROGMEM = "firmware.bin";
 static const char md5file_name[] PROGMEM = "firmware.md5";
 
@@ -69,7 +66,6 @@ bool FOTAService(void) {
 
   switch (state) {
   case FOTA_Sm_IDLE:
-    DEBUG_PRINT("heap1 -- %d\n", ESP.getFreeHeap());
     break;
 
   case FOTA_Sm_GET_MD5: {
@@ -82,7 +78,6 @@ bool FOTAService(void) {
     http->setReuse(true);
     http->setTimeout(3000);
     bool res = http->begin(client, addr);
-    DEBUG_PRINT("heap2 -- %d\n", ESP.getFreeHeap());
     if (res == true) {
       int httpCode = http->GET();
       // httpCode will be negative on error
@@ -115,7 +110,6 @@ bool FOTAService(void) {
       DEBUG_PRINT("[HTTP] begin... failed, error: %d\n", res);
       state = FOTA_Sm_ERROR;
     }
-    DEBUG_PRINT("heap3 -- %d\n", ESP.getFreeHeap());
   } break;
 
   case FOTA_Sm_CHECK: {
@@ -144,7 +138,6 @@ bool FOTAService(void) {
         } else {
           state = FOTA_Sm_ERROR;
         }
-        DEBUG_PRINT("heap4 -- %d\n", ESP.getFreeHeap());
       } else {
         DEBUG_PRINT("file httpCode error: %d\n", httpCode);
         state = FOTA_Sm_ERROR;
@@ -152,8 +145,6 @@ bool FOTAService(void) {
     } else {
       state = FOTA_Sm_ERROR;
     }
-    DEBUG_PRINT("heap5 -- %d\n", ESP.getFreeHeap());
-
   } break;
 
   case FOTA_Sm_GET_BLOCK: {

@@ -4,7 +4,6 @@
 
 #include <MD5Builder.h>
 #include <Update.h>
-#include <WiFi.h>
 #include <WiFiUdp.h>
 #include <stdlib.h>
 
@@ -122,7 +121,6 @@ bool FOTAService(void) {
       int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {
-        http->end();
         // HTTP header has been send and Server response header has been handled
         DEBUG_PRINT("[HTTP] GET... code: %d\n", httpCode);
         int size = http->getSize();
