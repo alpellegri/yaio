@@ -50,6 +50,7 @@ Future<FirebaseUser> signInWithGoogle() async {
   assert(user.uid == currentUser.uid);
 
   _user = user;
+  print(user);
   return user;
 }
 
