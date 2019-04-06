@@ -1,11 +1,5 @@
 #include <Arduino.h>
-#if 0
 #include <ESP8266HTTPClient.h>
-#else
-// use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
-#include <ESP8266HTTPWeakClient.h>
-#define HTTPClient HTTPWeakClient
-#endif
 
 #include <ESP8266WiFi.h>
 #include <MD5Builder.h>
@@ -38,7 +32,7 @@ typedef enum {
 
 static HTTPClient *http;
 
-static const uint32_t block_size = 6 * 1500;
+static const uint32_t block_size = 1 * 1500;
 static uint32_t block;
 static uint32_t num_blocks;
 
@@ -70,8 +64,12 @@ bool FOTAService(void) {
 
   state_current = state;
 
+  BearSSL::WiFiClientSecure client;
+  client.setInsecure();
+
   switch (state) {
   case FOTA_Sm_IDLE:
+    DEBUG_PRINT("heap1 -- %d\n", ESP.getFreeHeap());
     break;
 
   case FOTA_Sm_GET_MD5: {
@@ -83,7 +81,8 @@ bool FOTAService(void) {
     http = new HTTPClient;
     http->setReuse(true);
     http->setTimeout(3000);
-    bool res = http->begin(addr, storage_fingerprint);
+    bool res = http->begin(client, addr);
+    DEBUG_PRINT("heap2 -- %d\n", ESP.getFreeHeap());
     if (res == true) {
       int httpCode = http->GET();
       // httpCode will be negative on error
@@ -116,6 +115,7 @@ bool FOTAService(void) {
       DEBUG_PRINT("[HTTP] begin... failed, error: %d\n", res);
       state = FOTA_Sm_ERROR;
     }
+    DEBUG_PRINT("heap3 -- %d\n", ESP.getFreeHeap());
   } break;
 
   case FOTA_Sm_CHECK: {
@@ -125,12 +125,11 @@ bool FOTAService(void) {
     addr = String(F("https://")) + String(FPSTR(storage_host)) + file_url;
     DEBUG_PRINT("FOTA_Sm_CHECK %s\n", addr.c_str());
     http->setReuse(true);
-    bool res = http->begin(addr, storage_fingerprint);
+    bool res = http->begin(client, addr);
     if (res == true) {
       int httpCode = http->GET();
       // httpCode will be negative on error
       if (httpCode > 0) {
-        http->end();
         // HTTP header has been send and Server response header has been handled
         DEBUG_PRINT("[HTTP] GET... code: %d\n", httpCode);
         int size = http->getSize();
@@ -145,6 +144,7 @@ bool FOTAService(void) {
         } else {
           state = FOTA_Sm_ERROR;
         }
+        DEBUG_PRINT("heap4 -- %d\n", ESP.getFreeHeap());
       } else {
         DEBUG_PRINT("file httpCode error: %d\n", httpCode);
         state = FOTA_Sm_ERROR;
@@ -152,11 +152,13 @@ bool FOTAService(void) {
     } else {
       state = FOTA_Sm_ERROR;
     }
+    DEBUG_PRINT("heap5 -- %d\n", ESP.getFreeHeap());
+
   } break;
 
   case FOTA_Sm_GET_BLOCK: {
     http->setReuse(true);
-    bool res = http->begin(addr, storage_fingerprint);
+    bool res = http->begin(client, addr);
     if (res == true) {
       String range = String(F("bytes=")) + String(block * block_size) +
                      String(F("-")) + String(((block + 1) * block_size) - 1);

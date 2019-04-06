@@ -1,13 +1,7 @@
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
-#if 0
 #include <ESP8266HTTPClient.h>
-#else
-// use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
-#include <ESP8266HTTPWeakClient.h>
-#define HTTPClient HTTPWeakClient
-#endif
 
 #include <string>
 
@@ -54,7 +48,9 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
 
   http_req.setReuse(true);
   // http_req.setTimeout(3000);
-  http_req.begin(addr.c_str(), _fingerprint);
+  BearSSL::WiFiClientSecure client;
+  client.setInsecure();
+  http_req.begin(client, addr);
   httpCode_ = http_req.sendRequest(RestMethods[method],
                                    (uint8_t *)value.c_str(), value.length());
 
@@ -92,7 +88,7 @@ void FirebaseRest::pushBool(const String &path, bool value) {
 
 void FirebaseRest::pushString(const String &path, const String &value) {
   String buf = String(F("\"")) + value + String(F("\""));
-  String res = restReqApi(METHOD_PUSH, path.c_str(), buf);
+  String res = restReqApi(METHOD_PUSH, path, buf);
 }
 
 void FirebaseRest::setJSON(const String &path, const String &value) {
@@ -182,13 +178,16 @@ void FirebaseRest::restStreamApi(const String path) {
 
   // DEBUG_PRINT("restStreamApi %s\n", path.c_str());
   String post = String(F(".json?auth=")) + auth_;
-  String addr = String(F("https://")) + host_ + String(F("/")) + path + post;
+  String addr = String(F("https://")) + host_ +
+                     String(F("/")) + path + post;
 
   http_stream.setReuse(false);
   http_stream.end();
   http_stream.setReuse(true);
   // http_stream.setTimeout(3000);
-  http_stream.begin(addr.c_str(), _fingerprint);
+  BearSSL::WiFiClientSecure client;
+  client.setInsecure();
+  http_stream.begin(client, addr);
 
   http_stream.addHeader(String(F("Accept")), String(F("text/event-stream")));
   const char *headers[] = {"Location"};
@@ -202,7 +201,7 @@ void FirebaseRest::restStreamApi(const String path) {
     http_stream.setReuse(false);
     http_stream.end();
     http_stream.setReuse(true);
-    http_stream.begin(location);
+    http_stream.begin(client, location);
     httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], String());
   }
 
@@ -319,7 +318,9 @@ void FirebaseRest::sendMessage(String &message, String &key,
 
   String addr = String(F("http://")) + fcm_host + String(F("/fcm/send"));
   HTTPClient http;
-  http.begin(addr);
+  BearSSL::WiFiClientSecure client;
+  client.setInsecure();
+  http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));
   http.addHeader(String(F("Content-Type")), String(F("application/json")));
   http.addHeader(String(F("Authorization")), String(F("key=")) + key);
