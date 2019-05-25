@@ -2,6 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 
 #include <string>
 
@@ -9,11 +10,6 @@
 #include "firebase.h"
 
 static const char FcmServer[] PROGMEM = "fcm.googleapis.com";
-
-// Use web browser to view and copy
-// SHA1 fingerprint of the certificate
-static const char _fingerprint[] PROGMEM =
-    "B8:4F:40:70:0C:63:90:E0:07:E8:7D:BD:B4:11:D0:4A:EA:9C:90:F6";
 
 #if 1
 static const char *RestMethods[] = {
@@ -317,9 +313,8 @@ void FirebaseRest::sendMessage(String &message, String &key,
   json += F("]}");
 
   String addr = String(F("http://")) + fcm_host + String(F("/fcm/send"));
+  WiFiClient client;
   HTTPClient http;
-  BearSSL::WiFiClientSecure client;
-  client.setInsecure();
   http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));
   http.addHeader(String(F("Content-Type")), String(F("application/json")));
