@@ -113,15 +113,16 @@ bool FbmService(void) {
       DEBUG_PRINT("get failed: kstartup\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      if (object.success()) {
+      DynamicJsonDocument object(1024);
+      auto error = deserializeJson(object, json);
+      if (!error) {
         uint32_t bootcnt = object[F("bootcnt")];
         object[F("bootcnt")] = bootcnt + 1;
         object[F("time")] = getTime();
         object[F("version")] = VERS_getVersion();
-        yield();
-        Firebase.updateJSON(kstartup, JsonVariant(object));
+        String object_str;
+        serializeJson(object, object_str);
+        Firebase.updateJSON(kstartup, object_str);
         if (Firebase.failed()) {
           DEBUG_PRINT("update failed: kstartup\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
@@ -183,32 +184,7 @@ bool FbmService(void) {
     } else if (code == 0) {
       if ((current_time - stream_time) > (60 * 1000)) {
         DEBUG_PRINT("delta fail %d\n", (current_time - stream_time));
-#if 0
-        String kstartup = FbGetPath_startup();
-        String json = Firebase.getJSON(kstartup);
-        if (Firebase.failed()) {
-          DEBUG_PRINT("get failed: kstartup\n");
-          DEBUG_PRINT("%s\n", Firebase.error().c_str());
-        } else {
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &object = jsonBuffer.parseObject(json);
-          if (object.success()) {
-            uint32_t streamcnt = object[F("streamcnt")];
-            object[F("streamcnt")] = streamcnt + 1;
-            yield();
-            Firebase.updateJSON(kstartup, JsonVariant(object));
-            if (Firebase.failed()) {
-              DEBUG_PRINT("update failed: kstartup\n");
-              DEBUG_PRINT("%s\n", Firebase.error().c_str());
-            } else {
-              boot_sm = 3;
-            }
-          } else {
-          }
-        }
-#else
         boot_sm = 3;
-#endif
       }
     } else {
       stream_time = current_time;
@@ -224,10 +200,9 @@ bool FbmService(void) {
           DEBUG_PRINT("get failed: kcontrol\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
-          DynamicJsonBuffer jsonBuffer;
-          JsonObject &object = jsonBuffer.parseObject(json);
-          if (object.success()) {
-
+          DynamicJsonDocument object(1024);
+          auto error = deserializeJson(object, json);
+          if (!error) {
             int control_reboot = object[F("reboot")];
             if (control_reboot == 1) {
               ESP.restart();
@@ -243,8 +218,7 @@ bool FbmService(void) {
           }
         }
 #if 1
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &status = jsonBuffer.createObject();
+        DynamicJsonDocument status(1024);
         status[F("heap")] = ESP.getFreeHeap();
         status[F("time")] = getTime();
         struct tm timeinfo;
@@ -255,9 +229,10 @@ bool FbmService(void) {
 
         DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
 
-        yield();
+        String status_str;
+        serializeJson(status, status_str);
         String kstatus = FbGetPath_status();
-        Firebase.setJSON(kstatus, JsonVariant(status));
+        Firebase.setJSON(kstatus, status_str);
         if (Firebase.failed()) {
           DEBUG_PRINT("set failed: kstatus\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());

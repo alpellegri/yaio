@@ -173,12 +173,11 @@ void VM_writeOutNet(void) {
                         entry.key.c_str());
           } else {
             if ((entry.enLog == true) && (entry.wblog == true)) {
-              DynamicJsonBuffer jsonBuffer;
-              JsonObject &json = jsonBuffer.createObject();
+              DynamicJsonDocument json(1024);
               json[F("t")] = getTime();
               json[F("v")] = v;
               String strdata;
-              json.printTo(strdata);
+              serializeJson(json, strdata);
               String klog = FbGetPath_log();
               DEBUG_PRINT("VM_writeOut-log: %s: %d\n", entry.key.c_str(), v);
               Firebase.pushJSON(klog + F("/") + entry.key, strdata);
@@ -207,12 +206,11 @@ void VM_writeOutNet(void) {
                         entry.key.c_str());
           } else {
             if ((entry.enLog == true) && (entry.wblog == true)) {
-              DynamicJsonBuffer jsonBuffer;
-              JsonObject &json = jsonBuffer.createObject();
+              DynamicJsonDocument json(1024);
               json[F("t")] = getTime();
               json[F("v")] = v;
               String strdata;
-              json.printTo(strdata);
+              serializeJson(json, strdata);
               String klog = FbGetPath_log();
               DEBUG_PRINT("VM_writeOutNet-log: %s: %f\n", entry.key.c_str(), v);
               Firebase.pushJSON(klog + F("/") + entry.key, strdata);

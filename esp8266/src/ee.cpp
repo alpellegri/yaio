@@ -75,11 +75,11 @@ bool EE_LoadData(void) {
   }
   DEBUG_PRINT("\n");
 
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(data);
+  DynamicJsonDocument root(1024);
+  auto error = deserializeJson(root, data);
 
   // Test if parsing succeeds.
-  if (root.success() == 1) {
+  if (!error) {
     const char *ssid = root[FPSTR("ssid")];
     DEBUG_PRINT("ssid: %s\n", ssid);
     const char *password = root[FPSTR("password")];

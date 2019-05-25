@@ -12,8 +12,7 @@
 #include "timesrv.h"
 
 void fblog_log(String message, boolean fcm_notify) {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &log = jsonBuffer.createObject();
+  DynamicJsonDocument log(1024);
 
   log[F("time")] = getTime();
   log[F("node")] = EE_GetNode();
@@ -29,6 +28,6 @@ void fblog_log(String message, boolean fcm_notify) {
   }
   String klogs = FbGetPath_message();
   String data;
-  log.printTo(data);
+  serializeJson(log, data);
   Firebase.pushJSON(klogs, data);
 }

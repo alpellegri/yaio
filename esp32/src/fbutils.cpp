@@ -120,7 +120,7 @@ void FB_addProgDB(String key, JsonObject &obj) {
   entry.key = key;
   DEBUG_PRINT("FB_addProgDB: key=%s\n", entry.key.c_str());
 
-  JsonArray &nest = obj[F("p")].as<JsonArray>();
+  JsonArray nest = obj[F("p")].as<JsonArray>();
   for (uint32_t i = 0; i < nest.size(); ++i) {
     FuncEntry fentry;
     fentry.code = nest[i][F("i")].as<int>();
