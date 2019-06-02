@@ -19,7 +19,7 @@
 // #define PORT_GDO2 13 (D7) // rx
 
 // rf suspend timeout
-#define RF_SUSPEND_TO (1 * 1000)
+#define RF_SUSPEND_TO (2 * 1000)
 
 #ifdef USE_CC1101
 static CC1101 rfHandle;

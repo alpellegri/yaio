@@ -266,8 +266,8 @@ void VM_run(void) {
 
       DEBUG_PRINT("event found on: %s\n", entry.key.c_str());
 
-      // DEBUG_PRINT("cbkey: %s\n", cbkey.c_str());
-      if (cbkey.length() != 0) {
+      if (cbkey.length() > 0) {
+        DEBUG_PRINT("cbkey: %s\n", cbkey.c_str());
         vm_context_t ctx;
 
         /* init ACC with event value */

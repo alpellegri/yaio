@@ -47,7 +47,11 @@ void FB_addIoEntryDB(String key, JsonObject &obj) {
     entry.ev_tmstamp = 0;
     entry.ev_tmstamp_log = 0;
     entry.wb = false;
-    entry.cb = obj[F("cb")].as<String>();
+    if (obj.containsKey(F("cb"))) {
+      entry.cb = obj[F("cb")].as<String>();
+    } else {
+      entry.cb = F("");
+    }
 
     // post process data value for some case
     switch (entry.code) {
@@ -150,11 +154,13 @@ int16_t FB_getProgIdx(const char *key) {
 void FB_dumpIoEntry(void) {
   DEBUG_PRINT("FB_dumpIoEntry\n");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    DEBUG_PRINT(
-        "%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, cb=%s\n",
-        i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
-        IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl, IoEntryVec[i].ev,
-        IoEntryVec[i].ev_value.c_str(), IoEntryVec[i].cb.c_str());
+    DEBUG_PRINT("%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, "
+                "cb=%s, ewr=%d, erd=%d\n",
+                i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
+                IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl,
+                IoEntryVec[i].ev, IoEntryVec[i].ev_value.c_str(),
+                IoEntryVec[i].cb.c_str(), IoEntryVec[i].enWrite,
+                IoEntryVec[i].enRead);
   }
 }
 
