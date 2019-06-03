@@ -89,8 +89,8 @@ class _ExecEditState extends State<ExecEdit> {
                   ),
                 )
               : const Text(''),
-          new ListTile(
-            trailing: new ButtonTheme.bar(
+          new Container(
+            child: new ButtonTheme.bar(
               child: new ButtonBar(
                 children: <Widget>[
                   new FlatButton(
