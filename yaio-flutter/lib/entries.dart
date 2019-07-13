@@ -329,14 +329,14 @@ class IoEntry {
         int m = (value ~/ 60) % 60;
         int s = value % 60;
         DateTime dtset = new DateTime(0, 0, 0, h, m, s);
-        v = new DateFormat('Hm').format(dtset);
+        v = new DateFormat('Hms').format(dtset);
         break;
       case DataCode.Timeout:
         int h = (value ~/ 3600) % 24;
         int m = (value ~/ 60) % 60;
         int s = value % 60;
         DateTime dtset = new DateTime(0, 0, 0, h, m, s);
-        v = new DateFormat('Hm').format(dtset);
+        v = new DateFormat('Hms').format(dtset);
         break;
     }
     return v;
