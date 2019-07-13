@@ -139,7 +139,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                     ))
                   : (const Icon(Icons.update)),
               title: const Text('Update Device'),
-              subtitle: new Text('Configuration'),
+              subtitle: const Text('Configuration'),
               trailing: new FlatButton(
                 textColor: Theme.of(context).accentColor,
                 child: const Text('UPDATE'),

@@ -442,7 +442,7 @@ class TimerOptWidget extends StatelessWidget {
           new Row(children: <Widget>[
             new Expanded(
               child: new Row(children: <Widget>[
-                new Text('Polarity'),
+                const Text('Polarity'),
                 new Checkbox(
                     value: ((value & (1 << 24)) != 0),
                     onChanged: (bool v) {
@@ -454,7 +454,7 @@ class TimerOptWidget extends StatelessWidget {
                     }),
               ]),
             ),
-            new Text('Days of the week'),
+            const Text('Days of the week'),
             new PopupMenuButton(
               padding: EdgeInsets.zero,
               onSelected: applyOnSelected,
@@ -516,7 +516,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-        title: new Text('Edit'),
+        title: const Text('Edit'),
         content: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
