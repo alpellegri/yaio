@@ -50,7 +50,7 @@ class NodeSetup extends StatefulWidget {
   NodeSetup({this.domain, this.node});
 
   @override
-  _NodeSetupState createState() => new _NodeSetupState(domain, node);
+  _NodeSetupState createState() => new _NodeSetupState();
 }
 
 class _NodeSetupState extends State<NodeSetup> {
@@ -59,23 +59,18 @@ class _NodeSetupState extends State<NodeSetup> {
   Icon _iconConnStatus;
   bool _connStatus;
   Map _prefs;
-  String _nodeConfigJson;
   final TextEditingController _ctrlSSID = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
-  final String domain;
-  final String node;
-
-  _NodeSetupState(this.domain, this.node) {
-    _ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
-  }
 
   @override
   void initState() {
     super.initState();
+    _ws = new ServiceWebSocket(kWsUri, _openCb, _dataCb, _errorCb, _closeCb);
     _connStatus = false;
     _iconConnStatus = const Icon(Icons.settings_remote);
     _prefs = getPreferences();
-    _nodeConfigJson = json.encode(_prefs);
+    _prefs['domain'] = widget.domain;
+    _prefs['nodename'] = widget.node;
     _ctrlSSID.text = _prefs['ssid'];
     _ctrlPassword.text = _prefs['password'];
   }
@@ -89,7 +84,7 @@ class _NodeSetupState extends State<NodeSetup> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Configure $domain/$node'),
+        title: new Text('Configure ${widget.domain}/${widget.node}'),
       ),
       body: new ListView(children: <Widget>[
         new Column(
@@ -131,9 +126,6 @@ class _NodeSetupState extends State<NodeSetup> {
                     child: const Text('SAVE'),
                     onPressed: () {
                       savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
-                      setState(() {
-                        _nodeConfigJson = json.encode(_prefs);
-                      });
                     },
                   ),
                   const SizedBox(width: 16.0),
@@ -147,8 +139,8 @@ class _NodeSetupState extends State<NodeSetup> {
           children: <Widget>[
             new ListTile(
               leading: const Icon(Icons.developer_board),
-              title: new Text('$domain'),
-              subtitle: new Text('$node'),
+              title: new Text('${widget.domain}'),
+              subtitle: new Text('${widget.node}'),
               trailing: new FlatButton(
                 textColor: Theme.of(context).accentColor,
                 child: const Text('SUBMIT'),
@@ -161,7 +153,7 @@ class _NodeSetupState extends State<NodeSetup> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             new Text('Configuration file'),
-            new Text('$_nodeConfigJson'),
+            new Text('${json.encode(_prefs)}'),
           ],
         ),
       ]),
@@ -174,7 +166,9 @@ class _NodeSetupState extends State<NodeSetup> {
   }
 
   void _sendParameters() {
-    _ws.send(_nodeConfigJson);
+    String config = json.encode(_prefs);
+    print(config);
+    _ws.send(config);
   }
 
   void _openCb() {

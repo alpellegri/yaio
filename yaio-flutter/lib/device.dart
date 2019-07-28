@@ -655,6 +655,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
       DatabaseReference ref;
       ref = FirebaseDatabase.instance.reference().child(getControlRef());
       ref.set(getControlDefault());
+      ref = FirebaseDatabase.instance.reference().child(getStatusRef());
+      ref.set(getStatusDefault());
       ref = FirebaseDatabase.instance.reference().child(getStartupRef());
       ref.set(getStartupDefault());
     }

@@ -113,6 +113,7 @@ class _LoginState extends State<Login> {
       _map.putIfAbsent(domain, () => value);
     });
 
+    /*
     // update all nodes
     DateTime now = new DateTime.now();
     String root = getRootRef();
@@ -122,10 +123,12 @@ class _LoginState extends State<Login> {
           FirebaseDatabase.instance.reference().child('$dataSource/time');
       dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
     });
+    */
+    _updateAllNodes(domain, value);
   }
 
   void _onRootEntryChanged(Event event) {
-    // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
+    print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
     setState(() {
@@ -136,10 +139,22 @@ class _LoginState extends State<Login> {
         print('$kd/$kn: ${v.toString()}');
       });
     });*/
+    // _updateAllNodes(domain, value);
   }
 
   void _onRootEntryRemoved(Event event) {
     print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
+  }
+
+  void _updateAllNodes(String domain, dynamic value) {
+    DateTime now = new DateTime.now();
+    String root = getRootRef();
+    value.forEach((node, v) {
+      String dataSource = '$root/$domain/$node/control';
+      DatabaseReference dataRef =
+      FirebaseDatabase.instance.reference().child('$dataSource/time');
+      dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
+    });
   }
 
   @override

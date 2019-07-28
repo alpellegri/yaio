@@ -14,33 +14,28 @@ class ExecEdit extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ExecEditState createState() =>
-      new _ExecEditState(domain, node, entry, execList);
+  _ExecEditState createState() => new _ExecEditState();
 }
 
 class _ExecEditState extends State<ExecEdit> {
-  final String domain;
-  final String node;
   final TextEditingController _controllerName = new TextEditingController();
-  final ExecEntry entry;
-  List<ExecEntry> execList;
   ExecEntry _selectedNext;
   var _selectedNextList;
 
   List<IoEntry> entryIoList = new List();
 
-  _ExecEditState(this.domain, this.node, this.entry, this.execList);
-
   @override
   void initState() {
     super.initState();
-    _controllerName.text = entry?.key;
-    if (entry.cb != null) {
-      _selectedNextList = execList.where((el) => el.key == entry.cb);
+    _controllerName.text = widget.entry?.key;
+    if (widget.entry.cb != null) {
+      _selectedNextList =
+          widget.execList.where((el) => el.key == widget.entry.cb);
       if (_selectedNextList.length == 1) {
-        _selectedNext = execList.singleWhere((el) => el.key == entry.cb);
+        _selectedNext =
+            widget.execList.singleWhere((el) => el.key == widget.entry.cb);
       } else {
-        entry.cb = null;
+        widget.entry.cb = null;
       }
     }
   }
@@ -69,7 +64,7 @@ class _ExecEditState extends State<ExecEdit> {
               ),
             ),
           ),
-          (execList.length > 0)
+          (widget.execList.length > 0)
               ? new ListTile(
                   title: const Text('Callback Routine'),
                   trailing: new DropdownButton<ExecEntry>(
@@ -80,7 +75,7 @@ class _ExecEditState extends State<ExecEdit> {
                         _selectedNext = newValue;
                       });
                     },
-                    items: execList.map((ExecEntry entry) {
+                    items: widget.execList.map((ExecEntry entry) {
                       return new DropdownMenuItem<ExecEntry>(
                         value: entry,
                         child: new Text(entry.key),
@@ -96,9 +91,11 @@ class _ExecEditState extends State<ExecEdit> {
                   new FlatButton(
                       child: const Text('REMOVE'),
                       onPressed: () {
-                        print(entry.reference);
-                        if (entry.exist == true) {
-                          entry.reference.child(entry.key).remove();
+                        print(widget.entry.reference);
+                        if (widget.entry.exist == true) {
+                          widget.entry.reference
+                              .child(widget.entry.key)
+                              .remove();
                         }
                         Navigator.pop(context, null);
                       }),
@@ -106,10 +103,12 @@ class _ExecEditState extends State<ExecEdit> {
                       child: const Text('SAVE'),
                       onPressed: () {
                         setState(() {
-                          entry.key = _controllerName.text;
-                          entry.cb = _selectedNext?.key;
-                          entry.setOwner(node);
-                          entry.reference.child(entry.key).set(entry.toJson());
+                          widget.entry.key = _controllerName.text;
+                          widget.entry.cb = _selectedNext?.key;
+                          widget.entry.setOwner(widget.node);
+                          widget.entry.reference
+                              .child(widget.entry.key)
+                              .set(widget.entry.toJson());
                         });
                         Navigator.pop(context, null);
                       }),
@@ -120,7 +119,9 @@ class _ExecEditState extends State<ExecEdit> {
                           context,
                           new MaterialPageRoute(
                             builder: (BuildContext context) => new ExecProg(
-                                domain: domain, node: node, prog: entry.p),
+                                domain: widget.domain,
+                                node: widget.node,
+                                prog: widget.entry.p),
                           ));
                     },
                   ),

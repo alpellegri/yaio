@@ -13,53 +13,53 @@ class ChartHistory extends StatefulWidget {
   ChartHistory({Key key, this.domain, this.node, this.name}) : super(key: key);
 
   @override
-  _ChartHistoryState createState() =>
-      new _ChartHistoryState(domain, node, name);
+  _ChartHistoryState createState() => new _ChartHistoryState();
 }
 
 class _ChartHistoryState extends State<ChartHistory> {
-  final String domain;
-  final String node;
-  final String name;
-  List<LogEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
-  List<charts.Series<TimeSeries, DateTime>> seriesList =
+  List<charts.Series<TimeSeries, DateTime>> _seriesList =
       new List<charts.Series<TimeSeries, DateTime>>();
-
-  _ChartHistoryState(this.domain, this.node, this.name) {
-    print('_ChartHistoryState: ${getLogRef()}/$domain/$name');
-    _entryRef = FirebaseDatabase.instance
-        .reference()
-        .child('${getLogRef()}/$domain/$name');
-    _onAddSubscription = _entryRef.onValue.listen(_onEntryAdded);
-  }
+  List<String> _toDelete = new List<String>();
 
   @override
   void initState() {
     super.initState();
+
+    print('_ChartHistoryState: ${getLogRef()}/${widget.domain}/${widget.name}');
+    _entryRef = FirebaseDatabase.instance
+        .reference()
+        .child('${getLogRef()}/${widget.domain}/${widget.name}');
+    _onAddSubscription = _entryRef.onValue.listen(_onEntryAdded);
   }
 
   @override
   void dispose() {
     super.dispose();
+    _seriesList.clear();
     _onAddSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    // clean old
+    _toDelete.forEach((k) {
+      print('remove >> $k');
+      _entryRef.child(k).remove();
+    });
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(name),
+        title: new Text(widget.name),
       ),
-      body: (seriesList.length == 0)
+      body: (_seriesList.length == 0)
           ? (const Text(''))
           : (new Padding(
               padding: const EdgeInsets.all(8.0),
               child: new SizedBox(
                 height: 300.0,
                 child: new charts.TimeSeriesChart(
-                  seriesList,
+                  _seriesList,
                   animate: true,
                   // Optionally pass in a [DateTimeFactory] used by the chart. The factory
                   // should create the same type of [DateTime] as the data provided. If none
@@ -80,19 +80,19 @@ class _ChartHistoryState extends State<ChartHistory> {
   }
 
   void _onEntryAdded(Event event) {
-    print('_onEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
+    print('_onEntryAdded');
     List<TimeSeries> data = new List<TimeSeries>();
     if ((event.snapshot.key != null) && (event.snapshot.value != null)) {
       event.snapshot.value.forEach((k, v) {
+        // print('el $k ${v['t']} ${v['v']}');
         DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
-        DateTime start = DateTime.now().subtract(Duration(days: 3));
+        DateTime start = DateTime.now().subtract(Duration(days: 7));
         if (dt.isAfter(start) == true) {
-          data.add(new TimeSeries(dt, (v['v'] + 0.0)));
+          data.add(new TimeSeries(dt, (v['v'].toDouble())));
           data.sort((a, b) => a.time.compareTo(b.time));
         } else {
           // remove the object
-          print('remove $k');
-          _entryRef.child(k).remove();
+          _toDelete.add(k);
         }
       });
 
@@ -105,8 +105,8 @@ class _ChartHistoryState extends State<ChartHistory> {
         data: data,
       );
       setState(() {
-        seriesList.clear();
-        seriesList.add(serie);
+        _seriesList.clear();
+        _seriesList.add(serie);
       });
     }
   }
@@ -114,7 +114,7 @@ class _ChartHistoryState extends State<ChartHistory> {
   void _onFloatingActionButtonPressed() {
     _entryRef.remove();
     setState(() {
-      seriesList.clear();
+      _seriesList.clear();
     });
   }
 }

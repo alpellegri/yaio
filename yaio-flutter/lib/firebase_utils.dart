@@ -185,7 +185,6 @@ Map<String, Object> _startupDefault = {
 };
 
 Map<String, Object> _statusDefault = {
-  'heap': 0,
   'time': 0,
 };
 
