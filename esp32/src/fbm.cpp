@@ -173,7 +173,6 @@ bool FbmService(void) {
     Firebase.stream(kcontrol + F("/time"));
     boot_sm = 31;
     stream_time = millis();
-    ret = true;
   } break;
   case 31: {
     String response;

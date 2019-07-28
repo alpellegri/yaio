@@ -145,6 +145,7 @@ bool STA_Task(uint32_t current_time) {
         if (vmSchedule == true) {
           VM_runNet();
           yield();
+          // update at now
           current_time = millis();
           if ((int32_t)(current_time - core0_time) > 50) {
             DEBUG_PRINT("hang: %d %d\n", current_time - core0_time,
@@ -154,6 +155,9 @@ bool STA_Task(uint32_t current_time) {
             DEBUG_PRINT("reset hang: %d\n", current_time - core0_time);
             ESP.restart();
           }
+        } else {
+          core0_time = millis();
+          DEBUG_PRINT("core0_time: %d\n", core0_time);
         }
       }
     }
