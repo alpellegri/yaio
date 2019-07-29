@@ -192,12 +192,11 @@ Map<String, Object> getControlDefault() {
   return _controlDefault;
 }
 
-Map<String, Object> getStartupDefault() {
-  return _startupDefault;
-}
-
 Map<String, Object> getStatusDefault() {
   return _statusDefault;
+}
+Map<String, Object> getStartupDefault() {
+  return _startupDefault;
 }
 
 void nodeRefresh(String domain, String node) {
