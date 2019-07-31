@@ -37,6 +37,7 @@ class _ChartHistoryState extends State<ChartHistory> {
   @override
   void dispose() {
     super.dispose();
+    _toDelete.clear();
     _seriesList.clear();
     _onAddSubscription.cancel();
   }
