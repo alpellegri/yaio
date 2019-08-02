@@ -28,7 +28,7 @@ class _MyDrawerState extends State<MyDrawer> {
           accountEmail: new Text(getFirebaseUser().email),
           currentAccountPicture: new CircleAvatar(
             backgroundImage: new NetworkImage(
-              getFirebaseUser().photoUrl,
+              getFirebaseUser().providerData[1].photoUrl,
             ),
           ),
         ),

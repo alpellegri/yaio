@@ -105,7 +105,7 @@ class _LoginState extends State<Login> {
   }
 
   void _onRootEntryAdded(Event event) {
-    print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
 
@@ -128,7 +128,7 @@ class _LoginState extends State<Login> {
   }
 
   void _onRootEntryChanged(Event event) {
-    print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
     setState(() {
