@@ -252,7 +252,7 @@ class _DataEditScreenState extends State<DataEditScreen> {
                         data: widget.entry,
                         onChangedValue: _handleChangedValue,
                       ))
-                    : (const Text('')),
+                    : (new Container()),
                 (_execList.length > 0)
                     ? new ListTile(
                         title: const Text('Callback Routine'),

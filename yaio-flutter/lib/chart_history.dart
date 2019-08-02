@@ -49,12 +49,15 @@ class _ChartHistoryState extends State<ChartHistory> {
       print('remove >> $k');
       _entryRef.child(k).remove();
     });
+    setState(() {
+      _toDelete.clear();
+    });
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.name),
       ),
       body: (_seriesList.length == 0)
-          ? (const Text(''))
+          ? (new Container())
           : (new Padding(
               padding: const EdgeInsets.all(8.0),
               child: new SizedBox(

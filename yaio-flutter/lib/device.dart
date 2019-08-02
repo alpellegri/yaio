@@ -477,7 +477,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             ),
           ]),
       (_connected == false)
-          ? (const Text(''))
+          ? (new Container())
           : (new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,

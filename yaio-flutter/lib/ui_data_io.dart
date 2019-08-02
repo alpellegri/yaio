@@ -379,7 +379,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Text(''),
+              new Container(),
             ]);
     }
 
