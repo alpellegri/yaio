@@ -96,7 +96,7 @@ class _ChartHistoryState extends State<ChartHistory> {
       event.snapshot.value.forEach((k, v) {
         // print('el $k ${v['t']} ${v['v']}');
         DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
-        DateTime start = DateTime.now().subtract(Duration(days: 6));
+        DateTime start = DateTime.now().subtract(Duration(days: 7));
         if (dt.isAfter(start) == true) {
           data.add(new TimeSeries(dt, (v['v'].toDouble())));
           data.sort((a, b) => a.time.compareTo(b.time));
