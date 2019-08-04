@@ -47,12 +47,19 @@ class _ChartHistoryState extends State<ChartHistory> {
     if (_toDelete.length > 0) {
       Future(() async {
         print('Running the Future');
+        // wait 1s while displaing
         await Future.delayed(const Duration(seconds: 1));
       }).then((_) {
-        print('Future is complete');
+        // print('Future is complete');
         _toDelete.forEach((v) {
-          print(v);
-          _entryRef.child(v).remove();
+          // print(v);
+          // _entryRef.child(v).remove();
+          Future(() async {
+            print(v);
+            await _entryRef.child(v).remove();
+          }).then((_) {
+            // print('Future is complete');
+          });
         });
         _toDelete.clear();
       });
