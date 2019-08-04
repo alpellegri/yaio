@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'entries.dart';
 import 'firebase_utils.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -45,13 +44,20 @@ class _ChartHistoryState extends State<ChartHistory> {
   @override
   Widget build(BuildContext context) {
     // clean old
-    _toDelete.forEach((k) {
-      print('remove >> $k');
-      _entryRef.child(k).remove();
-    });
-    setState(() {
-      _toDelete.clear();
-    });
+    if (_toDelete.length > 0) {
+      Future(() async {
+        print('Running the Future');
+        await Future.delayed(const Duration(seconds: 1));
+      }).then((_) {
+        print('Future is complete');
+        _toDelete.forEach((v) {
+          print(v);
+          _entryRef.child(v).remove();
+        });
+        _toDelete.clear();
+      });
+    }
+
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.name),
@@ -90,7 +96,7 @@ class _ChartHistoryState extends State<ChartHistory> {
       event.snapshot.value.forEach((k, v) {
         // print('el $k ${v['t']} ${v['v']}');
         DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
-        DateTime start = DateTime.now().subtract(Duration(days: 7));
+        DateTime start = DateTime.now().subtract(Duration(days: 6));
         if (dt.isAfter(start) == true) {
           data.add(new TimeSeries(dt, (v['v'].toDouble())));
           data.sort((a, b) => a.time.compareTo(b.time));
