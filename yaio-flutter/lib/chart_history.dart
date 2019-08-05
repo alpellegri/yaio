@@ -3,6 +3,27 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'firebase_utils.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/foundation.dart';
+
+class ComputeMessage {
+  DatabaseReference ref;
+  List<String> list;
+
+  ComputeMessage(this.ref, this.list);
+}
+
+void clear(ComputeMessage message) {
+  print(message.list.length);
+  message.list.forEach((v) {
+    Future(() async {
+      print(v);
+      await message.ref.child(v).remove();
+    }).then((_) {
+      print('Future is complete');
+    });
+  });
+  //message.list.clear();
+}
 
 class ChartHistory extends StatefulWidget {
   final String domain;
@@ -43,26 +64,31 @@ class _ChartHistoryState extends State<ChartHistory> {
 
   @override
   Widget build(BuildContext context) {
-    // clean old
-    if (_toDelete.length > 0) {
-      Future(() async {
-        print('Running the Future');
-        // wait 1s while displaing
-        await Future.delayed(const Duration(seconds: 1));
-      }).then((_) {
-        // print('Future is complete');
-        _toDelete.forEach((v) {
-          // print(v);
-          // _entryRef.child(v).remove();
-          Future(() async {
-            print(v);
-            await _entryRef.child(v).remove();
-          }).then((_) {
-            // print('Future is complete');
+    // clean old in a different thread
+    if (false) {
+      ComputeMessage message = new ComputeMessage(_entryRef, _toDelete);
+      compute(clear, message);
+    } else {
+      if (_toDelete.length > 0) {
+        Future(() async {
+          print('Running the Future');
+          // wait 1s while displaing
+          await Future.delayed(const Duration(seconds: 1));
+        }).then((_) {
+          // print('Future is complete');
+          _toDelete.forEach((v) {
+            // print(v);
+            // _entryRef.child(v).remove();
+            Future(() async {
+              print(v);
+              await _entryRef.child(v).remove();
+            }).then((_) {
+              //print('Future is complete');
+            });
           });
+          _toDelete.clear();
         });
-        _toDelete.clear();
-      });
+      }
     }
 
     return new Scaffold(
@@ -108,8 +134,10 @@ class _ChartHistoryState extends State<ChartHistory> {
           data.add(new TimeSeries(dt, (v['v'].toDouble())));
           data.sort((a, b) => a.time.compareTo(b.time));
         } else {
-          // remove the object
-          _toDelete.add(k);
+          // add object to be removed
+          setState(() {
+            _toDelete.add(k);
+          });
         }
       });
 
