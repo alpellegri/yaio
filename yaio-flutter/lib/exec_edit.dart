@@ -53,7 +53,7 @@ class _ExecEditState extends State<ExecEdit> {
         title: new Text('Edit'),
       ),
       body: new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new ListTile(
@@ -87,8 +87,8 @@ class _ExecEditState extends State<ExecEdit> {
               : new Container(),
           new Container(
             child: new Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 new RaisedButton(
                     child: const Text('REMOVE'),
@@ -99,7 +99,6 @@ class _ExecEditState extends State<ExecEdit> {
                       }
                       Navigator.pop(context, null);
                     }),
-                const SizedBox(width: 8.0),
                 new RaisedButton(
                     child: const Text('SAVE'),
                     onPressed: () {
@@ -113,7 +112,6 @@ class _ExecEditState extends State<ExecEdit> {
                       });
                       Navigator.pop(context, null);
                     }),
-                const SizedBox(width: 8.0),
                 new RaisedButton(
                   child: const Text('EDIT'),
                   onPressed: () {
@@ -127,7 +125,6 @@ class _ExecEditState extends State<ExecEdit> {
                         ));
                   },
                 ),
-                const SizedBox(width: 8.0),
                 new RaisedButton(
                     child: const Text('DISCARD'),
                     onPressed: () {
@@ -444,36 +441,39 @@ class _EntryDialogState extends State<EntryDialog> {
                         }).toList(),
                       ),
                     ])),
-          new Row(mainAxisSize: MainAxisSize.max, children: <Widget>[
-            new RaisedButton(
-                child: const Text('REMOVE'),
-                onPressed: () {
-                  setState(() {
-                    _didChange();
-                    prog.removeAt(index);
-                  });
-                  Navigator.pop(context, null);
-                }),
-            const SizedBox(width: 8.0),
-            new RaisedButton(
-                child: const Text('SAVE'),
-                onPressed: () {
-                  _didChange();
-                  setState(() {
-                    prog[index].i = _selectedOpCode;
-                    prog[index].v = (_isImmediate == true)
-                        ? _controllerValue.text
-                        : _selectedEntry.key;
-                    Navigator.pop(context, null);
-                  });
-                }),
-            const SizedBox(width: 8.0),
-            new RaisedButton(
-                child: const Text('DISCARD'),
-                onPressed: () {
-                  Navigator.pop(context, null);
-                }),
-          ]),
+          new Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                new RaisedButton(
+                    child: const Text('REMOVE'),
+                    onPressed: () {
+                      setState(() {
+                        _didChange();
+                        prog.removeAt(index);
+                      });
+                      Navigator.pop(context, null);
+                    }),
+                const SizedBox(width: 8.0),
+                new RaisedButton(
+                    child: const Text('SAVE'),
+                    onPressed: () {
+                      _didChange();
+                      setState(() {
+                        prog[index].i = _selectedOpCode;
+                        prog[index].v = (_isImmediate == true)
+                            ? _controllerValue.text
+                            : _selectedEntry.key;
+                        Navigator.pop(context, null);
+                      });
+                    }),
+                const SizedBox(width: 8.0),
+                new RaisedButton(
+                    child: const Text('DISCARD'),
+                    onPressed: () {
+                      Navigator.pop(context, null);
+                    }),
+              ]),
         ],
       ),
     );
