@@ -161,17 +161,10 @@ class ExecProgListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Container(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: new Text(
-                    '$pc',
-                    style: new TextStyle(
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ),
-                new Text(
-                  '${kOpCode2Name[OpCode.values[entry.i]]}, $value',
-                ),
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: new Text('$pc',
+                        style: new TextStyle(color: Colors.grey[500]))),
+                new Text('${kOpCode2Name[OpCode.values[entry.i]]}, $value'),
               ],
             ),
           ),
@@ -228,21 +221,18 @@ class _ExecProgState extends State<ExecProg> {
       appBar: new AppBar(
         title: new Text('Program'),
       ),
-      body: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new ListView.builder(
-              shrinkWrap: true,
-              itemCount: prog.length,
-              itemBuilder: (buildContext, index) {
-                return new InkWell(
-                    onTap: () => _openEntryDialog(index),
-                    child:
-                        new ExecProgListItem(index, prog[index], entryIoList));
-              },
-            ),
-          ]),
+      body: Container(
+        child: new ListView.builder(
+          shrinkWrap: true,
+          physics: BouncingScrollPhysics(),
+          itemCount: prog.length,
+          itemBuilder: (buildContext, index) {
+            return new InkWell(
+                onTap: () => _openEntryDialog(index),
+                child: new ExecProgListItem(index, prog[index], entryIoList));
+          },
+        ),
+      ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',

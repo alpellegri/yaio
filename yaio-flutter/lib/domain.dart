@@ -53,7 +53,9 @@ class _DomainState extends State<Domain> {
       appBar: new AppBar(
         title: new Text(widget.domain),
       ),
-      body: new ListView.builder(
+      body: Container(
+          child: SingleChildScrollView(
+              child: new ListView.builder(
         shrinkWrap: true,
         physics: ClampingScrollPhysics(),
         itemCount: widget.map.keys.length,
@@ -65,7 +67,7 @@ class _DomainState extends State<Domain> {
               value: widget.map[_node],
               data: entryList);
         },
-      ),
+      ))),
     );
   }
 
@@ -196,7 +198,7 @@ class _DeviceCardState extends State<DeviceCard> {
           const SizedBox(height: 8.0),
           new ListView.builder(
             shrinkWrap: true,
-            physics: ClampingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             itemCount: query.length,
             itemBuilder: (buildContext, index) {
               if (query[index].drawWr == true) {

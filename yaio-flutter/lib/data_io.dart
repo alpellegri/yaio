@@ -51,6 +51,7 @@ class _DataIOState extends State<DataIO> {
       ),
       body: new ListView.builder(
         shrinkWrap: true,
+        physics: BouncingScrollPhysics(),
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return new InkWell(

@@ -14,29 +14,7 @@ class ExecListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          new Expanded(
-            child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    new Text(
-                      '${entry.key}',
-                      textAlign: TextAlign.left,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      child: new Text('${entry.key}', textAlign: TextAlign.left),
     );
   }
 }
@@ -92,6 +70,7 @@ class _ExecState extends State<Exec> {
       ),
       body: new ListView.builder(
         shrinkWrap: true,
+        physics: BouncingScrollPhysics(),
         reverse: true,
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
