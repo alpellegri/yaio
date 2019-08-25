@@ -47,6 +47,7 @@ class _ExecEditState extends State<ExecEdit> {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).primaryColor;
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Edit'),
@@ -85,53 +86,54 @@ class _ExecEditState extends State<ExecEdit> {
                 )
               : new Container(),
           new Container(
-            child: new ButtonTheme.bar(
-              child: new ButtonBar(
-                children: <Widget>[
-                  new FlatButton(
-                      child: const Text('REMOVE'),
-                      onPressed: () {
-                        print(widget.entry.reference);
-                        if (widget.entry.exist == true) {
-                          widget.entry.reference
-                              .child(widget.entry.key)
-                              .remove();
-                        }
-                        Navigator.pop(context, null);
-                      }),
-                  new FlatButton(
-                      child: const Text('SAVE'),
-                      onPressed: () {
-                        setState(() {
-                          widget.entry.key = _controllerName.text;
-                          widget.entry.cb = _selectedNext?.key;
-                          widget.entry.setOwner(widget.node);
-                          widget.entry.reference
-                              .child(widget.entry.key)
-                              .set(widget.entry.toJson());
-                        });
-                        Navigator.pop(context, null);
-                      }),
-                  new FlatButton(
-                    child: const Text('EDIT'),
+            child: new Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new RaisedButton(
+                    child: const Text('REMOVE'),
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                            builder: (BuildContext context) => new ExecProg(
-                                domain: widget.domain,
-                                node: widget.node,
-                                prog: widget.entry.p),
-                          ));
-                    },
-                  ),
-                  new FlatButton(
-                      child: const Text('DISCARD'),
-                      onPressed: () {
-                        Navigator.pop(context, null);
-                      }),
-                ],
-              ),
+                      print(widget.entry.reference);
+                      if (widget.entry.exist == true) {
+                        widget.entry.reference.child(widget.entry.key).remove();
+                      }
+                      Navigator.pop(context, null);
+                    }),
+                const SizedBox(width: 8.0),
+                new RaisedButton(
+                    child: const Text('SAVE'),
+                    onPressed: () {
+                      setState(() {
+                        widget.entry.key = _controllerName.text;
+                        widget.entry.cb = _selectedNext?.key;
+                        widget.entry.setOwner(widget.node);
+                        widget.entry.reference
+                            .child(widget.entry.key)
+                            .set(widget.entry.toJson());
+                      });
+                      Navigator.pop(context, null);
+                    }),
+                const SizedBox(width: 8.0),
+                new RaisedButton(
+                  child: const Text('EDIT'),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                          builder: (BuildContext context) => new ExecProg(
+                              domain: widget.domain,
+                              node: widget.node,
+                              prog: widget.entry.p),
+                        ));
+                  },
+                ),
+                const SizedBox(width: 8.0),
+                new RaisedButton(
+                    child: const Text('DISCARD'),
+                    onPressed: () {
+                      Navigator.pop(context, null);
+                    }),
+              ],
             ),
           ),
         ],
@@ -383,93 +385,97 @@ class _EntryDialogState extends State<EntryDialog> {
   Widget build(BuildContext context) {
     print('_EntryDialogState');
     return new AlertDialog(
-        // title: new Text('Edit'),
-        content: new Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new Row(children: [
-              new Expanded(
-                child: const Text('OpCode'),
-              ),
-              new DropdownButton<int>(
-                isDense: true,
-                hint: const Text('action'),
-                value: _selectedOpCode,
-                onChanged: (int newValue) {
+      // title: new Text('Edit'),
+      content: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Opcode'),
+            const SizedBox(height: 8.0),
+            new DropdownButton<int>(
+              isDense: true,
+              hint: const Text('action'),
+              value: _selectedOpCode,
+              onChanged: (int newValue) {
+                setState(() {
+                  _selectedOpCode = newValue;
+                  _isImmediate =
+                      kOpCodeIsImmediate[OpCode.values[_selectedOpCode]];
+                });
+              },
+              items: _opCodeMenu.map((int entry) {
+                return new DropdownMenuItem<int>(
+                  value: entry,
+                  child: new Text(
+                    kOpCode2Name[OpCode.values[entry]],
+                  ),
+                );
+              }).toList(),
+            ),
+          ]),
+          const SizedBox(height: 24.0),
+          (_isImmediate == true)
+              ? (new TextField(
+                  controller: _controllerValue,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'value',
+                    labelText: 'Value',
+                  ),
+                ))
+              : (new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                      const Text('Operand'),
+                      new DropdownButton<IoEntry>(
+                        hint: const Text('data'),
+                        value: _selectedEntry,
+                        onChanged: (IoEntry newValue) {
+                          setState(() {
+                            _selectedEntry = newValue;
+                          });
+                        },
+                        items: entryIoList.map((IoEntry entry) {
+                          return new DropdownMenuItem<IoEntry>(
+                            value: entry,
+                            child: new Text(entry.key),
+                          );
+                        }).toList(),
+                      ),
+                    ])),
+          new Row(mainAxisSize: MainAxisSize.max, children: <Widget>[
+            new RaisedButton(
+                child: const Text('REMOVE'),
+                onPressed: () {
                   setState(() {
-                    _selectedOpCode = newValue;
-                    _isImmediate =
-                        kOpCodeIsImmediate[OpCode.values[_selectedOpCode]];
+                    _didChange();
+                    prog.removeAt(index);
                   });
-                },
-                items: _opCodeMenu.map((int entry) {
-                  return new DropdownMenuItem<int>(
-                    value: entry,
-                    child: new Text(
-                      kOpCode2Name[OpCode.values[entry]],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ]),
-            (_isImmediate == true)
-                ? (new TextField(
-                    controller: _controllerValue,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: 'value',
-                      labelText: 'Value',
-                    ),
-                  ))
-                : (new Row(children: [
-                    new Expanded(
-                      child: const Text('Data'),
-                    ),
-                    new DropdownButton<IoEntry>(
-                      hint: const Text('data'),
-                      value: _selectedEntry,
-                      onChanged: (IoEntry newValue) {
-                        setState(() {
-                          _selectedEntry = newValue;
-                        });
-                      },
-                      items: entryIoList.map((IoEntry entry) {
-                        return new DropdownMenuItem<IoEntry>(
-                          value: entry,
-                          child: new Text(entry.key),
-                        );
-                      }).toList(),
-                    ),
-                  ])),
-          ],
-        ),
-        actions: <Widget>[
-          new OutlineButton(
-              child: const Text('REMOVE'),
-              onPressed: () {
-                setState(() {
-                  _didChange();
-                  prog.removeAt(index);
-                });
-                Navigator.pop(context, null);
-              }),
-          new OutlineButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                _didChange();
-                setState(() {
-                  prog[index].i = _selectedOpCode;
-                  prog[index].v = (_isImmediate == true)
-                      ? _controllerValue.text
-                      : _selectedEntry.key;
                   Navigator.pop(context, null);
-                });
-              }),
-          new OutlineButton(
-              child: const Text('DISCARD'),
-              onPressed: () {
-                Navigator.pop(context, null);
-              }),
-        ]);
+                }),
+            const SizedBox(width: 8.0),
+            new RaisedButton(
+                child: const Text('SAVE'),
+                onPressed: () {
+                  _didChange();
+                  setState(() {
+                    prog[index].i = _selectedOpCode;
+                    prog[index].v = (_isImmediate == true)
+                        ? _controllerValue.text
+                        : _selectedEntry.key;
+                    Navigator.pop(context, null);
+                  });
+                }),
+            const SizedBox(width: 8.0),
+            new RaisedButton(
+                child: const Text('DISCARD'),
+                onPressed: () {
+                  Navigator.pop(context, null);
+                }),
+          ]),
+        ],
+      ),
+    );
   }
 }
