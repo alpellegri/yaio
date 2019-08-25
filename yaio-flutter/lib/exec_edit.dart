@@ -431,9 +431,11 @@ class _EntryDialogState extends State<EntryDialog> {
                       labelText: 'Value',
                     ),
                   ))
-                : new ListTile(
-                    title: const Text('Data'),
-                    trailing: new DropdownButton<IoEntry>(
+                : (new Row(children: [
+                    new Expanded(
+                      child: const Text('Data'),
+                    ),
+                    new DropdownButton<IoEntry>(
                       hint: const Text('data'),
                       value: _selectedEntry,
                       onChanged: (IoEntry newValue) {
@@ -448,7 +450,7 @@ class _EntryDialogState extends State<EntryDialog> {
                         );
                       }).toList(),
                     ),
-                  ),
+                  ])),
           ],
         ),
         actions: <Widget>[

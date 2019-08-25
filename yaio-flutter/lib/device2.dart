@@ -4,9 +4,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
-import 'entries.dart';
-import 'chart_history.dart';
-import 'ui_data_io.dart';
 
 class DeviceConfig extends StatefulWidget {
   final String domain;
