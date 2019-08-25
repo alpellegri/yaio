@@ -3,9 +3,11 @@
 
 #define DEBUG_ENABLE
 #ifdef DEBUG_ENABLE
-#define DEBUG_PRINT(fmt, ...) Serial.printf_P(PSTR(fmt), ##__VA_ARGS__)
+#define DEBUG_PRINT(fmt, args...) do { \
+  Serial.printf_P(PSTR(fmt), ##args); \
+} while(0)
 #else
-#define DEBUG_PRINT(fmt, ...)
+#define DEBUG_PRINT(fmt, args...)
 #endif
 
 #endif
