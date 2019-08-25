@@ -47,14 +47,11 @@ class _ExecEditState extends State<ExecEdit> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Theme.of(context).primaryColor;
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Edit'),
       ),
       body: new Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new ListTile(
             title: new TextField(
@@ -85,12 +82,14 @@ class _ExecEditState extends State<ExecEdit> {
                   ),
                 )
               : new Container(),
+          const SizedBox(height: 24.0),
           new Container(
             child: new Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                new RaisedButton(
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('REMOVE'),
                     onPressed: () {
                       print(widget.entry.reference);
@@ -99,7 +98,8 @@ class _ExecEditState extends State<ExecEdit> {
                       }
                       Navigator.pop(context, null);
                     }),
-                new RaisedButton(
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('SAVE'),
                     onPressed: () {
                       setState(() {
@@ -112,7 +112,8 @@ class _ExecEditState extends State<ExecEdit> {
                       });
                       Navigator.pop(context, null);
                     }),
-                new RaisedButton(
+                new FlatButton(
+                  textColor: Theme.of(context).accentColor,
                   child: const Text('EDIT'),
                   onPressed: () {
                     Navigator.push(
@@ -125,11 +126,6 @@ class _ExecEditState extends State<ExecEdit> {
                         ));
                   },
                 ),
-                new RaisedButton(
-                    child: const Text('DISCARD'),
-                    onPressed: () {
-                      Navigator.pop(context, null);
-                    }),
               ],
             ),
           ),
@@ -157,7 +153,8 @@ class ExecProgListItem extends StatelessWidget {
         children: <Widget>[
           new Expanded(
             child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 new Container(
                     padding: const EdgeInsets.only(right: 8.0),
@@ -382,7 +379,13 @@ class _EntryDialogState extends State<EntryDialog> {
   Widget build(BuildContext context) {
     print('_EntryDialogState');
     return new AlertDialog(
-      // title: new Text('Edit'),
+      title: new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Text('Edit Code'),
+            const Icon(Icons.edit),
+          ]),
       content: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -411,7 +414,7 @@ class _EntryDialogState extends State<EntryDialog> {
               }).toList(),
             ),
           ]),
-          const SizedBox(height: 24.0),
+          const SizedBox(height: 16.0),
           (_isImmediate == true)
               ? (new TextField(
                   controller: _controllerValue,
@@ -441,11 +444,13 @@ class _EntryDialogState extends State<EntryDialog> {
                         }).toList(),
                       ),
                     ])),
+          const SizedBox(height: 24.0),
           new Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                new RaisedButton(
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('REMOVE'),
                     onPressed: () {
                       setState(() {
@@ -454,8 +459,8 @@ class _EntryDialogState extends State<EntryDialog> {
                       });
                       Navigator.pop(context, null);
                     }),
-                const SizedBox(width: 8.0),
-                new RaisedButton(
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
                     child: const Text('SAVE'),
                     onPressed: () {
                       _didChange();
@@ -466,12 +471,6 @@ class _EntryDialogState extends State<EntryDialog> {
                             : _selectedEntry.key;
                         Navigator.pop(context, null);
                       });
-                    }),
-                const SizedBox(width: 8.0),
-                new RaisedButton(
-                    child: const Text('DISCARD'),
-                    onPressed: () {
-                      Navigator.pop(context, null);
                     }),
               ]),
         ],
