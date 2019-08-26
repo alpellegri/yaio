@@ -289,6 +289,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         },
                         builder: (FormFieldState<String> field) {
                           return new ListView.builder(
+                            physics: BouncingScrollPhysics(),
                             shrinkWrap: true,
                             reverse: true,
                             itemCount: item.query.length,
@@ -360,6 +361,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         },
                         builder: (FormFieldState<String> field) {
                           return new ListView.builder(
+                            physics: BouncingScrollPhysics(),
                             shrinkWrap: true,
                             reverse: true,
                             itemCount: item.query.length,

@@ -104,6 +104,7 @@ class _MessagesState extends State<Messages> {
         title: new Text('${widget.title}'),
       ),
       body: new ListView.builder(
+        physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         reverse: true,
         itemCount: entryList.length,

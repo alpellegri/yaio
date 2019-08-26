@@ -152,7 +152,7 @@ class _LoginState extends State<Login> {
     value.forEach((node, v) {
       String dataSource = '$root/$domain/$node/control';
       DatabaseReference dataRef =
-      FirebaseDatabase.instance.reference().child('$dataSource/time');
+          FirebaseDatabase.instance.reference().child('$dataSource/time');
       dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
     });
   }
@@ -169,6 +169,7 @@ class _LoginState extends State<Login> {
       body: ((_connected == false))
           ? (new LinearProgressIndicator(value: null))
           : (new ListView.builder(
+              physics: BouncingScrollPhysics(),
               shrinkWrap: true,
               itemCount: _map.keys.length,
               itemBuilder: (context, domain) {
@@ -207,7 +208,7 @@ class DomainCard extends StatelessWidget {
               context,
               new MaterialPageRoute(
                 builder: (BuildContext context) =>
-                new Domain(domain: name, map: map),
+                    new Domain(domain: name, map: map),
                 fullscreenDialog: true,
               ),
             ), //modified
