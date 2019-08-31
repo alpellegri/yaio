@@ -1,19 +1,19 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'device2.dart';
 import 'data_io.dart';
 import 'exec.dart';
-import 'dart:async';
-import 'package:firebase_database/firebase_database.dart';
 import 'firebase_utils.dart';
 import 'entries.dart';
 import 'chart_history.dart';
 import 'ui_data_io.dart';
+import 'drawer.dart';
 
 class Domain extends StatefulWidget {
   final String domain;
-  final dynamic map;
 
-  Domain({Key key, this.domain, this.map}) : super(key: key);
+  Domain({Key key, this.domain}) : super(key: key);
 
   @override
   _DomainState createState() => new _DomainState();
@@ -21,30 +21,52 @@ class Domain extends StatefulWidget {
 
 class _DomainState extends State<Domain> {
   List<IoEntry> entryList = new List();
+  DatabaseReference _rootRef;
+  StreamSubscription<Event> _onRootAddSubscription;
+  StreamSubscription<Event> _onRootEditedSubscription;
+  StreamSubscription<Event> _onRootRemoveSubscription;
+  Map<String, dynamic> _map = new Map<String, dynamic>();
   DatabaseReference _dataRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onChangedSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<Event> _onDataAddSubscription;
+  StreamSubscription<Event> _onDataChangedSubscription;
+  StreamSubscription<Event> _onDataRemoveSubscription;
+  final NavDrawer drawer = new NavDrawer();
 
   @override
   void initState() {
+    print('_DomainState');
     super.initState();
+    _rootRef = FirebaseDatabase.instance
+        .reference()
+        .child(getRootRef())
+        .child(widget.domain);
+    _onRootAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
+    _onRootEditedSubscription =
+        _rootRef.onChildChanged.listen(_onRootEntryChanged);
+    _onRootRemoveSubscription =
+        _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
+
     _dataRef = FirebaseDatabase.instance
         .reference()
         .child(getUserRef())
         .child('obj/data')
         .child(widget.domain);
-    _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
-    _onChangedSubscription = _dataRef.onChildChanged.listen(_onEntryChanged);
-    _onRemoveSubscription = _dataRef.onChildRemoved.listen(_onEntryRemoved);
+    _onDataAddSubscription = _dataRef.onChildAdded.listen(_onDataEntryAdded);
+    _onDataChangedSubscription =
+        _dataRef.onChildChanged.listen(_onDataEntryChanged);
+    _onDataRemoveSubscription =
+        _dataRef.onChildRemoved.listen(_onDataEntryRemoved);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
-    _onChangedSubscription.cancel();
-    _onRemoveSubscription.cancel();
+    _onRootAddSubscription.cancel();
+    _onRootEditedSubscription.cancel();
+    _onRootRemoveSubscription.cancel();
+    _onDataAddSubscription.cancel();
+    _onDataChangedSubscription.cancel();
+    _onDataRemoveSubscription.cancel();
   }
 
   @override
@@ -53,25 +75,53 @@ class _DomainState extends State<Domain> {
       appBar: new AppBar(
         title: new Text(widget.domain),
       ),
+      drawer: drawer,
       body: Container(
           child: SingleChildScrollView(
               child: new ListView.builder(
         shrinkWrap: true,
         physics: ClampingScrollPhysics(),
-        itemCount: widget.map.keys.length,
+        itemCount: _map.keys.length,
         itemBuilder: (context, node) {
-          String _node = widget.map.keys.toList()[node];
+          String _node = _map.keys.toList()[node];
           return new DeviceCard(
               domain: widget.domain,
               node: _node,
-              value: widget.map[_node],
+              value: _map[_node],
               data: entryList);
         },
       ))),
     );
   }
 
-  void _onEntryAdded(Event event) {
+  void _onRootEntryAdded(Event event) {
+    // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
+    String domain = event.snapshot.key;
+    dynamic value = event.snapshot.value;
+    setState(() {
+      _map.putIfAbsent(domain, () => value);
+    });
+  }
+
+  void _onRootEntryChanged(Event event) {
+    // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
+    String domain = event.snapshot.key;
+    dynamic value = event.snapshot.value;
+    setState(() {
+      _map.update(domain, (dynamic v) => value);
+    });
+    // _updateAllNodes(domain, value);
+  }
+
+  void _onRootEntryRemoved(Event event) {
+    // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
+    String domain = event.snapshot.key;
+    setState(() {
+      _map.removeWhere((key, value) => key == domain);
+    });
+  }
+
+  void _onDataEntryAdded(Event event) {
     bool drawWr = event.snapshot.value['drawWr'];
     bool drawRd = event.snapshot.value['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
@@ -83,7 +133,7 @@ class _DomainState extends State<Domain> {
     }
   }
 
-  void _onEntryChanged(Event event) {
+  void _onDataEntryChanged(Event event) {
     bool drawWr = event.snapshot.value['drawWr'];
     bool drawRd = event.snapshot.value['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
@@ -96,7 +146,7 @@ class _DomainState extends State<Domain> {
     }
   }
 
-  void _onEntryRemoved(Event event) {
+  void _onDataEntryRemoved(Event event) {
     bool drawWr = event.snapshot.value['drawWr'];
     bool drawRd = event.snapshot.value['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {

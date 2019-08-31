@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'login.dart';
 import 'device.dart';
 import 'log_history.dart';
 import 'version.dart';
+import 'domain.dart';
 import 'firebase_utils.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Device.routeName: (BuildContext context) => new Device(title: 'Device'),
@@ -138,6 +139,15 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                     title: new Text(_domain),
                                     onTap: () {
                                       savePreferencesD(_domain);
+                                      Navigator.pop(context);
+                                      Navigator.push(
+                                        context,
+                                        new MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              new Domain(domain: _domain),
+                                          fullscreenDialog: true,
+                                        ),
+                                      );
                                     },
                                   );
                                 },

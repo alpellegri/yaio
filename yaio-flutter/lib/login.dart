@@ -21,12 +21,13 @@ class _LoginState extends State<Login> {
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   DatabaseReference _fcmRef;
   DatabaseReference _rootRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditedSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<Event> _onRootAddSubscription;
+  StreamSubscription<Event> _onRootEditedSubscription;
+  StreamSubscription<Event> _onRootRemoveSubscription;
   bool _connected = false;
   Map<String, dynamic> _map = new Map<String, dynamic>();
   final NavDrawer drawer = new NavDrawer();
+  String _curr_domain;
 
   @override
   void initState() {
@@ -62,10 +63,10 @@ class _LoginState extends State<Login> {
           print('getRootRef: ${getRootRef()}');
 
           _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
-          _onAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
-          _onEditedSubscription =
+          _onRootAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
+          _onRootEditedSubscription =
               _rootRef.onChildChanged.listen(_onRootEntryChanged);
-          _onRemoveSubscription =
+          _onRootRemoveSubscription =
               _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
 
           _fcmRef =
@@ -88,6 +89,7 @@ class _LoginState extends State<Login> {
             }
             setState(() {
               _connected = true;
+              _curr_domain = getDomain();
             });
             // at the end, not before
             // FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -102,9 +104,9 @@ class _LoginState extends State<Login> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
-    _onEditedSubscription.cancel();
-    _onRemoveSubscription.cancel();
+    _onRootAddSubscription.cancel();
+    _onRootEditedSubscription.cancel();
+    _onRootRemoveSubscription.cancel();
   }
 
   void _onRootEntryAdded(Event event) {
@@ -150,29 +152,32 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      drawer: (_connected == false) ? null : drawer,
-      appBar: new AppBar(
-        title: (_connected == false)
-            ? const Text('Login to Yaio...')
-            : new Text(widget.title),
-      ),
-      body: ((_connected == false))
-          ? (new SizedBox(
-              height: 3.0, child: new LinearProgressIndicator(value: null)))
-          : ((true)
-              ? (new ListView.builder(
-                  physics: BouncingScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _map.keys.length,
-                  itemBuilder: (context, domain) {
-                    String _domain = _map.keys.toList()[domain];
-                    return new DomainCard(name: _domain, map: _map[_domain]);
-                    // return new Text(_domain);
-                  },
-                ))
-              : (new Container())),
-    );
+    print('$_connected, $_curr_domain, ${_map.length}');
+    if ((_connected == false) || (_curr_domain == null) || (_map.length == 0)) {
+      return new Scaffold(
+        drawer: (_connected == false) ? null : drawer,
+        appBar: new AppBar(
+          title: (_connected == false)
+              ? const Text('Login to Yaio...')
+              : new Text(widget.title),
+        ),
+        body: ((_connected == false))
+            ? (new SizedBox(
+                height: 3.0, child: new LinearProgressIndicator(value: null)))
+            : (new ListView.builder(
+                physics: BouncingScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _map.keys.length,
+                itemBuilder: (context, domain) {
+                  String _domain = _map.keys.toList()[domain];
+                  return new DomainCard(name: _domain, map: _map[_domain]);
+                },
+              )),
+      );
+    } else {
+      print('hello');
+      return new Domain(domain: _curr_domain);
+    }
   }
 }
 
@@ -198,7 +203,7 @@ class DomainCard extends StatelessWidget {
             context,
             new MaterialPageRoute(
               builder: (BuildContext context) =>
-                  new Domain(domain: name, map: map),
+                  new Domain(domain: name),
               fullscreenDialog: true,
             ),
           ), //modified
