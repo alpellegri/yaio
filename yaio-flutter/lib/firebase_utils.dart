@@ -128,6 +128,18 @@ void savePreferencesDN(String domain, String node) {
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
+void savePreferencesD(String domain) {
+  // override previous
+  _nodeConfigMap['domain'] = domain;
+  _nodeConfigMap['uid'] = getFirebaseUser().uid;
+
+  // update firebase references
+  updateNodeRef(_nodeConfigMap);
+
+  _nodeConfigJson = json.encode(_nodeConfigMap);
+  _prefs.setString('node_config_json', _nodeConfigJson);
+}
+
 void savePreferencesSP(String ssid, String password) {
   // override previous
   _nodeConfigMap['ssid'] = ssid;

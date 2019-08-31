@@ -6,6 +6,8 @@ import 'drawer.dart';
 import 'domain.dart';
 import 'firebase_utils.dart';
 
+Map<String, dynamic> domains = new Map<String, dynamic>();
+
 class Login extends StatefulWidget {
   Login({Key key, this.title}) : super(key: key);
   static const String routeName = '/yaio';
@@ -24,6 +26,7 @@ class _LoginState extends State<Login> {
   StreamSubscription<Event> _onRemoveSubscription;
   bool _connected = false;
   Map<String, dynamic> _map = new Map<String, dynamic>();
+  final NavDrawer drawer = new NavDrawer();
 
   @override
   void initState() {
@@ -108,22 +111,10 @@ class _LoginState extends State<Login> {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
-
+    domains.putIfAbsent(domain, () => value);
     setState(() {
       _map.putIfAbsent(domain, () => value);
     });
-
-    /*
-    // update all nodes
-    DateTime now = new DateTime.now();
-    String root = getRootRef();
-    value.forEach((node, v) {
-      String dataSource = '$root/$domain/$node/control';
-      DatabaseReference dataRef =
-          FirebaseDatabase.instance.reference().child('$dataSource/time');
-      dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
-    });
-    */
     _updateAllNodes(domain, value);
   }
 
@@ -132,18 +123,18 @@ class _LoginState extends State<Login> {
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
     setState(() {
-      _map.putIfAbsent(domain, () => value);
+      _map.update(domain, (dynamic v) => value);
     });
-    /*_map.forEach((kd, v) {
-      v.forEach((kn, v) {
-        print('$kd/$kn: ${v.toString()}');
-      });
-    });*/
     // _updateAllNodes(domain, value);
   }
 
   void _onRootEntryRemoved(Event event) {
-    print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
+    String domain = event.snapshot.key;
+    domains.removeWhere((key, value) => key == domain);
+    setState(() {
+      _map.removeWhere((key, value) => key == domain);
+    });
   }
 
   void _updateAllNodes(String domain, dynamic value) {
@@ -167,17 +158,20 @@ class _LoginState extends State<Login> {
             : new Text(widget.title),
       ),
       body: ((_connected == false))
-          ? (new LinearProgressIndicator(value: null))
-          : (new ListView.builder(
-              physics: BouncingScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: _map.keys.length,
-              itemBuilder: (context, domain) {
-                String _domain = _map.keys.toList()[domain];
-                return new DomainCard(name: _domain, map: _map[_domain]);
-                // return new Text(_domain);
-              },
-            )),
+          ? (new SizedBox(
+              height: 3.0, child: new LinearProgressIndicator(value: null)))
+          : ((true)
+              ? (new ListView.builder(
+                  physics: BouncingScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: _map.keys.length,
+                  itemBuilder: (context, domain) {
+                    String _domain = _map.keys.toList()[domain];
+                    return new DomainCard(name: _domain, map: _map[_domain]);
+                    // return new Text(_domain);
+                  },
+                ))
+              : (new Container())),
     );
   }
 }
@@ -190,31 +184,26 @@ class DomainCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Card(
-      shape: new BeveledRectangleBorder(
-        borderRadius: BorderRadius.circular(0.0),
-      ),
-      child: new Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new InkWell(
-            child: new ListTile(
-              leading: const Icon(Icons.domain),
-              title: new Text(name),
-              subtitle: new Text('${map.keys.length} device'),
-            ),
-            onTap: () => Navigator.push(
-              context,
-              new MaterialPageRoute(
-                builder: (BuildContext context) =>
-                    new Domain(domain: name, map: map),
-                fullscreenDialog: true,
-              ),
-            ), //modified
+    return new Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new InkWell(
+          child: new ListTile(
+            leading: const Icon(Icons.domain),
+            title: new Text(name),
+            subtitle: new Text('${map.keys.length} device'),
           ),
-        ],
-      ),
+          onTap: () => Navigator.push(
+            context,
+            new MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  new Domain(domain: name, map: map),
+              fullscreenDialog: true,
+            ),
+          ), //modified
+        ),
+      ],
     );
   }
 }

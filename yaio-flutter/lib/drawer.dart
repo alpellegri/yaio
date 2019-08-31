@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'login.dart';
 import 'device.dart';
 import 'log_history.dart';
 import 'version.dart';
 import 'firebase_utils.dart';
-
-final MyDrawer drawer = new MyDrawer();
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Device.routeName: (BuildContext context) => new Device(title: 'Device'),
@@ -13,47 +13,156 @@ final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
       new VersionInfo(title: 'Version'),
 };
 
-class MyDrawer extends StatefulWidget {
+class NavDrawer extends StatefulWidget {
   @override
-  _MyDrawerState createState() => new _MyDrawerState();
+  NavDrawerState createState() => NavDrawerState();
 }
 
-class _MyDrawerState extends State<MyDrawer> {
+class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
+    begin: const Offset(0.0, -1.0),
+    end: Offset.zero,
+  ).chain(CurveTween(
+    curve: Curves.fastOutSlowIn,
+  ));
+
+  AnimationController _controller;
+  Animation<double> _drawerContentsOpacity;
+  Animation<Offset> _drawerDetailsPosition;
+  bool _showDrawerContents = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _drawerContentsOpacity = CurvedAnimation(
+      parent: ReverseAnimation(_controller),
+      curve: Curves.fastOutSlowIn,
+    );
+    _drawerDetailsPosition = _controller.drive(_drawerDetailsTween);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _showNotImplementedMessage() {
+    Navigator.pop(context); // Dismiss the drawer.
+    _scaffoldKey.currentState.showSnackBar(const SnackBar(
+      content: Text("The drawer's items don't do anything"),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Drawer(
-      child: new ListView(children: <Widget>[
-        new UserAccountsDrawerHeader(
-          accountName: new Text(getFirebaseUser().displayName),
-          accountEmail: new Text(getFirebaseUser().email),
-          currentAccountPicture: new CircleAvatar(
-            backgroundImage: new NetworkImage(
-              getFirebaseUser().providerData[1].photoUrl,
+    return Drawer(
+      child: new Column(
+        children: <Widget>[
+          new UserAccountsDrawerHeader(
+            accountName: new Text(getFirebaseUser().displayName),
+            accountEmail: new Text(getFirebaseUser().email),
+            currentAccountPicture: new CircleAvatar(
+              backgroundImage: new NetworkImage(
+                getFirebaseUser().providerData[1].photoUrl,
+              ),
+            ),
+            margin: EdgeInsets.zero,
+            onDetailsPressed: () {
+              _showDrawerContents = !_showDrawerContents;
+              if (_showDrawerContents)
+                _controller.reverse();
+              else
+                _controller.forward();
+            },
+          ),
+          new MediaQuery.removePadding(
+            context: context,
+            // DrawerHeader consumes top MediaQuery padding.
+            removeTop: true,
+            child: new Expanded(
+              child: new ListView(
+                dragStartBehavior: DragStartBehavior.down,
+                padding: const EdgeInsets.only(top: 8.0),
+                children: <Widget>[
+                  new Stack(
+                    children: <Widget>[
+                      // The initial contents of the drawer.
+                      new FadeTransition(
+                        opacity: _drawerContentsOpacity,
+                        child: new Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              new ListTile(
+                                  leading: const Icon(Icons.message),
+                                  title: const Text('Notification Logs'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.of(context)
+                                        .pushNamed(Messages.routeName);
+                                  }),
+                              new ListTile(
+                                  leading: const Icon(Icons.message),
+                                  title: const Text('Version Info'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.of(context)
+                                        .pushNamed(VersionInfo.routeName);
+                                  }),
+                            ]),
+                      ),
+                      // The drawer's "details" view.
+                      new SlideTransition(
+                        position: _drawerDetailsPosition,
+                        child: new FadeTransition(
+                          opacity: new ReverseAnimation(_drawerContentsOpacity),
+                          child: new Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              new ListView.builder(
+                                physics: BouncingScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: domains.keys.length,
+                                itemBuilder: (context, id) {
+                                  String _domain = domains.keys.toList()[id];
+                                  return new ListTile(
+                                    leading: const Icon(Icons.add),
+                                    title: new Text(_domain),
+                                    onTap: () {
+                                      savePreferencesD(_domain);
+                                    },
+                                  );
+                                },
+                              ),
+                              new ListTile(
+                                leading: const Icon(Icons.settings),
+                                title: const Text('Manage Domains'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context)
+                                      .pushNamed(Device.routeName);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        new ListTile(
-            leading: const Icon(Icons.developer_board),
-            title: const Text('Device'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushNamed(Device.routeName);
-            }),
-        new ListTile(
-            leading: const Icon(Icons.message),
-            title: const Text('Messages'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushNamed(Messages.routeName);
-            }),
-        new ListTile(
-            leading: const Icon(Icons.message),
-            title: const Text('Version'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushNamed(VersionInfo.routeName);
-            }),
-      ]),
+        ],
+      ),
     );
   }
 }

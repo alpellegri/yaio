@@ -142,94 +142,90 @@ class _DeviceCardState extends State<DeviceCard> {
     }
     // extract only data related to a node
     var query = widget.data.where((e) => (e.owner == widget.node)).toList();
-    return Card(
-      elevation: 2.0,
-      shape: new BeveledRectangleBorder(
-        borderRadius: BorderRadius.circular(0.0),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Container(
-            decoration: new BoxDecoration(
-                // color: Colors.grey[100],
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new Container(
+          decoration: new BoxDecoration(
+              // color: Colors.grey[100],
+              ),
+          child: new Row(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              const SizedBox(width: 8.0),
+              online
+                  ? new Icon(Icons.link, color: Colors.green[400])
+                  : new Icon(Icons.link_off, color: Colors.grey[400]),
+              const SizedBox(width: 8.0),
+              new Text(widget.node,
+                  style: new TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  )),
+              const SizedBox(width: 8.0),
+              new Expanded(
+                child: new Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    new PopupMenuButton<String>(
+                        padding: EdgeInsets.zero,
+                        onSelected: _routeSelection,
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuItem<String>>[
+                              new PopupMenuItem<String>(
+                                  value: 'Settings',
+                                  child: const Text('Settings')),
+                              new PopupMenuItem<String>(
+                                  value: 'Data IO',
+                                  child: const Text('Data IO')),
+                              new PopupMenuItem<String>(
+                                  value: 'Routine',
+                                  child: const Text('Routine')),
+                            ]),
+                  ],
                 ),
-            child: new Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                const SizedBox(width: 8.0),
-                online
-                    ? new Icon(Icons.link, color: Colors.green[400])
-                    : new Icon(Icons.link_off, color: Colors.grey[400]),
-                const SizedBox(width: 8.0),
-                new Text(widget.node,
-                    style: new TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    )),
-                const SizedBox(width: 8.0),
-                new Expanded(
-                  child: new Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      new PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          onSelected: _routeSelection,
-                          itemBuilder: (BuildContext context) =>
-                              <PopupMenuItem<String>>[
-                                new PopupMenuItem<String>(
-                                    value: 'Settings',
-                                    child: const Text('Settings')),
-                                new PopupMenuItem<String>(
-                                    value: 'Data IO',
-                                    child: const Text('Data IO')),
-                                new PopupMenuItem<String>(
-                                    value: 'Routine',
-                                    child: const Text('Routine')),
-                              ]),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8.0),
-          new ListView.builder(
-            shrinkWrap: true,
-            physics: BouncingScrollPhysics(),
-            itemCount: query.length,
-            itemBuilder: (buildContext, index) {
-              if (query[index].drawWr == true) {
-                return new InkWell(
-                  onTap: () {
-                    _openEntryDialog(widget.node, query[index]);
-                  },
-                  child: new DataItemWidget(query[index]),
-                );
-              } else if (query[index].enLog == true) {
-                return new InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        new MaterialPageRoute(
-                          builder: (BuildContext context) => new ChartHistory(
-                              domain: widget.domain,
-                              node: widget.node,
-                              name: query[index].key),
-                          fullscreenDialog: true,
-                        ));
-                  },
-                  child: new DataItemWidget(query[index]),
-                );
-              } else {
-                return DataItemWidget(query[index]);
-              }
-            },
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8.0),
+        new ListView.builder(
+          shrinkWrap: true,
+          physics: BouncingScrollPhysics(),
+          itemCount: query.length,
+          itemBuilder: (buildContext, index) {
+            if (query[index].drawWr == true) {
+              return new InkWell(
+                onTap: () {
+                  _openEntryDialog(widget.node, query[index]);
+                },
+                child: new DataItemWidget(query[index]),
+              );
+            } else if (query[index].enLog == true) {
+              return new InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      new MaterialPageRoute(
+                        builder: (BuildContext context) => new ChartHistory(
+                            domain: widget.domain,
+                            node: widget.node,
+                            name: query[index].key),
+                        fullscreenDialog: true,
+                      ));
+                },
+                child: new DataItemWidget(query[index]),
+              );
+            } else {
+              return DataItemWidget(query[index]);
+            }
+          },
+        ),
+        new Divider(
+            color: Colors.black12, thickness: .6, indent: 8, endIndent: 8),
+      ],
     );
   }
 
