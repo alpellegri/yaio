@@ -135,7 +135,7 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                 itemBuilder: (context, id) {
                                   String _domain = domains.keys.toList()[id];
                                   return new ListTile(
-                                    leading: const Icon(Icons.add),
+                                    leading: Icon(Icons.domain),
                                     title: new Text(_domain),
                                     onTap: () {
                                       savePreferencesD(_domain);

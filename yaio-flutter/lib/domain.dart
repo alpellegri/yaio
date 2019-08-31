@@ -34,7 +34,6 @@ class _DomainState extends State<Domain> {
 
   @override
   void initState() {
-    print('_DomainState');
     super.initState();
     _rootRef = FirebaseDatabase.instance
         .reference()

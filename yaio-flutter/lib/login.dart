@@ -152,7 +152,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    print('$_connected, $_curr_domain, ${_map.length}');
     if ((_connected == false) || (_curr_domain == null) || (_map.length == 0)) {
       return new Scaffold(
         drawer: (_connected == false) ? null : drawer,
@@ -164,51 +163,10 @@ class _LoginState extends State<Login> {
         body: ((_connected == false))
             ? (new SizedBox(
                 height: 3.0, child: new LinearProgressIndicator(value: null)))
-            : (new ListView.builder(
-                physics: BouncingScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _map.keys.length,
-                itemBuilder: (context, domain) {
-                  String _domain = _map.keys.toList()[domain];
-                  return new DomainCard(name: _domain, map: _map[_domain]);
-                },
-              )),
+            : (new Text('Select a domain')),
       );
     } else {
-      print('hello');
       return new Domain(domain: _curr_domain);
     }
-  }
-}
-
-class DomainCard extends StatelessWidget {
-  final String name;
-  final dynamic map;
-
-  const DomainCard({Key key, this.name, this.map}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        new InkWell(
-          child: new ListTile(
-            leading: const Icon(Icons.domain),
-            title: new Text(name),
-            subtitle: new Text('${map.keys.length} device'),
-          ),
-          onTap: () => Navigator.push(
-            context,
-            new MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  new Domain(domain: name),
-              fullscreenDialog: true,
-            ),
-          ), //modified
-        ),
-      ],
-    );
   }
 }
