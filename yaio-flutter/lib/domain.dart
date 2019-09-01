@@ -12,7 +12,6 @@ import 'drawer.dart';
 
 class Domain extends StatefulWidget {
   final String domain;
-
   Domain({Key key, this.domain}) : super(key: key);
 
   @override

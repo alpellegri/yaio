@@ -63,7 +63,8 @@ class _LoginState extends State<Login> {
           print('getRootRef: ${getRootRef()}');
 
           _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
-          _onRootAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
+          _onRootAddSubscription =
+              _rootRef.onChildAdded.listen(_onRootEntryAdded);
           _onRootEditedSubscription =
               _rootRef.onChildChanged.listen(_onRootEntryChanged);
           _onRootRemoveSubscription =

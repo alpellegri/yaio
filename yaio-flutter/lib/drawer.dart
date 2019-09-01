@@ -20,8 +20,6 @@ class NavDrawer extends StatefulWidget {
 }
 
 class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
     begin: const Offset(0.0, -1.0),
     end: Offset.zero,
@@ -52,13 +50,6 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _showNotImplementedMessage() {
-    Navigator.pop(context); // Dismiss the drawer.
-    _scaffoldKey.currentState.showSnackBar(const SnackBar(
-      content: Text("The drawer's items don't do anything"),
-    ));
   }
 
   @override
@@ -128,6 +119,7 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
+                              /*
                               new ListView.builder(
                                 physics: BouncingScrollPhysics(),
                                 shrinkWrap: true,
@@ -151,6 +143,32 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                     },
                                   );
                                 },
+                              ),*/
+                              new ListTile(
+                                leading: Icon(Icons.domain),
+                                title: new Text(getDomain()),
+                                trailing: PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                  savePreferencesD(value);
+                                  // Domain.of(context).rebuild();
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    new MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          new Domain(domain: value),
+                                      fullscreenDialog: true,
+                                    ),
+                                  );
+                                }, itemBuilder: (context) {
+                                  return domains.keys.map((key) {
+                                    return PopupMenuItem<String>(
+                                      value: key,
+                                      child: Text(key),
+                                    );
+                                  }).toList();
+                                }),
                               ),
                               new ListTile(
                                 leading: const Icon(Icons.settings),
