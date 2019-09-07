@@ -391,10 +391,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    var update = _updateItemMenu();
-    setState(() {
-      _isNeedCreate = update;
-    });
+    _isNeedCreate = _updateItemMenu();
+
     print('_isNeedCreate $_isNeedCreate');
     DateTime _startupTime;
     String diffTime;
