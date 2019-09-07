@@ -25,7 +25,6 @@ static bool boot_first = false;
 static uint32_t control_time;
 static uint32_t control_time_last;
 
-static uint16_t bootcnt = 0;
 static uint32_t fbm_update_last = 0;
 static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
@@ -58,17 +57,17 @@ bool FbmService(void) {
       DEBUG_PRINT("get failed: kstartup\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      if (object.success()) {
-        bootcnt = object[F("bootcnt")];
-        object[F("bootcnt")] = ++bootcnt;
+      DynamicJsonDocument object(1024);
+      auto error = deserializeJson(object, json);
+      if (!error) {
+        uint32_t bootcnt = object[F("bootcnt")];
+        object[F("bootcnt")] = bootcnt + 1;
         object[F("time")] = getTime();
         object[F("version")] = VERS_getVersion();
-        yield();
-        Firebase.updateJSON(kstartup, JsonVariant(object));
+        String object_str;
+        serializeJson(object, object_str);
+        Firebase.updateJSON(kstartup, object_str);
         if (Firebase.failed()) {
-          bootcnt--;
           DEBUG_PRINT("update failed: kstartup\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
@@ -155,9 +154,9 @@ bool FbmService(void) {
       DEBUG_PRINT("get failed: kcontrol\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      if (object.success()) {
+      DynamicJsonDocument object(1024);
+      auto error = deserializeJson(object, json);
+      if (!error) {
         control_time = object[F("time")];
 
         int control_reboot = object[F("reboot")];
@@ -177,13 +176,13 @@ bool FbmService(void) {
       }
     }
 
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &status = jsonBuffer.createObject();
+    DynamicJsonDocument status(1024);
     status[F("heap")] = ESP.getFreeHeap();
     status[F("time")] = getTime();
-    yield();
+    String status_str;
+    serializeJson(status, status_str);
     String kstatus = FbGetPath_status();
-    Firebase.setJSON(kstatus, JsonVariant(status));
+    Firebase.setJSON(kstatus, status_str);
     if (Firebase.failed()) {
       DEBUG_PRINT("set failed: kstatus\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());

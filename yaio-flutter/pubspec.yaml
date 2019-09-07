@@ -1,6 +1,6 @@
 name: yaio
 description: A new Flutter project.
-
+version: 0.4.2+7
 dependencies:
   flutter:
     sdk: flutter
@@ -11,6 +11,7 @@ dependencies:
   firebase_messaging:
   shared_preferences:
   charts_flutter:
+  package_info:
 
 dev_dependencies:
   flutter_test:
@@ -18,22 +19,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  fonts:
-    - family: Raleway
-      fonts:
-        - asset: asset/fonts/raleway/Raleway-Regular.ttf
-        - asset: asset/fonts/raleway/Raleway-Medium.ttf
-        - asset: asset/fonts/raleway/Raleway-SemiBold.ttf
-          style: italic
-    - family: Open_Sans
-      fonts:
-        - asset: asset/fonts/Open_Sans/OpenSans-Regular.ttf
-          style: italic
-    - family: Audiowide
-      fonts:
-        - asset: asset/fonts/Audiowide/Audiowide-Regular.ttf
-          style: italic
-    - family: Roboto_Mono
-      fonts:
-        - asset: asset/fonts/Roboto_Mono/RobotoMono-Regular.ttf
-          style: italic

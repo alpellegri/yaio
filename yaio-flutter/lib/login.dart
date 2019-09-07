@@ -6,6 +6,8 @@ import 'drawer.dart';
 import 'domain.dart';
 import 'firebase_utils.dart';
 
+Map<String, dynamic> domains = new Map<String, dynamic>();
+
 class Login extends StatefulWidget {
   Login({Key key, this.title}) : super(key: key);
   static const String routeName = '/yaio';
@@ -19,11 +21,13 @@ class _LoginState extends State<Login> {
   final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   DatabaseReference _fcmRef;
   DatabaseReference _rootRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditedSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<Event> _onRootAddSubscription;
+  StreamSubscription<Event> _onRootEditedSubscription;
+  StreamSubscription<Event> _onRootRemoveSubscription;
   bool _connected = false;
   Map<String, dynamic> _map = new Map<String, dynamic>();
+  final NavDrawer drawer = new NavDrawer();
+  String _curr_domain;
 
   @override
   void initState() {
@@ -59,10 +63,11 @@ class _LoginState extends State<Login> {
           print('getRootRef: ${getRootRef()}');
 
           _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
-          _onAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
-          _onEditedSubscription =
+          _onRootAddSubscription =
+              _rootRef.onChildAdded.listen(_onRootEntryAdded);
+          _onRootEditedSubscription =
               _rootRef.onChildChanged.listen(_onRootEntryChanged);
-          _onRemoveSubscription =
+          _onRootRemoveSubscription =
               _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
 
           _fcmRef =
@@ -85,6 +90,7 @@ class _LoginState extends State<Login> {
             }
             setState(() {
               _connected = true;
+              _curr_domain = getDomain();
             });
             // at the end, not before
             // FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -99,21 +105,42 @@ class _LoginState extends State<Login> {
   @override
   void dispose() {
     super.dispose();
-    _onAddSubscription.cancel();
-    _onEditedSubscription.cancel();
-    _onRemoveSubscription.cancel();
+    _onRootAddSubscription.cancel();
+    _onRootEditedSubscription.cancel();
+    _onRootRemoveSubscription.cancel();
   }
 
   void _onRootEntryAdded(Event event) {
-    print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
+    // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
-
+    domains.putIfAbsent(domain, () => value);
     setState(() {
       _map.putIfAbsent(domain, () => value);
     });
+    _updateAllNodes(domain, value);
+  }
 
-    // update all nodes
+  void _onRootEntryChanged(Event event) {
+    // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
+    String domain = event.snapshot.key;
+    dynamic value = event.snapshot.value;
+    setState(() {
+      _map.update(domain, (dynamic v) => value);
+    });
+    // _updateAllNodes(domain, value);
+  }
+
+  void _onRootEntryRemoved(Event event) {
+    // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
+    String domain = event.snapshot.key;
+    domains.removeWhere((key, value) => key == domain);
+    setState(() {
+      _map.removeWhere((key, value) => key == domain);
+    });
+  }
+
+  void _updateAllNodes(String domain, dynamic value) {
     DateTime now = new DateTime.now();
     String root = getRootRef();
     value.forEach((node, v) {
@@ -124,81 +151,23 @@ class _LoginState extends State<Login> {
     });
   }
 
-  void _onRootEntryChanged(Event event) {
-    // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
-    String domain = event.snapshot.key;
-    dynamic value = event.snapshot.value;
-    setState(() {
-      _map.putIfAbsent(domain, () => value);
-    });
-    /*_map.forEach((kd, v) {
-      v.forEach((kn, v) {
-        print('$kd/$kn: ${v.toString()}');
-      });
-    });*/
-  }
-
-  void _onRootEntryRemoved(Event event) {
-    print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
-  }
-
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      drawer: (_connected == false) ? null : drawer,
-      appBar: new AppBar(
-        title: (_connected == false)
-            ? const Text('Login to Yaio...')
-            : new Text(widget.title),
-      ),
-      body: ((_connected == false))
-          ? (new LinearProgressIndicator(value: null))
-          : (new ListView.builder(
-              shrinkWrap: true,
-              itemCount: _map.keys.length,
-              itemBuilder: (context, domain) {
-                String _domain = _map.keys.toList()[domain];
-                return new DomainCard(name: _domain, map: _map[_domain]);
-                // return new Text(_domain);
-              },
-            )),
-    );
-  }
-}
-
-class DomainCard extends StatelessWidget {
-  final String name;
-  final dynamic map;
-
-  const DomainCard({Key key, this.name, this.map}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Card(
-      shape: new BeveledRectangleBorder(
-        borderRadius: BorderRadius.circular(0.0),
-      ),
-      child: new Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new InkWell(
-            child: new ListTile(
-              leading: const Icon(Icons.domain),
-              title: new Text(name),
-              subtitle: new Text('${map.keys.length} device'),
-            ),
-            onTap: () => Navigator.push(
-              context,
-              new MaterialPageRoute(
-                builder: (BuildContext context) =>
-                new Domain(domain: name, map: map),
-                fullscreenDialog: true,
-              ),
-            ), //modified
-          ),
-        ],
-      ),
-    );
+    if ((_connected == false) || (_curr_domain == null) || (_map.length == 0)) {
+      return new Scaffold(
+        drawer: (_connected == false) ? null : drawer,
+        appBar: new AppBar(
+          title: (_connected == false)
+              ? const Text('Login to Yaio...')
+              : new Text(widget.title),
+        ),
+        body: ((_connected == false))
+            ? (new SizedBox(
+                height: 3.0, child: new LinearProgressIndicator(value: null)))
+            : (new Text('Select a domain')),
+      );
+    } else {
+      return new Domain(domain: _curr_domain);
+    }
   }
 }

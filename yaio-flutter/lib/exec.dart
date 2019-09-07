@@ -14,29 +14,7 @@ class ExecListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          new Expanded(
-            child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    new Text(
-                      '${entry.key}',
-                      textAlign: TextAlign.left,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      child: new Text('${entry.key}', textAlign: TextAlign.left),
     );
   }
 }
@@ -48,20 +26,15 @@ class Exec extends StatefulWidget {
   Exec({Key key, this.domain, this.node}) : super(key: key);
 
   @override
-  _ExecState createState() => new _ExecState(domain, node);
+  _ExecState createState() => new _ExecState();
 }
 
 class _ExecState extends State<Exec> {
-  final String domain;
-  final String node;
-
   List<ExecEntry> entryList = new List();
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
   StreamSubscription<Event> _onRemoveSubscription;
-
-  _ExecState(this.domain, this.node);
 
   @override
   void initState() {
@@ -70,8 +43,8 @@ class _ExecState extends State<Exec> {
         .reference()
         .child(getUserRef())
         .child('obj/exec')
-        .child(domain)
-        .child(node);
+        .child(widget.domain)
+        .child(widget.node);
     _onAddSubscription = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onEditSubscription = _entryRef.onChildChanged.listen(_onEntryEdited);
     _onRemoveSubscription = _entryRef.onChildRemoved.listen(_onEntryRemoved);
@@ -93,10 +66,11 @@ class _ExecState extends State<Exec> {
     });*/
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Routine $domain/$node'),
+        title: new Text('Routine ${widget.domain}/${widget.node}'),
       ),
       body: new ListView.builder(
         shrinkWrap: true,
+        physics: BouncingScrollPhysics(),
         reverse: true,
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
@@ -115,7 +89,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryAdded(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == node) {
+    if (owner == widget.node) {
       setState(() {
         entryList.add(new ExecEntry.fromMap(
             _entryRef, event.snapshot.key, event.snapshot.value));
@@ -125,7 +99,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryEdited(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == node) {
+    if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -137,7 +111,7 @@ class _ExecState extends State<Exec> {
 
   void _onEntryRemoved(Event event) {
     String owner = event.snapshot.value["owner"];
-    if (owner == node) {
+    if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
@@ -151,7 +125,10 @@ class _ExecState extends State<Exec> {
         context,
         new MaterialPageRoute(
           builder: (BuildContext context) => new ExecEdit(
-              domain: domain, node: node, entry: entry, execList: entryList),
+              domain: widget.domain,
+              node: widget.node,
+              entry: entry,
+              execList: entryList),
         ));
   }
 

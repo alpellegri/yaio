@@ -14,33 +14,28 @@ class ExecEdit extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ExecEditState createState() =>
-      new _ExecEditState(domain, node, entry, execList);
+  _ExecEditState createState() => new _ExecEditState();
 }
 
 class _ExecEditState extends State<ExecEdit> {
-  final String domain;
-  final String node;
   final TextEditingController _controllerName = new TextEditingController();
-  final ExecEntry entry;
-  List<ExecEntry> execList;
   ExecEntry _selectedNext;
   var _selectedNextList;
 
   List<IoEntry> entryIoList = new List();
 
-  _ExecEditState(this.domain, this.node, this.entry, this.execList);
-
   @override
   void initState() {
     super.initState();
-    _controllerName.text = entry?.key;
-    if (entry.cb != null) {
-      _selectedNextList = execList.where((el) => el.key == entry.cb);
+    _controllerName.text = widget.entry?.key;
+    if (widget.entry.cb != null) {
+      _selectedNextList =
+          widget.execList.where((el) => el.key == widget.entry.cb);
       if (_selectedNextList.length == 1) {
-        _selectedNext = execList.singleWhere((el) => el.key == entry.cb);
+        _selectedNext =
+            widget.execList.singleWhere((el) => el.key == widget.entry.cb);
       } else {
-        entry.cb = null;
+        widget.entry.cb = null;
       }
     }
   }
@@ -57,8 +52,6 @@ class _ExecEditState extends State<ExecEdit> {
         title: new Text('Edit'),
       ),
       body: new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new ListTile(
             title: new TextField(
@@ -69,7 +62,7 @@ class _ExecEditState extends State<ExecEdit> {
               ),
             ),
           ),
-          (execList.length > 0)
+          (widget.execList.length > 0)
               ? new ListTile(
                   title: const Text('Callback Routine'),
                   trailing: new DropdownButton<ExecEntry>(
@@ -80,7 +73,7 @@ class _ExecEditState extends State<ExecEdit> {
                         _selectedNext = newValue;
                       });
                     },
-                    items: execList.map((ExecEntry entry) {
+                    items: widget.execList.map((ExecEntry entry) {
                       return new DropdownMenuItem<ExecEntry>(
                         value: entry,
                         child: new Text(entry.key),
@@ -88,49 +81,52 @@ class _ExecEditState extends State<ExecEdit> {
                     }).toList(),
                   ),
                 )
-              : const Text(''),
-          new ListTile(
-            trailing: new ButtonTheme.bar(
-              child: new ButtonBar(
-                children: <Widget>[
-                  new FlatButton(
-                      child: const Text('REMOVE'),
-                      onPressed: () {
-                        print(entry.reference);
-                        if (entry.exist == true) {
-                          entry.reference.child(entry.key).remove();
-                        }
-                        Navigator.pop(context, null);
-                      }),
-                  new FlatButton(
-                      child: const Text('SAVE'),
-                      onPressed: () {
-                        setState(() {
-                          entry.key = _controllerName.text;
-                          entry.cb = _selectedNext?.key;
-                          entry.setOwner(node);
-                          entry.reference.child(entry.key).set(entry.toJson());
-                        });
-                        Navigator.pop(context, null);
-                      }),
-                  new FlatButton(
-                    child: const Text('EDIT'),
+              : new Container(),
+          const SizedBox(height: 24.0),
+          new Container(
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
+                    child: const Text('REMOVE'),
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                            builder: (BuildContext context) => new ExecProg(
-                                domain: domain, node: node, prog: entry.p),
-                          ));
-                    },
-                  ),
-                  new FlatButton(
-                      child: const Text('DISCARD'),
-                      onPressed: () {
-                        Navigator.pop(context, null);
-                      }),
-                ],
-              ),
+                      print(widget.entry.reference);
+                      if (widget.entry.exist == true) {
+                        widget.entry.reference.child(widget.entry.key).remove();
+                      }
+                      Navigator.pop(context, null);
+                    }),
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
+                    child: const Text('SAVE'),
+                    onPressed: () {
+                      setState(() {
+                        widget.entry.key = _controllerName.text;
+                        widget.entry.cb = _selectedNext?.key;
+                        widget.entry.setOwner(widget.node);
+                        widget.entry.reference
+                            .child(widget.entry.key)
+                            .set(widget.entry.toJson());
+                      });
+                      Navigator.pop(context, null);
+                    }),
+                new FlatButton(
+                  textColor: Theme.of(context).accentColor,
+                  child: const Text('EDIT'),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                          builder: (BuildContext context) => new ExecProg(
+                              domain: widget.domain,
+                              node: widget.node,
+                              prog: widget.entry.p),
+                        ));
+                  },
+                ),
+              ],
             ),
           ),
         ],
@@ -157,20 +153,14 @@ class ExecProgListItem extends StatelessWidget {
         children: <Widget>[
           new Expanded(
             child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 new Container(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: new Text(
-                    '$pc',
-                    style: new TextStyle(
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ),
-                new Text(
-                  '${kOpCode2Name[OpCode.values[entry.i]]}, $value',
-                ),
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: new Text('$pc',
+                        style: new TextStyle(color: Colors.grey[500]))),
+                new Text('${kOpCode2Name[OpCode.values[entry.i]]}, $value'),
               ],
             ),
           ),
@@ -227,21 +217,18 @@ class _ExecProgState extends State<ExecProg> {
       appBar: new AppBar(
         title: new Text('Program'),
       ),
-      body: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new ListView.builder(
-              shrinkWrap: true,
-              itemCount: prog.length,
-              itemBuilder: (buildContext, index) {
-                return new InkWell(
-                    onTap: () => _openEntryDialog(index),
-                    child:
-                        new ExecProgListItem(index, prog[index], entryIoList));
-              },
-            ),
-          ]),
+      body: Container(
+        child: new ListView.builder(
+          shrinkWrap: true,
+          physics: BouncingScrollPhysics(),
+          itemCount: prog.length,
+          itemBuilder: (buildContext, index) {
+            return new InkWell(
+                onTap: () => _openEntryDialog(index),
+                child: new ExecProgListItem(index, prog[index], entryIoList));
+          },
+        ),
+      ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
@@ -392,91 +379,102 @@ class _EntryDialogState extends State<EntryDialog> {
   Widget build(BuildContext context) {
     print('_EntryDialogState');
     return new AlertDialog(
-        // title: new Text('Edit'),
-        content: new Column(
+      title: new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new Row(children: [
-              new Expanded(
-                child: const Text('OpCode'),
-              ),
-              new DropdownButton<int>(
-                isDense: true,
-                hint: const Text('action'),
-                value: _selectedOpCode,
-                onChanged: (int newValue) {
-                  setState(() {
-                    _selectedOpCode = newValue;
-                    _isImmediate =
-                        kOpCodeIsImmediate[OpCode.values[_selectedOpCode]];
-                  });
-                },
-                items: _opCodeMenu.map((int entry) {
-                  return new DropdownMenuItem<int>(
-                    value: entry,
-                    child: new Text(
-                      kOpCode2Name[OpCode.values[entry]],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ]),
-            (_isImmediate == true)
-                ? (new TextField(
-                    controller: _controllerValue,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: 'value',
-                      labelText: 'Value',
-                    ),
-                  ))
-                : new ListTile(
-                    title: const Text('Data'),
-                    trailing: new DropdownButton<IoEntry>(
-                      hint: const Text('data'),
-                      value: _selectedEntry,
-                      onChanged: (IoEntry newValue) {
-                        setState(() {
-                          _selectedEntry = newValue;
-                        });
-                      },
-                      items: entryIoList.map((IoEntry entry) {
-                        return new DropdownMenuItem<IoEntry>(
-                          value: entry,
-                          child: new Text(entry.key),
-                        );
-                      }).toList(),
-                    ),
+            const Text('Edit Code'),
+            const Icon(Icons.edit),
+          ]),
+      content: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Opcode'),
+            const SizedBox(height: 8.0),
+            new DropdownButton<int>(
+              isDense: true,
+              hint: const Text('action'),
+              value: _selectedOpCode,
+              onChanged: (int newValue) {
+                setState(() {
+                  _selectedOpCode = newValue;
+                  _isImmediate =
+                      kOpCodeIsImmediate[OpCode.values[_selectedOpCode]];
+                });
+              },
+              items: _opCodeMenu.map((int entry) {
+                return new DropdownMenuItem<int>(
+                  value: entry,
+                  child: new Text(
+                    kOpCode2Name[OpCode.values[entry]],
                   ),
-          ],
-        ),
-        actions: <Widget>[
-          new OutlineButton(
-              child: const Text('REMOVE'),
-              onPressed: () {
-                setState(() {
-                  _didChange();
-                  prog.removeAt(index);
-                });
-                Navigator.pop(context, null);
-              }),
-          new OutlineButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                _didChange();
-                setState(() {
-                  prog[index].i = _selectedOpCode;
-                  prog[index].v = (_isImmediate == true)
-                      ? _controllerValue.text
-                      : _selectedEntry.key;
-                  Navigator.pop(context, null);
-                });
-              }),
-          new OutlineButton(
-              child: const Text('DISCARD'),
-              onPressed: () {
-                Navigator.pop(context, null);
-              }),
-        ]);
+                );
+              }).toList(),
+            ),
+          ]),
+          const SizedBox(height: 16.0),
+          (_isImmediate == true)
+              ? (new TextField(
+                  controller: _controllerValue,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'value',
+                    labelText: 'Value',
+                  ),
+                ))
+              : (new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                      const Text('Operand'),
+                      new DropdownButton<IoEntry>(
+                        hint: const Text('data'),
+                        value: _selectedEntry,
+                        onChanged: (IoEntry newValue) {
+                          setState(() {
+                            _selectedEntry = newValue;
+                          });
+                        },
+                        items: entryIoList.map((IoEntry entry) {
+                          return new DropdownMenuItem<IoEntry>(
+                            value: entry,
+                            child: new Text(entry.key),
+                          );
+                        }).toList(),
+                      ),
+                    ])),
+          const SizedBox(height: 24.0),
+          new Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
+                    child: const Text('REMOVE'),
+                    onPressed: () {
+                      setState(() {
+                        _didChange();
+                        prog.removeAt(index);
+                      });
+                      Navigator.pop(context, null);
+                    }),
+                new FlatButton(
+                    textColor: Theme.of(context).accentColor,
+                    child: const Text('SAVE'),
+                    onPressed: () {
+                      _didChange();
+                      setState(() {
+                        prog[index].i = _selectedOpCode;
+                        prog[index].v = (_isImmediate == true)
+                            ? _controllerValue.text
+                            : _selectedEntry.key;
+                        Navigator.pop(context, null);
+                      });
+                    }),
+              ]),
+        ],
+      ),
+    );
   }
 }

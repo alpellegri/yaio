@@ -2,16 +2,7 @@
 #define firebase_h
 
 #include <Arduino.h>
-#if 0
 #include <ESP8266HTTPClient.h>
-#else
-// use weak http connection. i.e. do not close in case of SHA1 finger fails!!!
-#include <ESP8266HTTPWeakClient.h>
-#define HTTPClient HTTPWeakClient
-#endif
-
-#include <string>
-#include <vector>
 
 #define USE_HTTP_REUSE
 

@@ -36,10 +36,11 @@ FirebaseUser getFirebaseUser() {
 Future<FirebaseUser> signInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-  final FirebaseUser user = await _auth.signInWithGoogle(
+  final AuthCredential credential = GoogleAuthProvider.getCredential(
     accessToken: googleAuth.accessToken,
     idToken: googleAuth.idToken,
   );
+  final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
   assert(user.email != null);
   assert(user.displayName != null);
   assert(!user.isAnonymous);
@@ -47,8 +48,9 @@ Future<FirebaseUser> signInWithGoogle() async {
 
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
-  print(user);
+
   _user = user;
+  // print(user);
   return user;
 }
 
@@ -126,6 +128,18 @@ void savePreferencesDN(String domain, String node) {
   _prefs.setString('node_config_json', _nodeConfigJson);
 }
 
+void savePreferencesD(String domain) {
+  // override previous
+  _nodeConfigMap['domain'] = domain;
+  _nodeConfigMap['uid'] = getFirebaseUser().uid;
+
+  // update firebase references
+  updateNodeRef(_nodeConfigMap);
+
+  _nodeConfigJson = json.encode(_nodeConfigMap);
+  _prefs.setString('node_config_json', _nodeConfigJson);
+}
+
 void savePreferencesSP(String ssid, String password) {
   // override previous
   _nodeConfigMap['ssid'] = ssid;
@@ -183,7 +197,6 @@ Map<String, Object> _startupDefault = {
 };
 
 Map<String, Object> _statusDefault = {
-  'heap': 0,
   'time': 0,
 };
 
@@ -191,12 +204,11 @@ Map<String, Object> getControlDefault() {
   return _controlDefault;
 }
 
-Map<String, Object> getStartupDefault() {
-  return _startupDefault;
-}
-
 Map<String, Object> getStatusDefault() {
   return _statusDefault;
+}
+Map<String, Object> getStartupDefault() {
+  return _startupDefault;
 }
 
 void nodeRefresh(String domain, String node) {

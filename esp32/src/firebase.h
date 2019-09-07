@@ -5,9 +5,6 @@
 
 #include <HTTPClient.h>
 
-#include <string>
-#include <vector>
-
 #define USE_HTTP_REUSE
 
 typedef enum {

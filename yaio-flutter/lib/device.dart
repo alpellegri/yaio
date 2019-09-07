@@ -100,7 +100,6 @@ class CollapsibleBody extends StatelessWidget {
     this.child,
     this.isEditMode,
     this.onSelect,
-    this.onCancel,
     this.onAdd,
     this.onRemove,
   });
@@ -109,7 +108,6 @@ class CollapsibleBody extends StatelessWidget {
   final Widget child;
   final bool isEditMode;
   final VoidCallback onSelect;
-  final VoidCallback onCancel;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
@@ -117,35 +115,33 @@ class CollapsibleBody extends StatelessWidget {
   Widget build(BuildContext context) {
     var widget;
     if (isEditMode == false) {
-      widget = new ButtonTheme.bar(
-          child: new ButtonBar(children: <Widget>[
-        new FlatButton(
-            onPressed: onRemove,
-            child: const Text(
-              'REMOVE',
-            )),
-        new FlatButton(
-            onPressed: onAdd,
-            child: const Text(
-              'ADD',
-            )),
-        new FlatButton(
-            onPressed: onCancel,
-            child: const Text(
-              'CANCEL',
-            )),
-        new FlatButton(onPressed: onSelect, child: const Text('SELECT')),
-      ]));
+      widget = new Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            new FlatButton(
+                textColor: Theme.of(context).accentColor,
+                onPressed: onRemove,
+                child: const Text('REMOVE')),
+            new FlatButton(
+                textColor: Theme.of(context).accentColor,
+                onPressed: onAdd,
+                child: const Text('ADD')),
+            new FlatButton(
+                textColor: Theme.of(context).accentColor,
+                onPressed: onSelect,
+                child: const Text('SELECT')),
+          ]);
     } else {
-      widget = new ButtonTheme.bar(
-          child: new ButtonBar(children: <Widget>[
-        new FlatButton(
-            onPressed: onCancel,
-            child: const Text(
-              'CANCEL',
-            )),
-        new FlatButton(onPressed: onSelect, child: const Text('SAVE')),
-      ]));
+      widget = new Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            new FlatButton(
+                textColor: Theme.of(context).accentColor,
+                onPressed: onSelect,
+                child: const Text('SAVE')),
+          ]);
     }
 
     return new Column(children: <Widget>[
@@ -261,10 +257,6 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   _ctrlDomainName = item.value;
                   close();
                 },
-                onCancel: () {
-                  Form.of(context).reset();
-                  close();
-                },
                 onAdd: () {
                   add();
                 },
@@ -297,6 +289,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         },
                         builder: (FormFieldState<String> field) {
                           return new ListView.builder(
+                            physics: BouncingScrollPhysics(),
                             shrinkWrap: true,
                             reverse: true,
                             itemCount: item.query.length,
@@ -337,10 +330,6 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   _changePreferences();
                   close();
                 },
-                onCancel: () {
-                  Form.of(context).reset();
-                  close();
-                },
                 onAdd: () {
                   add();
                 },
@@ -372,6 +361,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         },
                         builder: (FormFieldState<String> field) {
                           return new ListView.builder(
+                            physics: BouncingScrollPhysics(),
                             shrinkWrap: true,
                             reverse: true,
                             itemCount: item.query.length,
@@ -401,10 +391,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    var update = _updateItemMenu();
-    setState(() {
-      _isNeedCreate = update;
-    });
+    _isNeedCreate = _updateItemMenu();
+
     print('_isNeedCreate $_isNeedCreate');
     DateTime _startupTime;
     String diffTime;
@@ -477,7 +465,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             ),
           ]),
       (_connected == false)
-          ? (const Text(''))
+          ? (new Container())
           : (new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,

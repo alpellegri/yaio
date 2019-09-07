@@ -131,12 +131,17 @@ bool FbGetDB(void) {
       ret = false;
     } else {
       FB_deinitRegIDsDB();
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        String id = i->value.as<String>();
-        FB_addRegIDsDB(id);
+      DynamicJsonDocument doc(1024);
+      auto error = deserializeJson(doc, json);
+      if (!error) {
+        JsonObject object = doc.as<JsonObject>();
+        for (JsonPair p : object) {
+          String key = p.key().c_str();
+          String id = p.value().as<String>();
+          FB_addRegIDsDB(id);
+        }
+      } else {
+        DEBUG_PRINT("deserializeJson error\n");
       }
     }
   }
@@ -151,11 +156,17 @@ bool FbGetDB(void) {
       ret = false;
     } else {
       FB_deinitProgDB();
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        FB_addProgDB(i->key, i->value);
+      DynamicJsonDocument doc(8192);
+      auto error = deserializeJson(doc, json);
+      if (!error) {
+        JsonObject object = doc.as<JsonObject>();
+        for (JsonPair p : object) {
+          String key = p.key().c_str();
+          JsonObject value = p.value().as<JsonObject>();
+          FB_addProgDB(key, value);
+        }
+      } else {
+        DEBUG_PRINT("deserializeJson error\n");
       }
     }
   }
@@ -171,14 +182,19 @@ bool FbGetDB(void) {
     } else {
       PHT_Deinit();
       FB_deinitIoEntryDB();
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject &object = jsonBuffer.parseObject(json);
-      for (JsonObject::iterator i = object.begin(); i != object.end(); ++i) {
-        yield();
-        JsonObject &nestedObject = i->value;
-        if (nestedObject[F("owner")] == owner) {
-          FB_addIoEntryDB(i->key, i->value);
+      DynamicJsonDocument doc(8192);
+      auto error = deserializeJson(doc, json);
+      if (!error) {
+        JsonObject object = doc.as<JsonObject>();
+        for (JsonPair p : object) {
+          String key = p.key().c_str();
+          JsonObject value = p.value().as<JsonObject>();
+          if (value[F("owner")] == owner) {
+            FB_addIoEntryDB(key, value);
+          }
         }
+      } else {
+        DEBUG_PRINT("deserializeJson error\n");
       }
     }
   }

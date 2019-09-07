@@ -8,11 +8,6 @@
 
 static const char FcmServer[] PROGMEM = "fcm.googleapis.com";
 
-// Use web browser to view and copy
-// SHA1 fingerprint of the certificate
-static const char _fingerprint[] PROGMEM =
-    "B8:4F:40:70:0C:63:90:E0:07:E8:7D:BD:B4:11:D0:4A:EA:9C:90:F6";
-
 #if 1
 static const char *RestMethods[] = {
     "GET", "PUT", "POST", "PATCH", "DELETE",
@@ -46,7 +41,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
 
   http_req.setReuse(true);
   // http_req.setTimeout(3000);
-  http_req.begin(addr.c_str());
+  http_req.begin(addr);
   httpCode_ = http_req.sendRequest(RestMethods[method],
                                    (uint8_t *)value.c_str(), value.length());
 
@@ -84,7 +79,7 @@ void FirebaseRest::pushBool(const String &path, bool value) {
 
 void FirebaseRest::pushString(const String &path, const String &value) {
   String buf = String(F("\"")) + value + String(F("\""));
-  String res = restReqApi(METHOD_PUSH, path.c_str(), buf);
+  String res = restReqApi(METHOD_PUSH, path, buf);
 }
 
 void FirebaseRest::setJSON(const String &path, const String &value) {
@@ -174,13 +169,14 @@ void FirebaseRest::restStreamApi(const String path) {
 
   // DEBUG_PRINT("restStreamApi %s\n", path.c_str());
   String post = String(F(".json?auth=")) + auth_;
-  String addr = String(F("https://")) + host_ + String(F("/")) + path + post;
+  String addr = String(F("https://")) + host_ +
+                     String(F("/")) + path + post;
 
   http_stream.setReuse(false);
   http_stream.end();
   http_stream.setReuse(true);
   // http_stream.setTimeout(3000);
-  http_stream.begin(addr.c_str());
+  http_stream.begin(addr);
 
   http_stream.addHeader(String(F("Accept")), String(F("text/event-stream")));
   const char *headers[] = {"Location"};
