@@ -228,7 +228,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _ctrlNodeName = getNode() ?? '';
 
     _loadNodeInfo();
-    _connected = checkConnected();
+    _connected = _checkConnected();
 
     _demoItems = <DemoItem<dynamic>>[
       new DemoItem<String>(
@@ -634,7 +634,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
       _statusSub = _statusRef.onValue.listen(_onValueStatus);
       _startupSub = _startupRef.onValue.listen(_onValueStartup);
     }
-    _connected = checkConnected();
+    _connected = _checkConnected();
   }
 
   void _changePreferences() {
@@ -649,7 +649,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _loadNodeInfo();
   }
 
-  bool checkConnected() {
+  bool _checkConnected() {
     return ((_control != null) && (_status != null) && (_startup != null));
   }
 
@@ -657,7 +657,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     // print('_onValueControl ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       _control = event.snapshot.value;
-      _connected = checkConnected();
+      _connected = _checkConnected();
     });
   }
 
@@ -671,7 +671,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         _controlRef.set(_control);
       }
       _status = event.snapshot.value;
-      _connected = checkConnected();
+      _connected = _checkConnected();
     });
   }
 
@@ -679,7 +679,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     // print('_onValueStartup ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       _startup = event.snapshot.value;
-      _connected = checkConnected();
+      _connected = _checkConnected();
     });
   }
 
