@@ -127,7 +127,6 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                 trailing: PopupMenuButton<String>(
                                     onSelected: (value) {
                                   savePreferencesD(value);
-                                  // Domain.of(context).rebuild();
                                   Navigator.pop(context);
                                   Navigator.pop(context);
                                   Navigator.push(
