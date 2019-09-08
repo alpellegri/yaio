@@ -14,7 +14,6 @@ class Device extends StatefulWidget {
 }
 
 class _DeviceState extends State<Device> {
-
   @override
   void initState() {
     super.initState();
@@ -441,8 +440,10 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
   void _onRootEntryChanged(Event event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
-    entryMap[event.snapshot.key] = event.snapshot.value;
-    _updateItemMenu();
+    setState(() {
+      entryMap[event.snapshot.key] = event.snapshot.value;
+      _updateItemMenu();
+    });
   }
 
   void _onRootEntryRemoved(Event event) {

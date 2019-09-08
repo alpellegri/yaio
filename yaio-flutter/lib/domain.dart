@@ -74,11 +74,9 @@ class _DomainState extends State<Domain> {
         title: new Text(widget.domain),
       ),
       drawer: drawer,
-      body: Container(
-          child: SingleChildScrollView(
-              child: new ListView.builder(
+      body: new ListView.builder(
         shrinkWrap: true,
-        physics: ClampingScrollPhysics(),
+        physics: new ClampingScrollPhysics(),
         itemCount: _map.keys.length,
         itemBuilder: (context, node) {
           String _node = _map.keys.toList()[node];
@@ -88,7 +86,7 @@ class _DomainState extends State<Domain> {
               value: _map[_node],
               data: entryList);
         },
-      ))),
+      ),
     );
   }
 
