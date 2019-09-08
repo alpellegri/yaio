@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'node_setup.dart';
 import 'firebase_utils.dart';
 import 'const.dart';
 
@@ -15,13 +14,11 @@ class Device extends StatefulWidget {
 }
 
 class _DeviceState extends State<Device> {
-  bool _connected = false;
 
   @override
   void initState() {
     super.initState();
     print('_DeviceState');
-    _connected = true;
   }
 
   @override
@@ -204,19 +201,6 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   String _ctrlNodeName;
   bool _isNeedCreate = true;
 
-  static const time_limit = const Duration(seconds: 20);
-  DatabaseReference _controlRef;
-  DatabaseReference _statusRef;
-  DatabaseReference _startupRef;
-  StreamSubscription<Event> _controlSub;
-  StreamSubscription<Event> _statusSub;
-  StreamSubscription<Event> _startupSub;
-  Map<dynamic, dynamic> _control;
-  Map<dynamic, dynamic> _status;
-  Map<dynamic, dynamic> _startup;
-  bool _connected = false;
-  int _controlTimeoutCnt;
-
   @override
   void initState() {
     super.initState();
@@ -226,9 +210,6 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _onRemoveSubscription = _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
     _ctrlDomainName = getDomain() ?? '';
     _ctrlNodeName = getNode() ?? '';
-
-    _loadNodeInfo();
-    _connected = _checkConnected();
 
     _demoItems = <DemoItem<dynamic>>[
       new DemoItem<String>(
@@ -384,166 +365,29 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _onAddSubscription.cancel();
     _onEditedSubscription.cancel();
     _onRemoveSubscription.cancel();
-    _controlSub.cancel();
-    _statusSub.cancel();
-    _startupSub.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     _isNeedCreate = _updateItemMenu();
-
     print('_isNeedCreate $_isNeedCreate');
-    DateTime _startupTime;
-    String diffTime;
-    Duration diff;
-    if (_connected == true) {
-      DateTime current = new DateTime.now();
-      _startupTime = new DateTime.fromMillisecondsSinceEpoch(
-          int.parse(_startup['time'].toString()) * 1000);
-      DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
-          int.parse(_status['time'].toString()) * 1000);
-      diff = current.difference(_heartbeatTime);
-      if (diff.inDays > 0) {
-        diffTime = '${diff.inDays} days ago';
-      } else if (diff.inHours > 0) {
-        diffTime = '${diff.inHours} hours ago';
-      } else if (diff.inMinutes > 0) {
-        diffTime = '${diff.inMinutes} minutes ago';
-      } else if (diff.inSeconds > 0) {
-        diffTime = '${diff.inSeconds} seconds ago';
-      } else {
-        diffTime = 'now';
-      }
-    }
-    return new ListView(children: <Widget>[
-      new SingleChildScrollView(
-        child: new SafeArea(
-          top: false,
-          bottom: false,
-          child: new Container(
-              margin: const EdgeInsets.all(16.0),
-              child: new ExpansionPanelList(
-                  expansionCallback: (int index, bool isExpanded) {
-                    setState(() {
-                      _demoItems[index].isExpanded = !isExpanded;
-                    });
-                  },
-                  children: _demoItems.map((DemoItem<dynamic> item) {
-                    return new ExpansionPanel(
-                        isExpanded: item.isExpanded,
-                        headerBuilder: item.headerBuilder,
-                        body: item.build());
-                  }).toList())),
-        ),
-      ),
-      new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new ListTile(
-              leading: (_isNeedCreate == true)
-                  ? (const Icon(Icons.link_off))
-                  : (const Icon(Icons.link)),
-              title: const Text('Selected Device'),
-              subtitle: new Text('$_ctrlDomainName/$_ctrlNodeName'),
-              trailing: new FlatButton(
-                textColor: Theme.of(context).accentColor,
-                child: const Text('CONFIGURE'),
-                onPressed: (_isNeedCreate == true)
-                    ? null
-                    : () {
-                        Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                              builder: (BuildContext context) => new NodeSetup(
-                                  domain: _ctrlDomainName, node: _ctrlNodeName),
-                              fullscreenDialog: true,
-                            ));
-                      },
-              ),
-            ),
-          ]),
-      (_connected == false)
-          ? (new Container())
-          : (new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new ListTile(
-                  leading: (diff > time_limit)
-                      ? (new Icon(Icons.cloud_queue, color: Colors.red[400]))
-                      : (new Icon(Icons.cloud_done, color: Colors.green[400])),
-                  title: new Text('HeartBeat: $diffTime'),
-                  subtitle: new Text('Device Memory: ${_status["heap"]}'),
-                ),
-                new ListTile(
-                  leading: (_control['reboot'] == kNodeUpdate)
-                      ? (new CircularProgressIndicator(
-                          value: null,
-                        ))
-                      : (const Icon(Icons.update)),
-                  title: const Text('Update Device'),
-                  subtitle: new Text('Configuration'),
-                  trailing: new FlatButton(
-                    textColor: Theme.of(context).accentColor,
-                    child: const Text('UPDATE'),
-                    onPressed: () {
-                      _nodeActionRequest(kNodeUpdate);
-                    },
-                  ),
-                ),
-                new ListTile(
-                  leading: (_control['reboot'] == kNodeReboot)
-                      ? (new CircularProgressIndicator(
-                          value: null,
-                        ))
-                      : (const Icon(Icons.power_settings_new)),
-                  title: const Text('PowerUp'),
-                  subtitle: new Text('${_startupTime.toString()}'),
-                  trailing: new FlatButton(
-                    textColor: Theme.of(context).accentColor,
-                    child: const Text('RESTART'),
-                    onPressed: () {
-                      _nodeActionRequest(kNodeReboot);
-                    },
-                  ),
-                ),
-                new ListTile(
-                  leading: (_control['reboot'] == kNodeFlash)
-                      ? (new CircularProgressIndicator(
-                          value: null,
-                        ))
-                      : (const Icon(Icons.system_update_alt)),
-                  title: const Text('Firmware Version'),
-                  subtitle: new Text('${_startup["version"]}'),
-                  trailing: new FlatButton(
-                    textColor: Theme.of(context).accentColor,
-                    child: const Text('UPGRADE'),
-                    onPressed: () {
-                      _nodeActionRequest(kNodeFlash);
-                    },
-                  ),
-                ),
-                new ListTile(
-                  leading: (_control['reboot'] == kNodeErase)
-                      ? (new CircularProgressIndicator(
-                          value: null,
-                        ))
-                      : (const Icon(Icons.delete_forever)),
-                  title: const Text('Erase device'),
-                  subtitle: new Text('${getOwner()}'),
-                  trailing: new FlatButton(
-                    textColor: Theme.of(context).accentColor,
-                    child: const Text('ERASE'),
-                    onPressed: () {
-                      _nodeActionRequest(kNodeErase);
-                    },
-                  ),
-                ),
-              ],
-            )),
-    ]);
+
+    return new SingleChildScrollView(
+      child: new Container(
+          margin: const EdgeInsets.all(16.0),
+          child: new ExpansionPanelList(
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  _demoItems[index].isExpanded = !isExpanded;
+                });
+              },
+              children: _demoItems.map((DemoItem<dynamic> item) {
+                return new ExpansionPanel(
+                    isExpanded: item.isExpanded,
+                    headerBuilder: item.headerBuilder,
+                    body: item.build());
+              }).toList())),
+    );
   }
 
   bool _updateItemMenu() {
@@ -609,34 +453,6 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _updateItemMenu();
   }
 
-  void _loadNodeInfo() {
-    _controlTimeoutCnt = 0;
-    String control = getControlRef();
-    String startup = getStartupRef();
-    if ((control != null) && (startup != null)) {
-      print('_loadNodeInfo $control $startup');
-      if (_controlSub != null) {
-        _controlSub.cancel();
-      }
-      if (_statusSub != null) {
-        _statusSub.cancel();
-      }
-      if (_startupSub != null) {
-        _startupSub.cancel();
-      }
-
-      _controlRef =
-          FirebaseDatabase.instance.reference().child(getControlRef());
-      _statusRef = FirebaseDatabase.instance.reference().child(getStatusRef());
-      _startupRef =
-          FirebaseDatabase.instance.reference().child(getStartupRef());
-      _controlSub = _controlRef.onValue.listen(_onValueControl);
-      _statusSub = _statusRef.onValue.listen(_onValueStatus);
-      _startupSub = _startupRef.onValue.listen(_onValueStartup);
-    }
-    _connected = _checkConnected();
-  }
-
   void _changePreferences() {
     savePreferencesDN(_ctrlDomainName, _ctrlNodeName);
     if (_isNeedCreate == true) {
@@ -646,48 +462,5 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
       ref = FirebaseDatabase.instance.reference().child(getStartupRef());
       ref.set(getStartupDefault());
     }
-    _loadNodeInfo();
-  }
-
-  bool _checkConnected() {
-    return ((_control != null) && (_status != null) && (_startup != null));
-  }
-
-  void _onValueControl(Event event) {
-    // print('_onValueControl ${event.snapshot.key} ${event.snapshot.value}');
-    setState(() {
-      _control = event.snapshot.value;
-      _connected = _checkConnected();
-    });
-  }
-
-  void _onValueStatus(Event event) {
-    // print('_onValueStatus ${event.snapshot.key} ${event.snapshot.value}');
-    // update control time to keep up node
-    DateTime now = new DateTime.now();
-    setState(() {
-      if ((_control != null) && (_controlTimeoutCnt++ < 5)) {
-        _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-        _controlRef.set(_control);
-      }
-      _status = event.snapshot.value;
-      _connected = _checkConnected();
-    });
-  }
-
-  void _onValueStartup(Event event) {
-    // print('_onValueStartup ${event.snapshot.key} ${event.snapshot.value}');
-    setState(() {
-      _startup = event.snapshot.value;
-      _connected = _checkConnected();
-    });
-  }
-
-  void _nodeActionRequest(int value) {
-    _controlTimeoutCnt = 0;
-    _control['reboot'] = value;
-    DateTime now = new DateTime.now();
-    _control['time'] = now.millisecondsSinceEpoch ~/ 1000;
-    _controlRef.set(_control);
   }
 }

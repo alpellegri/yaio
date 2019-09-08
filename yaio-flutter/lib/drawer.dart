@@ -119,34 +119,11 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
-                              /*
-                              new ListView.builder(
-                                physics: BouncingScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount: domains.keys.length,
-                                itemBuilder: (context, id) {
-                                  String _domain = domains.keys.toList()[id];
-                                  return new ListTile(
-                                    leading: Icon(Icons.domain),
-                                    title: new Text(_domain),
-                                    onTap: () {
-                                      savePreferencesD(_domain);
-                                      Navigator.pop(context);
-                                      Navigator.push(
-                                        context,
-                                        new MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              new Domain(domain: _domain),
-                                          fullscreenDialog: true,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),*/
                               new ListTile(
                                 leading: Icon(Icons.domain),
-                                title: new Text(getDomain()),
+                                title: ((getDomain() == null)
+                                    ? (const Text(''))
+                                    : (new Text(getDomain()))),
                                 trailing: PopupMenuButton<String>(
                                     onSelected: (value) {
                                   savePreferencesD(value);
