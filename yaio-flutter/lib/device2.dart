@@ -94,8 +94,8 @@ class _DeviceConfigState extends State<DeviceConfig> {
               new ListTile(
                 leading: (false)
                     ? (const Icon(Icons.link_off))
-                    : (const Icon(Icons.link)),
-                title: const Text('Selected Device'),
+                    : (const Icon(Icons.developer_board)),
+                title: const Text('Node'),
                 subtitle: new Text('${widget.domain}/${widget.node}'),
                 trailing: new FlatButton(
                   textColor: Theme.of(context).accentColor,
@@ -167,7 +167,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.system_update_alt)),
+                        : (const Icon(Icons.cloud_download)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${widget.value['startup']["version"]}'),
                     trailing: new FlatButton(
@@ -183,7 +183,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.delete_forever)),
+                        : (const Icon(Icons.delete)),
                     title: const Text('Erase device'),
                     subtitle: new Text(widget.node),
                     trailing: new FlatButton(
