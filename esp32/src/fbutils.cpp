@@ -154,7 +154,7 @@ int16_t FB_getProgIdx(const char *key) {
 void FB_dumpIoEntry(void) {
   DEBUG_PRINT("FB_dumpIoEntry\n");
   for (uint8_t i = 0; i < IoEntryVec.size(); ++i) {
-    DEBUG_PRINT("%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%d, "
+    DEBUG_PRINT("%d: key=%s, code=%d, value=%s, ioctl=%x, ev=%d, ev_value=%s, "
                 "cb=%s, ewr=%d, erd=%d\n",
                 i, IoEntryVec[i].key.c_str(), IoEntryVec[i].code,
                 IoEntryVec[i].value.c_str(), IoEntryVec[i].ioctl,
