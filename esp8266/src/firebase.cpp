@@ -31,6 +31,7 @@ void FirebaseRest::begin(const String &host, const String &auth) {
   auth_ = auth;
 }
 
+#ifdef USE_HTTP_REUSE
 String FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                 const String value) {
 
@@ -62,6 +63,40 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
 
   return result_;
 }
+#else
+String FirebaseRest::restReqApi(RestMethod_t method, const String path,
+                                const String value) {
+
+  HTTPClient http_req;
+  String path_ = String(F("/")) + path + String(F(".json"));
+  String post = String(F("?auth=")) + auth_;
+  if (method != METHOD_GET) {
+    post += String(F("&print=silent"));
+  }
+  String addr = String(F("https://")) + host_ + path_ + post;
+  // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
+
+  // http_req.setReuse(true);
+  // http_req.setTimeout(3000);
+  BearSSL::WiFiClientSecure client;
+  client.setInsecure();
+  http_req.begin(client, addr);
+  httpCode_ = http_req.sendRequest(RestMethods[method],
+                                   (uint8_t *)value.c_str(), value.length());
+
+  if ((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT)) {
+    result_ = http_req.getString();
+    // DEBUG_PRINT("[HTTP] result_: %s\n", result_.c_str());
+  } else {
+    result_ = String(F(""));
+    DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
+                httpCode_, http_req.errorToString(httpCode_).c_str());
+  }
+  http_req.end();
+
+  return result_;
+}
+#endif
 
 void FirebaseRest::pushJSON(const String &path, const String &value) {
   String res = restReqApi(METHOD_PUSH, path, value);
@@ -311,8 +346,9 @@ void FirebaseRest::sendMessage(String &message, String &key,
   json += String(F("\"")) + RegIDs[i] + F("\"");
   json += F("]}");
 
-  String addr = String(F("http://")) + fcm_host + String(F("/fcm/send"));
-  WiFiClient client;
+  String addr = String(F("https://")) + fcm_host + String(F("/fcm/send"));
+  WiFiClientSecure client;
+  client.setInsecure();
   HTTPClient http;
   http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));

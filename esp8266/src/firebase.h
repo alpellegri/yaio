@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 
-#define USE_HTTP_REUSE
+// #define USE_HTTP_REUSE
 
 typedef enum {
   METHOD_GET = 0,
