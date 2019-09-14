@@ -108,6 +108,12 @@ class _NodeSetupState extends State<NodeSetup> {
                             hintText: 'Access Point Name',
                             labelText: 'WiFi NAME *',
                           ),
+                          onChanged: (v) {
+                            setState(() {
+                              print('....');
+                              _prefs['ssid'] = v;
+                            });
+                          },
                         ),
                         const SizedBox(height: 12.0),
                         new TextField(
@@ -117,6 +123,12 @@ class _NodeSetupState extends State<NodeSetup> {
                             hintText: 'Access Point Password',
                             labelText: 'WiFi PASSWORD *',
                           ),
+                          onChanged: (v) {
+                            setState(() {
+                              print('....');
+                              _prefs['password'] = v;
+                            });
+                          },
                         ),
                         const SizedBox(height: 12.0),
                       ])),
