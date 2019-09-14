@@ -4,11 +4,10 @@
 #include <string.h>
 
 #include "ap.h"
+#include "debug.h"
 #include "ee.h"
 #include "sta.h"
 #include "vers.h"
-#include "debug.h"
-
 
 static uint8_t mode;
 static uint32_t schedule_time;

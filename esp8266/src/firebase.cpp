@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
 #include <string>
@@ -174,8 +174,7 @@ void FirebaseRest::restStreamApi(const String path) {
 
   // DEBUG_PRINT("restStreamApi %s\n", path.c_str());
   String post = String(F(".json?auth=")) + auth_;
-  String addr = String(F("https://")) + host_ +
-                     String(F("/")) + path + post;
+  String addr = String(F("https://")) + host_ + String(F("/")) + path + post;
 
   http_stream.setReuse(false);
   http_stream.end();
