@@ -110,7 +110,6 @@ class _NodeSetupState extends State<NodeSetup> {
                           ),
                           onChanged: (v) {
                             setState(() {
-                              print('....');
                               _prefs['ssid'] = v;
                             });
                           },
@@ -125,7 +124,6 @@ class _NodeSetupState extends State<NodeSetup> {
                           ),
                           onChanged: (v) {
                             setState(() {
-                              print('....');
                               _prefs['password'] = v;
                             });
                           },
