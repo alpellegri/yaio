@@ -44,6 +44,7 @@ public:
   bool failed();
   String error();
   void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
+  void run(void);
 
 private:
   String restReqApi(RestMethod_t method, const String path, const String value);
@@ -54,6 +55,8 @@ private:
   String result_;
   int httpCode_;
 #ifdef USE_HTTP_REUSE
+  bool status;
+  uint32_t ctime;
   HTTPClient http_req;
 #endif
   HTTPClient http_stream;

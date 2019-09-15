@@ -28,9 +28,12 @@ void FirebaseRest::begin(const String &host, const String &auth) {
   auth_ = auth;
 }
 
+#ifdef USE_HTTP_REUSE
 String FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                 const String value) {
 
+  status = true;
+  ctime = millis();
   String path_ = String(F("/")) + path + String(F(".json"));
   String post = String(F("?auth=")) + auth_;
   if (method != METHOD_GET) {
@@ -42,12 +45,12 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   http_req.setReuse(true);
   // http_req.setTimeout(3000);
   http_req.begin(addr);
-  httpCode_ = http_req.sendRequest(RestMethods[method],
-                                   (uint8_t *)value.c_str(), value.length());
+  httpCode_ = http_req.sendRequest(RestMethods[method], value);
 
   if ((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT)) {
+    // DEBUG_PRINT("[HTTP] size: %d %d\n", httpCode_, http_req.getSize());
     result_ = http_req.getString();
-    // DEBUG_PRINT("[HTTP] result_: %s\n", result_.c_str());
+    // DEBUG_PRINT("[HTTP] response: %s\n", result_.c_str());
   } else {
     result_ = String(F(""));
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
@@ -57,6 +60,37 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
 
   return result_;
 }
+#else
+String FirebaseRest::restReqApi(RestMethod_t method, const String path,
+                                const String value) {
+
+  HTTPClient http_req;
+  String path_ = String(F("/")) + path + String(F(".json"));
+  String post = String(F("?auth=")) + auth_;
+  if (method != METHOD_GET) {
+    post += String(F("&print=silent"));
+  }
+  String addr = String(F("https://")) + host_ + path_ + post;
+  // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
+
+  // http_req.setReuse(true);
+  // http_req.setTimeout(3000);
+  http_req.begin(addr);
+  httpCode_ = http_req.sendRequest(RestMethods[method], value);
+
+  if ((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT)) {
+    result_ = http_req.getString();
+    // DEBUG_PRINT("[HTTP] result_: %s\n", result_.c_str());
+  } else {
+    result_ = String(F(""));
+    DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
+                httpCode_, http_req.errorToString(httpCode_).c_str());
+  }
+  http_req.end();
+
+  return result_;
+}
+#endif
 
 void FirebaseRest::pushJSON(const String &path, const String &value) {
   String res = restReqApi(METHOD_PUSH, path, value);
@@ -181,7 +215,7 @@ void FirebaseRest::restStreamApi(const String path) {
   const char *headers[] = {"Location"};
   http_stream.collectHeaders(headers, 1);
 
-  httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], F(""));
+  httpCode_ = http_stream.GET();
 
   while (httpCode_ == HTTP_CODE_TEMPORARY_REDIRECT) {
     String location = http_stream.header(String(FPSTR("Location")).c_str());
@@ -190,7 +224,7 @@ void FirebaseRest::restStreamApi(const String path) {
     http_stream.end();
     http_stream.setReuse(true);
     http_stream.begin(location);
-    httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], String());
+    httpCode_ = http_stream.GET();
   }
 
   result_ = String(F(""));
@@ -260,7 +294,7 @@ String FirebaseRest::error() { return HTTPClient::errorToString(httpCode_); }
 
 void FirebaseRest::sendMessage(String &message, String &key,
                                std::vector<String> &RegIDs) {
-  int i;
+  uint32_t i;
   String fcm_host = String(FPSTR(FcmServer));
 
   //  DATA='{
@@ -298,28 +332,55 @@ void FirebaseRest::sendMessage(String &message, String &key,
   json += F("},");
 
   json += F("\"registration_ids\":[");
-  for (i = 0; i < ((int)RegIDs.size() - 1); i++) {
+  for (i = 0; i < RegIDs.size(); i++) {
     json += String(F("\"")) + RegIDs[i] + F("\",");
   }
-  json += String(F("\"")) + RegIDs[i] + F("\"");
   json += F("]}");
 
-  String addr = String(F("http://")) + fcm_host + String(F("/fcm/send"));
+  String addr = String(F("https://")) + fcm_host + String(F("/fcm/send"));
   HTTPClient http;
-  http.begin(addr);
+  WiFiClientSecure client;
+  http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));
   http.addHeader(String(F("Content-Type")), String(F("application/json")));
   http.addHeader(String(F("Authorization")), String(F("key=")) + key);
   // DEBUG_PRINT("json: %s\n", json.c_str());
   int httpCode = http.POST(json);
   if (httpCode == HTTP_CODE_OK) {
-    String result = http.getString();
-    DEBUG_PRINT("[HTTP] response: %s\n", result.c_str());
+#if 0
+    String response = http.getString();
+#else
+    String response;
+    uint8_t buff[64];
+    uint8_t bsize = sizeof(buff) - 1;
+    int size;
+    while (size = (client.available())) {
+      uint16_t rsize = ((size > bsize) ? bsize : size);
+      client.read(buff, rsize);
+      buff[rsize] = 0;
+      String line((char *)buff);
+      response += line;
+    }
+#endif
+    DEBUG_PRINT("[HTTP] response: %s\n", response.c_str());
+    // DEBUG_PRINT("[HTTP] size: %d %d\n", httpCode, client.available());
   } else {
     DEBUG_PRINT("[HTTP] POST... failed, error: %d, %s\n", httpCode,
                 http.errorToString(httpCode).c_str());
   }
   http.end();
+}
+
+void FirebaseRest::run(void) {
+  uint32_t current_time = millis();
+  if ((current_time - ctime) > 2000) {
+    DEBUG_PRINT("http_req end\n");
+    http_req.setReuse(false);
+    if (status == true) {
+      status = false;
+      http_req.end();
+    }
+  }
 }
 
 FirebaseRest Firebase;

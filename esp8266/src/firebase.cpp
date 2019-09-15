@@ -35,6 +35,7 @@ void FirebaseRest::begin(const String &host, const String &auth) {
 String FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                 const String value) {
 
+  ctime = millis();
   String path_ = String(F("/")) + path + String(F(".json"));
   String post = String(F("?auth=")) + auth_;
   if (method != METHOD_GET) {
@@ -48,12 +49,12 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   BearSSL::WiFiClientSecure client;
   client.setInsecure();
   http_req.begin(client, addr);
-  httpCode_ = http_req.sendRequest(RestMethods[method],
-                                   (uint8_t *)value.c_str(), value.length());
+  httpCode_ = http_req.sendRequest(RestMethods[method], value);
 
   if ((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT)) {
+    // DEBUG_PRINT("[HTTP] size: %d %d\n", httpCode_, http_req.getSize());
     result_ = http_req.getString();
-    // DEBUG_PRINT("[HTTP] result_: %s\n", result_.c_str());
+    // DEBUG_PRINT("[HTTP] response: %s\n", result_.c_str());
   } else {
     result_ = String(F(""));
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
@@ -81,8 +82,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   BearSSL::WiFiClientSecure client;
   client.setInsecure();
   http_req.begin(client, addr);
-  httpCode_ = http_req.sendRequest(RestMethods[method],
-                                   (uint8_t *)value.c_str(), value.length());
+  httpCode_ = http_req.sendRequest(RestMethods[method], value);
 
   if ((httpCode_ == HTTP_CODE_OK) || (httpCode_ == HTTP_CODE_NO_CONTENT)) {
     result_ = http_req.getString();
@@ -223,7 +223,7 @@ void FirebaseRest::restStreamApi(const String path) {
   const char *headers[] = {"Location"};
   http_stream.collectHeaders(headers, 1);
 
-  httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], F(""));
+  httpCode_ = http_stream.GET();
 
   while (httpCode_ == HTTP_CODE_TEMPORARY_REDIRECT) {
     String location = http_stream.header(String(FPSTR("Location")).c_str());
@@ -232,7 +232,7 @@ void FirebaseRest::restStreamApi(const String path) {
     http_stream.end();
     http_stream.setReuse(true);
     http_stream.begin(client, location);
-    httpCode_ = http_stream.sendRequest(RestMethods[METHOD_GET], String());
+    httpCode_ = http_stream.GET();
   }
 
   result_ = String(F(""));
@@ -302,7 +302,7 @@ String FirebaseRest::error() { return HTTPClient::errorToString(httpCode_); }
 
 void FirebaseRest::sendMessage(String &message, String &key,
                                std::vector<String> &RegIDs) {
-  int i;
+  uint32_t i;
   String fcm_host = String(FPSTR(FcmServer));
 
   //  DATA='{
@@ -340,14 +340,13 @@ void FirebaseRest::sendMessage(String &message, String &key,
   json += F("},");
 
   json += F("\"registration_ids\":[");
-  for (i = 0; i < ((int)RegIDs.size() - 1); i++) {
+  for (i = 0; i < RegIDs.size(); i++) {
     json += String(F("\"")) + RegIDs[i] + F("\",");
   }
-  json += String(F("\"")) + RegIDs[i] + F("\"");
   json += F("]}");
 
   String addr = String(F("https://")) + fcm_host + String(F("/fcm/send"));
-  WiFiClientSecure client;
+  BearSSL::WiFiClientSecure client;
   client.setInsecure();
   HTTPClient http;
   http.begin(client, addr);
@@ -357,6 +356,7 @@ void FirebaseRest::sendMessage(String &message, String &key,
   // DEBUG_PRINT("json: %s\n", json.c_str());
   int httpCode = http.POST(json);
   if (httpCode == HTTP_CODE_OK) {
+    DEBUG_PRINT("[HTTP] size: %d %d\n", httpCode, http.getSize());
     String result = http.getString();
     DEBUG_PRINT("[HTTP] response: %s\n", result.c_str());
   } else {
@@ -364,6 +364,19 @@ void FirebaseRest::sendMessage(String &message, String &key,
                 http.errorToString(httpCode).c_str());
   }
   http.end();
+}
+
+void FirebaseRest::run(void) {
+#ifdef USE_HTTP_REUSE
+  uint32_t current_time = millis();
+  if ((current_time - ctime) > 500) {
+    DEBUG_PRINT("http_req end\n");
+    // http_req.setReuse(false);
+    if (http_req.connected() == true) {
+      http_req.end();
+    }
+  }
+#endif
 }
 
 FirebaseRest Firebase;
