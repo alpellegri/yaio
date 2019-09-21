@@ -20,12 +20,10 @@
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
-#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
 
 static bool fota_mode = false;
 
 static Preferences preferences;
-static uint32_t last_wifi_time;
 static uint32_t core0_time;
 static uint32_t core0_time2;
 
@@ -121,7 +119,6 @@ bool STA_Task(uint32_t current_time) {
 
   wl_status_t wifi_status = WiFi.status();
   if (wifi_status == WL_CONNECTED) {
-    last_wifi_time = current_time;
     // wait for time service is up
     if (fota_mode == true) {
       FOTAService();
@@ -162,11 +159,8 @@ bool STA_Task(uint32_t current_time) {
       }
     }
   } else {
-    DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
-      // force reboot
-      ESP.restart();
-    }
+    FbmOnDisconnect();
+    ret = false;
   }
 
   return ret;

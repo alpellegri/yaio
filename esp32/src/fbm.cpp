@@ -86,6 +86,8 @@ String FBM_getResetReason(void) {
   return ret;
 }
 
+void FbmOnDisconnect(void) { boot_sm = 3; }
+
 /* main function task */
 bool FbmService(void) {
   bool ret = false;

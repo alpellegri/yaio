@@ -2,7 +2,6 @@
 #define firebase_h
 
 #include <Arduino.h>
-
 #include <HTTPClient.h>
 
 #define USE_HTTP_REUSE
@@ -44,22 +43,20 @@ public:
   bool failed();
   String error();
   void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
-  void run(void);
 
 private:
   String restReqApi(RestMethod_t method, const String path, const String value);
   void restStreamApi(const String path);
 
-  String host_;
-  String auth_;
-  String result_;
-  int httpCode_;
+  String _host;
+  String _auth;
+  String _result;
+  int _httpCode;
 #ifdef USE_HTTP_REUSE
-  bool status;
-  uint32_t ctime;
-  HTTPClient http_req;
+  HTTPClient _http_req;
 #endif
-  HTTPClient http_stream;
+  HTTPClient _http_stream;
+  WiFiClient _client_stream;
 };
 
 extern FirebaseRest Firebase;
