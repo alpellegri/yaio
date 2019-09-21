@@ -10,7 +10,8 @@ import 'firebase_utils.dart';
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
   Device.routeName: (BuildContext context) =>
       new Device(title: 'Manage Domains and Nodes'),
-  Messages.routeName: (BuildContext context) => new Messages(title: 'Messages'),
+  Messages.routeName: (BuildContext context) =>
+      new Messages(title: 'Notifications'),
   VersionInfo.routeName: (BuildContext context) =>
       new VersionInfo(title: 'Version'),
 };
@@ -95,7 +96,7 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                             children: <Widget>[
                               new ListTile(
                                   leading: const Icon(Icons.notifications),
-                                  title: const Text('Notification Logs'),
+                                  title: const Text('Notification'),
                                   onTap: () {
                                     Navigator.pop(context);
                                     Navigator.of(context)
