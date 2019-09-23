@@ -42,7 +42,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
 
   _http_req.setReuse(true);
   // http_req.setTimeout(3000);
-  _http_req.begin(addr);
+  _http_req.begin(_client_req, addr);
   _httpCode = _http_req.sendRequest(RestMethods[method], value);
 
   if ((_httpCode == HTTP_CODE_OK) || (_httpCode == HTTP_CODE_NO_CONTENT)) {
@@ -207,7 +207,7 @@ void FirebaseRest::restStreamApi(const String path) {
   _http_stream.end();
   _http_stream.setReuse(true);
   // http_stream.setTimeout(3000);
-  _http_stream.begin(addr);
+  _http_stream.begin(_client_stream, addr);
 
   _http_stream.addHeader(String(F("Accept")), String(F("text/event-stream")));
   const char *headers[] = {"Location"};
@@ -221,7 +221,7 @@ void FirebaseRest::restStreamApi(const String path) {
     _http_stream.setReuse(false);
     _http_stream.end();
     _http_stream.setReuse(true);
-    _http_stream.begin(location);
+    _http_stream.begin(_client_stream, location);
     _httpCode = _http_stream.GET();
   }
 
@@ -239,18 +239,13 @@ void FirebaseRest::stream(const String &path) { restStreamApi(path); }
 
 int FirebaseRest::readEvent(String &response) {
   int ret = 0;
-  WiFiClient *client = _http_stream.getStreamPtr();
   response = F("");
-  if (client == nullptr) {
-    DEBUG_PRINT("client == nullptr\n");
-    ret = -1;
-  } else {
     uint8_t buff[64];
     uint8_t bsize = sizeof(buff) - 1;
     size_t size;
-    while (_http_stream.connected() && (size = client->available())) {
+    while (_http_stream.connected() && (size = _client_stream.available())) {
       uint16_t rsize = ((size > bsize) ? bsize : size);
-      client->read(buff, rsize);
+      _client_stream.read(buff, rsize);
       buff[rsize] = 0;
       String line((char *)buff);
       // DEBUG_PRINT("client: (%d,%d) %s\n", size, rsize, line.c_str());
@@ -258,7 +253,7 @@ int FirebaseRest::readEvent(String &response) {
       delay(10);
     }
     ret = response.length();
-  }
+
   return ret;
 }
 

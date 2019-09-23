@@ -54,9 +54,10 @@ private:
   int _httpCode;
 #ifdef USE_HTTP_REUSE
   HTTPClient _http_req;
+  WiFiClientSecure _client_req;
 #endif
   HTTPClient _http_stream;
-  WiFiClient _client_stream;
+  WiFiClientSecure _client_stream;
 };
 
 extern FirebaseRest Firebase;

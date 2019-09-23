@@ -122,11 +122,11 @@ bool FbGetDB(void) {
   String path;
 
   if (ret == true) {
-    String kfcmtoken = FbGetPath_fcmtoken();
-    DEBUG_PRINT("token path: %s\n", kfcmtoken.c_str());
-    String json = Firebase.getJSON(kfcmtoken);
+    String data = FbGetPath_fcmtoken();
+    DEBUG_PRINT("path: %s\n", data.c_str());
+    String json = Firebase.getJSON(data);
     if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kfcmtoken\n");
+      DEBUG_PRINT("get failed: %s\n", data.c_str());
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
@@ -141,17 +141,17 @@ bool FbGetDB(void) {
           FB_addRegIDsDB(id);
         }
       } else {
-        DEBUG_PRINT("deserializeJson error\n");
+        DEBUG_PRINT("deserializeJson error: %s\n", data.c_str());
       }
     }
   }
 
   if (ret == true) {
-    String kexec = FbGetPath_exec();
-    DEBUG_PRINT("exex path: %s\n", kexec.c_str());
-    String json = Firebase.getJSON(kexec);
+    String data = FbGetPath_exec();
+    DEBUG_PRINT("path: %s\n", data.c_str());
+    String json = Firebase.getJSON(data);
     if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kexec\n");
+      DEBUG_PRINT("get failed: %s\n", data.c_str());
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
@@ -166,17 +166,17 @@ bool FbGetDB(void) {
           FB_addProgDB(key, value);
         }
       } else {
-        DEBUG_PRINT("deserializeJson error\n");
+        DEBUG_PRINT("deserializeJson error: %s\n", data.c_str());
       }
     }
   }
 
   if (ret == true) {
-    String kdata = FbGetPath_data();
-    DEBUG_PRINT("data path: %s\n", kdata.c_str());
-    String json = Firebase.getJSON(kdata);
+    String data = FbGetPath_data();
+    DEBUG_PRINT("path: %s\n", data.c_str());
+    String json = Firebase.getJSON(data);
     if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kdata\n");
+      DEBUG_PRINT("get failed: %s\n", data.c_str());
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
       ret = false;
     } else {
@@ -194,7 +194,7 @@ bool FbGetDB(void) {
           }
         }
       } else {
-        DEBUG_PRINT("deserializeJson error\n");
+        DEBUG_PRINT("deserializeJson error: %s\n", data.c_str());
       }
     }
   }
