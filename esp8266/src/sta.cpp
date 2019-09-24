@@ -120,11 +120,8 @@ bool STA_Task(uint32_t current_time) {
       }
     }
   } else {
-    DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
-      // force reboot
-      ESP.restart();
-    }
+    FbmOnDisconnect();
+    ret = false;
   }
 
   return ret;

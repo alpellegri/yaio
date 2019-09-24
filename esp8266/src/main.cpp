@@ -62,8 +62,7 @@ void loop() {
     } else if (mode == 1) {
       ret = STA_Task(current_time);
       if (ret == false) {
-        mode = 0;
-        AP_Setup();
+        STA_Setup();
       }
     } else {
       /* unmapped mode */

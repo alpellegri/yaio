@@ -1,5 +1,6 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiUdp.h>
+#include <coredecls.h> // settimeofday_cb()
 #include <string.h>
 #include <time.h>
 
@@ -18,23 +19,24 @@ uint32_t getTime(void) {
   return (uint32_t)now;
 }
 
+static void time_is_set(void) {
+  uint32_t current = getTime();
+  DEBUG_PRINT("UTC time: %d\n", current);
+  time_init = true;
+}
+
 // void TimeSetup(void) { configTime(0, 0, "pool.ntp.org", "time.nist.gov"); }
 static const char ntpserv1[] PROGMEM = "pool.ntp.org";
 static const char ntpserv2[] PROGMEM = "time.nist.gov";
 void TimeSetup(void) {
+  settimeofday_cb(time_is_set);
   configTime(0, 0, String(FPSTR(ntpserv1)).c_str(),
              String(FPSTR(ntpserv2)).c_str());
 }
 
 bool TimeService(void) {
   if (time_init == false) {
-    uint32_t current = getTime();
-    if (current == 0) {
-      DEBUG_PRINT("wait for NTP...\n");
-    } else {
-      time_init = true;
-      DEBUG_PRINT("UTC time: %d\n", current);
-    }
+    DEBUG_PRINT("wait for NTP...\n");
   } else {
 #if 0
     uint32_t curr = millis();

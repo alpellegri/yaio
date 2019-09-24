@@ -29,6 +29,7 @@ static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
 String FBM_getResetReason(void) { return ESP.getResetReason(); }
+void FbmOnDisconnect(void) { boot_sm = 3; }
 
 /* main function task */
 bool FbmService(void) {
@@ -106,12 +107,12 @@ bool FbmService(void) {
       DEBUG_PRINT("set failed: kcontrol/reboot\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      boot_sm = 31;
+      boot_sm = 3;
     }
   } break;
 
   // firebase monitoring / read
-  case 31: {
+  case 3: {
     ret = true;
     uint32_t time_now = getTime();
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
@@ -175,7 +176,7 @@ bool FbmService(void) {
       DEBUG_PRINT("set failed: kstatus\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      boot_sm = 31;
+      boot_sm = 3;
     }
   } break;
 

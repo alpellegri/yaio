@@ -3,8 +3,11 @@
 
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
 
 // #define USE_HTTP_REUSE
+// #define USE_HTTP_STREAM
 
 typedef enum {
   METHOD_GET = 0,
@@ -43,21 +46,23 @@ public:
   bool failed();
   String error();
   void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
-  void run(void);
 
 private:
   String restReqApi(RestMethod_t method, const String path, const String value);
   void restStreamApi(const String path);
 
-  String host_;
-  String auth_;
-  String result_;
-  int httpCode_;
+  String _host;
+  String _auth;
+  String _result;
+  int _httpCode;
 #ifdef USE_HTTP_REUSE
-  uint32_t ctime;
-  HTTPClient http_req;
+  HTTPClient _http_req;
+  BearSSL::WiFiClientSecure _client_req;
 #endif
-  HTTPClient http_stream;
+#ifdef USE_HTTP_STREAM
+  HTTPClient _http_stream;
+  BearSSL::WiFiClientSecure _client_stream;
+#endif
 };
 
 extern FirebaseRest Firebase;
