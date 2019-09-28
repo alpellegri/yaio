@@ -240,19 +240,19 @@ void FirebaseRest::stream(const String &path) { restStreamApi(path); }
 int FirebaseRest::readEvent(String &response) {
   int ret = 0;
   response = F("");
-    uint8_t buff[64];
-    uint8_t bsize = sizeof(buff) - 1;
-    size_t size;
-    while (_http_stream.connected() && (size = _client_stream.available())) {
-      uint16_t rsize = ((size > bsize) ? bsize : size);
-      _client_stream.read(buff, rsize);
-      buff[rsize] = 0;
-      String line((char *)buff);
-      // DEBUG_PRINT("client: (%d,%d) %s\n", size, rsize, line.c_str());
-      response += line;
-      delay(10);
-    }
-    ret = response.length();
+  uint8_t buff[64];
+  uint8_t bsize = sizeof(buff) - 1;
+  size_t size;
+  while (_http_stream.connected() && (size = _client_stream.available())) {
+    uint16_t rsize = ((size > bsize) ? bsize : size);
+    _client_stream.read(buff, rsize);
+    buff[rsize] = 0;
+    String line((char *)buff);
+    // DEBUG_PRINT("client: (%d,%d) %s\n", size, rsize, line.c_str());
+    response += line;
+    delay(10);
+  }
+  ret = response.length();
 
   return ret;
 }
