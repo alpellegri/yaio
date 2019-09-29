@@ -21,7 +21,7 @@
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define STA_NTP_TIMEOUT (5 * 1000)
+#define STA_NTP_TIMEOUT (10 * 1000)
 
 static bool fota_mode = false;
 static uint32_t ntp_to;

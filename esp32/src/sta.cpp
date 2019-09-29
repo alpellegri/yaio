@@ -20,7 +20,8 @@
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
-#define STA_NTP_TIMEOUT (5 * 1000)
+
+#define STA_NTP_TIMEOUT (10 * 1000)
 
 static bool fota_mode = false;
 static uint32_t ntp_to;
