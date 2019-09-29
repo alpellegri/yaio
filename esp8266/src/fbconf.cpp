@@ -201,6 +201,7 @@ bool FbGetDB(void) {
 
   FB_dumpIoEntry();
   FB_dumpProg();
+  DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
   return ret;
 }

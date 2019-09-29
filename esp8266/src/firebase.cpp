@@ -53,7 +53,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   if ((_httpCode == HTTP_CODE_OK) || (_httpCode == HTTP_CODE_NO_CONTENT)) {
     // DEBUG_PRINT("[HTTP] size: %d %d\n", _httpCode, _http_req.getSize());
     _result = _http_req.getString();
-    DEBUG_PRINT("[HTTP] response: %s\n", _result.c_str());
+    // DEBUG_PRINT("[HTTP] response: %s\n", _result.c_str());
   } else {
     _result = String(F(""));
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
@@ -76,7 +76,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   String addr = String(F("https://")) + _host + path_ + post;
   // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
 
-  http.setTimeout(1000);
+  // http.setTimeout(3000);
   BearSSL::WiFiClientSecure client;
   client.setInsecure();
   http.begin(client, addr);
@@ -262,6 +262,9 @@ int FirebaseRest::readEvent(String &response) {
     delay(10);
   }
   ret = response.length();
+  if (_http_stream.connected() == false) {
+    ret = -1;
+  }
   return ret;
 }
 #endif
