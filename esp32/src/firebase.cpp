@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <WiFiClient.h>
 
 #include <string>
 
@@ -41,7 +42,8 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
 
   _http_req.setReuse(true);
-  // http_req.setTimeout(3000);
+  // _http_req.setTimeout(3000);
+
   _http_req.begin(_client_req, addr);
   _httpCode = _http_req.sendRequest(RestMethods[method], value);
 
@@ -71,7 +73,6 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   String addr = String(F("https://")) + _host + path_ + post;
   // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
 
-  // http.setReuse(true);
   // http.setTimeout(3000);
   http.begin(addr);
   _httpCode = http.sendRequest(RestMethods[method], value);
@@ -197,6 +198,7 @@ void FirebaseRest::remove(const String &path) {
   String res = restReqApi(METHOD_REMOVE, path, String());
 }
 
+#ifdef USE_HTTP_STREAM
 void FirebaseRest::restStreamApi(const String path) {
 
   // DEBUG_PRINT("restStreamApi %s\n", path.c_str());
@@ -253,9 +255,12 @@ int FirebaseRest::readEvent(String &response) {
     delay(10);
   }
   ret = response.length();
-
+  if (_http_stream.connected() == false) {
+    ret = -1;
+  }
   return ret;
 }
+#endif
 
 bool FirebaseRest::failed() {
   return !((_httpCode == HTTP_CODE_OK) || (_httpCode == HTTP_CODE_NO_CONTENT));
@@ -309,8 +314,8 @@ void FirebaseRest::sendMessage(String &message, String &key,
   json += F("]}");
 
   String addr = String(F("https://")) + fcm_host + String(F("/fcm/send"));
-  HTTPClient http;
   WiFiClientSecure client;
+  HTTPClient http;
   http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));
   http.addHeader(String(F("Content-Type")), String(F("application/json")));
@@ -325,7 +330,7 @@ void FirebaseRest::sendMessage(String &message, String &key,
     uint8_t buff[64];
     uint8_t bsize = sizeof(buff) - 1;
     int size;
-    while (size = (client.available())) {
+    while ((size = client.available()) > 0) {
       uint16_t rsize = ((size > bsize) ? bsize : size);
       client.read(buff, rsize);
       buff[rsize] = 0;

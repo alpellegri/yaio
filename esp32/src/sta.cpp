@@ -29,7 +29,6 @@ static uint32_t core0_time2;
 
 bool STA_Setup(void) {
   bool ret = true;
-  bool sts = true;
   int cnt;
 
   digitalWrite(LED, LED_OFF);
@@ -79,13 +78,8 @@ bool STA_Setup(void) {
       preferences.putUInt("fota-req", 0);
     }
   } else {
-    sts = false;
-  }
-
-  if (sts != true) {
     DEBUG_PRINT("not connected to router\n");
     ESP.restart();
-    ret = false;
   }
 
   return ret;
