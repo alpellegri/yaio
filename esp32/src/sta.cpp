@@ -20,8 +20,10 @@
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
+#define STA_NTP_TIMEOUT (5 * 1000)
 
 static bool fota_mode = false;
+static uint32_t ntp_to;
 
 static Preferences preferences;
 static uint32_t core0_time;
@@ -149,6 +151,10 @@ bool STA_Task(uint32_t current_time) {
         } else {
           core0_time = millis();
           DEBUG_PRINT("core0_time: %d\n", core0_time);
+        }
+      } else {
+        if ((millis() - ntp_to) > STA_NTP_TIMEOUT) {
+          ESP.restart();
         }
       }
     }
