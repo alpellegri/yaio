@@ -24,10 +24,12 @@
 #define STA_NTP_TIMEOUT (10 * 1000)
 
 static bool fota_mode = false;
+static uint32_t last_wifi_time;
 static uint32_t ntp_to;
 
 bool STA_Setup(void) {
   bool ret = true;
+  bool sts = true;
   int cnt;
 
   digitalWrite(LED, LED_OFF);
@@ -77,8 +79,13 @@ bool STA_Setup(void) {
       FOTA_UpdateReq();
     }
   } else {
+    sts = false;
+  }
+
+  if (sts != true) {
     DEBUG_PRINT("not connected to router\n");
     ESP.restart();
+    ret = false;
   }
 
   return ret;
@@ -94,6 +101,7 @@ bool STA_Task(uint32_t current_time) {
 
   wl_status_t wifi_status = WiFi.status();
   if (wifi_status == WL_CONNECTED) {
+    last_wifi_time = current_time;
     // wait for time service is up
     if (fota_mode == true) {
       FOTAService();
@@ -102,9 +110,8 @@ bool STA_Task(uint32_t current_time) {
         bool vmSchedule = FbmService();
         if (vmSchedule == true) {
           yield();
-          Timers_Service();
-          RF_Loop();
           RF_Service();
+          Timers_Service();
           PHT_Service();
           PIO_Service();
           VM_run();
@@ -126,6 +133,4 @@ bool STA_Task(uint32_t current_time) {
   return ret;
 }
 
-void STA_Loop() {
-  // RF_Loop();
-}
+void STA_Loop() { RF_Loop(); }

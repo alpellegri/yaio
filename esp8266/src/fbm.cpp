@@ -16,9 +16,17 @@
 #include "vers.h"
 #include "vm.h"
 
+#define FBM_UPDATE_MONITOR_FAST (1)
+#define FBM_UPDATE_MONITOR_SLOW (5)
+
 static uint8_t boot_sm = 0;
 static bool boot_first = false;
-static uint32_t stream_time = 0;
+static uint32_t control_time;
+static uint32_t control_time_last;
+
+static uint32_t fbm_update_last = 0;
+static uint32_t fbm_monitor_last = 0;
+static bool fbm_monitor_run = false;
 
 String FBM_getResetReason(void) { return ESP.getResetReason(); }
 void FbmOnDisconnect(void) { boot_sm = 3; }
@@ -49,7 +57,7 @@ bool FbmService(void) {
       DEBUG_PRINT("get failed: kstartup\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      DynamicJsonDocument object(512);
+      DynamicJsonDocument object(1024);
       auto error = deserializeJson(object, json);
       if (!error) {
         uint32_t bootcnt = object[F("bootcnt")];
@@ -86,6 +94,7 @@ bool FbmService(void) {
       }
 
       DEBUG_PRINT("Node is up!\n");
+      control_time_last = 0;
       boot_sm = 21;
     }
   } break;
@@ -102,86 +111,73 @@ bool FbmService(void) {
     }
   } break;
 
-  // firebase monitoring
+  // firebase monitoring / read
   case 3: {
-    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-    String kcontrol = FbGetPath_control();
-    Firebase.stream(kcontrol + F("/time"));
-    boot_sm = 31;
-    stream_time = millis();
-  } break;
-  case 31: {
-    String response;
-    int code = Firebase.readEvent(response);
-    uint32_t current_time = millis();
-    if (code == -1) {
-      boot_sm = 3;
-    } else if (code == 0) {
-      if ((current_time - stream_time) > (60 * 1000)) {
-        DEBUG_PRINT("delta fail %d\n", (current_time - stream_time));
-        boot_sm = 3;
-      }
-    } else {
-      stream_time = current_time;
-      DEBUG_PRINT("response: _%s_\n", response.c_str());
+    ret = true;
+    uint32_t time_now = getTime();
+    if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
+                                             ? (FBM_UPDATE_MONITOR_FAST)
+                                             : (FBM_UPDATE_MONITOR_SLOW))) {
+      DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
+      fbm_update_last = time_now;
 
-      String line = response.substring(7, response.indexOf('\n'));
-      if (line.compareTo(F("put")) == 0) {
-        DEBUG_PRINT("processing\n");
-        bool run = false;
-        VM_UpdateDataReq();
-        String kcontrol = FbGetPath_control();
-        String json = Firebase.getJSON(kcontrol);
-        if (Firebase.failed() == true) {
-          DEBUG_PRINT("get failed: kcontrol\n");
-          DEBUG_PRINT("%s\n", Firebase.error().c_str());
-        } else {
-          DynamicJsonDocument object(512);
-          auto error = deserializeJson(object, json);
-          if (!error) {
-            int control_reboot = object[F("reboot")];
-            if (control_reboot == 0) {
-              run = true;
-            } else if (control_reboot == 1) {
-              boot_sm = 6;
-            } else if (control_reboot == 2) {
-              boot_sm = 4;
-            } else if (control_reboot == 3) {
-              boot_sm = 2;
-            } else if (control_reboot == 4) {
-              boot_sm = 5;
+      String kcontrol = FbGetPath_control();
+      String json = Firebase.getJSON(kcontrol);
+      if (Firebase.failed() == true) {
+        DEBUG_PRINT("get failed: kcontrol/time\n");
+        DEBUG_PRINT("%s\n", Firebase.error().c_str());
+      } else {
+        DynamicJsonDocument object(1024);
+        auto error = deserializeJson(object, json);
+        if (!error) {
+          control_time = object[F("time")];
+          uint32_t control_reboot = object[F("reboot")];
+          if (control_time != control_time_last) {
+            control_time_last = control_time;
+            fbm_monitor_last = time_now;
+            VM_UpdateDataReq();
+            fbm_monitor_run = true;
+            boot_sm = 32;
+          }
+          if (fbm_monitor_run == true) {
+            if ((time_now - fbm_monitor_last) > FBM_UPDATE_MONITOR_SLOW) {
+              fbm_monitor_run = false;
             }
+          }
+          if (control_reboot == 1) {
+            boot_sm = 6;
+          } else if (control_reboot == 2) {
+            boot_sm = 4;
+          } else if (control_reboot == 3) {
+            boot_sm = 2;
+          } else if (control_reboot == 4) {
+            boot_sm = 5;
           } else {
-            DEBUG_PRINT("parseObject() failed\n");
           }
-        }
-
-        if (run == true) {
-          DynamicJsonDocument status(512);
-          status[F("heap")] = ESP.getFreeHeap();
-          status[F("time")] = getTime();
-          struct tm timeinfo;
-          time_t now = time(nullptr);
-          gmtime_r(&now, &timeinfo);
-          Serial.print("Current time: ");
-          Serial.print(asctime(&timeinfo));
-
-          DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
-
-          String status_str;
-          serializeJson(status, status_str);
-          String kstatus = FbGetPath_status();
-          DEBUG_PRINT("set: kstatus\n");
-          Firebase.setJSON(kstatus, status_str);
-          DEBUG_PRINT("set: kstatus\n");
-          if (Firebase.failed()) {
-            DEBUG_PRINT("set failed: kstatus\n");
-            DEBUG_PRINT("%s\n", Firebase.error().c_str());
-          }
+        } else {
+          DEBUG_PRINT("parseObject() failed\n");
         }
       }
     }
+  } break;
+
+  // firebase monitoring / write
+  case 32: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     ret = true;
+    DynamicJsonDocument status(1024);
+    status[F("heap")] = ESP.getFreeHeap();
+    status[F("time")] = getTime();
+    String status_str;
+    serializeJson(status, status_str);
+    String kstatus = FbGetPath_status();
+    Firebase.setJSON(kstatus, status_str);
+    if (Firebase.failed()) {
+      DEBUG_PRINT("set failed: kstatus\n");
+      DEBUG_PRINT("%s\n", Firebase.error().c_str());
+    } else {
+      boot_sm = 3;
+    }
   } break;
 
   case 4:
