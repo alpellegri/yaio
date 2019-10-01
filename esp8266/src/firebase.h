@@ -48,7 +48,7 @@ public:
   void sendMessage(String &message, String &key, std::vector<String> &RegIDs);
 
 private:
-  String restReqApi(RestMethod_t method, const String path, const String value);
+  String &restReqApi(RestMethod_t method, const String path, const String value);
   void restStreamApi(const String path);
 
   String _host;

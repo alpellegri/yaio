@@ -30,7 +30,7 @@ void FirebaseRest::begin(const String &host, const String &auth) {
 }
 
 #ifdef USE_HTTP_REUSE
-String FirebaseRest::restReqApi(RestMethod_t method, const String path,
+String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                 const String value) {
 
   String path_ = String(F("/")) + path + String(F(".json"));
@@ -61,7 +61,7 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
   return _result;
 }
 #else
-String FirebaseRest::restReqApi(RestMethod_t method, const String path,
+String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                 const String value) {
 
   HTTPClient http;
@@ -92,94 +92,94 @@ String FirebaseRest::restReqApi(RestMethod_t method, const String path,
 #endif
 
 void FirebaseRest::pushJSON(const String &path, const String &value) {
-  String res = restReqApi(METHOD_PUSH, path, value);
+  restReqApi(METHOD_PUSH, path, value);
 }
 
 void FirebaseRest::pushInt(const String &path, int value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_PUSH, path, buf);
+  restReqApi(METHOD_PUSH, path, buf);
 }
 
 void FirebaseRest::pushFloat(const String &path, float value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_PUSH, path, buf);
+  restReqApi(METHOD_PUSH, path, buf);
 }
 
 void FirebaseRest::pushBool(const String &path, bool value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_PUSH, path, buf);
+  restReqApi(METHOD_PUSH, path, buf);
 }
 
 void FirebaseRest::pushString(const String &path, const String &value) {
   String buf = String(F("\"")) + value + String(F("\""));
-  String res = restReqApi(METHOD_PUSH, path, buf);
+  restReqApi(METHOD_PUSH, path, buf);
 }
 
 void FirebaseRest::setJSON(const String &path, const String &value) {
-  String res = restReqApi(METHOD_SET, path, value);
+  restReqApi(METHOD_SET, path, value);
 }
 
 void FirebaseRest::setInt(const String &path, int value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_SET, path, buf);
+  restReqApi(METHOD_SET, path, buf);
 }
 
 void FirebaseRest::setFloat(const String &path, float value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_SET, path, buf);
+  restReqApi(METHOD_SET, path, buf);
 }
 
 void FirebaseRest::setBool(const String &path, bool value) {
   String buf = (value == true) ? (String(F("true"))) : (String(F("false")));
-  String res = restReqApi(METHOD_SET, path, buf);
+  restReqApi(METHOD_SET, path, buf);
 }
 
 void FirebaseRest::setString(const String &path, const String &value) {
   String buf = String(F("\"")) + value + String(F("\""));
-  String res = restReqApi(METHOD_SET, path, buf);
+  restReqApi(METHOD_SET, path, buf);
 }
 
 void FirebaseRest::updateJSON(const String &path, const String &value) {
-  String res = restReqApi(METHOD_UPDATE, path, value);
+  restReqApi(METHOD_UPDATE, path, value);
 }
 
 void FirebaseRest::updateInt(const String &path, int value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_UPDATE, path, buf);
+  restReqApi(METHOD_UPDATE, path, buf);
 }
 
 void FirebaseRest::updateFloat(const String &path, float value) {
   String buf = String(value);
-  String res = restReqApi(METHOD_UPDATE, path, buf);
+  restReqApi(METHOD_UPDATE, path, buf);
 }
 
 void FirebaseRest::updateBool(const String &path, bool value) {
   String buf = (value == true) ? (String(F("true"))) : (String(F("false")));
-  String res = restReqApi(METHOD_UPDATE, path, buf);
+  restReqApi(METHOD_UPDATE, path, buf);
 }
 
 void FirebaseRest::updateString(const String &path, const String &value) {
   String buf = String(F("\"")) + value + String(F("\""));
-  String res = restReqApi(METHOD_UPDATE, path, buf);
+  restReqApi(METHOD_UPDATE, path, buf);
 }
 
 String FirebaseRest::getJSON(const String &path) {
-  String res = restReqApi(METHOD_GET, path, String());
+  String &res = restReqApi(METHOD_GET, path, String());
   return res;
 }
 
 int FirebaseRest::getInt(const String &path) {
-  String res = restReqApi(METHOD_GET, path, String());
+  String &res = restReqApi(METHOD_GET, path, String());
   return res.toInt();
 }
 
 float FirebaseRest::getFloat(const String &path) {
-  String res = restReqApi(METHOD_GET, path, String());
+  String &res = restReqApi(METHOD_GET, path, String());
   return res.toFloat();
 }
 
 String FirebaseRest::getString(const String &path) {
-  String res = restReqApi(METHOD_GET, path, String());
+  String &res = restReqApi(METHOD_GET, path, String());
   String ret;
   if (res.length() > 2) {
     ret = res.substring(1, res.length() - 2);
@@ -190,12 +190,12 @@ String FirebaseRest::getString(const String &path) {
 }
 
 bool FirebaseRest::getBool(const String &path) {
-  String res = restReqApi(METHOD_GET, path, String());
+  String &res = restReqApi(METHOD_GET, path, String());
   return res.equals(String(F("true")));
 }
 
 void FirebaseRest::remove(const String &path) {
-  String res = restReqApi(METHOD_REMOVE, path, String());
+  restReqApi(METHOD_REMOVE, path, String());
 }
 
 #ifdef USE_HTTP_STREAM
