@@ -7,7 +7,7 @@
 #include <WiFiClient.h>
 
 // #define USE_HTTP_REUSE
-#define USE_HTTP_STREAM
+// #define USE_HTTP_STREAM
 
 typedef enum {
   METHOD_GET = 0,
