@@ -136,9 +136,10 @@ bool FbGetDB(void) {
       if (!error) {
         JsonObject object = doc.as<JsonObject>();
         for (JsonPair p : object) {
-          String key = p.key().c_str();
-          String id = p.value().as<String>();
-          FB_addRegIDsDB(id);
+          TokenEntry token;
+          token.key = p.key().c_str();
+          token.value = p.value().as<String>();
+          FB_addRegIDsDB(token);
         }
       } else {
         DEBUG_PRINT("deserializeJson error: %s\n", data.c_str());
@@ -201,7 +202,6 @@ bool FbGetDB(void) {
 
   FB_dumpIoEntry();
   FB_dumpProg();
-  DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
   return ret;
 }

@@ -11,19 +11,21 @@
 #include "pio.h"
 #include "rf.h"
 
-static std::vector<String> RegIDs;
+static std::vector<TokenEntry> RegIDs;
 static std::vector<IoEntry> IoEntryVec;
 static std::vector<ProgEntry> ProgVec;
 
 void FB_deinitRegIDsDB(void) { RegIDs.clear(); }
+void FB_clearRegIDsDB(uint32_t id) { RegIDs.erase(RegIDs.begin() + id); }
 
-void FB_addRegIDsDB(String string) {
+void FB_addRegIDsDB(TokenEntry token) {
+  DEBUG_PRINT("FB_addRegIDsDB: key=%s\n", token.key.c_str());
   if (RegIDs.size() < NUM_REGIDS_MAX) {
-    RegIDs.push_back(string);
+    RegIDs.push_back(token);
   }
 }
 
-std::vector<String> &FB_getRegIDs() { return RegIDs; }
+std::vector<TokenEntry> &FB_getRegIDs() { return RegIDs; }
 
 void FB_deinitIoEntryDB(void) { IoEntryVec.clear(); }
 

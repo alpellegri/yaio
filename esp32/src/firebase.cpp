@@ -31,7 +31,7 @@ void FirebaseRest::begin(const String &host, const String &auth) {
 
 #ifdef USE_HTTP_REUSE
 String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
-                                const String value) {
+                                 const String value) {
 
   String path_ = String(F("/")) + path + String(F(".json"));
   String post = String(F("?auth=")) + _auth;
@@ -62,7 +62,7 @@ String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
 }
 #else
 String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
-                                const String value) {
+                                 const String value) {
 
   HTTPClient http;
   String path_ = String(F("/")) + path + String(F(".json"));
@@ -242,6 +242,7 @@ void FirebaseRest::stream(const String &path) { restStreamApi(path); }
 int FirebaseRest::readEvent(String &response) {
   int ret = 0;
   response = F("");
+
   uint8_t buff[64];
   uint8_t bsize = sizeof(buff) - 1;
   size_t size;
@@ -254,6 +255,7 @@ int FirebaseRest::readEvent(String &response) {
     response += line;
     delay(10);
   }
+
   ret = response.length();
   if (_http_stream.connected() == false) {
     ret = -1;
@@ -268,8 +270,9 @@ bool FirebaseRest::failed() {
 
 String FirebaseRest::error() { return HTTPClient::errorToString(_httpCode); }
 
-void FirebaseRest::sendMessage(String &message, String &key,
-                               std::vector<String> &RegIDs) {
+String FirebaseRest::sendMessage(String &message, String &key,
+                                 std::vector<String> &tokens) {
+  String response;
   uint32_t i;
   String fcm_host = String(FPSTR(FcmServer));
 
@@ -308,8 +311,8 @@ void FirebaseRest::sendMessage(String &message, String &key,
   json += F("},");
 
   json += F("\"registration_ids\":[");
-  for (i = 0; i < RegIDs.size(); i++) {
-    json += String(F("\"")) + RegIDs[i] + F("\",");
+  for (i = 0; i < tokens.size(); i++) {
+    json += String(F("\"")) + tokens[i] + F("\",");
   }
   json += F("]}");
 
@@ -323,28 +326,16 @@ void FirebaseRest::sendMessage(String &message, String &key,
   // DEBUG_PRINT("json: %s\n", json.c_str());
   int httpCode = http.POST(json);
   if (httpCode == HTTP_CODE_OK) {
-#if 0
-    String response = http.getString();
-#else
-    String response;
-    uint8_t buff[64];
-    uint8_t bsize = sizeof(buff) - 1;
-    int size;
-    while ((size = client.available()) > 0) {
-      uint16_t rsize = ((size > bsize) ? bsize : size);
-      client.read(buff, rsize);
-      buff[rsize] = 0;
-      String line((char *)buff);
-      response += line;
-    }
-#endif
-    DEBUG_PRINT("[HTTP] response: %s\n", response.c_str());
+    response = http.getString();
+    // DEBUG_PRINT("[HTTP] response: %s\n", response.c_str());
     // DEBUG_PRINT("[HTTP] size: %d %d\n", httpCode, client.available());
   } else {
     DEBUG_PRINT("[HTTP] POST... failed, error: %d, %s\n", httpCode,
                 http.errorToString(httpCode).c_str());
   }
   http.end();
+
+  return response;
 }
 
 FirebaseRest Firebase;
