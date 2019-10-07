@@ -215,6 +215,7 @@ void FirebaseRest::restStreamApi(const String path) {
   _http_stream.setReuse(true);
   // _http_stream.setTimeout(3000);
   _client_stream.setInsecure();
+  _client_stream.setBufferSizes(1024, 1024);
   _http_stream.begin(_client_stream, addr);
 
   _http_stream.addHeader(String(F("Accept")), String(F("text/event-stream")));
