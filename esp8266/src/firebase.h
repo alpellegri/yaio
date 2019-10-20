@@ -6,7 +6,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-// #define USE_HTTP_REUSE
+#define USE_HTTP_REUSE
 // #define USE_HTTP_STREAM
 
 typedef enum {

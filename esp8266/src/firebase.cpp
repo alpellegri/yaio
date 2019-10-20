@@ -46,7 +46,7 @@ String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
   _http_req.setReuse(true);
   // _http_req.setTimeout(3000);
   _client_req.setInsecure();
-  // _client_req.setBufferSizes(4096, 1024);
+  _client_req.setBufferSizes(4096, 1024);
   _http_req.begin(_client_req, addr);
   _httpCode = _http_req.sendRequest(RestMethods[method], value);
 
@@ -326,6 +326,7 @@ String FirebaseRest::sendMessage(String &message, String &key,
   String addr = String(F("https://")) + fcm_host + String(F("/fcm/send"));
   BearSSL::WiFiClientSecure client;
   client.setInsecure();
+  client.setBufferSizes(4096, 1024);
   HTTPClient http;
   http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));
