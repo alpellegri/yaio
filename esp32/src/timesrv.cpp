@@ -21,9 +21,12 @@ uint32_t getTime(void) {
 // void TimeSetup(void) { configTime(0, 0, "pool.ntp.org", "time.nist.gov"); }
 static const char ntpserv1[] PROGMEM = "pool.ntp.org";
 static const char ntpserv2[] PROGMEM = "time.nist.gov";
+String srv1;
+String srv2;
 void TimeSetup(void) {
-  configTime(0, 0, String(FPSTR(ntpserv1)).c_str(),
-             String(FPSTR(ntpserv2)).c_str());
+  srv1 = String(FPSTR(ntpserv1));
+  srv2 = String(FPSTR(ntpserv2));
+  configTime(0, 0, srv1.c_str(), srv2.c_str());
 }
 
 bool TimeService(void) {
