@@ -45,8 +45,7 @@ public:
   int readEvent(String &response);
   bool failed();
   String error();
-  String sendMessage(String &message, String &key,
-                     std::vector<String> &tokens);
+  String sendMessage(String &message, String &key, std::vector<String> &tokens);
 
 private:
   String &restReqApi(RestMethod_t method, const String path,
