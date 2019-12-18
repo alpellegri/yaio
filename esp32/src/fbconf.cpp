@@ -157,7 +157,7 @@ bool FbGetDB(void) {
       ret = false;
     } else {
       FB_deinitProgDB();
-      DynamicJsonDocument doc(8192);
+      DynamicJsonDocument doc(16384);
       auto error = deserializeJson(doc, json);
       if (!error) {
         JsonObject object = doc.as<JsonObject>();
@@ -183,7 +183,7 @@ bool FbGetDB(void) {
     } else {
       PHT_Deinit();
       FB_deinitIoEntryDB();
-      DynamicJsonDocument doc(8192);
+      DynamicJsonDocument doc(16384);
       auto error = deserializeJson(doc, json);
       if (!error) {
         JsonObject object = doc.as<JsonObject>();

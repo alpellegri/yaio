@@ -326,9 +326,20 @@ String FirebaseRest::sendMessage(String &message, String &key,
   // DEBUG_PRINT("json: %s\n", json.c_str());
   int httpCode = http.POST(json);
   if (httpCode == HTTP_CODE_OK) {
-    response = http.getString();
-    // DEBUG_PRINT("[HTTP] response: %s\n", response.c_str());
-    // DEBUG_PRINT("[HTTP] size: %d %d\n", httpCode, client.available());
+    response = F("");
+
+    uint8_t buff[64];
+    uint8_t bsize = sizeof(buff) - 1;
+    size_t size;
+    while (http.connected() && (size = client.available())) {
+      uint16_t rsize = ((size > bsize) ? bsize : size);
+      client.read(buff, rsize);
+      buff[rsize] = 0;
+      String line((char *)buff);
+      // DEBUG_PRINT("client: (%d,%d) %s\n", size, rsize, line.c_str());
+      response += line;
+      delay(10);
+    }
   } else {
     DEBUG_PRINT("[HTTP] POST... failed, error: %d, %s\n", httpCode,
                 http.errorToString(httpCode).c_str());

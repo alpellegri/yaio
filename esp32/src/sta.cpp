@@ -55,9 +55,9 @@ bool STA_Setup(void) {
 
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
-  while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
+  while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 10)) {
     DEBUG_PRINT(".");
-    delay(500);
+    delay(1000);
   }
   DEBUG_PRINT("\n");
 
