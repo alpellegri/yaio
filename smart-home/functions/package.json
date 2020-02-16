@@ -1,26 +1,19 @@
 {
-  "name": "big-ben-functions",
-  "description": "A simple endpoint that returns a number of 'BONG' based on the time of day",
+  "name": "smarthome-washer",
+  "description": "Codelab for controlling devices through the Google Assistant",
+  "engines": {
+    "node": "8"
+  },
   "dependencies": {
-    "actions-on-google": "^2.1.0",
-    "cors": "^2.8.4",
-    "firebase": "^5.0.4",
-    "firebase-admin": "^5.12.1",
-    "firebase-functions": "^2.0.2",
-    "google-auth-library": "^0.10.0",
-    "googleapis": "^27.0.0"
+    "actions-on-google": "^2.12.0",
+    "cors": "^2.8.5",
+    "firebase-admin": "^8.0.0",
+    "firebase-functions": "^3.2.0",
+    "googleapis": "^43.0.0"
   },
+  "private": true,
   "devDependencies": {
-    "eslint": "^4.13.1",
-    "eslint-plugin-promise": "^3.6.0"
-  },
-  "scripts": {
-    "lint": "./node_modules/.bin/eslint --max-warnings=0 .",
-    "serve": "firebase serve --only functions",
-    "shell": "firebase experimental:functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
-  },
-  "private": true
+    "eslint": "^6.3.0",
+    "eslint-config-google": "^0.14.0"
+  }
 }
