@@ -7,8 +7,8 @@
 #include <vector>
 
 #define NUM_REGIDS_MAX 5
-#define NUM_IO_ENTRY_MAX 40
-#define NUM_IO_FUNCTION_MAX 40
+#define NUM_IO_ENTRY_MAX 128
+#define NUM_IO_FUNCTION_MAX 128
 
 enum {
   /*  0 */ kPhyDIn = 0,

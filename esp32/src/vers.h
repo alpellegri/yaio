@@ -6,6 +6,6 @@
 extern String VERS_getVersion(void);
 
 #define VERS_HW_VER "ESP32"
-#define VERS_SW_VER "0.3.28.0"
+#define VERS_SW_VER "0.3.29.0"
 
 #endif
