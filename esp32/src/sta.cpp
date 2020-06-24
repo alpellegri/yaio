@@ -145,7 +145,7 @@ bool STA_Task(uint32_t current_time) {
             DEBUG_PRINT("hang: %d %d\n", current_time - core0_time,
                         core0_time2 - core0_time);
           }
-          if ((int32_t)(current_time - core0_time) > 4000) {
+          if ((int32_t)(current_time - core0_time) > 8000) {
             DEBUG_PRINT("reset hang: %d\n", current_time - core0_time);
             ESP.restart();
           }
