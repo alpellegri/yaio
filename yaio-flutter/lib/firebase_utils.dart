@@ -9,7 +9,7 @@ import 'const.dart';
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
-FirebaseUser _user;
+User _user;
 
 Map _nodeConfigMap = new Map();
 SharedPreferences _prefs;
@@ -29,25 +29,25 @@ String dTHRef;
 String dDomain;
 String dNodeName;
 
-FirebaseUser getFirebaseUser() {
+User getFirebaseUser() {
   return _user;
 }
 
-Future<FirebaseUser> signInWithGoogle() async {
+Future<User> signInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-  final AuthCredential credential = GoogleAuthProvider.getCredential(
+  final AuthCredential credential = GoogleAuthProvider.credential(
     accessToken: googleAuth.accessToken,
     idToken: googleAuth.idToken,
   );
-  final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+  final User user = (await _auth.signInWithCredential(credential)).user;
   assert(user.email != null);
   assert(user.displayName != null);
   assert(!user.isAnonymous);
   assert(await user.getIdToken() != null);
 
-  final FirebaseUser currentUser = await _auth.currentUser();
-  assert(user.uid == currentUser.uid);
+  // final User currentUser = await _auth.   .currentUser();
+  // assert(user.uid == currentUser.uid);
 
   _user = user;
   // print(user);

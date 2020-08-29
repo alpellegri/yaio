@@ -62,11 +62,11 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
           new UserAccountsDrawerHeader(
             accountName: new Text(getFirebaseUser().displayName),
             accountEmail: new Text(getFirebaseUser().email),
-            currentAccountPicture: new CircleAvatar(
+            /*currentAccountPicture: new CircleAvatar(
               backgroundImage: new NetworkImage(
-                getFirebaseUser().providerData[1].photoUrl,
+                getFirebaseUser().providerData[1].photoURL,
               ),
-            ),
+            ),*/
             margin: EdgeInsets.zero,
             onDetailsPressed: () {
               _showDrawerContents = !_showDrawerContents;

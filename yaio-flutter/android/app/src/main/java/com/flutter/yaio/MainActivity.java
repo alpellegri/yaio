@@ -1,4 +1,4 @@
-package com.example.yaio;
+package com.flutter.yaio;
 
 import android.os.Bundle;
 

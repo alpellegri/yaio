@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'drawer.dart';
 import 'login.dart';
 
@@ -18,7 +19,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   print('app start');
   DateTime now = new DateTime.now();
   Duration off = now.timeZoneOffset;
