@@ -121,7 +121,7 @@ void vm_write(vm_context_t &ctx, const char *key_value) {
     //
     VM_writeOutMessage(ctx, entry.value);
   } else {
-    entry.value = ctx.ACC;
+    entry.value = String(ctx.ACC);
     entry.wb = 1;
   }
 }
