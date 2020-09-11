@@ -35,11 +35,13 @@ class ServiceWebSocket {
   }
 
   void send(String value) {
-    (_socket != null) ? _socket.add(value) : {};
+    // (_socket != null) ? _socket.add(value) : {};
+    _socket?.add(value);
   }
 
   void close() {
-    (_socket != null) ? _socket.close() : {};
+    // (_socket != null) ? _socket.close() : {};
+    _socket?.close();
   }
 }
 

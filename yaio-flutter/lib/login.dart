@@ -36,22 +36,19 @@ class _LoginState extends State<Login> {
     _connected = false;
     signInWithGoogle().then((onValue) {
       _fbMessaging.configure(
-        onMessage: (Map<String, dynamic> message) {
+        onMessage: (Map<String, dynamic> message) async {
           print("onMessage: $message");
-          // _showItemDialog(message);
         },
-        onLaunch: (Map<String, dynamic> message) {
+        onLaunch: (Map<String, dynamic> message) async {
           print("onLaunch: $message");
-          // _navigateToItemDetail(message);
         },
-        onResume: (Map<String, dynamic> message) {
+        onResume: (Map<String, dynamic> message) async {
           print("onResume: $message");
-          // _navigateToItemDetail(message);
         },
       );
 
       _fbMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(sound: true, badge: true, alert: true));
+          const IosNotificationSettings(sound: true, badge: true, alert: true, provisional: true));
       _fbMessaging.onIosSettingsRegistered
           .listen((IosNotificationSettings settings) {
         print('Settings registered: $settings');
