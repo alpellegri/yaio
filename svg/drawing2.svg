@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="drawing2.svg"
+   inkscape:export-filename="E:\GitHub\yaio\svg\ic_launcher2\res\mipmap-xxxhdpi\ic_launcher.png"
+   inkscape:export-xdpi="28.472218"
+   inkscape:export-ydpi="28.472218">
+  <defs
+     id="defs2">
+    <rect
+       x="68.791666"
+       y="170.08928"
+       width="4.5357143"
+       height="68.41369"
+       id="rect847" />
+    <rect
+       x="44.134698"
+       y="122.91489"
+       width="66.514885"
+       height="33.705056"
+       id="rect841" />
+    <linearGradient
+       id="linearGradient6026"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop6024" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient6026"
+       id="radialGradient6034"
+       cx="99.515228"
+       cy="167.30443"
+       fx="99.515228"
+       fy="167.30443"
+       r="66.204938"
+       gradientTransform="matrix(1,0,0,0.70552171,0,49.267521)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="67.470238"
+     inkscape:cy="551.51391"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:document-rotation="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.717251;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4517"
+       width="171.28275"
+       height="171.28275"
+       x="17.047756"
+       y="61.613926" />
+    <path
+       style="fill:#333333;stroke:none;stroke-width:6.41861;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path9239"
+       sodipodi:type="arc"
+       sodipodi:cx="-115.81254"
+       sodipodi:cy="-183.17177"
+       sodipodi:rx="76.555565"
+       sodipodi:ry="70.14106"
+       sodipodi:start="6.0873773"
+       sodipodi:end="5.9752448"
+       d="m -40.71989,-196.81835 a 76.555565,70.14106 0 0 1 -58.099108,82.03776 76.555565,70.14106 0 0 1 -91.133552,-50.91066 76.555565,70.14106 0 0 1 52.99026,-84.89176 76.555565,70.14106 0 0 1 94.104129,46.15172"
+       inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-hdpi\ic_launcher.png"
+       inkscape:export-xdpi="15.24"
+       inkscape:export-ydpi="15.24"
+       sodipodi:arc-type="arc"
+       transform="matrix(-0.93902649,0.34384482,0.02865632,-0.99958932,0,0)"
+       sodipodi:open="true" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:138.392px;line-height:1.25;font-family:Impact;-inkscape-font-specification:'Impact, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffcc00;fill-opacity:1;stroke:#ffffff;stroke-width:4.18729;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       x="27.785181"
+       y="213.26082"
+       id="text4522"
+       transform="scale(1.1465738,0.87216368)"
+       inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-hdpi\ic_launcher.png"
+       inkscape:export-xdpi="15.24"
+       inkscape:export-ydpi="15.24"><tspan
+         sodipodi:role="line"
+         id="tspan5975"
+         x="27.785181"
+         y="213.26082"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:138.392px;font-family:Impact;-inkscape-font-specification:'Impact, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffcc00;fill-opacity:1;stroke:#ffffff;stroke-width:4.18729;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:normal">Ya</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:35.7774px;line-height:1.25;font-family:Impact;-inkscape-font-specification:'Impact, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#333333;fill-opacity:1;stroke:#fffff6;stroke-width:0.899997;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       x="136.65018"
+       y="220.09058"
+       id="text13192"
+       transform="scale(1.0590692,0.94422536)"
+       inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-hdpi\ic_launcher.png"
+       inkscape:export-xdpi="15.24"
+       inkscape:export-ydpi="15.24"><tspan
+         sodipodi:role="line"
+         id="tspan13190"
+         x="136.65018"
+         y="220.09058"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:35.7774px;font-family:Impact;-inkscape-font-specification:'Impact, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#333333;fill-opacity:1;stroke:#fffff6;stroke-width:0.899997;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal">io</tspan></text>
+    <text
+       xml:space="preserve"
+       id="text839"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect841);fill:#000000;fill-opacity:1;stroke:none;" />
+    <text
+       xml:space="preserve"
+       id="text845"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect847);fill:#000000;fill-opacity:1;stroke:none;" />
+  </g>
+</svg>
