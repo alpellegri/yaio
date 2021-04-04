@@ -60,8 +60,8 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       child: new Column(
         children: <Widget>[
           new UserAccountsDrawerHeader(
-            accountName: new Text(getFirebaseUser().displayName),
-            accountEmail: new Text(getFirebaseUser().email),
+            accountName: new Text(getFirebaseUser().user.displayName),
+            accountEmail: new Text(getFirebaseUser().user.email),
             /*currentAccountPicture: new CircleAvatar(
               backgroundImage: new NetworkImage(
                 getFirebaseUser().providerData[1].photoURL,

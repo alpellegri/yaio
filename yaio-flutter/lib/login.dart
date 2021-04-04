@@ -18,7 +18,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final FirebaseMessaging _fbMessaging = new FirebaseMessaging();
   DatabaseReference _fcmRef;
   DatabaseReference _rootRef;
   StreamSubscription<Event> _onRootAddSubscription;
@@ -35,25 +34,7 @@ class _LoginState extends State<Login> {
 
     _connected = false;
     signInWithGoogle().then((onValue) {
-      _fbMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print("onMessage: $message");
-        },
-        onLaunch: (Map<String, dynamic> message) async {
-          print("onLaunch: $message");
-        },
-        onResume: (Map<String, dynamic> message) async {
-          print("onResume: $message");
-        },
-      );
-
-      _fbMessaging.requestNotificationPermissions(
-          const IosNotificationSettings(sound: true, badge: true, alert: true, provisional: true));
-      _fbMessaging.onIosSettingsRegistered
-          .listen((IosNotificationSettings settings) {
-        print('Settings registered: $settings');
-      });
-      _fbMessaging.getToken().then((String token) {
+      FirebaseMessaging.instance.getToken().then((String token) {
         assert(token != null);
 
         loadPreferences().then((map) {

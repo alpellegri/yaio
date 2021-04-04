@@ -7,9 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'const.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
-User _user;
+UserCredential _userCredential;
 
 Map _nodeConfigMap = new Map();
 SharedPreferences _prefs;
@@ -29,34 +28,28 @@ String dTHRef;
 String dDomain;
 String dNodeName;
 
-User getFirebaseUser() {
-  return _user;
+UserCredential getFirebaseUser() {
+  return _userCredential;
 }
 
-Future<User> signInWithGoogle() async {
-  final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+Future<UserCredential> signInWithGoogle() async {
+  UserCredential userCredential;
+  final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-  final AuthCredential credential = GoogleAuthProvider.credential(
+  final GoogleAuthCredential googleAuthCredential =
+      GoogleAuthProvider.credential(
     accessToken: googleAuth.accessToken,
     idToken: googleAuth.idToken,
   );
-  final User user = (await _auth.signInWithCredential(credential)).user;
-  assert(user.email != null);
-  assert(user.displayName != null);
-  assert(!user.isAnonymous);
-  assert(await user.getIdToken() != null);
-
-  // final User currentUser = await _auth.   .currentUser();
-  // assert(user.uid == currentUser.uid);
-
-  _user = user;
+  userCredential = await _auth.signInWithCredential(googleAuthCredential);
+  _userCredential = userCredential;
   // print(user);
-  return user;
+  return userCredential;
 }
 
 void updateUserRef() {
   print('updateUserRef');
-  dUserRef = 'users/${getFirebaseUser().uid}';
+  dUserRef = 'users/${getFirebaseUser().user.uid}';
   dRootRef = '$dUserRef/root';
   dObjRef = '$dUserRef/obj';
   dFcmTokenRef = '$dUserRef/$kFcmTokenRef';
@@ -104,7 +97,7 @@ Future<Map> loadPreferences() async {
     print(_nodeConfigJson);
     _nodeConfigMap = json.decode(_nodeConfigJson);
     // override
-    _nodeConfigMap['uid'] = getFirebaseUser().uid;
+    _nodeConfigMap['uid'] = getFirebaseUser().user.uid;
     updateNodeRef(_nodeConfigMap);
   }
 
@@ -119,7 +112,7 @@ void savePreferencesDN(String domain, String node) {
   // override previous
   _nodeConfigMap['domain'] = domain;
   _nodeConfigMap['nodename'] = node;
-  _nodeConfigMap['uid'] = getFirebaseUser().uid;
+  _nodeConfigMap['uid'] = getFirebaseUser().user.uid;
 
   // update firebase references
   updateNodeRef(_nodeConfigMap);
@@ -131,7 +124,7 @@ void savePreferencesDN(String domain, String node) {
 void savePreferencesD(String domain) {
   // override previous
   _nodeConfigMap['domain'] = domain;
-  _nodeConfigMap['uid'] = getFirebaseUser().uid;
+  _nodeConfigMap['uid'] = getFirebaseUser().user.uid;
 
   // update firebase references
   updateNodeRef(_nodeConfigMap);
@@ -144,7 +137,7 @@ void savePreferencesSP(String ssid, String password) {
   // override previous
   _nodeConfigMap['ssid'] = ssid;
   _nodeConfigMap['password'] = password;
-  _nodeConfigMap['uid'] = getFirebaseUser().uid;
+  _nodeConfigMap['uid'] = getFirebaseUser().user.uid;
 
   // update firebase references
   updateNodeRef(_nodeConfigMap);
@@ -207,6 +200,7 @@ Map<String, Object> getControlDefault() {
 Map<String, Object> getStatusDefault() {
   return _statusDefault;
 }
+
 Map<String, Object> getStartupDefault() {
   return _startupDefault;
 }
