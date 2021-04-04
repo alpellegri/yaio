@@ -2,11 +2,23 @@
 #include <WiFiUdp.h>
 #include <string.h>
 #include <time.h>
+#include <WiFi.h>
 
 #include "debug.h"
 #include "timesrv.h"
 
 static bool time_init = false;
+
+void printLocalTime()
+{
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo))
+  {
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
 
 uint8_t getWeekDay(void) {
   time_t now = time(nullptr);
@@ -27,12 +39,14 @@ void TimeSetup(void) {
   srv1 = String(FPSTR(ntpserv1));
   srv2 = String(FPSTR(ntpserv2));
   configTime(0, 0, srv1.c_str(), srv2.c_str());
+  printLocalTime();
 }
 
 bool TimeService(void) {
+
   if (time_init == false) {
     struct tm timeinfo;
-    time_init = getLocalTime(&timeinfo, 0);
+    time_init = getLocalTime(&timeinfo);
     if (time_init == false) {
       DEBUG_PRINT("wait for NTP...\n");
     } else {
@@ -56,5 +70,6 @@ bool TimeService(void) {
     }
 #endif
   }
+
   return time_init;
 }

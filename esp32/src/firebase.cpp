@@ -43,7 +43,7 @@ String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
 
   _http_req.setReuse(true);
   // _http_req.setTimeout(3000);
-
+  _client_req.setInsecure();
   _http_req.begin(_client_req, addr);
   _httpCode = _http_req.sendRequest(RestMethods[method], value);
 
@@ -209,6 +209,7 @@ void FirebaseRest::restStreamApi(const String path) {
   _http_stream.end();
   _http_stream.setReuse(true);
   // http_stream.setTimeout(3000);
+  _client_stream.setInsecure();
   _http_stream.begin(_client_stream, addr);
 
   _http_stream.addHeader(String(F("Accept")), String(F("text/event-stream")));
@@ -319,6 +320,7 @@ String FirebaseRest::sendMessage(String &message, String &key,
   String addr = String(F("https://")) + fcm_host + String(F("/fcm/send"));
   WiFiClientSecure client;
   HTTPClient http;
+  client.setInsecure();
   http.begin(client, addr);
   // http.addHeader(String(F("Accept")), String(F("*/")));
   http.addHeader(String(F("Content-Type")), String(F("application/json")));

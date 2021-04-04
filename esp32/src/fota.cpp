@@ -27,6 +27,7 @@ typedef enum {
   FOTA_Sm_ERROR,
 } FOTA_StateMachine_t;
 
+static WiFiClientSecure client;
 static HTTPClient *http;
 
 static const uint32_t block_size = 64 * 1500;
@@ -74,7 +75,8 @@ bool FOTAService(void) {
     http = new HTTPClient;
     http->setReuse(true);
     http->setTimeout(3000);
-    bool res = http->begin(addr);
+    client.setInsecure();
+    bool res = http->begin(client, addr);
     if (res == true) {
       int httpCode = http->GET();
       // httpCode will be negative on error
@@ -116,7 +118,8 @@ bool FOTAService(void) {
     addr = String(F("https://")) + String(FPSTR(storage_host)) + file_url;
     DEBUG_PRINT("FOTA_Sm_CHECK %s\n", addr.c_str());
     http->setReuse(true);
-    bool res = http->begin(addr);
+    client.setInsecure();
+    bool res = http->begin(client, addr);
     if (res == true) {
       int httpCode = http->GET();
       // httpCode will be negative on error
@@ -146,7 +149,8 @@ bool FOTAService(void) {
 
   case FOTA_Sm_GET_BLOCK: {
     http->setReuse(true);
-    bool res = http->begin(addr);
+    client.setInsecure();
+    bool res = http->begin(client, addr);
     if (res == true) {
       String range = String(F("bytes=")) + String(block * block_size) +
                      String(F("-")) + String(((block + 1) * block_size) - 1);
