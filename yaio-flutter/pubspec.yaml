@@ -20,16 +20,6 @@ dependencies:
   flutter_local_notifications:
 
 dependency_overrides:
-  # firebase_auth:
-  # firebase_auth_platform_interface:
-  # firebase_auth_web:
-  # firebase_core:
-  # firebase_core_web:
-  # firebase_messaging:
-  # firebase_messaging_platform_interface:
-  # firebase_messaging_web:
-  # Override for `flutter_local_notifications`:
-  # plugin_platform_interface: ^2.0.0
 
 flutter:
   uses-material-design: true
