@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class VersionInfo extends StatefulWidget {
   VersionInfo({Key key, this.title}) : super(key: key);
