@@ -97,8 +97,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                     : (const Icon(Icons.developer_board)),
                 title: const Text('Node'),
                 subtitle: new Text('${widget.domain}/${widget.node}'),
-                trailing: new FlatButton(
-                  textColor: Theme.of(context).accentColor,
+                trailing: new TextButton(
                   child: const Text('CONFIGURE'),
                   onPressed: (false)
                       ? null
@@ -138,8 +137,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         : (const Icon(Icons.update)),
                     title: const Text('Update Device'),
                     subtitle: const Text('Configuration'),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('UPDATE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeUpdate);
@@ -154,8 +152,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         : (const Icon(Icons.power_settings_new)),
                     title: const Text('PowerUp'),
                     subtitle: new Text('${_startupTime.toString()}'),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('RESTART'),
                       onPressed: () {
                         _nodeActionRequest(kNodeReboot);
@@ -170,8 +167,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         : (const Icon(Icons.cloud_download)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${widget.value['startup']["version"]}'),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('UPGRADE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeFlash);
@@ -186,8 +182,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         : (const Icon(Icons.delete)),
                     title: const Text('Erase device'),
                     subtitle: new Text(widget.node),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('ERASE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeErase);

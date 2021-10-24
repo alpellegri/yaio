@@ -547,7 +547,7 @@ class ExecEntry {
   String key;
   String owner;
   String cb;
-  List<InstrEntry> p = new List<InstrEntry>();
+  List<InstrEntry> p = [];
 
   ExecEntry(DatabaseReference ref) : reference = ref;
 
@@ -571,7 +571,7 @@ class ExecEntry {
     exist = true;
     Map<String, dynamic> map = new Map<String, dynamic>();
     map['owner'] = owner;
-    List list = new List();
+    List list = [];
     if (p.length > 0) {
       p.forEach((e) {
         list.add({'i': e.i, 'v': e.v});

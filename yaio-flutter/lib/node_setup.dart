@@ -133,8 +133,7 @@ class _NodeSetupState extends State<NodeSetup> {
                         const SizedBox(height: 12.0),
                       ])),
                   const SizedBox(width: 32.0),
-                  new FlatButton(
-                    textColor: Theme.of(context).accentColor,
+                  new TextButton(
                     child: const Text('SAVE'),
                     onPressed: () {
                       savePreferencesSP(_ctrlSSID.text, _ctrlPassword.text);
@@ -153,8 +152,7 @@ class _NodeSetupState extends State<NodeSetup> {
               leading: const Icon(Icons.developer_board),
               title: new Text('${widget.domain}'),
               subtitle: new Text('${widget.node}'),
-              trailing: new FlatButton(
-                textColor: Theme.of(context).accentColor,
+              trailing: new TextButton(
                 child: const Text('SUBMIT'),
                 onPressed: _sendParameters,
               ),

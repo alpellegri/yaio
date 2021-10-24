@@ -22,7 +22,7 @@ class _ExecEditState extends State<ExecEdit> {
   ExecEntry _selectedNext;
   var _selectedNextList;
 
-  List<IoEntry> entryIoList = new List();
+  List<IoEntry> entryIoList = [];
 
   @override
   void initState() {
@@ -88,8 +88,7 @@ class _ExecEditState extends State<ExecEdit> {
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                new FlatButton(
-                    textColor: Theme.of(context).accentColor,
+                new TextButton(
                     child: const Text('REMOVE'),
                     onPressed: () {
                       print(widget.entry.reference);
@@ -98,8 +97,7 @@ class _ExecEditState extends State<ExecEdit> {
                       }
                       Navigator.pop(context, null);
                     }),
-                new FlatButton(
-                    textColor: Theme.of(context).accentColor,
+                new TextButton(
                     child: const Text('SAVE'),
                     onPressed: () {
                       setState(() {
@@ -112,8 +110,7 @@ class _ExecEditState extends State<ExecEdit> {
                       });
                       Navigator.pop(context, null);
                     }),
-                new FlatButton(
-                  textColor: Theme.of(context).accentColor,
+                new TextButton(
                   child: const Text('EDIT'),
                   onPressed: () {
                     Navigator.push(
@@ -186,7 +183,7 @@ class _ExecProgState extends State<ExecProg> {
   final String domain;
   final String node;
   final List<InstrEntry> prog;
-  List<IoEntry> entryIoList = new List();
+  List<IoEntry> entryIoList = [];
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onValueSubscription;
 
@@ -261,13 +258,13 @@ class _ExecProgState extends State<ExecProg> {
             ),
           ),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
               child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(ctrl.text);
               },
             ),
-            new FlatButton(
+            new TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(null);
@@ -345,7 +342,7 @@ class _EntryDialogState extends State<EntryDialog> {
   final TextEditingController _controllerValue = new TextEditingController();
   bool _isImmediate;
   int _selectedOpCode;
-  List<int> _opCodeMenu = new List<int>();
+  List<int> _opCodeMenu = [];
   IoEntry _selectedEntry;
 
   _EntryDialogState(this.index, this.prog, this.entryIoList);
@@ -449,8 +446,7 @@ class _EntryDialogState extends State<EntryDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                new FlatButton(
-                    textColor: Theme.of(context).accentColor,
+                new TextButton(
                     child: const Text('REMOVE'),
                     onPressed: () {
                       setState(() {
@@ -459,8 +455,7 @@ class _EntryDialogState extends State<EntryDialog> {
                       });
                       Navigator.pop(context, null);
                     }),
-                new FlatButton(
-                    textColor: Theme.of(context).accentColor,
+                new TextButton(
                     child: const Text('SAVE'),
                     onPressed: () {
                       _didChange();

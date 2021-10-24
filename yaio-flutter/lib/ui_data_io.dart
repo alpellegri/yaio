@@ -526,7 +526,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
               ),
             ]),
         actions: <Widget>[
-          new FlatButton(
+          new TextButton(
               child: const Text('SAVE'),
               onPressed: () {
                 try {
@@ -537,7 +537,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
                 }
                 Navigator.pop(context, null);
               }),
-          new FlatButton(
+          new TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.pop(context, null);

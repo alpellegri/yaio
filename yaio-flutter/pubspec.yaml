@@ -1,6 +1,6 @@
 name: yaio
 description: A new Flutter project.
-version: 0.4.10
+version: 0.4.12
 
 environment:
   sdk: ">=2.10.0 <3.0.0"

@@ -19,7 +19,7 @@ class Domain extends StatefulWidget {
 }
 
 class _DomainState extends State<Domain> {
-  List<IoEntry> entryList = new List();
+  List<IoEntry> entryList = [];
   DatabaseReference _rootRef;
   StreamSubscription<Event> _onRootAddSubscription;
   StreamSubscription<Event> _onRootEditedSubscription;

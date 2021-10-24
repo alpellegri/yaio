@@ -30,7 +30,7 @@ class Exec extends StatefulWidget {
 }
 
 class _ExecState extends State<Exec> {
-  List<ExecEntry> entryList = new List();
+  List<ExecEntry> entryList = [];
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;

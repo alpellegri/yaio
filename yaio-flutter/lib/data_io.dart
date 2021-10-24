@@ -16,7 +16,7 @@ class DataIO extends StatefulWidget {
 }
 
 class _DataIOState extends State<DataIO> {
-  List<IoEntry> entryList = new List();
+  List<IoEntry> entryList = [];
   DatabaseReference _dataRef;
   StreamSubscription<Event> _onAddSubscription;
   StreamSubscription<Event> _onEditSubscription;
@@ -132,8 +132,8 @@ class DataEditScreen extends StatefulWidget {
 
 class _DataEditScreenState extends State<DataEditScreen> {
   DatabaseReference _execRef;
-  List<ExecEntry> _execList = new List();
-  List<int> _opTypeMenu = new List<int>();
+  List<ExecEntry> _execList = [];
+  List<int> _opTypeMenu = [];
 
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
@@ -178,18 +178,25 @@ class _DataEditScreenState extends State<DataEditScreen> {
           title:
               new Text((widget.entry.key != null) ? widget.entry.key : 'Data'),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
                 child: const Text(
                   'REMOVE',
                   style: const TextStyle(color: Colors.white),
                 ),
                 onPressed: () {
+                  FirebaseDatabase.instance
+                      .reference()
+                      .child(getUserRef())
+                      .child('obj/logs')
+                      .child(widget.domain)
+                      .child(widget.entry.key)
+                      ?.remove();
                   if (widget.entry.exist == true) {
-                    widget.entry.reference.child(widget.entry.key).remove();
+                    widget.entry.reference.child(widget.entry.key)?.remove();
                   }
                   Navigator.pop(context, null);
                 }),
-            new FlatButton(
+            new TextButton(
                 child: const Text(
                   'SAVE',
                   style: const TextStyle(color: Colors.white),

@@ -73,7 +73,7 @@ class Messages extends StatefulWidget {
 }
 
 class _MessagesState extends State<Messages> {
-  List<MessageEntry> entryList = new List();
+  List<MessageEntry> entryList = [];
   DatabaseReference _entryRef;
   StreamSubscription<Event> _onAddSub;
   StreamSubscription<Event> _onRemoveSub;

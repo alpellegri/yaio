@@ -115,16 +115,13 @@ class CollapsibleBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            new FlatButton(
-                textColor: Theme.of(context).accentColor,
+            new TextButton(
                 onPressed: onRemove,
                 child: const Text('REMOVE')),
-            new FlatButton(
-                textColor: Theme.of(context).accentColor,
+            new TextButton(
                 onPressed: onAdd,
                 child: const Text('ADD')),
-            new FlatButton(
-                textColor: Theme.of(context).accentColor,
+            new TextButton(
                 onPressed: onSelect,
                 child: const Text('SELECT')),
           ]);
@@ -133,8 +130,7 @@ class CollapsibleBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            new FlatButton(
-                textColor: Theme.of(context).accentColor,
+            new TextButton(
                 onPressed: onSelect,
                 child: const Text('SAVE')),
           ]);
