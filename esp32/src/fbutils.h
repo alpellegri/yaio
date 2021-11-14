@@ -70,6 +70,7 @@ class ProgEntry {
 public:
   String key; // firebase key
   std::vector<FuncEntry> funcvec;
+  String cb;
 };
 
 extern void FB_deinitRegIDsDB(void);
