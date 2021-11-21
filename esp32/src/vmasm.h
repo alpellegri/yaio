@@ -13,6 +13,7 @@ typedef struct {
 } vm_context_t;
 
 typedef struct {
+  const char opcode[10];
   void (*read)(vm_context_t &ctx, const char *value);
   uint8_t (*exec)(uint8_t pc, vm_context_t &ctx, const char *key_value);
   void (*write)(vm_context_t &ctx, const char *key_value);
