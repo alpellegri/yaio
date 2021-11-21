@@ -12,10 +12,30 @@ class ExecListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Text('${entry.key}', textAlign: TextAlign.left),
-    );
+    return Container(
+        // alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).primaryColorLight,
+        ),
+        child: Stack(
+          children: <Widget>[
+            Container(
+              // alignment: Alignment.centerLeft,
+              width: 4,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8)),
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+              child: Text('${entry.key}', textAlign: TextAlign.left),
+            )
+          ],
+        ));
   }
 }
 
@@ -64,25 +84,32 @@ class _ExecState extends State<Exec> {
       print('>> ${e.name.toString()}');
       e.p.forEach((f) => print('>> ${f.i.toString()} ${f.v.toString()}'));
     });*/
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Routine ${widget.domain}/${widget.node}'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Routine ${widget.domain}/${widget.node}'),
       ),
-      body: new ListView.builder(
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+          crossAxisCount: 3,
+          childAspectRatio: 2,
+        ),
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
-        reverse: true,
+        reverse: false,
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
-          return new InkWell(
-              onTap: () => _openEntryDialog(entryList[index]),
-              child: new ExecListItem(entryList[index]));
+          return InkWell(
+            onTap: () => _openEntryDialog(entryList[index]),
+            child: ExecListItem(entryList[index]),
+          );
         },
       ),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
-        child: new Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

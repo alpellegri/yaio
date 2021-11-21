@@ -49,7 +49,13 @@ class _DataIOState extends State<DataIO> {
       appBar: AppBar(
         title: Text('Data IO ${widget.domain}/${widget.node}'),
       ),
-      body: ListView.builder(
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+          crossAxisCount: 3,
+          childAspectRatio: 2,
+        ),
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         itemCount: entryList.length,

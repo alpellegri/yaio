@@ -12,7 +12,7 @@ const String kStringTimer = 'Timer';
 const String kStringBool = 'Bool';
 const String kStringInt = 'Int';
 const String kStringFloat = 'Float';
-const String kStringMessaging = 'Messaging';
+const String kStringString = 'String';
 const String kStringTimeout = 'Timeout';
 const String kStringPhyAIn = 'PhyAIn';
 const String kStringPhyAOut = 'PhyAOut';
@@ -29,7 +29,7 @@ enum DataCode {
   Bool,
   Int,
   Float,
-  Messaging,
+  String,
   Timeout,
   PhyAIn,
   PhyAOut,
@@ -47,7 +47,7 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.Bool: kStringBool,
   DataCode.Int: kStringInt,
   DataCode.Float: kStringFloat,
-  DataCode.Messaging: kStringMessaging,
+  DataCode.String: kStringString,
   DataCode.Timeout: kStringTimeout,
   DataCode.PhyAIn: kStringPhyAIn,
   DataCode.PhyAOut: kStringPhyAOut,
@@ -65,7 +65,7 @@ const Map<String, DataCode> kEntryName2Id = const {
   kStringBool: DataCode.Bool,
   kStringInt: DataCode.Int,
   kStringFloat: DataCode.Float,
-  kStringMessaging: DataCode.Messaging,
+  kStringString: DataCode.String,
   kStringTimeout: DataCode.Timeout,
   kStringPhyAIn: DataCode.PhyAIn,
   kStringPhyAOut: DataCode.PhyAOut,
@@ -152,7 +152,7 @@ String getValueCtrl2(IoEntry data) {
     case DataCode.Float:
       v = data.value.toString();
       break;
-    case DataCode.Messaging:
+    case DataCode.String:
       v = data.value;
       break;
     case DataCode.Bool:
@@ -251,7 +251,7 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
       local.ioctl = clearBits(local.ioctl, 8, 8);
       local.ioctl |= setBits(8, 8, int.parse(v));
       break;
-    case DataCode.Messaging:
+    case DataCode.String:
       // string values
       local.value = v;
       break;
@@ -318,7 +318,7 @@ class IoEntry {
       case DataCode.Bool:
       case DataCode.Int:
       case DataCode.Float:
-      case DataCode.Messaging:
+      case DataCode.String:
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
         v = value;
@@ -354,7 +354,7 @@ class IoEntry {
       case DataCode.RadioRx:
       case DataCode.RadioTx:
       case DataCode.RadioMach:
-      case DataCode.Messaging:
+      case DataCode.String:
       case DataCode.Timer:
       case DataCode.Timeout:
         v = getValue().toString();
