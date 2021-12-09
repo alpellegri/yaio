@@ -187,9 +187,9 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   bool _nodeNeedUpdate = false;
 
   DatabaseReference _rootRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditedSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onAddSubscription;
+  StreamSubscription<DatabaseEvent> _onEditedSubscription;
+  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
   List<DemoItem<dynamic>> _demoItems;
   Map<String, dynamic> entryMap = new Map<String, dynamic>();
   String _ctrlDomainName;
@@ -415,11 +415,11 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
   }
 
-  void _onRootEntryAdded(Event event) {
+  void _onRootEntryAdded(DatabaseEvent event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     // print(_nodeNeedUpdate);
-    var domain = event.snapshot.key;
-    var v = event.snapshot.value;
+    String domain = event.snapshot.key;
+    dynamic v = event.snapshot.value;
     if (_nodeNeedUpdate == true) {
       // value contain a map of nodes, each key is the name of the node
       v.forEach((node, v) {
@@ -434,7 +434,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     });
   }
 
-  void _onRootEntryChanged(Event event) {
+  void _onRootEntryChanged(DatabaseEvent event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       entryMap[event.snapshot.key] = event.snapshot.value;
@@ -442,7 +442,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     });
   }
 
-  void _onRootEntryRemoved(Event event) {
+  void _onRootEntryRemoved(DatabaseEvent event) {
     // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
       entryMap.remove(event.snapshot.key);

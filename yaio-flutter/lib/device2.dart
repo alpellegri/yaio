@@ -21,9 +21,9 @@ class _DeviceConfigState extends State<DeviceConfig> {
   DatabaseReference _controlRef;
   DatabaseReference _statusRef;
   DatabaseReference _startupRef;
-  StreamSubscription<Event> _controlSub;
-  StreamSubscription<Event> _statusSub;
-  StreamSubscription<Event> _startupSub;
+  StreamSubscription<DatabaseEvent> _controlSub;
+  StreamSubscription<DatabaseEvent> _statusSub;
+  StreamSubscription<DatabaseEvent> _startupSub;
 
   @override
   void initState() {
@@ -195,19 +195,19 @@ class _DeviceConfigState extends State<DeviceConfig> {
     );
   }
 
-  void _onValueStartup(Event event) {
+  void _onValueStartup(DatabaseEvent event) {
     setState(() {
       widget.value['startup'] = event.snapshot.value;
     });
   }
 
-  void _onValueControl(Event event) {
+  void _onValueControl(DatabaseEvent event) {
     setState(() {
       widget.value['control'] = event.snapshot.value;
     });
   }
 
-  void _onValueStatus(Event event) {
+  void _onValueStatus(DatabaseEvent event) {
     setState(() {
       widget.value['status'] = event.snapshot.value;
     });

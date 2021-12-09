@@ -18,9 +18,9 @@ class DataIO extends StatefulWidget {
 class _DataIOState extends State<DataIO> {
   List<IoEntry> entryList = [];
   DatabaseReference _dataRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onAddSubscription;
+  StreamSubscription<DatabaseEvent> _onEditSubscription;
+  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
 
   @override
   void initState() {
@@ -73,8 +73,9 @@ class _DataIOState extends State<DataIO> {
     );
   }
 
-  void _onEntryAdded(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryAdded(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       setState(() {
         IoEntry entry = new IoEntry.fromMap(
@@ -84,9 +85,10 @@ class _DataIOState extends State<DataIO> {
     }
   }
 
-  void _onEntryChanged(Event event) {
+  void _onEntryChanged(DatabaseEvent event) {
     print('_onEntryChanged');
-    String owner = event.snapshot.value["owner"];
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -97,8 +99,9 @@ class _DataIOState extends State<DataIO> {
     }
   }
 
-  void _onEntryRemoved(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryRemoved(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -144,7 +147,7 @@ class _DataEditScreenState extends State<DataEditScreen> {
   final TextEditingController _controllerName = new TextEditingController();
   final TextEditingController _controllerType = new TextEditingController();
   String _selectedExec;
-  StreamSubscription<Event> _onValueExecSubscription;
+  StreamSubscription<DatabaseEvent> _onValueExecSubscription;
   List<String> _execStringList = [];
 
   void _handleChangedValue(IoEntry newValue) {
@@ -337,7 +340,7 @@ class _DataEditScreenState extends State<DataEditScreen> {
     );
   }
 
-  void _onValueExec(Event event) {
+  void _onValueExec(DatabaseEvent event) {
     // print('_onValueExec');
     Map data = event.snapshot.value;
     // print('node: $node');

@@ -21,14 +21,14 @@ class Domain extends StatefulWidget {
 class _DomainState extends State<Domain> {
   List<IoEntry> entryList = [];
   DatabaseReference _rootRef;
-  StreamSubscription<Event> _onRootAddSubscription;
-  StreamSubscription<Event> _onRootEditedSubscription;
-  StreamSubscription<Event> _onRootRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onRootAddSubscription;
+  StreamSubscription<DatabaseEvent> _onRootEditedSubscription;
+  StreamSubscription<DatabaseEvent> _onRootRemoveSubscription;
   Map<String, dynamic> _map = new Map<String, dynamic>();
   DatabaseReference _dataRef;
-  StreamSubscription<Event> _onDataAddSubscription;
-  StreamSubscription<Event> _onDataChangedSubscription;
-  StreamSubscription<Event> _onDataRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onDataAddSubscription;
+  StreamSubscription<DatabaseEvent> _onDataChangedSubscription;
+  StreamSubscription<DatabaseEvent> _onDataRemoveSubscription;
   final NavDrawer drawer = new NavDrawer();
 
   @override
@@ -90,7 +90,7 @@ class _DomainState extends State<Domain> {
     );
   }
 
-  void _onRootEntryAdded(Event event) {
+  void _onRootEntryAdded(DatabaseEvent event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
@@ -99,7 +99,7 @@ class _DomainState extends State<Domain> {
     });
   }
 
-  void _onRootEntryChanged(Event event) {
+  void _onRootEntryChanged(DatabaseEvent event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
@@ -109,7 +109,7 @@ class _DomainState extends State<Domain> {
     // _updateAllNodes(domain, value);
   }
 
-  void _onRootEntryRemoved(Event event) {
+  void _onRootEntryRemoved(DatabaseEvent event) {
     // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     setState(() {
@@ -117,9 +117,10 @@ class _DomainState extends State<Domain> {
     });
   }
 
-  void _onDataEntryAdded(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
+  void _onDataEntryAdded(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    bool drawWr = v['drawWr'];
+    bool drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       setState(() {
         IoEntry entry = new IoEntry.fromMap(
@@ -129,9 +130,10 @@ class _DomainState extends State<Domain> {
     }
   }
 
-  void _onDataEntryChanged(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
+  void _onDataEntryChanged(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    bool drawWr = v['drawWr'];
+    bool drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -142,9 +144,10 @@ class _DomainState extends State<Domain> {
     }
   }
 
-  void _onDataEntryRemoved(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
+  void _onDataEntryRemoved(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    bool drawWr = v['drawWr'];
+    bool drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);

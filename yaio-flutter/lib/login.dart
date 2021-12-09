@@ -20,9 +20,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   DatabaseReference _fcmRef;
   DatabaseReference _rootRef;
-  StreamSubscription<Event> _onRootAddSubscription;
-  StreamSubscription<Event> _onRootEditedSubscription;
-  StreamSubscription<Event> _onRootRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onRootAddSubscription;
+  StreamSubscription<DatabaseEvent> _onRootEditedSubscription;
+  StreamSubscription<DatabaseEvent> _onRootRemoveSubscription;
   bool _connected = false;
   Map<String, dynamic> _map = new Map<String, dynamic>();
   final NavDrawer drawer = new NavDrawer();
@@ -49,10 +49,10 @@ class _LoginState extends State<Login> {
               _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
 
           _fcmRef =
-              FirebaseDatabase.instance.reference().child(getFcmTokenRef());
-          _fcmRef.once().then((DataSnapshot onValue) {
-            print('once: ${onValue.value}');
-            Map map = onValue.value;
+              FirebaseDatabase.instance.ref().child(getFcmTokenRef());
+          _fcmRef.once().then((DatabaseEvent onValue) {
+            print('once: ${onValue.snapshot.value}');
+            Map map = onValue.snapshot.value;
             bool tokenFound = false;
             if (map != null) {
               map.forEach((key, value) {
@@ -88,7 +88,7 @@ class _LoginState extends State<Login> {
     _onRootRemoveSubscription.cancel();
   }
 
-  void _onRootEntryAdded(Event event) {
+  void _onRootEntryAdded(DatabaseEvent event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
@@ -99,7 +99,7 @@ class _LoginState extends State<Login> {
     _updateAllNodes(domain, value);
   }
 
-  void _onRootEntryChanged(Event event) {
+  void _onRootEntryChanged(DatabaseEvent event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
@@ -109,7 +109,7 @@ class _LoginState extends State<Login> {
     // _updateAllNodes(domain, value);
   }
 
-  void _onRootEntryRemoved(Event event) {
+  void _onRootEntryRemoved(DatabaseEvent event) {
     // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     domains.removeWhere((key, value) => key == domain);

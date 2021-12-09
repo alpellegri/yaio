@@ -52,15 +52,15 @@ class Exec extends StatefulWidget {
 class _ExecState extends State<Exec> {
   List<ExecEntry> entryList = [];
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onAddSubscription;
+  StreamSubscription<DatabaseEvent> _onEditSubscription;
+  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
 
   @override
   void initState() {
     super.initState();
     _entryRef = FirebaseDatabase.instance
-        .reference()
+        .ref()
         .child(getUserRef())
         .child('obj/exec')
         .child(widget.domain)
@@ -114,8 +114,9 @@ class _ExecState extends State<Exec> {
     );
   }
 
-  void _onEntryAdded(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryAdded(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       setState(() {
         entryList.add(new ExecEntry.fromMap(
@@ -124,8 +125,9 @@ class _ExecState extends State<Exec> {
     }
   }
 
-  void _onEntryEdited(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryEdited(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -136,8 +138,9 @@ class _ExecState extends State<Exec> {
     }
   }
 
-  void _onEntryRemoved(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryRemoved(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);

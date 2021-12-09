@@ -188,7 +188,7 @@ class _ExecProgState extends State<ExecProg> {
   final List<InstrEntry> prog;
   List<IoEntry> entryIoList = [];
   DatabaseReference _dataRef;
-  StreamSubscription<Event> _onValueSubscription;
+  StreamSubscription<DatabaseEvent> _onValueSubscription;
 
   _ExecProgState(this.domain, this.node, this.prog);
 
@@ -306,13 +306,13 @@ class _ExecProgState extends State<ExecProg> {
   }
 
   // read all oneshot
-  void _onValueIoEntry(Event event) {
+  void _onValueIoEntry(DatabaseEvent event) {
     print('_onValueIoEntry');
     Map data = event.snapshot.value;
     if (data != null) {
       data.forEach((k, v) {
         // print('key: $k - value: ${v.toString()}');
-        String owner = v["owner"];
+        String owner = v['owner'];
         if (owner == node) {
           setState(() {
             IoEntry e = new IoEntry.fromMap(_dataRef, k, v);

@@ -75,8 +75,8 @@ class Messages extends StatefulWidget {
 class _MessagesState extends State<Messages> {
   List<MessageEntry> entryList = [];
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSub;
-  StreamSubscription<Event> _onRemoveSub;
+  StreamSubscription<DatabaseEvent> _onAddSub;
+  StreamSubscription<DatabaseEvent> _onRemoveSub;
 
   _MessagesState() {
     _entryRef = FirebaseDatabase.instance.reference().child(getMessagesRef());
@@ -123,7 +123,7 @@ class _MessagesState extends State<Messages> {
     );
   }
 
-  _onEntryAdded(Event event) {
+  _onEntryAdded(DatabaseEvent event) {
     print('_onEntryAdded');
     setState(() {
       entryList.add(new MessageEntry.fromSnapshot(event.snapshot));
@@ -131,7 +131,7 @@ class _MessagesState extends State<Messages> {
     });
   }
 
-  _onEntryRemoved(Event event) {
+  _onEntryRemoved(DatabaseEvent event) {
     print('_onEntryRemoved');
     var oldValue =
         entryList.singleWhere((entry) => entry.key == event.snapshot.key);

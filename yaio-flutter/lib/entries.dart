@@ -593,13 +593,16 @@ class MessageEntry {
 
   MessageEntry(this.dateTime, this.message);
 
-  MessageEntry.fromSnapshot(DataSnapshot snapshot)
-      : key = snapshot.key,
-        dateTime = new DateTime.fromMillisecondsSinceEpoch(
-            snapshot.value["time"] * 1000),
-        domain = snapshot.value["domain"],
-        node = snapshot.value["node"],
-        message = snapshot.value["msg"];
+  MessageEntry.fromSnapshot(DataSnapshot snapshot) {
+    dynamic v = snapshot.value;
+
+    key = snapshot.key;
+    dateTime = new DateTime.fromMillisecondsSinceEpoch(v['time'] * 1000);
+
+    domain = v['domain'];
+    node = v['node'];
+    message = v['msg'];
+  }
 }
 
 class LogEntry {

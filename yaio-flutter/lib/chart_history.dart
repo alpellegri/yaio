@@ -38,9 +38,10 @@ class ChartHistory extends StatefulWidget {
 
 class _ChartHistoryState extends State<ChartHistory> {
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSubscription;
-  List<String> _toDelete = new List<String>();
-  List<TimeSeries> _toAdd = new List<TimeSeries>();
+  StreamSubscription<DatabaseEvent> _onAddSubscription;
+  List<String> _toDelete = [];
+  List<TimeSeries> _toAdd = [];
+  List<TimeSeries> _clear = [];
   charts.Series<TimeSeries, DateTime> serie;
 
   @override
@@ -127,10 +128,10 @@ class _ChartHistoryState extends State<ChartHistory> {
     );
   }
 
-  void _onEntryAdded(Event event) {
+  void _onEntryAdded(DatabaseEvent event) {
     // print('_onEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
-    var k = event.snapshot.key;
-    var v = event.snapshot.value;
+    String k = event.snapshot.key;
+    dynamic v = event.snapshot.value;
     // print('el $k ${v['t']} ${v['v']}');
     DateTime dt = new DateTime.fromMillisecondsSinceEpoch(v['t'] * 1000);
     DateTime start = DateTime.now().subtract(Duration(days: 7));
@@ -149,6 +150,15 @@ class _ChartHistoryState extends State<ChartHistory> {
 
   void _onFloatingActionButtonPressed() {
     _entryRef.remove();
+    setState(() {
+      serie = new charts.Series<TimeSeries, DateTime>(
+        id: 'Data',
+        colorFn: (_, __) => charts.MaterialPalette.indigo.shadeDefault,
+        domainFn: (TimeSeries values, _) => values.time,
+        measureFn: (TimeSeries values, _) => values.value,
+        data: _clear,
+      );
+    });
   }
 }
 
