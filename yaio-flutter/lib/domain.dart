@@ -241,7 +241,10 @@ class _DeviceCardState extends State<DeviceCard> {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisSpacing: 4,
             mainAxisSpacing: 4,
-            crossAxisCount: 3,
+            crossAxisCount:
+                (MediaQuery.of(context).orientation == Orientation.portrait)
+                    ? 3
+                    : 5,
             childAspectRatio: 2,
           ),
           shrinkWrap: true,
