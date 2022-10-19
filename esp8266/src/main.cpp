@@ -4,10 +4,10 @@
 #include <string.h>
 
 #include "ap.h"
+#include "debug.h"
 #include "ee.h"
 #include "sta.h"
 #include "vers.h"
-#include "debug.h"
 
 #define LED D0    // Led in NodeMCU at pin GPIO16 (D0).
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
@@ -62,8 +62,7 @@ void loop() {
     } else if (mode == 1) {
       ret = STA_Task(current_time);
       if (ret == false) {
-        mode = 0;
-        AP_Setup();
+        STA_Setup();
       }
     } else {
       /* unmapped mode */

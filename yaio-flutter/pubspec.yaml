@@ -1,21 +1,25 @@
 name: yaio
 description: A new Flutter project.
-version: 0.4.2+7
+version: 0.4.20
+
+environment:
+  sdk: ">=2.10.0 <3.0.0"
+
 dependencies:
   flutter:
     sdk: flutter
   intl:
-  google_sign_in:
   firebase_auth:
+  firebase_core:
   firebase_database:
   firebase_messaging:
   shared_preferences:
   charts_flutter:
-  package_info:
+  package_info_plus:
+  google_sign_in:
+  flutter_local_notifications:
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+dependency_overrides:
 
 flutter:
   uses-material-design: true

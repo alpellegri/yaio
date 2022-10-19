@@ -1,10 +1,8 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <WiFiUDP.h>
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 
 #include "debug.h"
 #include "ee.h"
@@ -87,11 +85,12 @@ String FBM_getResetReason(void) {
   return ret;
 }
 
+void FbmOnDisconnect(void) { boot_sm = 3; }
+
 /* main function task */
 bool FbmService(void) {
   bool ret = false;
 
-  // DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
   switch (boot_sm) {
   // firebase init
   case 0: {
@@ -113,7 +112,7 @@ bool FbmService(void) {
       DEBUG_PRINT("get failed: kstartup\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      DynamicJsonDocument object(1024);
+      DynamicJsonDocument object(512);
       auto error = deserializeJson(object, json);
       if (!error) {
         uint32_t bootcnt = object[F("bootcnt")];
@@ -188,10 +187,11 @@ bool FbmService(void) {
     } else {
       stream_time = current_time;
       DEBUG_PRINT("response: _%s_\n", response.c_str());
-#if 1
+
       String line = response.substring(7, response.indexOf('\n'));
       if (line.compareTo(F("put")) == 0) {
         DEBUG_PRINT("processing\n");
+        bool run = false;
         VM_UpdateDataReq();
         String kcontrol = FbGetPath_control();
         String json = Firebase.getJSON(kcontrol);
@@ -199,12 +199,14 @@ bool FbmService(void) {
           DEBUG_PRINT("get failed: kcontrol\n");
           DEBUG_PRINT("%s\n", Firebase.error().c_str());
         } else {
-          DynamicJsonDocument object(1024);
+          DynamicJsonDocument object(512);
           auto error = deserializeJson(object, json);
           if (!error) {
             int control_reboot = object[F("reboot")];
-            if (control_reboot == 1) {
-              ESP.restart();
+            if (control_reboot == 0) {
+              run = true;
+            } else if (control_reboot == 1) {
+              boot_sm = 6;
             } else if (control_reboot == 2) {
               boot_sm = 4;
             } else if (control_reboot == 3) {
@@ -216,29 +218,31 @@ bool FbmService(void) {
             DEBUG_PRINT("parseObject() failed\n");
           }
         }
-#if 1
-        DynamicJsonDocument status(1024);
-        status[F("heap")] = ESP.getFreeHeap();
-        status[F("time")] = getTime();
-        struct tm timeinfo;
-        time_t now = time(nullptr);
-        gmtime_r(&now, &timeinfo);
-        Serial.print("Current time: ");
-        Serial.print(asctime(&timeinfo));
 
-        DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
+        if (run == true) {
+          DynamicJsonDocument status(512);
+          status[F("heap")] = ESP.getFreeHeap();
+          status[F("time")] = getTime();
+          struct tm timeinfo;
+          time_t now = time(nullptr);
+          gmtime_r(&now, &timeinfo);
+          Serial.print("Current time: ");
+          Serial.print(asctime(&timeinfo));
 
-        String status_str;
-        serializeJson(status, status_str);
-        String kstatus = FbGetPath_status();
-        Firebase.setJSON(kstatus, status_str);
-        if (Firebase.failed()) {
-          DEBUG_PRINT("set failed: kstatus\n");
-          DEBUG_PRINT("%s\n", Firebase.error().c_str());
+          DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
+
+          String status_str;
+          serializeJson(status, status_str);
+          String kstatus = FbGetPath_status();
+          DEBUG_PRINT("set: kstatus\n");
+          Firebase.setJSON(kstatus, status_str);
+          DEBUG_PRINT("set: kstatus\n");
+          if (Firebase.failed()) {
+            DEBUG_PRINT("set failed: kstatus\n");
+            DEBUG_PRINT("%s\n", Firebase.error().c_str());
+          }
         }
-#endif
       }
-#endif
     }
     ret = true;
   } break;
@@ -254,6 +258,11 @@ bool FbmService(void) {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     EE_EraseData();
     DEBUG_PRINT("EEPROM erased\n");
+    ESP.restart();
+    break;
+
+  case 6:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     ESP.restart();
     break;
 

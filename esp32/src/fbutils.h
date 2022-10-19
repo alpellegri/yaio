@@ -7,8 +7,8 @@
 #include <vector>
 
 #define NUM_REGIDS_MAX 5
-#define NUM_IO_ENTRY_MAX 40
-#define NUM_IO_FUNCTION_MAX 40
+#define NUM_IO_ENTRY_MAX 128
+#define NUM_IO_FUNCTION_MAX 128
 
 enum {
   /*  0 */ kPhyDIn = 0,
@@ -28,7 +28,11 @@ enum {
   /* 14 */ kPhyAOut,
 };
 
-// template class std::basic_string<char>;
+class TokenEntry {
+public:
+  String key;
+  String value;
+};
 
 class IoEntry {
 public:
@@ -66,11 +70,13 @@ class ProgEntry {
 public:
   String key; // firebase key
   std::vector<FuncEntry> funcvec;
+  String cb;
 };
 
 extern void FB_deinitRegIDsDB(void);
-extern void FB_addRegIDsDB(String string);
-extern std::vector<String> &FB_getRegIDs();
+extern void FB_clearRegIDsDB(uint32_t id);
+extern void FB_addRegIDsDB(TokenEntry token);
+extern std::vector<TokenEntry> &FB_getRegIDs();
 
 extern void FB_deinitIoEntryDB(void);
 extern IoEntry &FB_getIoEntry(uint8_t i);

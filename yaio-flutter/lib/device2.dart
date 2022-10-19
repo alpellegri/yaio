@@ -21,9 +21,9 @@ class _DeviceConfigState extends State<DeviceConfig> {
   DatabaseReference _controlRef;
   DatabaseReference _statusRef;
   DatabaseReference _startupRef;
-  StreamSubscription<Event> _controlSub;
-  StreamSubscription<Event> _statusSub;
-  StreamSubscription<Event> _startupSub;
+  StreamSubscription<DatabaseEvent> _controlSub;
+  StreamSubscription<DatabaseEvent> _statusSub;
+  StreamSubscription<DatabaseEvent> _startupSub;
 
   @override
   void initState() {
@@ -94,11 +94,10 @@ class _DeviceConfigState extends State<DeviceConfig> {
               new ListTile(
                 leading: (false)
                     ? (const Icon(Icons.link_off))
-                    : (const Icon(Icons.link)),
-                title: const Text('Selected Device'),
+                    : (const Icon(Icons.developer_board)),
+                title: const Text('Node'),
                 subtitle: new Text('${widget.domain}/${widget.node}'),
-                trailing: new FlatButton(
-                  textColor: Theme.of(context).accentColor,
+                trailing: new TextButton(
                   child: const Text('CONFIGURE'),
                   onPressed: (false)
                       ? null
@@ -138,8 +137,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         : (const Icon(Icons.update)),
                     title: const Text('Update Device'),
                     subtitle: const Text('Configuration'),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('UPDATE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeUpdate);
@@ -154,8 +152,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         : (const Icon(Icons.power_settings_new)),
                     title: const Text('PowerUp'),
                     subtitle: new Text('${_startupTime.toString()}'),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('RESTART'),
                       onPressed: () {
                         _nodeActionRequest(kNodeReboot);
@@ -167,11 +164,10 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.system_update_alt)),
+                        : (const Icon(Icons.cloud_download)),
                     title: const Text('Firmware Version'),
                     subtitle: new Text('${widget.value['startup']["version"]}'),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('UPGRADE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeFlash);
@@ -183,11 +179,10 @@ class _DeviceConfigState extends State<DeviceConfig> {
                         ? (new CircularProgressIndicator(
                             value: null,
                           ))
-                        : (const Icon(Icons.delete_forever)),
+                        : (const Icon(Icons.delete)),
                     title: const Text('Erase device'),
                     subtitle: new Text(widget.node),
-                    trailing: new FlatButton(
-                      textColor: Theme.of(context).accentColor,
+                    trailing: new TextButton(
                       child: const Text('ERASE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeErase);
@@ -200,19 +195,19 @@ class _DeviceConfigState extends State<DeviceConfig> {
     );
   }
 
-  void _onValueStartup(Event event) {
+  void _onValueStartup(DatabaseEvent event) {
     setState(() {
       widget.value['startup'] = event.snapshot.value;
     });
   }
 
-  void _onValueControl(Event event) {
+  void _onValueControl(DatabaseEvent event) {
     setState(() {
       widget.value['control'] = event.snapshot.value;
     });
   }
 
-  void _onValueStatus(Event event) {
+  void _onValueStatus(DatabaseEvent event) {
     setState(() {
       widget.value['status'] = event.snapshot.value;
     });

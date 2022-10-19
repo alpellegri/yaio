@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <WiFiUDP.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -30,6 +29,7 @@ static uint32_t fbm_monitor_last = 0;
 static bool fbm_monitor_run = false;
 
 String FBM_getResetReason(void) { return ESP.getResetReason(); }
+void FbmOnDisconnect(void) { boot_sm = 3; }
 
 /* main function task */
 bool FbmService(void) {
@@ -107,12 +107,12 @@ bool FbmService(void) {
       DEBUG_PRINT("set failed: kcontrol/reboot\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
     } else {
-      boot_sm = 31;
+      boot_sm = 3;
     }
   } break;
 
-  // firebase monitoring
-  case 31: {
+  // firebase monitoring / read
+  case 3: {
     ret = true;
     uint32_t time_now = getTime();
     if ((time_now - fbm_update_last) >= ((fbm_monitor_run == true)
@@ -122,60 +122,49 @@ bool FbmService(void) {
       fbm_update_last = time_now;
 
       String kcontrol = FbGetPath_control();
-      yield();
-      control_time = Firebase.getInt(kcontrol + F("/time"));
+      String json = Firebase.getJSON(kcontrol);
       if (Firebase.failed() == true) {
         DEBUG_PRINT("get failed: kcontrol/time\n");
         DEBUG_PRINT("%s\n", Firebase.error().c_str());
       } else {
-        if (control_time != control_time_last) {
-          control_time_last = control_time;
-          fbm_monitor_last = time_now;
-          VM_UpdateDataReq();
-          fbm_monitor_run = true;
-          boot_sm = 32;
-        }
-        if (fbm_monitor_run == true) {
-          if ((time_now - fbm_monitor_last) > FBM_UPDATE_MONITOR_SLOW) {
-            fbm_monitor_run = false;
+        DynamicJsonDocument object(1024);
+        auto error = deserializeJson(object, json);
+        if (!error) {
+          control_time = object[F("time")];
+          uint32_t control_reboot = object[F("reboot")];
+          if (control_time != control_time_last) {
+            control_time_last = control_time;
+            fbm_monitor_last = time_now;
+            VM_UpdateDataReq();
+            fbm_monitor_run = true;
+            boot_sm = 32;
           }
+          if (fbm_monitor_run == true) {
+            if ((time_now - fbm_monitor_last) > FBM_UPDATE_MONITOR_SLOW) {
+              fbm_monitor_run = false;
+            }
+          }
+          if (control_reboot == 1) {
+            boot_sm = 6;
+          } else if (control_reboot == 2) {
+            boot_sm = 4;
+          } else if (control_reboot == 3) {
+            boot_sm = 2;
+          } else if (control_reboot == 4) {
+            boot_sm = 5;
+          } else {
+          }
+        } else {
+          DEBUG_PRINT("parseObject() failed\n");
         }
-        yield();
       }
     }
   } break;
 
-  // firebase monitoring
+  // firebase monitoring / write
   case 32: {
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     ret = true;
-    String kcontrol = FbGetPath_control();
-    String json = Firebase.getJSON(kcontrol);
-    if (Firebase.failed() == true) {
-      DEBUG_PRINT("get failed: kcontrol\n");
-      DEBUG_PRINT("%s\n", Firebase.error().c_str());
-    } else {
-      DynamicJsonDocument object(1024);
-      auto error = deserializeJson(object, json);
-      if (!error) {
-        control_time = object[F("time")];
-
-        int control_reboot = object[F("reboot")];
-        if (control_reboot == 1) {
-          ESP.restart();
-        } else if (control_reboot == 2) {
-          boot_sm = 4;
-        } else if (control_reboot == 3) {
-          boot_sm = 2;
-        } else if (control_reboot == 4) {
-          boot_sm = 5;
-        } else {
-          boot_sm = 31;
-        }
-      } else {
-        DEBUG_PRINT("parseObject() failed\n");
-      }
-    }
-
     DynamicJsonDocument status(1024);
     status[F("heap")] = ESP.getFreeHeap();
     status[F("time")] = getTime();
@@ -186,6 +175,8 @@ bool FbmService(void) {
     if (Firebase.failed()) {
       DEBUG_PRINT("set failed: kstatus\n");
       DEBUG_PRINT("%s\n", Firebase.error().c_str());
+    } else {
+      boot_sm = 3;
     }
   } break;
 
@@ -200,6 +191,11 @@ bool FbmService(void) {
     DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     EE_EraseData();
     DEBUG_PRINT("EEPROM erased\n");
+    ESP.restart();
+    break;
+
+  case 6:
+    DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
     ESP.restart();
     break;
 

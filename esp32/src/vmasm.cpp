@@ -120,35 +120,39 @@ void vm_write(vm_context_t &ctx, const char *key_value) {
   if (entry.code == kMessaging) {
     //
     VM_writeOutMessage(ctx, entry.value);
-  } else {
-    entry.value = ctx.ACC;
+  } else if (entry.code == kTimeout) {
+    entry.value = String(ctx.ACC);
     entry.wb = 1;
+  } else {
+    entry.value = String(ctx.ACC);
+    entry.wb = 1;
+    entry.ev = true;
   }
 }
 
 vm_itlb_t VM_pipe[] = {
-    /*  0: nop      */ {NULL, vm_exec_nop, NULL},
-    /*  1: ldi      */ {vm_readi, vm_exec_ldi, NULL},
-    /*  2: reserved */ {NULL, NULL, NULL},
-    /*  3: ld       */ {vm_read, vm_exec_ldi, NULL},
-    /*  4: reserved */ {NULL, NULL, NULL},
-    /*  5: st       */ {NULL, vm_exec_st, vm_write},
-    /*  6: lt       */ {vm_read, vm_exec_lt, NULL},
-    /*  7: gt       */ {vm_read, vm_exec_gt, NULL},
-    /*  8: eqi      */ {vm_readi, vm_exec_eqi, NULL},
-    /*  9: eq       */ {vm_read, vm_exec_eqi, NULL},
-    /* 10: bz       */ {NULL, vm_exec_bz, NULL},
-    /* 11: bnz      */ {NULL, vm_exec_bnz, NULL},
-    /* 12: dly      */ {vm_readi, vm_exec_dly, NULL},
-    /* 13: reserved */ {NULL, NULL, NULL},
-    /* 14: lte      */ {vm_read, vm_exec_lte, NULL},
-    /* 15: gte      */ {vm_read, vm_exec_gte, NULL},
-    /* 16: halt     */ {NULL, vm_exec_halt, NULL},
-    /* 17: jmp      */ {NULL, vm_exec_jmp, NULL},
-    /* 18: addi     */ {vm_readi, vm_exec_addi, NULL},
-    /* 19: add      */ {vm_read, vm_exec_addi, NULL},
-    /* 20: subi     */ {vm_readi, vm_exec_subi, NULL},
-    /* 21: sub      */ {vm_read, vm_exec_subi, NULL},
+    /*  0: nop      */ {"nop", NULL, vm_exec_nop, NULL},
+    /*  1: ldi      */ {"ldi", vm_readi, vm_exec_ldi, NULL},
+    /*  2: reserved */ {"res2", NULL, NULL, NULL},
+    /*  3: ld       */ {"ld", vm_read, vm_exec_ldi, NULL},
+    /*  4: reserved */ {"res4", NULL, NULL, NULL},
+    /*  5: st       */ {"st", NULL, vm_exec_st, vm_write},
+    /*  6: lt       */ {"lt", vm_read, vm_exec_lt, NULL},
+    /*  7: gt       */ {"gt", vm_read, vm_exec_gt, NULL},
+    /*  8: eqi      */ {"eqi", vm_readi, vm_exec_eqi, NULL},
+    /*  9: eq       */ {"eq", vm_read, vm_exec_eqi, NULL},
+    /* 10: bz       */ {"bz", NULL, vm_exec_bz, NULL},
+    /* 11: bnz      */ {"bnz", NULL, vm_exec_bnz, NULL},
+    /* 12: dly      */ {"dly", vm_readi, vm_exec_dly, NULL},
+    /* 13: reserved */ {"res13", NULL, NULL, NULL},
+    /* 14: lte      */ {"lte", vm_read, vm_exec_lte, NULL},
+    /* 15: gte      */ {"gte", vm_read, vm_exec_gte, NULL},
+    /* 16: halt     */ {"halt", NULL, vm_exec_halt, NULL},
+    /* 17: jmp      */ {"jmp", NULL, vm_exec_jmp, NULL},
+    /* 18: addi     */ {"addi", vm_readi, vm_exec_addi, NULL},
+    /* 19: add      */ {"add", vm_read, vm_exec_addi, NULL},
+    /* 20: subi     */ {"subi", vm_readi, vm_exec_subi, NULL},
+    /* 21: sub      */ {"sub", vm_read, vm_exec_subi, NULL},
 };
 
 uint8_t VM_decode(uint8_t pc, vm_context_t &ctx, FuncEntry &stm) {
@@ -160,21 +164,24 @@ uint8_t VM_decode(uint8_t pc, vm_context_t &ctx, FuncEntry &stm) {
     // DEBUG_PRINT("VM_pipe read\n");
     if (VM_pipe[code].read != NULL) {
       VM_pipe[code].read(ctx, value.c_str());
-      // DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+      // DEBUG_PRINT("asm-r: %s %s ACC=%d V=%d\n", VM_pipe[code].opcode,
+      //             value.c_str(), ctx.ACC, ctx.V);
     }
 
     /* decode-execute */
     // DEBUG_PRINT("VM_pipe exec\n");
     if (VM_pipe[code].exec != NULL) {
       pc = VM_pipe[code].exec(pc, ctx, value.c_str());
-      // DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+      DEBUG_PRINT("asm: %s %s %d\n", VM_pipe[code].opcode, value.c_str(),
+                  ctx.ACC);
     }
 
     /* decode-write */
     // DEBUG_PRINT("VM_pipe write\n");
     if (VM_pipe[code].write != NULL) {
       VM_pipe[code].write(ctx, value.c_str());
-      // DEBUG_PRINT("VM_decode ACC=%d V=%d\n", ctx.ACC, ctx.V);
+      // DEBUG_PRINT("asm-w: %s %s ACC=%d V=%d\n", VM_pipe[code].opcode,
+      //             value.c_str(), ctx.ACC, ctx.V);
     }
   } else {
     ctx.HALT = true;

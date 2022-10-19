@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="drawing.svg"
+   inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-xhdpi\ic_launcher.png"
+   inkscape:export-xdpi="14.236109"
+   inkscape:export-ydpi="14.236109">
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient6026"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop6024" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient6026"
+       id="radialGradient6034"
+       cx="99.515228"
+       cy="167.30443"
+       fx="99.515228"
+       fy="167.30443"
+       r="66.204938"
+       gradientTransform="matrix(1,0,0,0.70552171,0,49.267521)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="268.84678"
+     inkscape:cy="595.10772"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.71725059;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4517"
+       width="171.28275"
+       height="171.28275"
+       x="17.047756"
+       y="61.613926" />
+    <path
+       style="fill:#333333;stroke:none;stroke-width:6.18585443;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path9239"
+       sodipodi:type="arc"
+       sodipodi:cx="102.29173"
+       sodipodi:cy="145.80614"
+       sodipodi:rx="62.5"
+       sodipodi:ry="62.5"
+       sodipodi:start="3.643623"
+       sodipodi:end="3.5165792"
+       d="M 47.503773,115.73074 A 62.5,62.5 0 0 1 130.61214,90.090746 62.5,62.5 0 0 1 158.87836,172.34298 62.5,62.5 0 0 1 77.565215,203.20692 62.5,62.5 0 0 1 44.134698,122.91489"
+       sodipodi:open="true"
+       inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-hdpi\ic_launcher.png"
+       inkscape:export-xdpi="15.24"
+       inkscape:export-ydpi="15.24" />
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:126.8001709px;line-height:1.25;font-family:'Comic Sans MS';-inkscape-font-specification:'Comic Sans MS, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffcc00;fill-opacity:1;stroke:#ffffff;stroke-width:4.18728685;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x="17.720121"
+       y="195.82195"
+       id="text4522"
+       transform="scale(1.0505334,0.95189738)"
+       inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-hdpi\ic_launcher.png"
+       inkscape:export-xdpi="15.24"
+       inkscape:export-ydpi="15.24"><tspan
+         sodipodi:role="line"
+         id="tspan5975"
+         x="17.720121"
+         y="195.82195"
+         style="fill:#ffcc00;fill-opacity:1;stroke:#ffffff;stroke-width:4.18728685;stroke-opacity:1">Ya</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.86923027px;line-height:1.25;font-family:'Comic Sans MS';-inkscape-font-specification:'Comic Sans MS, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffcc00;fill-opacity:1;stroke:#fffff6;stroke-width:0.80000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x="102.55053"
+       y="209.34378"
+       id="text13192"
+       transform="scale(1.2776441,0.78269057)"
+       inkscape:export-filename="F:\Download\ic_launcher\res\mipmap-hdpi\ic_launcher.png"
+       inkscape:export-xdpi="15.24"
+       inkscape:export-ydpi="15.24"><tspan
+         sodipodi:role="line"
+         id="tspan13190"
+         x="102.55053"
+         y="209.34378"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.86923027px;font-family:'Comic Sans MS';-inkscape-font-specification:'Comic Sans MS, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffcc00;fill-opacity:1;stroke:#fffff6;stroke-width:0.80000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">io</tspan></text>
+  </g>
+</svg>

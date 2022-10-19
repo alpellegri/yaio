@@ -4,11 +4,10 @@
 #include <string.h>
 
 #include "ap.h"
+#include "debug.h"
 #include "ee.h"
 #include "sta.h"
 #include "vers.h"
-#include "debug.h"
-
 
 static uint8_t mode;
 static uint32_t schedule_time;
@@ -58,8 +57,7 @@ void loop() {
     } else if (mode == 1) {
       ret = STA_Task(current_time);
       if (ret == false) {
-        mode = 0;
-        AP_Setup();
+        STA_Setup();
       }
     } else {
       /* unmapped mode */

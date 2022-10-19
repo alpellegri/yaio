@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <Adafruit_Sensor.h>
 #include <DHTesp.h>
 
 #include "debug.h"
@@ -15,6 +14,7 @@
 #define SAMPLE_PERIOD (60 * 1000)
 
 #define lpfilter(y, x) (0.95 * (y) + 0.05 * (x))
+// #define lpfilter(y, x) (0 * (y) + 1 * (x))
 
 // #define DHTPIN D6 // 12
 #define DHTTYPE DHTesp ::DHT22

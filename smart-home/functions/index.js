@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2018 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,44 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 'use strict';
 
-const util = require('util');
-const https = require('https');
 const functions = require('firebase-functions');
-const firebase = require('firebase');
-const {smarthome} = require('actions-on-google');
-const cors = require('cors')({origin: true});
+const { smarthome } = require('actions-on-google');
+const { google } = require('googleapis');
+const util = require('util');
+const admin = require('firebase-admin');
 
 // Initialize Firebase
-const config = functions.config().firebase;
-const admin = require('firebase-admin');
 admin.initializeApp();
+const firebaseRef = admin.database().ref('/');
+
+// Initialize Homegraph
+const auth = new google.auth.GoogleAuth({
+  scopes: ['https://www.googleapis.com/auth/homegraph']
+});
+const homegraph = google.homegraph({
+  version: 'v1',
+  auth: auth
+});
 
 const oauth2Ref = admin.database().ref('/oauth2');
 
+const kCodeTemperature = 2;
+const kCodeHumidity = 3;
 const kCodeBool = 8;
-const kCodeInt = 9;
 
-exports.auth = functions.https.onRequest((request, response) => {
-  // console.log('auth -> Request headers: ' + JSON.stringify(request.headers));
-  // console.log('auth -> Request query: ' + JSON.stringify(request.query));
-  // console.log('auth -> Request body: ' + JSON.stringify(request.body));
+exports.fakeauth = functions.https.onRequest((request, response) => {
+  // console.log('fakeauth -> Request headers: ' + JSON.stringify(request.headers));
+  // console.log('fakeauth -> Request query: ' + JSON.stringify(request.query));
+  // console.log('fakeauth -> Request body: ' + JSON.stringify(request.body));
 
   // Code entry.
-  let Data = {
+  let data = {
     value: 0,
     uid: request.query.code,
     state: request.query.state,
   };
 
-  let Key = request.query.code;
+  let key = request.query.code;
   let updates = {};
-  updates['/auth_code/' + Key] = Data;
+  updates['/auth_code/' + key] = data;
   // should wait the it returns...
   oauth2Ref.update(updates);
 
-	const responseurl = util.format('%s?code=%s&state=%s',
+  const responseurl = util.format('%s?code=%s&state=%s',
     decodeURIComponent(request.query.redirect_uri),
     request.query.code,
     request.query.state);
@@ -58,287 +67,414 @@ exports.auth = functions.https.onRequest((request, response) => {
   return response.redirect(responseurl);
 });
 
-exports.token = functions.https.onRequest((request, response) => {
-  // console.log('token -> Request headers: ' + JSON.stringify(request.headers));
-  // console.log('token -> Request query: ' + JSON.stringify(request.query));
-  // console.log('token -> Request body: ' + JSON.stringify(request.body));
+exports.faketoken = functions.https.onRequest(async (request, response) => {
+  // console.log('faketoken -> Request headers: ' + JSON.stringify(request.headers));
+  // console.log('faketoken -> Request query: ' + JSON.stringify(request.query));
+  // console.log('faketoken -> Request body: ' + JSON.stringify(request.body));
 
   const grantType = request.query.grant_type
     ? request.query.grant_type : request.body.grant_type;
-  const expires = 1 * 60 * 60;
+  const secondsInDay = 86400; // 86400 = 60 * 60 * 24
   const HTTP_STATUS_OK = 200;
   console.log(`Grant type ${grantType}`);
 
   if (grantType === 'authorization_code') {
     console.log(`request.body.code ${request.body.code}`);
-    oauth2Ref.child('auth_code').child(request.body.code).once('value').then(function(snapshot) {
-      const auth_code = snapshot.val();
-      const obj = {
-        token_type: 'bearer',
-        access_token: auth_code.uid,
-        refresh_token: auth_code.uid,
-        expires_in: expires,
-      };
-      const Data = {
-        value: 0,
-        uid: auth_code.uid,
-        expires: expires,
-      };
-      const Key = auth_code.uid;
-      let updates = {};
-      updates['/access_token/' + Key] = Data;
-      updates['/refresh_token/' + Key] = Data;
-      // should wait the it returns...
-      oauth2Ref.update(updates);
-      response.status(HTTP_STATUS_OK).json(obj);
-    }).catch((err) => {
-      console.error(err);
-    });
+    const snapshot = await oauth2Ref.child('auth_code').child(request.body.code).once('value');
+    const auth_code = snapshot.val();
+    const obj = {
+      token_type: 'bearer',
+      access_token: auth_code.uid,
+      refresh_token: auth_code.uid,
+      expires_in: secondsInDay,
+    };
+    const data = {
+      value: 0,
+      uid: auth_code.uid,
+      expires: secondsInDay,
+    };
+    const key = auth_code.uid;
+    let updates = {};
+    updates['/access_token/' + key] = data;
+    updates['/refresh_token/' + key] = data;
+    // should wait the it returns...
+    oauth2Ref.update(updates);
+    response.status(HTTP_STATUS_OK).json(obj);
   } else if (grantType === 'refresh_token') {
     console.log(`request.body.refresh_token ${request.body.refresh_token}`);
-    oauth2Ref.child('refresh_token').child(request.body.refresh_token).once('value').then(function(snapshot) {
-      const refresh_token = snapshot.val();
-      const obj = {
-        token_type: 'bearer',
-        access_token: refresh_token.uid,
-        expires_in: expires,
-      };
-      const Data = {
-        value: 0,
-        uid: refresh_token.uid,
-        expires: expires,
-      };
-      const Key = refresh_token.uid;
-      let updates = {};
-      updates['/access_token/' + Key] = Data;
-      oauth2Ref.update(updates);
-      response.status(HTTP_STATUS_OK).json(obj);
-    }).catch((err) => {
-      console.error(err);
-    });
+    const snapshot = await oauth2Ref.child('refresh_token').child(request.body.refresh_token).once('value');
+    const refresh_token = snapshot.val();
+    const obj = {
+      token_type: 'bearer',
+      access_token: refresh_token.uid,
+      expires_in: secondsInDay,
+    };
+    const data = {
+      value: 0,
+      uid: refresh_token.uid,
+      expires: secondsInDay,
+    };
+    const key = refresh_token.uid;
+    let updates = {};
+    updates['/access_token/' + key] = data;
+    oauth2Ref.update(updates);
+    response.status(HTTP_STATUS_OK).json(obj);
   }
 });
 
-function init(req, res, uid, domains, uidRef) {
-  let reqdata = req.body;
+const app = smarthome({
+  debug: false,
+});
 
-  if (!reqdata.inputs) {
-    showError(res, 'missing inputs');
-    return;
-  }
+app.onSync(async (body, headers) => {
+  // console.log('-> body: ' + JSON.stringify(body));
+  // console.log('-> headers: ' + JSON.stringify(headers));
 
-  for (let i = 0; i < reqdata.inputs.length; i++) {
-    let input = reqdata.inputs[i];
-		let intent = input.intent || '';
-		console.log('> intent ', intent);
-    switch (intent) {
-      case 'action.devices.SYNC':
-        sync(reqdata, res, uid, domains, uidRef);
-        return;
-      case 'action.devices.QUERY':
-        query(reqdata, res, uid, domains, uidRef);
-        return;
-      case 'action.devices.EXECUTE':
-        execute(reqdata, res, uid, domains, uidRef);
-        return;
-    }
-  }
-  showError(res, 'missing intent');
-}
+  const access_token = headers.authorization ? headers.authorization.split(' ')[1] : null;
+  const uid = access_token;
+  const uidPath = '/users/' + uid;
+  const uidRef = admin.database().ref(uidPath);
+  const snapshot = await uidRef.child('/obj/data').once('value');
+  const snapshotVal = snapshot.val();
 
-function sync(req, res, uid, domains, uidRef) {
-
-  uidRef.child('/obj/data').child(domains[0]).once('value').then(function(snapshot) {
-    const snapshotVal = snapshot.val();
-    const device_keys = Object.keys(snapshotVal);
-    let devices = [];
-    let i = 0;
-    for (let id = 0; id < device_keys.length; id++) {
-      // console.log(`key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
-      // filter with selected aog
-      if (snapshotVal[device_keys[id]].aog == true) {
-        // filter with Bool and Int
-        if ((snapshotVal[device_keys[id]].code == kCodeBool) || (snapshotVal[device_keys[id]].code == kCodeInt)) {
-          console.log(`[${i}] key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
-          let type = 'action.devices.types.SWITCH';
-          let trait = 'action.devices.traits.OnOff';
-          devices[i++] = {
-            id: device_keys[id],
-            type: type,
-            traits: [
-              trait,
-            ],
-            name: {
-              defaultNames: [device_keys[id]],
-              name: device_keys[id],
-              nicknames: [device_keys[id]],
-            },
-            willReportState: false,
-            deviceInfo: {
-              manufacturer: 'Yaio',
-              model: 'yaio virtual device',
-              hwVersion: '1.0',
-              swVersion: '1.0.1',
-            },
-          };
-        } else {
-          // console.log(`x key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
-        }
-      } else {
-        // console.log(`x key: ${device_keys[id]} type: ${snapshotVal[device_keys[id]].code} aog: ${snapshotVal[device_keys[id]].aog}`);
-      }
-    }
-
-    let json = {
-      requestId: req.requestId,
-      payload: {
-        agentUserId: uid,
-        devices: devices,
-      },
-    };
-    // console.log('-> json: ' + JSON.stringify(json));
-    res.status(200).json(json);
-  }).catch((err) => {
-    console.error(err);
-    showError(res, 'database error');
-  });
-}
-
-function query(req, res, uid, domains, uidRef) {
-
-  uidRef.child('/obj/data').child(domains[0]).once('value').then(function(snapshot) {
-    const snapshotVal = snapshot.val();
-    const device_keys = Object.keys(snapshotVal);
-    const reqDevices = req.inputs[0].payload.devices;
-
-    let devices = {};
-    for (let i = 0; i < reqDevices.length; i++) {
-      let id = device_keys.indexOf(reqDevices[i].id);
-      if (id != -1) {
-        let value = snapshotVal[device_keys[id]].value;
-        if (snapshotVal[device_keys[id]].code == kCodeInt) {
-          // convert int to bool
-          value = (value != 0) ? true : false;
-        }
-        devices[device_keys[id]] = {
-          on: value,
-          online: true,
-        };
-      }
-    }
-
-    let json = {
-      requestId: req.requestId,
-      payload: {
-        devices: devices,
-      },
-    };
-    // console.log('-> json: ' + JSON.stringify(json));
-    res.status(200).json(json);
-  }).catch((err) => {
-    console.error(err);
-    showError(res, 'database error');
-  });
-}
-
-function execute(body, res, uid, domains, uidRef) {
-
-  const {requestId} = body;
-  const payload = {
-    commands: [{
-      ids: [],
-      status: 'SUCCESS',
-      states: {
-        online: true,
-      },
-    }],
-  };
-
-  uidRef.child('/obj/data').child(domains[0]).once('value').then(function(snapshot) {
-    const snapshotVal = snapshot.val();
-    const device_keys = Object.keys(snapshotVal);
-
-    for (const input of body.inputs) {
-      for (let k = 0; k < input.payload.commands.length; k++) {
-        const command = input.payload.commands[k];
-        for (const device of command.devices) {
-          const deviceId = device.id;
-          const id = device_keys.indexOf(deviceId);
-          payload.commands[k].ids.push(deviceId);
-          if (id != -1) {
-            for (const execution of command.execution) {
-              const execCommand = execution.command;
-              const {params} = execution;
-              let val = snapshotVal[device_keys[id]].value;
-              if (snapshotVal[device_keys[id]].code == kCodeInt) {
-                // convert bool to int
-                const value = (params.on == true) ? 1 : 0;
-                // clear last significant bit and set
-                val = (val & (~1)) | value;
-              } else {
-                val = params.on;
-              }
-              let d = new Date();
-              switch (execCommand) {
-                case 'action.devices.commands.OnOff':
-                  uidRef.child('/obj/data').child(domains[0]).child(device_keys[id]).update({
-                    value: val,
-                  });
-                  uidRef.child('/root').child(domains[0]).child(snapshotVal[device_keys[id]].owner).child('control').update({
-                    time: Math.floor(d.getTime()/1000),
-                  });
-                  payload.commands[0].states.on = params.on;
-                  break;
-              }
+  let devices = [];
+  if (snapshotVal) {
+    // console.log('-> snapshotVal: ' + JSON.stringify(snapshotVal));
+    const domains = Object.entries(snapshotVal);
+    for (const [domain, domainData] of domains) {
+      const keys = Object.entries(domainData);
+      for (const [key, keyData] of keys) {
+        if (keyData.aog == true) {
+          if (keyData.code == kCodeBool) {
+            // const json = JSON.stringify(keyData);
+            // console.log(`${domain} -> ${key} : ${json}`)
+            const data = {
+              id: domain + '/' + key,
+              type: 'action.devices.types.SWITCH',
+              traits: [
+                'action.devices.traits.OnOff',
+              ],
+              name: {
+                defaultNames: [key],
+                name: key,
+                nicknames: [key],
+              },
+              willReportState: true,
+              deviceInfo: {
+                manufacturer: 'Yaio',
+                model: 'yaio virtual device',
+                hwVersion: '1.0',
+                swVersion: '1.0.1',
+              },
             }
+            devices.push(data);
+          } else if (keyData.code == kCodeTemperature) {
+            const json = JSON.stringify(keyData);
+            console.log(`${domain} -> ${key} : ${json}`)
+            const data = {
+              id: domain + '/' + key,
+              type: 'action.devices.types.THERMOSTAT',
+              traits: [
+                'action.devices.traits.TemperatureSetting'
+              ],
+              name: {
+                defaultNames: [key],
+                name: key,
+                nicknames: [key],
+              },
+              willReportState: true,
+              attributes: {
+                queryOnlyTemperatureSetting: true,
+                //availableThermostatModes: 'off,heat,cool,on',
+                thermostatTemperatureUnit: 'C',
+              },
+              deviceInfo: {
+                manufacturer: 'Yaio',
+                model: 'yaio virtual device',
+                hwVersion: '1.0',
+                swVersion: '1.0.1',
+              },
+            }
+            devices.push(data);
+          } else if (keyData.code == kCodeHumidity) {
+            const json = JSON.stringify(keyData);
+            console.log(`${domain} -> ${key} : ${json}`)
+            const data = {
+              id: domain + '/' + key,
+              type: 'action.devices.types.THERMOSTAT',
+              traits: [
+                'action.devices.traits.TemperatureSetting'
+              ],
+              name: {
+                defaultNames: [key],
+                name: key,
+                nicknames: [key],
+              },
+              willReportState: true,
+              attributes: {
+                queryOnlyHumiditySetting: true,
+                //availableThermostatModes: 'off,heat,cool,on',
+              },
+              deviceInfo: {
+                manufacturer: 'Yaio',
+                model: 'yaio virtual device',
+                hwVersion: '1.0',
+                swVersion: '1.0.1',
+              },
+            }
+            devices.push(data);
           }
         }
       }
     }
+  }
 
-    let json = {
-      requestId: requestId,
-      payload: payload,
-    };
-    // console.log('-> json: ' + JSON.stringify(json));
-    res.status(200).json(json);
-  }).catch((err) => {
-    console.error(err);
-    showError(res, 'database error');
-  });
+  const resp = {
+    requestId: body.requestId,
+    payload: {
+      agentUserId: uid,
+      devices: devices,
+    },
+  };
+
+  return resp;
+});
+
+const queryFirebase = async (uid, deviceId) => {
+  const uidPath = '/users/' + uid;
+  const uidRef = admin.database().ref(uidPath);
+  const domain = deviceId.split('/')[0];
+  const device = deviceId.split('/')[1];
+  const path = `/obj/data/${domain}/${device}`;
+  const snapshot = await uidRef.child(path).once('value');
+  const data = snapshot.val();
+
+  let resp;
+  switch (data.code) {
+    case kCodeTemperature:
+      // console.log('-> temp: ' + data.value);
+      resp = {
+        // on: true,
+        online: true,
+        // thermostatMode: 'cool',
+        thermostatTemperatureSetpoint: data.value,
+        thermostatTemperatureAmbient: data.value,
+        // thermostatHumidityAmbient: 45.3,
+        status: 'SUCCESS',
+      };
+      break;
+    case kCodeHumidity:
+      // console.log('-> hum: ' + data.value);
+      resp = {
+        // on: true,
+        online: true,
+        // thermostatMode: 'cool',
+        thermostatHumidityAmbient: data.value,
+        status: 'SUCCESS',
+      };
+      break;
+    case kCodeBool:
+      resp = {
+        on: data.value,
+        online: true,
+        status: 'SUCCESS',
+      };
+      break;
+  }
+
+  return resp;
 }
 
-function showError(res, message) {
-  res.status(401).set({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-  }).json({error: message});
+const queryDevice = async (uid, deviceId) => {
+  console.log('-> queryDevice: ' + JSON.stringify(deviceId));
+  const resp = await queryFirebase(uid, deviceId);
+  return resp;
 }
 
-exports.ha = functions.https.onRequest((req, res) => {
-  // console.log('-> Request headers: ' + JSON.stringify(req.headers));
-  // console.log('-> Request query: ' + JSON.stringify(req.query));
-  // console.log('-> Request body: ' + JSON.stringify(req.body));
+app.onQuery(async (body, headers) => {
+  // console.log('-> body: ' + JSON.stringify(body));
+  // console.log('-> headers: ' + JSON.stringify(headers));
 
-  let access_token = req.headers.authorization ? req.headers.authorization.split(' ')[1] : null;
-  console.log('access_token: ' + access_token);
-
-  // for now uid is access_token
+  const access_token = headers.authorization ? headers.authorization.split(' ')[1] : null;
   const uid = access_token;
+
+  const { requestId } = body;
+  const payload = {
+    devices: {},
+  };
+  const queryPromises = [];
+  const intent = body.inputs[0];
+  for (const device of intent.payload.devices) {
+    const deviceId = device.id;
+    queryPromises.push(queryDevice(uid, deviceId)
+      .then((data) => {
+        // Add response to device payload
+        payload.devices[deviceId] = data;
+      }
+      ));
+  }
+  // Wait for all promises to resolve
+  await Promise.all(queryPromises)
+  return {
+    requestId: requestId,
+    payload: payload,
+  };
+});
+
+const updateDevice = async (execution, uid, deviceId) => {
+  const { params, command } = execution;
 
   const uidPath = '/users/' + uid;
   const uidRef = admin.database().ref(uidPath);
+  const domain = deviceId.split('/')[0];
+  const device = deviceId.split('/')[1];
+  const path = `/obj/data/${domain}/${device}`;
 
-  uidRef.child('/root').once('value').then(function(snapshot) {
-    const snapshotVal = snapshot.val();
-    const domains = Object.keys(snapshotVal);
-    if (domains.length > 0) {
-      init(req, res, uid, domains, uidRef);
-    } else {
-      showError(res, 'database error');
+  let state, ref;
+  switch (command) {
+    case 'action.devices.commands.OnOff':
+      state = { value: params.on };
+      ref = uidRef.child(path);
+      break;
+    // case 'action.devices.commands.StartStop':
+    // state = {isRunning: params.start};
+    // ref = firebaseRef.child(deviceId).child('StartStop');
+    // break;
+    // case 'action.devices.commands.PauseUnpause':
+    // state = {isPaused: params.pause};
+    // ref = firebaseRef.child(deviceId).child('StartStop');
+    // break;
+  }
+
+  return ref.update(state)
+    .then(() => state);
+};
+
+const updateRoot = async (uid, domain, node) => {
+  const uidPath = '/users/' + uid;
+  const uidRef = admin.database().ref(uidPath);
+  const path = `/root/${domain}/${node}/control`;
+
+  const d = new Date();
+  let state, ref;
+  state = { time: Math.floor(d.getTime() / 1000) };
+  ref = uidRef.child(path);
+
+  return ref.update(state)
+    .then(() => state);
+};
+
+app.onExecute(async (body, headers) => {
+  // console.log('-> body: ' + JSON.stringify(body));
+  // console.log('-> headers: ' + JSON.stringify(headers));
+
+  const access_token = headers.authorization ? headers.authorization.split(' ')[1] : null;
+  const uid = access_token;
+  const uidPath = '/users/' + uid;
+  const uidRef = admin.database().ref(uidPath);
+
+  const { requestId } = body;
+  // Execution results are grouped by status
+  const result = {
+    ids: [],
+    status: 'SUCCESS',
+    states: {
+      online: true,
+    },
+  };
+
+  const executePromises = [];
+  const intent = body.inputs[0];
+  for (const command of intent.payload.commands) {
+    for (const device of command.devices) {
+      const deviceId = device.id;
+      for (const execution of command.execution) {
+        const domain = deviceId.split('/')[0];
+        const device = deviceId.split('/')[1];
+
+        const snapshot = await uidRef.child('/obj/data').child(domain).child(device).once('value');
+        const snapshotVal = snapshot.val();
+        // console.log('-> snapshot: ' + JSON.stringify(snapshot));
+        const node = snapshotVal.owner;
+
+        executePromises.push(
+          updateDevice(execution, uid, deviceId)
+            .then((data) => {
+              result.ids.push(deviceId);
+              Object.assign(result.states, data);
+            })
+            .catch(() => console.error(`Unable to update ${device.id}`))
+        );
+        executePromises.push(
+          updateRoot(uid, domain, node)
+            .then((data) => { })
+            .catch(() => console.error(`Unable to root ${device.id}`))
+        );
+      }
     }
-  }).catch((err) => {
-    console.error(err);
-    showError(res, 'database error');
-  });
+  }
+
+
+  await Promise.all(executePromises)
+  return {
+    requestId: requestId,
+    payload: {
+      commands: [result],
+    },
+  };
 });
+
+exports.smarthome = functions.https.onRequest(app);
+
+exports.requestsync = functions.https.onRequest(async (request, response) => {
+  console.log('-> request: ' + JSON.stringify(request));
+  response.set('Access-Control-Allow-Origin', '*');
+  console.info('Request SYNC for user 123');
+  try {
+    const res = await homegraph.devices.requestSync({
+      requestBody: {
+        agentUserId: '123'
+      }
+    });
+    console.info('Request sync response:', res.status, res.data);
+    response.json(res.data);
+  } catch (err) {
+    console.error(err);
+    response.status(500).send(`Error requesting sync: ${err}`)
+  }
+});
+
+/**
+ * Send a REPORT STATE call to the homegraph when data for any device id
+ * has been changed.
+ */
+
+// exports.reportstate = functions.database.ref('{deviceId}').onWrite(async (change, context) => {
+//   console.info('Firebase write event triggered this cloud function');
+//   const snapshot = change.after.val();
+//   // console.info(JSON.stringify(change));
+//   // console.info(JSON.stringify(context));
+//
+//   const requestBody = {
+//     requestId: 'ff36a3cc', /* Any unique ID */
+//     agentUserId: '123', /* Hardcoded user ID */
+//     payload: {
+//       devices: {
+//         states: {
+//           /* Report the current state of our washer */
+//           [context.params.deviceId]: {
+//             on: snapshot.OnOff.on,
+//             isPaused: snapshot.StartStop.isPaused,
+//             isRunning: snapshot.StartStop.isRunning,
+//           },
+//         },
+//       },
+//     },
+//   };
+//
+//   const res = await homegraph.devices.reportStateAndNotification({
+//     requestBody
+//   });
+//   console.info('Report state response:', res.status, res.data);
+// });
+

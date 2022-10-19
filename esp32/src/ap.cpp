@@ -74,6 +74,7 @@ bool AP_Setup(void) {
     DEBUG_PRINT("Connecting mode AP\n");
 
     // AP Static IP
+    WiFi.mode(WIFI_AP);
     if (!WiFi.softAP(String(FPSTR(ap_ssid)).c_str(),
                      String(FPSTR(ap_password)).c_str())) {
       DEBUG_PRINT("AP Start Failed\n");

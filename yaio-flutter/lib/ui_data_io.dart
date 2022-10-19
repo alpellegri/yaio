@@ -2,26 +2,6 @@ import 'package:flutter/material.dart';
 import 'entries.dart';
 import 'firebase_utils.dart';
 
-class DataValueWidget extends StatelessWidget {
-  final IoEntry entry;
-
-  DataValueWidget(this.entry);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        new Text(
-          entry.getStringValue(),
-          textAlign: TextAlign.right,
-        ),
-      ],
-    );
-  }
-}
-
 class DataItemWidget extends StatelessWidget {
   final IoEntry entry;
 
@@ -29,41 +9,65 @@ class DataItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          new Expanded(
-            child: new Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                new Expanded(
-                    child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Text(
-                      entry.key,
-                      textAlign: TextAlign.left,
-                    ),
-                    new Text(
-                      '${kEntryId2Name[DataCode.values[entry.code]]}',
-                      textAlign: TextAlign.left,
-                      style: new TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                )),
-                new DataValueWidget(entry),
-              ],
+    return Container(
+        // alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).primaryColorLight,
+        ),
+        child: Stack(
+          children: <Widget>[
+            Container(
+              // alignment: Alignment.centerLeft,
+              width: 4,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8)),
+                color: Theme.of(context).primaryColor,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              entry.key,
+                              textAlign: TextAlign.left,
+                            ),
+                            Text(
+                              '${kEntryId2Name[DataCode.values[entry.code]]}',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        )),
+                        Text(
+                          entry.getStringValue(),
+                          textAlign: TextAlign.right,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ));
   }
 }
 
@@ -99,11 +103,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
     Widget w;
     switch (DataCode.values[data.code]) {
       case DataCode.RadioRx:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
@@ -112,7 +116,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
@@ -122,11 +126,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
       case DataCode.PhyDOut:
       case DataCode.PhyAOut:
       case DataCode.RadioTx:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
@@ -135,12 +139,12 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
               ),
-              new TextField(
+              TextField(
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
@@ -149,7 +153,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -160,11 +164,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
       case DataCode.PhyAIn:
       case DataCode.DhtTemperature:
       case DataCode.DhtHumidity:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
@@ -173,12 +177,12 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
               ),
-              new TextField(
+              TextField(
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
@@ -187,7 +191,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'period',
                   labelText: 'Period [min]',
                 ),
@@ -195,11 +199,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
             ]);
         break;
       case DataCode.RadioMach:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
@@ -208,7 +212,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'identifier',
                   labelText: 'ID',
                 ),
@@ -217,11 +221,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
         break;
       case DataCode.Int:
       case DataCode.Float:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
@@ -230,19 +234,19 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
               ),
             ]);
         break;
-      case DataCode.Messaging:
-        w = new Column(
+      case DataCode.String:
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
@@ -250,7 +254,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   });
                   widget.onChangedValue(data);
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -259,11 +263,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
         break;
       case DataCode.Bool:
         data.value ??= false;
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new Switch(
+              Switch(
                   value: data.value,
                   onChanged: (bool v) {
                     setState(() {
@@ -274,11 +278,11 @@ class _DataConfigWidget extends State<DataConfigWidget> {
             ]);
         break;
       case DataCode.Timer:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
@@ -287,12 +291,12 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'hour',
                   labelText: 'Hour',
                 ),
               ),
-              new TextField(
+              TextField(
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
@@ -301,12 +305,12 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'minutes',
                   labelText: 'Minutes',
                 ),
               ),
-              new TextField(
+              TextField(
                 controller: ctrl_3,
                 onSubmitted: (v) {
                   setState(() {
@@ -315,21 +319,20 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'seconds',
                   labelText: 'Seconds',
                 ),
               ),
-              new TimerOptWidget(
-                  value: data.ioctl, onChanged: _handleTimerChanged),
+              TimerOptWidget(value: data.ioctl, onChanged: _handleTimerChanged),
             ]);
         break;
       case DataCode.Timeout:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new TextField(
+              TextField(
                 controller: ctrl_1,
                 onSubmitted: (v) {
                   setState(() {
@@ -338,12 +341,12 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'hour',
                   labelText: 'Hour',
                 ),
               ),
-              new TextField(
+              TextField(
                 controller: ctrl_2,
                 onSubmitted: (v) {
                   setState(() {
@@ -352,12 +355,12 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'minutes',
                   labelText: 'Minutes',
                 ),
               ),
-              new TextField(
+              TextField(
                 controller: ctrl_3,
                 onSubmitted: (v) {
                   setState(() {
@@ -366,7 +369,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'seconds',
                   labelText: 'Seconds',
                 ),
@@ -374,15 +377,15 @@ class _DataConfigWidget extends State<DataConfigWidget> {
             ]);
         break;
       default:
-        w = new Column(
+        w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new Container(),
+              Container(),
             ]);
     }
 
-    return new Container(
+    return Container(
       child: w,
     );
   }
@@ -434,15 +437,15 @@ class TimerOptWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('TimerOptWidget $value');
-    return new Container(
-      child: new Column(
+    return Container(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new Row(children: <Widget>[
-            new Expanded(
-              child: new Row(children: <Widget>[
-                const Text('Polarity'),
-                new Checkbox(
+          Row(children: <Widget>[
+            Expanded(
+              child: Row(children: <Widget>[
+                Text('Polarity'),
+                Checkbox(
                     value: ((value & (1 << 24)) != 0),
                     onChanged: (bool v) {
                       int newValue = value;
@@ -453,19 +456,19 @@ class TimerOptWidget extends StatelessWidget {
                     }),
               ]),
             ),
-            const Text('Days of the week'),
-            new PopupMenuButton(
+            Text('Days of the week'),
+            PopupMenuButton(
               padding: EdgeInsets.zero,
               onSelected: applyOnSelected,
               itemBuilder: (BuildContext context) {
                 return dayOption.map((String opt) {
                   int index = dayOption.indexOf(opt);
-                  return new PopupMenuItem<int>(
+                  return PopupMenuItem<int>(
                     value: index,
-                    child: new CheckedPopupMenuItem<int>(
+                    child: CheckedPopupMenuItem<int>(
                       value: index,
                       checked: isChecked(index, value),
-                      child: new Text(opt),
+                      child: Text(opt),
                     ),
                   );
                 }).toList();
@@ -514,20 +517,20 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return new AlertDialog(
+    return AlertDialog(
         title: const Text('Edit'),
-        content: new Column(
+        content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new DataConfigWidget(
+              DataConfigWidget(
                 data: data,
                 onChangedValue: _handleChangedValue,
               ),
             ]),
         actions: <Widget>[
-          new FlatButton(
-              child: const Text('SAVE'),
+          TextButton(
+              child: Text('SAVE'),
               onPressed: () {
                 try {
                   data.reference.child(data.key).set(data.toJson());
@@ -537,8 +540,8 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
                 }
                 Navigator.pop(context, null);
               }),
-          new FlatButton(
-              child: const Text('DISCARD'),
+          TextButton(
+              child: Text('DISCARD'),
               onPressed: () {
                 Navigator.pop(context, null);
               }),

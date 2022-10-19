@@ -19,16 +19,16 @@ class Domain extends StatefulWidget {
 }
 
 class _DomainState extends State<Domain> {
-  List<IoEntry> entryList = new List();
+  List<IoEntry> entryList = [];
   DatabaseReference _rootRef;
-  StreamSubscription<Event> _onRootAddSubscription;
-  StreamSubscription<Event> _onRootEditedSubscription;
-  StreamSubscription<Event> _onRootRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onRootAddSubscription;
+  StreamSubscription<DatabaseEvent> _onRootEditedSubscription;
+  StreamSubscription<DatabaseEvent> _onRootRemoveSubscription;
   Map<String, dynamic> _map = new Map<String, dynamic>();
   DatabaseReference _dataRef;
-  StreamSubscription<Event> _onDataAddSubscription;
-  StreamSubscription<Event> _onDataChangedSubscription;
-  StreamSubscription<Event> _onDataRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onDataAddSubscription;
+  StreamSubscription<DatabaseEvent> _onDataChangedSubscription;
+  StreamSubscription<DatabaseEvent> _onDataRemoveSubscription;
   final NavDrawer drawer = new NavDrawer();
 
   @override
@@ -74,11 +74,9 @@ class _DomainState extends State<Domain> {
         title: new Text(widget.domain),
       ),
       drawer: drawer,
-      body: Container(
-          child: SingleChildScrollView(
-              child: new ListView.builder(
+      body: new ListView.builder(
         shrinkWrap: true,
-        physics: ClampingScrollPhysics(),
+        physics: new ClampingScrollPhysics(),
         itemCount: _map.keys.length,
         itemBuilder: (context, node) {
           String _node = _map.keys.toList()[node];
@@ -88,11 +86,11 @@ class _DomainState extends State<Domain> {
               value: _map[_node],
               data: entryList);
         },
-      ))),
+      ),
     );
   }
 
-  void _onRootEntryAdded(Event event) {
+  void _onRootEntryAdded(DatabaseEvent event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
@@ -101,7 +99,7 @@ class _DomainState extends State<Domain> {
     });
   }
 
-  void _onRootEntryChanged(Event event) {
+  void _onRootEntryChanged(DatabaseEvent event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
@@ -111,7 +109,7 @@ class _DomainState extends State<Domain> {
     // _updateAllNodes(domain, value);
   }
 
-  void _onRootEntryRemoved(Event event) {
+  void _onRootEntryRemoved(DatabaseEvent event) {
     // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
     String domain = event.snapshot.key;
     setState(() {
@@ -119,9 +117,10 @@ class _DomainState extends State<Domain> {
     });
   }
 
-  void _onDataEntryAdded(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
+  void _onDataEntryAdded(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    bool drawWr = v['drawWr'];
+    bool drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       setState(() {
         IoEntry entry = new IoEntry.fromMap(
@@ -131,9 +130,10 @@ class _DomainState extends State<Domain> {
     }
   }
 
-  void _onDataEntryChanged(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
+  void _onDataEntryChanged(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    bool drawWr = v['drawWr'];
+    bool drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -144,9 +144,10 @@ class _DomainState extends State<Domain> {
     }
   }
 
-  void _onDataEntryRemoved(Event event) {
-    bool drawWr = event.snapshot.value['drawWr'];
-    bool drawRd = event.snapshot.value['drawRd'];
+  void _onDataEntryRemoved(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    bool drawWr = v['drawWr'];
+    bool drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -190,47 +191,44 @@ class _DeviceCardState extends State<DeviceCard> {
     }
     // extract only data related to a node
     var query = widget.data.where((e) => (e.owner == widget.node)).toList();
-    return new Column(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Container(
-          decoration: new BoxDecoration(
+        Container(
+          decoration: BoxDecoration(
               // color: Colors.grey[100],
               ),
-          child: new Row(
+          child: Row(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              const SizedBox(width: 8.0),
+              SizedBox(width: 8.0),
               online
-                  ? new Icon(Icons.link, color: Colors.green[400])
-                  : new Icon(Icons.link_off, color: Colors.grey[400]),
-              const SizedBox(width: 8.0),
-              new Text(widget.node,
-                  style: new TextStyle(
+                  ? Icon(Icons.link, color: Colors.green[400])
+                  : Icon(Icons.link_off, color: Colors.grey[400]),
+              SizedBox(width: 8.0),
+              Text(widget.node,
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
                   )),
-              const SizedBox(width: 8.0),
-              new Expanded(
-                child: new Column(
+              SizedBox(width: 8.0),
+              Expanded(
+                child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    new PopupMenuButton<String>(
+                    PopupMenuButton<String>(
                         padding: EdgeInsets.zero,
                         onSelected: _routeSelection,
                         itemBuilder: (BuildContext context) =>
                             <PopupMenuItem<String>>[
-                              new PopupMenuItem<String>(
-                                  value: 'Settings',
-                                  child: const Text('Settings')),
-                              new PopupMenuItem<String>(
-                                  value: 'Data IO',
-                                  child: const Text('Data IO')),
-                              new PopupMenuItem<String>(
-                                  value: 'Routine',
-                                  child: const Text('Routine')),
+                              PopupMenuItem<String>(
+                                  value: 'Settings', child: Text('Settings')),
+                              PopupMenuItem<String>(
+                                  value: 'Data IO', child: Text('Data IO')),
+                              PopupMenuItem<String>(
+                                  value: 'Routine', child: Text('Routine')),
                             ]),
                   ],
                 ),
@@ -238,25 +236,34 @@ class _DeviceCardState extends State<DeviceCard> {
             ],
           ),
         ),
-        const SizedBox(height: 8.0),
-        new ListView.builder(
+        SizedBox(height: 8.0),
+        GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
+            crossAxisCount:
+                (MediaQuery.of(context).orientation == Orientation.portrait)
+                    ? 3
+                    : 5,
+            childAspectRatio: 2,
+          ),
           shrinkWrap: true,
           physics: BouncingScrollPhysics(),
           itemCount: query.length,
           itemBuilder: (buildContext, index) {
             if (query[index].drawWr == true) {
-              return new InkWell(
+              return InkWell(
                 onTap: () {
                   _openEntryDialog(widget.node, query[index]);
                 },
-                child: new DataItemWidget(query[index]),
+                child: DataItemWidget(query[index]),
               );
             } else if (query[index].enLog == true) {
-              return new InkWell(
+              return InkWell(
                 onTap: () {
                   Navigator.push(
                       context,
-                      new MaterialPageRoute(
+                      MaterialPageRoute(
                         builder: (BuildContext context) => new ChartHistory(
                             domain: widget.domain,
                             node: widget.node,
@@ -264,15 +271,14 @@ class _DeviceCardState extends State<DeviceCard> {
                         fullscreenDialog: true,
                       ));
                 },
-                child: new DataItemWidget(query[index]),
+                child: DataItemWidget(query[index]),
               );
             } else {
               return DataItemWidget(query[index]);
             }
           },
         ),
-        new Divider(
-            color: Colors.black12, thickness: .6, indent: 8, endIndent: 8),
+        Divider(color: Colors.black12, thickness: .6, indent: 8, endIndent: 8),
       ],
     );
   }

@@ -114,6 +114,14 @@ void VM_writeOut(void) {
                     entry.value.c_str());
         entry.wb = 0;
       } break;
+      case kRadioTx: {
+        if (entry.wb == 1) {
+          uint32_t v = atoi(entry.value.c_str());
+          DEBUG_PRINT("VM_writeOut: %s: %d\n", entry.key.c_str(), v);
+          RF_Send(v, 24);
+          entry.wb = 0;
+        }
+      } break;
       default:
         // DEBUG_PRINT("VM_writeOut: error\n");
         entry.wb = 2;
@@ -153,11 +161,6 @@ void VM_writeOutNet(void) {
         } else {
           entry.wb = 0;
         }
-      } break;
-      case kRadioTx: {
-        uint32_t v = atoi(entry.value.c_str());
-        RF_Send(v, 24);
-        entry.wb = 0;
       } break;
       case kPhyDIn:
       case kPhyAIn:
@@ -266,7 +269,7 @@ void VM_run(void) {
 
       DEBUG_PRINT("event found on: %s\n", entry.key.c_str());
 
-      if (cbkey.length() > 0) {
+      while (cbkey.length() > 0) {
         DEBUG_PRINT("cbkey: %s\n", cbkey.c_str());
         vm_context_t ctx;
 
@@ -283,12 +286,12 @@ void VM_run(void) {
         std::vector<FuncEntry> &funcvec = prog.funcvec;
 
         DEBUG_PRINT("VM_run start [%s] >>>>>>>>>>>>\n", prog.key.c_str());
-        DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
+        // DEBUG_PRINT("Heap: %d\n", ESP.getFreeHeap());
 
         uint8_t pc = 0;
         while ((pc < funcvec.size()) && (ctx.HALT == false)) {
-          DEBUG_PRINT("VM_run exec [%d] code=%d, ACC=%d V=%d\n", pc,
-                      funcvec[pc].code, ctx.ACC, ctx.V);
+         // DEBUG_PRINT("VM_run exec pc=%d, code=%d, ACC=%d V=%d\n", pc,
+         //              funcvec[pc].code, ctx.ACC, ctx.V);
 
           /* decode */
           pc = VM_decode(pc, ctx, funcvec[pc]);
@@ -296,6 +299,7 @@ void VM_run(void) {
           // DEBUG_PRINT("VM_run stop [%d] ACC=%d V=%d\n", pc, ctx.ACC, ctx.V);
         }
         DEBUG_PRINT("VM_run stop [%s] <<<<<<<<<<<<\n", prog.key.c_str());
+        cbkey = prog.cb;
       }
     }
   }
@@ -310,4 +314,5 @@ void VM_runNet(void) {
   VM_readInNet();
   // update outputs
   VM_writeOutNet();
+  // Firebase.run();
 }

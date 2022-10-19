@@ -8,8 +8,10 @@ import 'domain.dart';
 import 'firebase_utils.dart';
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
-  Device.routeName: (BuildContext context) => new Device(title: 'Device'),
-  Messages.routeName: (BuildContext context) => new Messages(title: 'Messages'),
+  Device.routeName: (BuildContext context) =>
+      new Device(title: 'Manage Domains and Nodes'),
+  Messages.routeName: (BuildContext context) =>
+      new Messages(title: 'Notifications'),
   VersionInfo.routeName: (BuildContext context) =>
       new VersionInfo(title: 'Version'),
 };
@@ -58,13 +60,13 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       child: new Column(
         children: <Widget>[
           new UserAccountsDrawerHeader(
-            accountName: new Text(getFirebaseUser().displayName),
-            accountEmail: new Text(getFirebaseUser().email),
-            currentAccountPicture: new CircleAvatar(
+            accountName: new Text(getFirebaseUser().user.displayName),
+            accountEmail: new Text(getFirebaseUser().user.email),
+            /*currentAccountPicture: new CircleAvatar(
               backgroundImage: new NetworkImage(
-                getFirebaseUser().providerData[1].photoUrl,
+                getFirebaseUser().providerData[1].photoURL,
               ),
-            ),
+            ),*/
             margin: EdgeInsets.zero,
             onDetailsPressed: () {
               _showDrawerContents = !_showDrawerContents;
@@ -93,15 +95,15 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
                               new ListTile(
-                                  leading: const Icon(Icons.message),
-                                  title: const Text('Notification Logs'),
+                                  leading: const Icon(Icons.notifications),
+                                  title: const Text('Notification'),
                                   onTap: () {
                                     Navigator.pop(context);
                                     Navigator.of(context)
                                         .pushNamed(Messages.routeName);
                                   }),
                               new ListTile(
-                                  leading: const Icon(Icons.message),
+                                  leading: const Icon(Icons.receipt),
                                   title: const Text('Version Info'),
                                   onTap: () {
                                     Navigator.pop(context);
@@ -119,60 +121,38 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
-                              /*
-                              new ListView.builder(
-                                physics: BouncingScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount: domains.keys.length,
-                                itemBuilder: (context, id) {
-                                  String _domain = domains.keys.toList()[id];
-                                  return new ListTile(
-                                    leading: Icon(Icons.domain),
-                                    title: new Text(_domain),
-                                    onTap: () {
-                                      savePreferencesD(_domain);
+                              new ListTile(
+                                leading: new Icon(Icons.home),
+                                title: ((getDomain() == null)
+                                    ? (const Text(''))
+                                    : (new Text(getDomain()))),
+                                trailing: PopupMenuButton<String>(
+                                    icon: const Icon(Icons.edit),
+                                    onSelected: (value) {
+                                      savePreferencesD(value);
+                                      Navigator.pop(context);
                                       Navigator.pop(context);
                                       Navigator.push(
                                         context,
                                         new MaterialPageRoute(
                                           builder: (BuildContext context) =>
-                                              new Domain(domain: _domain),
+                                              new Domain(domain: value),
                                           fullscreenDialog: true,
                                         ),
                                       );
                                     },
-                                  );
-                                },
-                              ),*/
-                              new ListTile(
-                                leading: Icon(Icons.domain),
-                                title: new Text(getDomain()),
-                                trailing: PopupMenuButton<String>(
-                                    onSelected: (value) {
-                                  savePreferencesD(value);
-                                  // Domain.of(context).rebuild();
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-                                  Navigator.push(
-                                    context,
-                                    new MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          new Domain(domain: value),
-                                      fullscreenDialog: true,
-                                    ),
-                                  );
-                                }, itemBuilder: (context) {
-                                  return domains.keys.map((key) {
-                                    return PopupMenuItem<String>(
-                                      value: key,
-                                      child: Text(key),
-                                    );
-                                  }).toList();
-                                }),
+                                    itemBuilder: (context) {
+                                      return domains.keys.map((key) {
+                                        return PopupMenuItem<String>(
+                                          value: key,
+                                          child: Text(key),
+                                        );
+                                      }).toList();
+                                    }),
                               ),
                               new ListTile(
                                 leading: const Icon(Icons.settings),
-                                title: const Text('Manage Domains'),
+                                title: const Text('Manage Domains and Nodes'),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context)

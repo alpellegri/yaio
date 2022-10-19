@@ -21,10 +21,11 @@
 #define LED_ON LOW
 #define BUTTON D3 // flash button at pin GPIO00 (D3)
 
-#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
+#define STA_NTP_TIMEOUT (10 * 1000)
 
 static bool fota_mode = false;
 static uint32_t last_wifi_time;
+static uint32_t ntp_to;
 
 bool STA_Setup(void) {
   bool ret = true;
@@ -59,6 +60,7 @@ bool STA_Setup(void) {
   DEBUG_PRINT("\n");
 
   if (WiFi.status() == WL_CONNECTED) {
+    ntp_to = millis();
     TimeSetup();
     RF_Setup();
 
@@ -117,14 +119,15 @@ bool STA_Task(uint32_t current_time) {
           VM_runNet();
           yield();
         }
+      } else {
+        if ((millis() - ntp_to) > STA_NTP_TIMEOUT) {
+          ESP.restart();
+        }
       }
     }
   } else {
-    DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
-      // force reboot
-      ESP.restart();
-    }
+    FbmOnDisconnect();
+    ret = false;
   }
 
   return ret;

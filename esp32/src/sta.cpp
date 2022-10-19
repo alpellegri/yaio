@@ -20,18 +20,18 @@
 #define LED 13
 #define LED_OFF LOW
 #define LED_ON HIGH
-#define STA_WIFI_TIMEOUT (5 * 60 * 1000)
+
+#define STA_NTP_TIMEOUT (10 * 1000)
 
 static bool fota_mode = false;
+static uint32_t ntp_to;
 
 static Preferences preferences;
-static uint32_t last_wifi_time;
 static uint32_t core0_time;
 static uint32_t core0_time2;
 
 bool STA_Setup(void) {
   bool ret = true;
-  bool sts = true;
   int cnt;
 
   digitalWrite(LED, LED_OFF);
@@ -55,9 +55,9 @@ bool STA_Setup(void) {
 
   WiFi.begin(sta_ssid.c_str(), sta_password.c_str());
   cnt = 0;
-  while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 30)) {
+  while ((WiFi.status() != WL_CONNECTED) && (cnt++ < 10)) {
     DEBUG_PRINT(".");
-    delay(500);
+    delay(1000);
   }
   DEBUG_PRINT("\n");
 
@@ -81,13 +81,8 @@ bool STA_Setup(void) {
       preferences.putUInt("fota-req", 0);
     }
   } else {
-    sts = false;
-  }
-
-  if (sts != true) {
     DEBUG_PRINT("not connected to router\n");
     ESP.restart();
-    ret = false;
   }
 
   return ret;
@@ -121,7 +116,6 @@ bool STA_Task(uint32_t current_time) {
 
   wl_status_t wifi_status = WiFi.status();
   if (wifi_status == WL_CONNECTED) {
-    last_wifi_time = current_time;
     // wait for time service is up
     if (fota_mode == true) {
       FOTAService();
@@ -151,7 +145,7 @@ bool STA_Task(uint32_t current_time) {
             DEBUG_PRINT("hang: %d %d\n", current_time - core0_time,
                         core0_time2 - core0_time);
           }
-          if ((int32_t)(current_time - core0_time) > 4000) {
+          if ((int32_t)(current_time - core0_time) > 8000) {
             DEBUG_PRINT("reset hang: %d\n", current_time - core0_time);
             ESP.restart();
           }
@@ -159,14 +153,15 @@ bool STA_Task(uint32_t current_time) {
           core0_time = millis();
           DEBUG_PRINT("core0_time: %d\n", core0_time);
         }
+      } else {
+        if ((millis() - ntp_to) > STA_NTP_TIMEOUT) {
+          ESP.restart();
+        }
       }
     }
   } else {
-    DEBUG_PRINT("WiFi.status: %d\n", wifi_status);
-    if ((current_time - last_wifi_time) > STA_WIFI_TIMEOUT) {
-      // force reboot
-      ESP.restart();
-    }
+    FbmOnDisconnect();
+    ret = false;
   }
 
   return ret;

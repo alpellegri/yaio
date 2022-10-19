@@ -12,10 +12,30 @@ class ExecListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Text('${entry.key}', textAlign: TextAlign.left),
-    );
+    return Container(
+        // alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).primaryColorLight,
+        ),
+        child: Stack(
+          children: <Widget>[
+            Container(
+              // alignment: Alignment.centerLeft,
+              width: 4,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8)),
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+              child: Text('${entry.key}', textAlign: TextAlign.left),
+            )
+          ],
+        ));
   }
 }
 
@@ -30,17 +50,17 @@ class Exec extends StatefulWidget {
 }
 
 class _ExecState extends State<Exec> {
-  List<ExecEntry> entryList = new List();
+  List<ExecEntry> entryList = [];
   DatabaseReference _entryRef;
-  StreamSubscription<Event> _onAddSubscription;
-  StreamSubscription<Event> _onEditSubscription;
-  StreamSubscription<Event> _onRemoveSubscription;
+  StreamSubscription<DatabaseEvent> _onAddSubscription;
+  StreamSubscription<DatabaseEvent> _onEditSubscription;
+  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
 
   @override
   void initState() {
     super.initState();
     _entryRef = FirebaseDatabase.instance
-        .reference()
+        .ref()
         .child(getUserRef())
         .child('obj/exec')
         .child(widget.domain)
@@ -64,31 +84,42 @@ class _ExecState extends State<Exec> {
       print('>> ${e.name.toString()}');
       e.p.forEach((f) => print('>> ${f.i.toString()} ${f.v.toString()}'));
     });*/
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Routine ${widget.domain}/${widget.node}'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Routine ${widget.domain}/${widget.node}'),
       ),
-      body: new ListView.builder(
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+          crossAxisCount:
+              (MediaQuery.of(context).orientation == Orientation.portrait)
+                  ? 3
+                  : 5,
+          childAspectRatio: 2,
+        ),
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
-        reverse: true,
+        reverse: false,
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
-          return new InkWell(
-              onTap: () => _openEntryDialog(entryList[index]),
-              child: new ExecListItem(entryList[index]));
+          return InkWell(
+            onTap: () => _openEntryDialog(entryList[index]),
+            child: ExecListItem(entryList[index]),
+          );
         },
       ),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
-        child: new Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }
 
-  void _onEntryAdded(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryAdded(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       setState(() {
         entryList.add(new ExecEntry.fromMap(
@@ -97,8 +128,9 @@ class _ExecState extends State<Exec> {
     }
   }
 
-  void _onEntryEdited(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryEdited(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -109,8 +141,9 @@ class _ExecState extends State<Exec> {
     }
   }
 
-  void _onEntryRemoved(Event event) {
-    String owner = event.snapshot.value["owner"];
+  void _onEntryRemoved(DatabaseEvent event) {
+    dynamic v = event.snapshot.value;
+    String owner = v['owner'];
     if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
