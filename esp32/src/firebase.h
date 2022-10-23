@@ -5,9 +5,6 @@
 #include <HTTPClient.h>
 #include <WiFiClient.h>
 
-#define USE_HTTP_REUSE
-#define USE_HTTP_STREAM
-
 typedef enum {
   METHOD_GET = 0,
   METHOD_SET,
@@ -55,14 +52,10 @@ private:
   String _auth;
   String _result;
   int _httpCode;
-#ifdef USE_HTTP_REUSE
   HTTPClient _http_req;
   WiFiClientSecure _client_req;
-#endif
-#ifdef USE_HTTP_STREAM
   HTTPClient _http_stream;
   WiFiClientSecure _client_stream;
-#endif
 };
 
 extern FirebaseRest Firebase;

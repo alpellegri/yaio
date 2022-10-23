@@ -220,23 +220,16 @@ bool FbmService(void) {
         }
 
         if (run == true) {
+          DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
           DynamicJsonDocument status(512);
           status[F("heap")] = ESP.getFreeHeap();
           status[F("time")] = getTime();
-          struct tm timeinfo;
-          time_t now = time(nullptr);
-          gmtime_r(&now, &timeinfo);
-          Serial.print("Current time: ");
-          Serial.print(asctime(&timeinfo));
-
-          DEBUG_PRINT("boot_sm: %d - Heap: %d\n", boot_sm, ESP.getFreeHeap());
 
           String status_str;
           serializeJson(status, status_str);
           String kstatus = FbGetPath_status();
           DEBUG_PRINT("set: kstatus\n");
           Firebase.setJSON(kstatus, status_str);
-          DEBUG_PRINT("set: kstatus\n");
           if (Firebase.failed()) {
             DEBUG_PRINT("set failed: kstatus\n");
             DEBUG_PRINT("%s\n", Firebase.error().c_str());

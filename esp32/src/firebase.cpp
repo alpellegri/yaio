@@ -27,9 +27,10 @@ static const char *RestMethods[] = {
 void FirebaseRest::begin(const String &host, const String &auth) {
   _host = host;
   _auth = auth;
+  // _http_req.setReuse(false);
+  _client_req.setInsecure();
 }
 
-#ifdef USE_HTTP_REUSE
 String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
                                  const String value) {
 
@@ -41,9 +42,6 @@ String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
   String addr = String(F("https://")) + _host + path_ + post;
   // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
 
-  _http_req.setReuse(true);
-  // _http_req.setTimeout(3000);
-  _client_req.setInsecure();
   _http_req.begin(_client_req, addr);
   _httpCode = _http_req.sendRequest(RestMethods[method], value);
 
@@ -55,41 +53,12 @@ String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
     _result = String(F(""));
     DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
                 _httpCode, _http_req.errorToString(_httpCode).c_str());
-    _http_req.end();
+    // _http_req.end();
   }
+  _http_req.end();
 
   return _result;
 }
-#else
-String &FirebaseRest::restReqApi(RestMethod_t method, const String path,
-                                 const String value) {
-
-  HTTPClient http;
-  String path_ = String(F("/")) + path + String(F(".json"));
-  String post = String(F("?auth=")) + _auth;
-  if (method != METHOD_GET) {
-    post += String(F("&print=silent"));
-  }
-  String addr = String(F("https://")) + _host + path_ + post;
-  // DEBUG_PRINT("[HTTP] addr: %s\n", addr.c_str());
-
-  // http.setTimeout(3000);
-  http.begin(addr);
-  _httpCode = http.sendRequest(RestMethods[method], value);
-
-  if ((_httpCode == HTTP_CODE_OK) || (_httpCode == HTTP_CODE_NO_CONTENT)) {
-    _result = http.getString();
-    // DEBUG_PRINT("[HTTP] _result: %s\n", _result.c_str());
-  } else {
-    _result = String(F(""));
-    DEBUG_PRINT("[HTTP] %s... failed, error: %d, %s\n", RestMethods[method],
-                _httpCode, http.errorToString(_httpCode).c_str());
-  }
-  http.end();
-
-  return _result;
-}
-#endif
 
 void FirebaseRest::pushJSON(const String &path, const String &value) {
   restReqApi(METHOD_PUSH, path, value);
@@ -198,7 +167,6 @@ void FirebaseRest::remove(const String &path) {
   restReqApi(METHOD_REMOVE, path, String());
 }
 
-#ifdef USE_HTTP_STREAM
 void FirebaseRest::restStreamApi(const String path) {
 
   // DEBUG_PRINT("restStreamApi %s\n", path.c_str());
@@ -263,7 +231,6 @@ int FirebaseRest::readEvent(String &response) {
   }
   return ret;
 }
-#endif
 
 bool FirebaseRest::failed() {
   return !((_httpCode == HTTP_CODE_OK) || (_httpCode == HTTP_CODE_NO_CONTENT));

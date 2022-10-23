@@ -306,7 +306,6 @@ void VM_run(void) {
 
   // update outputs
   VM_writeOut();
-  // DEBUG_PRINT("|");
 }
 
 void VM_runNet(void) {
@@ -314,5 +313,4 @@ void VM_runNet(void) {
   VM_readInNet();
   // update outputs
   VM_writeOutNet();
-  // Firebase.run();
 }
