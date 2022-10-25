@@ -42,9 +42,9 @@ const kCodeHumidity = 3;
 const kCodeBool = 8;
 
 exports.fakeauth = functions.https.onRequest((request, response) => {
-  // console.log('fakeauth -> Request headers: ' + JSON.stringify(request.headers));
-  // console.log('fakeauth -> Request query: ' + JSON.stringify(request.query));
-  // console.log('fakeauth -> Request body: ' + JSON.stringify(request.body));
+  // functions.logger.log('fakeauth -> Request headers: ' + JSON.stringify(request.headers));
+  // functions.logger.log('fakeauth -> Request query: ' + JSON.stringify(request.query));
+  // functions.logger.log('fakeauth -> Request body: ' + JSON.stringify(request.body));
 
   // Code entry.
   let data = {
@@ -63,23 +63,23 @@ exports.fakeauth = functions.https.onRequest((request, response) => {
     decodeURIComponent(request.query.redirect_uri),
     request.query.code,
     request.query.state);
-  console.log('-> responseurl: ' + responseurl);
+  functions.logger.log('fakeauth -> responseurl: ' + responseurl);
   return response.redirect(responseurl);
 });
 
 exports.faketoken = functions.https.onRequest(async (request, response) => {
-  // console.log('faketoken -> Request headers: ' + JSON.stringify(request.headers));
-  // console.log('faketoken -> Request query: ' + JSON.stringify(request.query));
-  // console.log('faketoken -> Request body: ' + JSON.stringify(request.body));
+  // functions.logger.log('faketoken -> Request headers: ' + JSON.stringify(request.headers));
+  // functions.logger.log('faketoken -> Request query: ' + JSON.stringify(request.query));
+  // functions.logger.log('faketoken -> Request body: ' + JSON.stringify(request.body));
 
   const grantType = request.query.grant_type
     ? request.query.grant_type : request.body.grant_type;
   const secondsInDay = 86400; // 86400 = 60 * 60 * 24
   const HTTP_STATUS_OK = 200;
-  console.log(`Grant type ${grantType}`);
+  functions.logger.log(`faketoken -> Grant type ${grantType}`);
 
   if (grantType === 'authorization_code') {
-    console.log(`request.body.code ${request.body.code}`);
+    functions.logger.log(`faketoken -> request.body.code ${request.body.code}`);
     const snapshot = await oauth2Ref.child('auth_code').child(request.body.code).once('value');
     const auth_code = snapshot.val();
     const obj = {
@@ -101,7 +101,7 @@ exports.faketoken = functions.https.onRequest(async (request, response) => {
     oauth2Ref.update(updates);
     response.status(HTTP_STATUS_OK).json(obj);
   } else if (grantType === 'refresh_token') {
-    console.log(`request.body.refresh_token ${request.body.refresh_token}`);
+    functions.logger.log(`faketoken -> request.body.refresh_token ${request.body.refresh_token}`);
     const snapshot = await oauth2Ref.child('refresh_token').child(request.body.refresh_token).once('value');
     const refresh_token = snapshot.val();
     const obj = {
@@ -127,8 +127,8 @@ const app = smarthome({
 });
 
 app.onSync(async (body, headers) => {
-  // console.log('-> body: ' + JSON.stringify(body));
-  // console.log('-> headers: ' + JSON.stringify(headers));
+  // functions.logger.log('onSync -> body: ' + JSON.stringify(body));
+  // functions.logger.log('onSync -> headers: ' + JSON.stringify(headers));
 
   const access_token = headers.authorization ? headers.authorization.split(' ')[1] : null;
   const uid = access_token;
@@ -139,7 +139,7 @@ app.onSync(async (body, headers) => {
 
   let devices = [];
   if (snapshotVal) {
-    // console.log('-> snapshotVal: ' + JSON.stringify(snapshotVal));
+    // functions.logger.log('onSync -> snapshotVal: ' + JSON.stringify(snapshotVal));
     const domains = Object.entries(snapshotVal);
     for (const [domain, domainData] of domains) {
       const keys = Object.entries(domainData);
@@ -147,7 +147,7 @@ app.onSync(async (body, headers) => {
         if (keyData.aog == true) {
           if (keyData.code == kCodeBool) {
             // const json = JSON.stringify(keyData);
-            // console.log(`${domain} -> ${key} : ${json}`)
+            // functions.logger.log(`onSync -> ${domain} -> ${key} : ${json}`)
             const data = {
               id: domain + '/' + key,
               type: 'action.devices.types.SWITCH',
@@ -169,8 +169,8 @@ app.onSync(async (body, headers) => {
             }
             devices.push(data);
           } else if (keyData.code == kCodeTemperature) {
-            const json = JSON.stringify(keyData);
-            console.log(`${domain} -> ${key} : ${json}`)
+            // const json = JSON.stringify(keyData);
+            // functions.logger.log(`onSync -> ${domain} -> ${key} : ${json}`)
             const data = {
               id: domain + '/' + key,
               type: 'action.devices.types.THERMOSTAT',
@@ -184,8 +184,10 @@ app.onSync(async (body, headers) => {
               },
               willReportState: true,
               attributes: {
+                "availableThermostatModes": [
+                  "off"
+                ],
                 queryOnlyTemperatureSetting: true,
-                //availableThermostatModes: 'off,heat,cool,on',
                 thermostatTemperatureUnit: 'C',
               },
               deviceInfo: {
@@ -197,8 +199,8 @@ app.onSync(async (body, headers) => {
             }
             devices.push(data);
           } else if (keyData.code == kCodeHumidity) {
-            const json = JSON.stringify(keyData);
-            console.log(`${domain} -> ${key} : ${json}`)
+            // const json = JSON.stringify(keyData);
+            // functions.logger.log(`onSync -> ${domain} -> ${key} : ${json}`)
             const data = {
               id: domain + '/' + key,
               type: 'action.devices.types.THERMOSTAT',
@@ -212,8 +214,10 @@ app.onSync(async (body, headers) => {
               },
               willReportState: true,
               attributes: {
+                "availableThermostatModes": [
+                  "off"
+                ],
                 queryOnlyHumiditySetting: true,
-                //availableThermostatModes: 'off,heat,cool,on',
               },
               deviceInfo: {
                 manufacturer: 'Yaio',
@@ -252,32 +256,23 @@ const queryFirebase = async (uid, deviceId) => {
   let resp;
   switch (data.code) {
     case kCodeTemperature:
-      // console.log('-> temp: ' + data.value);
+      // functions.logger.log('queryFirebase -> temp: ' + data.value);
       resp = {
-        // on: true,
         online: true,
-        // thermostatMode: 'cool',
-        thermostatTemperatureSetpoint: data.value,
         thermostatTemperatureAmbient: data.value,
-        // thermostatHumidityAmbient: 45.3,
-        status: 'SUCCESS',
       };
       break;
     case kCodeHumidity:
-      // console.log('-> hum: ' + data.value);
+      // functions.logger.log('queryFirebase -> hum: ' + data.value);
       resp = {
-        // on: true,
         online: true,
-        // thermostatMode: 'cool',
         thermostatHumidityAmbient: data.value,
-        status: 'SUCCESS',
       };
       break;
     case kCodeBool:
       resp = {
         on: data.value,
         online: true,
-        status: 'SUCCESS',
       };
       break;
   }
@@ -286,14 +281,14 @@ const queryFirebase = async (uid, deviceId) => {
 }
 
 const queryDevice = async (uid, deviceId) => {
-  console.log('-> queryDevice: ' + JSON.stringify(deviceId));
+  functions.logger.log('queryDevice -> queryDevice: ' + JSON.stringify(deviceId));
   const resp = await queryFirebase(uid, deviceId);
   return resp;
 }
 
 app.onQuery(async (body, headers) => {
-  // console.log('-> body: ' + JSON.stringify(body));
-  // console.log('-> headers: ' + JSON.stringify(headers));
+  // functions.logger.log('onQuery -> body: ' + JSON.stringify(body));
+  // functions.logger.log('onQuery -> headers: ' + JSON.stringify(headers));
 
   const access_token = headers.authorization ? headers.authorization.split(' ')[1] : null;
   const uid = access_token;
@@ -365,8 +360,8 @@ const updateRoot = async (uid, domain, node) => {
 };
 
 app.onExecute(async (body, headers) => {
-  // console.log('-> body: ' + JSON.stringify(body));
-  // console.log('-> headers: ' + JSON.stringify(headers));
+  // functions.logger.log('onExecute -> body: ' + JSON.stringify(body));
+  // functions.logger.log('onExecute -> headers: ' + JSON.stringify(headers));
 
   const access_token = headers.authorization ? headers.authorization.split(' ')[1] : null;
   const uid = access_token;
@@ -394,7 +389,7 @@ app.onExecute(async (body, headers) => {
 
         const snapshot = await uidRef.child('/obj/data').child(domain).child(device).once('value');
         const snapshotVal = snapshot.val();
-        // console.log('-> snapshot: ' + JSON.stringify(snapshot));
+        // functions.logger.log('onExecute -> snapshot: ' + JSON.stringify(snapshot));
         const node = snapshotVal.owner;
 
         executePromises.push(
@@ -403,12 +398,12 @@ app.onExecute(async (body, headers) => {
               result.ids.push(deviceId);
               Object.assign(result.states, data);
             })
-            .catch(() => console.error(`Unable to update ${device.id}`))
+            .catch(() => functions.logger.error(`Unable to update ${device.id}`))
         );
         executePromises.push(
           updateRoot(uid, domain, node)
             .then((data) => { })
-            .catch(() => console.error(`Unable to root ${device.id}`))
+            .catch(() => functions.logger.error(`Unable to root ${device.id}`))
         );
       }
     }
@@ -427,19 +422,19 @@ app.onExecute(async (body, headers) => {
 exports.smarthome = functions.https.onRequest(app);
 
 exports.requestsync = functions.https.onRequest(async (request, response) => {
-  console.log('-> request: ' + JSON.stringify(request));
+  functions.logger.log('requestsync -> request: ' + JSON.stringify(request));
   response.set('Access-Control-Allow-Origin', '*');
-  console.info('Request SYNC for user 123');
+  functions.logger.info('requestsync -> Request SYNC for user 123');
   try {
     const res = await homegraph.devices.requestSync({
       requestBody: {
         agentUserId: '123'
       }
     });
-    console.info('Request sync response:', res.status, res.data);
+    functions.logger.info('requestsync -> Request sync response:', res.status, res.data);
     response.json(res.data);
   } catch (err) {
-    console.error(err);
+    functions.logger.error(err);
     response.status(500).send(`Error requesting sync: ${err}`)
   }
 });
@@ -450,10 +445,10 @@ exports.requestsync = functions.https.onRequest(async (request, response) => {
  */
 
 // exports.reportstate = functions.database.ref('{deviceId}').onWrite(async (change, context) => {
-//   console.info('Firebase write event triggered this cloud function');
+//   functions.logger.info('Firebase write event triggered this cloud function');
 //   const snapshot = change.after.val();
-//   // console.info(JSON.stringify(change));
-//   // console.info(JSON.stringify(context));
+//   // functions.logger.info(JSON.stringify(change));
+//   // functions.logger.info(JSON.stringify(context));
 //
 //   const requestBody = {
 //     requestId: 'ff36a3cc', /* Any unique ID */
@@ -475,6 +470,6 @@ exports.requestsync = functions.https.onRequest(async (request, response) => {
 //   const res = await homegraph.devices.reportStateAndNotification({
 //     requestBody
 //   });
-//   console.info('Report state response:', res.status, res.data);
+//   functions.logger.info('Report state response:', res.status, res.data);
 // });
 
