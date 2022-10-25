@@ -184,8 +184,8 @@ app.onSync(async (body, headers) => {
               },
               willReportState: true,
               attributes: {
-                "availableThermostatModes": [
-                  "off"
+                availableThermostatModes: [
+                  'off'
                 ],
                 queryOnlyTemperatureSetting: true,
                 thermostatTemperatureUnit: 'C',
@@ -214,8 +214,8 @@ app.onSync(async (body, headers) => {
               },
               willReportState: true,
               attributes: {
-                "availableThermostatModes": [
-                  "off"
+                availableThermostatModes: [
+                  'off'
                 ],
                 queryOnlyHumiditySetting: true,
               },
@@ -258,6 +258,7 @@ const queryFirebase = async (uid, deviceId) => {
     case kCodeTemperature:
       // functions.logger.log('queryFirebase -> temp: ' + data.value);
       resp = {
+        status: 'SUCCESS',
         online: true,
         thermostatTemperatureAmbient: data.value,
       };
@@ -265,14 +266,16 @@ const queryFirebase = async (uid, deviceId) => {
     case kCodeHumidity:
       // functions.logger.log('queryFirebase -> hum: ' + data.value);
       resp = {
+        status: 'SUCCESS',
         online: true,
         thermostatHumidityAmbient: data.value,
       };
       break;
     case kCodeBool:
       resp = {
-        on: data.value,
+        status: 'SUCCESS',
         online: true,
+        on: data.value,
       };
       break;
   }
