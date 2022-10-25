@@ -175,7 +175,7 @@ app.onSync(async (body, headers) => {
               id: domain + '/' + key,
               type: 'action.devices.types.THERMOSTAT',
               traits: [
-                'action.devices.traits.TemperatureSetting'
+                'action.devices.traits.TemperatureSetting',
               ],
               name: {
                 defaultNames: [key],
@@ -184,9 +184,6 @@ app.onSync(async (body, headers) => {
               },
               willReportState: true,
               attributes: {
-                availableThermostatModes: [
-                  'off'
-                ],
                 queryOnlyTemperatureSetting: true,
                 thermostatTemperatureUnit: 'C',
               },
@@ -205,7 +202,7 @@ app.onSync(async (body, headers) => {
               id: domain + '/' + key,
               type: 'action.devices.types.THERMOSTAT',
               traits: [
-                'action.devices.traits.TemperatureSetting'
+                'action.devices.traits.TemperatureSetting',
               ],
               name: {
                 defaultNames: [key],
@@ -214,9 +211,6 @@ app.onSync(async (body, headers) => {
               },
               willReportState: true,
               attributes: {
-                availableThermostatModes: [
-                  'off'
-                ],
                 queryOnlyHumiditySetting: true,
               },
               deviceInfo: {
@@ -256,22 +250,25 @@ const queryFirebase = async (uid, deviceId) => {
   let resp;
   switch (data.code) {
     case kCodeTemperature:
-      // functions.logger.log('queryFirebase -> temp: ' + data.value);
+      // functions.logger.log('queryFirebase -> kCodeTemperature: ' + data.value);
       resp = {
         status: 'SUCCESS',
         online: true,
+        on: true,
         thermostatTemperatureAmbient: data.value,
       };
       break;
     case kCodeHumidity:
-      // functions.logger.log('queryFirebase -> hum: ' + data.value);
+      // functions.logger.log('queryFirebase -> kCodeHumidity: ' + data.value);
       resp = {
         status: 'SUCCESS',
         online: true,
+        on: true,
         thermostatHumidityAmbient: data.value,
       };
       break;
     case kCodeBool:
+      // functions.logger.log('queryFirebase -> kCodeBool: ' + data.value);
       resp = {
         status: 'SUCCESS',
         online: true,
@@ -284,7 +281,7 @@ const queryFirebase = async (uid, deviceId) => {
 }
 
 const queryDevice = async (uid, deviceId) => {
-  functions.logger.log('queryDevice -> queryDevice: ' + JSON.stringify(deviceId));
+  // functions.logger.log('queryDevice -> queryDevice: ' + JSON.stringify(deviceId));
   const resp = await queryFirebase(uid, deviceId);
   return resp;
 }
@@ -425,9 +422,9 @@ app.onExecute(async (body, headers) => {
 exports.smarthome = functions.https.onRequest(app);
 
 exports.requestsync = functions.https.onRequest(async (request, response) => {
-  functions.logger.log('requestsync -> request: ' + JSON.stringify(request));
+  // functions.logger.log('requestsync -> request: ' + JSON.stringify(request));
   response.set('Access-Control-Allow-Origin', '*');
-  functions.logger.info('requestsync -> Request SYNC for user 123');
+  // functions.logger.info('requestsync -> Request SYNC for user 123');
   try {
     const res = await homegraph.devices.requestSync({
       requestBody: {
