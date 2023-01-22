@@ -10,26 +10,31 @@ class DeviceConfig extends StatefulWidget {
   final String node;
   final dynamic value;
 
-  DeviceConfig({Key key, this.domain, this.node, this.value}) : super(key: key);
+  const DeviceConfig({
+    super.key,
+    required this.domain,
+    required this.node,
+    this.value,
+  });
 
   @override
-  _DeviceConfigState createState() => new _DeviceConfigState();
+  _DeviceConfigState createState() => _DeviceConfigState();
 }
 
 class _DeviceConfigState extends State<DeviceConfig> {
-  DatabaseReference _rootRef;
-  DatabaseReference _controlRef;
-  DatabaseReference _statusRef;
-  DatabaseReference _startupRef;
-  StreamSubscription<DatabaseEvent> _controlSub;
-  StreamSubscription<DatabaseEvent> _statusSub;
-  StreamSubscription<DatabaseEvent> _startupSub;
+  late DatabaseReference _rootRef;
+  late DatabaseReference _controlRef;
+  late DatabaseReference _statusRef;
+  late DatabaseReference _startupRef;
+  late StreamSubscription<DatabaseEvent> _controlSub;
+  late StreamSubscription<DatabaseEvent> _statusSub;
+  late StreamSubscription<DatabaseEvent> _startupSub;
 
   @override
   void initState() {
     super.initState();
 
-    _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
+    _rootRef = FirebaseDatabase.instance.ref().child(getRootRef()!);
     _controlRef =
         _rootRef.child(widget.domain).child(widget.node).child('control');
     _statusRef =
@@ -52,14 +57,14 @@ class _DeviceConfigState extends State<DeviceConfig> {
   @override
   Widget build(BuildContext context) {
     print('_DeviceConfigState');
-    String diffTime;
-    DateTime _startupTime = new DateTime.fromMillisecondsSinceEpoch(
+    String diffTime = '';
+    DateTime startupTime = DateTime.fromMillisecondsSinceEpoch(
         int.parse(widget.value['startup']['time'].toString()) * 1000);
     if (_checkConnected() == true) {
-      DateTime current = new DateTime.now();
-      DateTime _heartbeatTime = new DateTime.fromMillisecondsSinceEpoch(
+      DateTime current = DateTime.now();
+      DateTime heartbeatTime = DateTime.fromMillisecondsSinceEpoch(
           int.parse(widget.value['status']['time'].toString()) * 1000);
-      Duration diff = current.difference(_heartbeatTime);
+      Duration diff = current.difference(heartbeatTime);
       if (diff.inDays > 0) {
         diffTime = '${diff.inDays} days ago';
       } else if (diff.inHours > 0) {
@@ -75,40 +80,38 @@ class _DeviceConfigState extends State<DeviceConfig> {
     bool online = false;
 
     if ((widget.value['status'] != null) && (widget.value['control'] != null)) {
-      DateTime statusTime = new DateTime.fromMillisecondsSinceEpoch(
+      DateTime statusTime = DateTime.fromMillisecondsSinceEpoch(
           int.parse(widget.value['status']['time'].toString()) * 1000);
-      DateTime controlTime = new DateTime.fromMillisecondsSinceEpoch(
+      DateTime controlTime = DateTime.fromMillisecondsSinceEpoch(
           int.parse(widget.value['control']['time'].toString()) * 1000);
       Duration diff = statusTime.difference(controlTime);
       online = (diff.inSeconds >= 0);
     }
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.node),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.node),
       ),
-      body: new ListView(children: <Widget>[
-        new Column(
+      body: ListView(children: <Widget>[
+        Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new ListTile(
+              ListTile(
                 leading: (false)
                     ? (const Icon(Icons.link_off))
                     : (const Icon(Icons.developer_board)),
                 title: const Text('Node'),
-                subtitle: new Text('${widget.domain}/${widget.node}'),
-                trailing: new TextButton(
+                subtitle: Text('${widget.domain}/${widget.node}'),
+                trailing: TextButton(
                   child: const Text('CONFIGURE'),
                   onPressed: (false)
                       ? null
                       : () {
                           Navigator.push(
                               context,
-                              new MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    new NodeSetup(
-                                        domain: widget.domain,
-                                        node: widget.node),
+                              MaterialPageRoute(
+                                builder: (BuildContext context) => NodeSetup(
+                                    domain: widget.domain, node: widget.node),
                                 fullscreenDialog: true,
                               ));
                         },
@@ -116,73 +119,73 @@ class _DeviceConfigState extends State<DeviceConfig> {
               ),
             ]),
         (_checkConnected() == false)
-            ? (new Container())
-            : (new Column(
+            ? (Container())
+            : (Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  new ListTile(
+                  ListTile(
                     leading: (online)
-                        ? (new Icon(Icons.cloud_done, color: Colors.green[400]))
-                        : (new Icon(Icons.cloud_queue, color: Colors.red[400])),
-                    title: new Text('HeartBeat: $diffTime'),
-                    subtitle: new Text(
+                        ? (Icon(Icons.cloud_done, color: Colors.green[400]))
+                        : (Icon(Icons.cloud_queue, color: Colors.red[400])),
+                    title: Text('HeartBeat: $diffTime'),
+                    subtitle: Text(
                         'Device Memory: ${widget.value['status']["heap"]}'),
                   ),
-                  new ListTile(
+                  ListTile(
                     leading: (widget.value['control']['reboot'] == kNodeUpdate)
-                        ? (new CircularProgressIndicator(
+                        ? (const CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.update)),
                     title: const Text('Update Device'),
                     subtitle: const Text('Configuration'),
-                    trailing: new TextButton(
+                    trailing: TextButton(
                       child: const Text('UPDATE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeUpdate);
                       },
                     ),
                   ),
-                  new ListTile(
+                  ListTile(
                     leading: (widget.value['control']['reboot'] == kNodeReboot)
-                        ? (new CircularProgressIndicator(
+                        ? (const CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.power_settings_new)),
                     title: const Text('PowerUp'),
-                    subtitle: new Text('${_startupTime.toString()}'),
-                    trailing: new TextButton(
+                    subtitle: Text(startupTime.toString()),
+                    trailing: TextButton(
                       child: const Text('RESTART'),
                       onPressed: () {
                         _nodeActionRequest(kNodeReboot);
                       },
                     ),
                   ),
-                  new ListTile(
+                  ListTile(
                     leading: (widget.value['control']['reboot'] == kNodeFlash)
-                        ? (new CircularProgressIndicator(
+                        ? (const CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.cloud_download)),
                     title: const Text('Firmware Version'),
-                    subtitle: new Text('${widget.value['startup']["version"]}'),
-                    trailing: new TextButton(
+                    subtitle: Text('${widget.value['startup']["version"]}'),
+                    trailing: TextButton(
                       child: const Text('UPGRADE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeFlash);
                       },
                     ),
                   ),
-                  new ListTile(
+                  ListTile(
                     leading: (widget.value['control']['reboot'] == kNodeErase)
-                        ? (new CircularProgressIndicator(
+                        ? (const CircularProgressIndicator(
                             value: null,
                           ))
                         : (const Icon(Icons.delete)),
                     title: const Text('Erase device'),
-                    subtitle: new Text(widget.node),
-                    trailing: new TextButton(
+                    subtitle: Text(widget.node),
+                    trailing: TextButton(
                       child: const Text('ERASE'),
                       onPressed: () {
                         _nodeActionRequest(kNodeErase);
@@ -219,7 +222,7 @@ class _DeviceConfigState extends State<DeviceConfig> {
 
   void _nodeActionRequest(int value) {
     widget.value['control']['reboot'] = value;
-    DateTime now = new DateTime.now();
+    DateTime now = DateTime.now();
     widget.value['control']['time'] = now.millisecondsSinceEpoch ~/ 1000;
     _controlRef.set(widget.value['control']);
   }

@@ -5,12 +5,15 @@ import 'firebase_utils.dart';
 import 'const.dart';
 
 class Device extends StatefulWidget {
-  Device({Key key, this.title}) : super(key: key);
+  const Device({
+    super.key,
+    required this.title,
+  });
   static const String routeName = '/device';
   final String title;
 
   @override
-  _DeviceState createState() => new _DeviceState();
+  _DeviceState createState() => _DeviceState();
 }
 
 class _DeviceState extends State<Device> {
@@ -22,11 +25,11 @@ class _DeviceState extends State<Device> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
-      body: new ExpansionPanelsDemo(),
+      body: ExpansionPanelsDemo(),
     );
   }
 }
@@ -35,17 +38,21 @@ class ListItem extends StatelessWidget {
   final String value;
   final FormFieldState<String> field;
 
-  ListItem(this.value, this.field);
+  ListItem({
+    super.key,
+    required this.value,
+    required this.field,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return new Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
-      new Radio<String>(
+    return Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      Radio<String>(
         value: value,
         groupValue: field.value,
         onChanged: field.didChange,
       ),
-      new Text(value),
+      Text(value),
     ]);
   }
 }
@@ -54,7 +61,13 @@ typedef Widget DemoItemBodyBuilder<T>(DemoItem<T> item);
 typedef String ValueToString<T>(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
-  const DualHeaderWithHint({this.name, this.value, this.hint, this.showHint});
+  const DualHeaderWithHint({
+    super.key,
+    required this.name,
+    required this.value,
+    required this.hint,
+    required this.showHint,
+  });
 
   final String name;
   final String value;
@@ -62,7 +75,7 @@ class DualHeaderWithHint extends StatelessWidget {
   final bool showHint;
 
   Widget _crossFade(Widget first, Widget second, bool isExpanded) {
-    return new AnimatedCrossFade(
+    return AnimatedCrossFade(
       firstChild: first,
       secondChild: second,
       firstCurve: const Interval(0.0, 0.75, curve: Curves.fastOutSlowIn),
@@ -76,28 +89,29 @@ class DualHeaderWithHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Row(children: <Widget>[
-      new Expanded(
-        child: new Container(
+    return Row(children: <Widget>[
+      Expanded(
+        child: Container(
           margin: const EdgeInsets.only(left: 24.0),
-          child: new Text(name),
+          child: Text(name),
         ),
       ),
-      new Container(
+      Container(
           margin: const EdgeInsets.only(left: 24.0),
-          child: _crossFade(new Text(value), new Text(hint), showHint))
+          child: _crossFade(Text(value), Text(hint), showHint))
     ]);
   }
 }
 
 class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody({
-    this.margin: EdgeInsets.zero,
-    this.child,
-    this.isEditMode,
-    this.onSelect,
-    this.onAdd,
-    this.onRemove,
+    super.key,
+    this.margin = EdgeInsets.zero,
+    required this.child,
+    required this.isEditMode,
+    required this.onSelect,
+    required this.onAdd,
+    required this.onRemove,
   });
 
   final EdgeInsets margin;
@@ -109,35 +123,27 @@ class CollapsibleBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var widget;
+    Row widget;
     if (isEditMode == false) {
-      widget = new Row(
+      widget = Row(
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            new TextButton(
-                onPressed: onRemove,
-                child: const Text('REMOVE')),
-            new TextButton(
-                onPressed: onAdd,
-                child: const Text('ADD')),
-            new TextButton(
-                onPressed: onSelect,
-                child: const Text('SELECT')),
+            TextButton(onPressed: onRemove, child: const Text('REMOVE')),
+            TextButton(onPressed: onAdd, child: const Text('ADD')),
+            TextButton(onPressed: onSelect, child: const Text('SELECT')),
           ]);
     } else {
-      widget = new Row(
+      widget = Row(
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            new TextButton(
-                onPressed: onSelect,
-                child: const Text('SAVE')),
+            TextButton(onPressed: onSelect, child: const Text('SAVE')),
           ]);
     }
 
-    return new Column(children: <Widget>[
-      new Container(
+    return Column(children: <Widget>[
+      Container(
           margin: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 0.0) -
               margin,
           child: child),
@@ -148,14 +154,14 @@ class CollapsibleBody extends StatelessWidget {
 
 class DemoItem<T> {
   DemoItem({
-    this.name,
-    this.value,
-    this.hint,
-    this.builder,
-    this.valueToString,
-  }) : textController = new TextEditingController(text: valueToString(value));
+    required this.name,
+    required this.value,
+    required this.hint,
+    required this.builder,
+    required this.valueToString,
+  }) : textController = TextEditingController(text: valueToString(value));
 
-  List query = new List();
+  List query = [];
   final String name;
   final String hint;
   final TextEditingController textController;
@@ -167,7 +173,7 @@ class DemoItem<T> {
 
   ExpansionPanelHeaderBuilder get headerBuilder {
     return (BuildContext context, bool isExpanded) {
-      return new DualHeaderWithHint(
+      return DualHeaderWithHint(
           name: name,
           value: valueToString(value),
           hint: hint,
@@ -179,27 +185,29 @@ class DemoItem<T> {
 }
 
 class ExpansionPanelsDemo extends StatefulWidget {
+  const ExpansionPanelsDemo({super.key});
+
   @override
-  _ExpansionPanelsDemoState createState() => new _ExpansionPanelsDemoState();
+  _ExpansionPanelsDemoState createState() => _ExpansionPanelsDemoState();
 }
 
 class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
-  bool _nodeNeedUpdate = false;
+  final bool _nodeNeedUpdate = false;
 
-  DatabaseReference _rootRef;
-  StreamSubscription<DatabaseEvent> _onAddSubscription;
-  StreamSubscription<DatabaseEvent> _onEditedSubscription;
-  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
-  List<DemoItem<dynamic>> _demoItems;
-  Map<String, dynamic> entryMap = new Map<String, dynamic>();
-  String _ctrlDomainName;
-  String _ctrlNodeName;
+  late DatabaseReference _rootRef;
+  late StreamSubscription<DatabaseEvent> _onAddSubscription;
+  late StreamSubscription<DatabaseEvent> _onEditedSubscription;
+  late StreamSubscription<DatabaseEvent> _onRemoveSubscription;
+  late List<DemoItem<dynamic>> _demoItems;
+  Map<String, dynamic> entryMap = <String, dynamic>{};
+  late String _ctrlDomainName;
+  late String _ctrlNodeName;
   bool _isNeedCreate = true;
 
   @override
   void initState() {
     super.initState();
-    _rootRef = FirebaseDatabase.instance.reference().child(getRootRef());
+    _rootRef = FirebaseDatabase.instance.ref().child(getRootRef()!);
     _onAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
     _onEditedSubscription = _rootRef.onChildChanged.listen(_onRootEntryChanged);
     _onRemoveSubscription = _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
@@ -207,7 +215,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _ctrlNodeName = getNode() ?? '';
 
     _demoItems = <DemoItem<dynamic>>[
-      new DemoItem<String>(
+      DemoItem<String>(
           name: 'Domain',
           value: _ctrlDomainName,
           hint: 'Select domain',
@@ -226,10 +234,10 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               });
             }
 
-            return new Form(child: new Builder(builder: (BuildContext context) {
-              return new CollapsibleBody(
+            return Form(child: Builder(builder: (BuildContext context) {
+              return CollapsibleBody(
                 onSelect: () {
-                  Form.of(context).save();
+                  Form.of(context)?.save();
                   _ctrlDomainName = item.value;
                   close();
                 },
@@ -248,30 +256,31 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 },
                 isEditMode: item.isEditMode,
                 child: (item.isEditMode == true)
-                    ? (new TextFormField(
+                    ? (TextFormField(
                         controller: item.textController,
-                        decoration: new InputDecoration(
+                        decoration: InputDecoration(
                           hintText: item.hint,
                           labelText: item.name,
                         ),
-                        onSaved: (String value) {
-                          item.value = value;
+                        onSaved: (String? value) {
+                          item.value = value!;
                         },
                       ))
-                    : (new FormField<String>(
+                    : (FormField<String>(
                         initialValue: item.value,
-                        onSaved: (String result) {
-                          item.value = result;
+                        onSaved: (String? result) {
+                          item.value = result!;
                         },
                         builder: (FormFieldState<String> field) {
-                          return new ListView.builder(
-                            physics: BouncingScrollPhysics(),
+                          return ListView.builder(
+                            physics: const BouncingScrollPhysics(),
                             shrinkWrap: true,
                             reverse: true,
                             itemCount: item.query.length,
                             itemBuilder: (buildContext, index) {
-                              return new InkWell(
-                                child: new ListItem(item.query[index], field),
+                              return InkWell(
+                                child: ListItem(
+                                    value: item.query[index], field: field),
                               );
                             },
                           );
@@ -279,7 +288,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               );
             }));
           }),
-      new DemoItem<String>(
+      DemoItem<String>(
           name: 'Device',
           value: _ctrlNodeName,
           hint: 'Select Device',
@@ -298,10 +307,10 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               });
             }
 
-            return new Form(child: new Builder(builder: (BuildContext context) {
-              return new CollapsibleBody(
+            return Form(child: Builder(builder: (BuildContext context) {
+              return CollapsibleBody(
                 onSelect: () {
-                  Form.of(context).save();
+                  Form.of(context)?.save();
                   _ctrlNodeName = item.value;
                   _changePreferences();
                   close();
@@ -320,30 +329,31 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 },
                 isEditMode: item.isEditMode,
                 child: (item.isEditMode == true)
-                    ? (new TextFormField(
+                    ? (TextFormField(
                         controller: item.textController,
-                        decoration: new InputDecoration(
+                        decoration: InputDecoration(
                           hintText: item.hint,
                           labelText: item.name,
                         ),
-                        onSaved: (String value) {
-                          item.value = value;
+                        onSaved: (String? value) {
+                          item.value = value!;
                         },
                       ))
-                    : (new FormField<String>(
+                    : (FormField<String>(
                         initialValue: item.value,
-                        onSaved: (String result) {
-                          item.value = result;
+                        onSaved: (String? result) {
+                          item.value = result!;
                         },
                         builder: (FormFieldState<String> field) {
-                          return new ListView.builder(
-                            physics: BouncingScrollPhysics(),
+                          return ListView.builder(
+                            physics: const BouncingScrollPhysics(),
                             shrinkWrap: true,
                             reverse: true,
                             itemCount: item.query.length,
                             itemBuilder: (buildContext, index) {
-                              return new InkWell(
-                                child: new ListItem(item.query[index], field),
+                              return InkWell(
+                                child: ListItem(
+                                    value: item.query[index], field: field),
                               );
                             },
                           );
@@ -367,17 +377,17 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     _isNeedCreate = _updateItemMenu();
     print('_isNeedCreate $_isNeedCreate');
 
-    return new SingleChildScrollView(
-      child: new Container(
+    return SingleChildScrollView(
+      child: Container(
           margin: const EdgeInsets.all(16.0),
-          child: new ExpansionPanelList(
+          child: ExpansionPanelList(
               expansionCallback: (int index, bool isExpanded) {
                 setState(() {
                   _demoItems[index].isExpanded = !isExpanded;
                 });
               },
               children: _demoItems.map((DemoItem<dynamic> item) {
-                return new ExpansionPanel(
+                return ExpansionPanel(
                     isExpanded: item.isExpanded,
                     headerBuilder: item.headerBuilder,
                     body: item.build());
@@ -405,20 +415,20 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
   void _nodeUpdate(String domain, String node) {
     DatabaseReference dataRef;
-    String root = getRootRef();
+    String root = getRootRef()!;
     String dataSource = '$root/$domain/$node/control';
     print(dataSource);
-    dataRef = FirebaseDatabase.instance.reference().child('$dataSource/reboot');
+    dataRef = FirebaseDatabase.instance.ref().child('$dataSource/reboot');
     dataRef.set(kNodeUpdate);
-    DateTime now = new DateTime.now();
-    dataRef = FirebaseDatabase.instance.reference().child('$dataSource/time');
+    DateTime now = DateTime.now();
+    dataRef = FirebaseDatabase.instance.ref().child('$dataSource/time');
     dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
   }
 
   void _onRootEntryAdded(DatabaseEvent event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
     // print(_nodeNeedUpdate);
-    String domain = event.snapshot.key;
+    String domain = event.snapshot.key!;
     dynamic v = event.snapshot.value;
     if (_nodeNeedUpdate == true) {
       // value contain a map of nodes, each key is the name of the node
@@ -429,7 +439,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
     setState(() {
       // print(event.snapshot.key);
-      entryMap.putIfAbsent(event.snapshot.key, () => event.snapshot.value);
+      entryMap.putIfAbsent(event.snapshot.key!, () => event.snapshot.value);
       _updateItemMenu();
     });
   }
@@ -437,7 +447,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   void _onRootEntryChanged(DatabaseEvent event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
     setState(() {
-      entryMap[event.snapshot.key] = event.snapshot.value;
+      entryMap[event.snapshot.key!] = event.snapshot.value;
       _updateItemMenu();
     });
   }
@@ -454,9 +464,9 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     savePreferencesDN(_ctrlDomainName, _ctrlNodeName);
     if (_isNeedCreate == true) {
       DatabaseReference ref;
-      ref = FirebaseDatabase.instance.reference().child(getControlRef());
+      ref = FirebaseDatabase.instance.ref().child(getControlRef()!);
       ref.set(getControlDefault());
-      ref = FirebaseDatabase.instance.reference().child(getStartupRef());
+      ref = FirebaseDatabase.instance.ref().child(getStartupRef()!);
       ref.set(getStartupDefault());
     }
   }

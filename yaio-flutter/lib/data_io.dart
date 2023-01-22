@@ -9,25 +9,29 @@ class DataIO extends StatefulWidget {
   final String domain;
   final String node;
 
-  DataIO({Key key, this.domain, this.node}) : super(key: key);
+  const DataIO({
+    super.key,
+    required this.domain,
+    required this.node,
+  });
 
   @override
-  _DataIOState createState() => new _DataIOState();
+  _DataIOState createState() => _DataIOState();
 }
 
 class _DataIOState extends State<DataIO> {
   List<IoEntry> entryList = [];
-  DatabaseReference _dataRef;
-  StreamSubscription<DatabaseEvent> _onAddSubscription;
-  StreamSubscription<DatabaseEvent> _onEditSubscription;
-  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
+  late DatabaseReference _dataRef;
+  late StreamSubscription<DatabaseEvent> _onAddSubscription;
+  late StreamSubscription<DatabaseEvent> _onEditSubscription;
+  late StreamSubscription<DatabaseEvent> _onRemoveSubscription;
 
   @override
   void initState() {
     super.initState();
     _dataRef = FirebaseDatabase.instance
-        .reference()
-        .child(getUserRef())
+        .ref()
+        .child(getUserRef()!)
         .child('obj/data')
         .child(widget.domain);
     _onAddSubscription = _dataRef.onChildAdded.listen(_onEntryAdded);
@@ -60,29 +64,29 @@ class _DataIOState extends State<DataIO> {
           childAspectRatio: 2,
         ),
         shrinkWrap: true,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return InkWell(
               onTap: () => _openEntryEdit(entryList[index]),
-              child: DataItemWidget(entryList[index]));
+              child: DataItemWidget(entry: entryList[index]));
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   void _onEntryAdded(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    String owner = v['owner'];
+    String? owner = v['owner'];
     if (owner == widget.node) {
       setState(() {
-        IoEntry entry = new IoEntry.fromMap(
-            _dataRef, event.snapshot.key, event.snapshot.value);
+        IoEntry entry =
+            IoEntry.fromMap(_dataRef, event.snapshot.key, event.snapshot.value);
         entryList.add(entry);
       });
     }
@@ -91,20 +95,20 @@ class _DataIOState extends State<DataIO> {
   void _onEntryChanged(DatabaseEvent event) {
     print('_onEntryChanged');
     dynamic v = event.snapshot.value;
-    String owner = v['owner'];
+    String? owner = v['owner'];
     if (owner == widget.node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
-        entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
-            _dataRef, event.snapshot.key, event.snapshot.value);
+        entryList[entryList.indexOf(oldValue)] =
+            IoEntry.fromMap(_dataRef, event.snapshot.key, event.snapshot.value);
       });
     }
   }
 
   void _onEntryRemoved(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    String owner = v['owner'];
+    String? owner = v['owner'];
     if (owner == widget.node) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -118,15 +122,14 @@ class _DataIOState extends State<DataIO> {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (BuildContext context) => new DataEditScreen(
+          builder: (BuildContext context) => DataEditScreen(
               domain: widget.domain, node: widget.node, entry: entry),
           fullscreenDialog: true,
         ));
   }
 
   void _onFloatingActionButtonPressed() {
-    final IoEntry entry = new IoEntry.setReference(_dataRef);
-    entry.setOwner(widget.node);
+    final IoEntry entry = IoEntry.setReference(_dataRef);
     _openEntryEdit(entry);
   }
 }
@@ -136,21 +139,26 @@ class DataEditScreen extends StatefulWidget {
   final String node;
   final IoEntry entry;
 
-  DataEditScreen({this.domain, this.node, this.entry});
+  const DataEditScreen({
+    super.key,
+    required this.domain,
+    required this.node,
+    required this.entry,
+  });
 
   @override
-  _DataEditScreenState createState() => new _DataEditScreenState();
+  _DataEditScreenState createState() => _DataEditScreenState();
 }
 
 class _DataEditScreenState extends State<DataEditScreen> {
-  DatabaseReference _execRef;
-  List<ExecEntry> _execList = [];
-  List<int> _opTypeMenu = [];
+  late DatabaseReference _execRef;
+  final List<ExecEntry> _execList = [];
+  final List<int> _opTypeMenu = [];
 
-  final TextEditingController _controllerName = new TextEditingController();
-  final TextEditingController _controllerType = new TextEditingController();
-  String _selectedExec;
-  StreamSubscription<DatabaseEvent> _onValueExecSubscription;
+  final TextEditingController _controllerName = TextEditingController();
+  final TextEditingController _controllerType = TextEditingController();
+  String? _selectedExec;
+  late StreamSubscription<DatabaseEvent> _onValueExecSubscription;
   List<String> _execStringList = [];
 
   void _handleChangedValue(IoEntry newValue) {
@@ -165,14 +173,14 @@ class _DataEditScreenState extends State<DataEditScreen> {
     super.initState();
     print('domain ${widget.domain}');
     _execRef = FirebaseDatabase.instance
-        .reference()
-        .child(getUserRef())
+        .ref()
+        .child(getUserRef()!)
         .child('obj/exec')
         .child(widget.domain)
         .child(widget.node);
     _onValueExecSubscription = _execRef.onValue.listen(_onValueExec);
     if (widget.entry.value != null) {
-      _controllerName.text = widget.entry.key;
+      _controllerName.text = widget.entry.key!;
       _controllerType.text = widget.entry.code.toString();
     }
     DataCode.values.toList().forEach((e) => _opTypeMenu.add(e.index));
@@ -188,28 +196,28 @@ class _DataEditScreenState extends State<DataEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text((widget.entry.key != null) ? widget.entry.key : 'Data'),
+          title: Text((widget.entry.key != null) ? widget.entry.key! : 'Data'),
           actions: <Widget>[
             TextButton(
-                child: Text(
+                child: const Text(
                   'REMOVE',
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () {
                   FirebaseDatabase.instance
-                      .reference()
-                      .child(getUserRef())
+                      .ref()
+                      .child(getUserRef()!)
                       .child('obj/logs')
                       .child(widget.domain)
-                      .child(widget.entry.key)
-                      ?.remove();
+                      .child(widget.entry.key!)
+                      .remove();
                   if (widget.entry.exist == true) {
-                    widget.entry.reference.child(widget.entry.key)?.remove();
+                    widget.entry.reference.child(widget.entry.key!).remove();
                   }
                   Navigator.pop(context, null);
                 }),
             TextButton(
-                child: Text(
+                child: const Text(
                   'SAVE',
                   style: TextStyle(color: Colors.white),
                 ),
@@ -224,11 +232,12 @@ class _DataEditScreenState extends State<DataEditScreen> {
                     // entry.setOwner(getOwner());
                     if (widget.entry.value != null) {
                       print('saving');
+                      widget.entry.owner = widget.node;
                       widget.entry.reference
-                          .child(widget.entry.key)
+                          .child(widget.entry.key!)
                           .set(widget.entry.toJson());
                     } else {
-                      print('missing');
+                      print('error missing');
                     }
                   } catch (exception) {
                     print('bug');
@@ -238,7 +247,7 @@ class _DataEditScreenState extends State<DataEditScreen> {
           ]),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           alignment: Alignment.bottomLeft,
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,19 +255,19 @@ class _DataEditScreenState extends State<DataEditScreen> {
               children: <Widget>[
                 TextField(
                   controller: _controllerName,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'name',
                     labelText: 'Name',
                   ),
                 ),
                 Row(children: [
-                  Expanded(
+                  const Expanded(
                     child: Text('Data Type'),
                   ),
                   DropdownButton<int>(
-                    hint: Text('select'),
+                    hint: const Text('select'),
                     value: widget.entry.code,
-                    onChanged: (int newValue) {
+                    onChanged: (int? newValue) {
                       setState(() {
                         widget.entry.code = newValue;
                       });
@@ -266,7 +275,9 @@ class _DataEditScreenState extends State<DataEditScreen> {
                     items: _opTypeMenu.map((int entry) {
                       return DropdownMenuItem<int>(
                         value: entry,
-                        child: Text(kEntryId2Name[DataCode.values[entry]]),
+                        child: Text(
+                          kEntryId2Name[DataCode.values[entry]]!,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -279,61 +290,61 @@ class _DataEditScreenState extends State<DataEditScreen> {
                     : (Container()),
                 (_execStringList.length > 1)
                     ? ListTile(
-                        title: Text('Callback Routine'),
+                        title: const Text('Callback Routine'),
                         trailing: DropdownButton<String>(
-                          hint: Text('Select'),
+                          hint: const Text('Select'),
                           value: _selectedExec,
-                          onChanged: (String newValue) {
+                          onChanged: (String? newValue) {
                             setState(() {
-                              _selectedExec = newValue;
+                              _selectedExec = newValue!;
                             });
                           },
                           items: _execStringList.map((String e) {
                             return DropdownMenuItem<String>(
                               value: e,
-                              child: (e != '') ? (Text(e)) : (Text('-')),
+                              child: (e != '') ? (Text(e)) : (const Text('-')),
                             );
                           }).toList(),
                         ),
                       )
-                    : Text('routine empty'),
+                    : const Text('routine empty'),
                 ListTile(
-                  title: Text('Enable on Google Home'),
+                  title: const Text('Enable on Google Home'),
                   leading: Checkbox(
                       value: widget.entry.aog,
-                      onChanged: (bool value) {
+                      onChanged: (bool? value) {
                         setState(() {
-                          widget.entry.aog = value;
+                          widget.entry.aog = value!;
                         });
                       }),
                 ),
                 ListTile(
-                  title: Text('On Dashboard Write Mode'),
+                  title: const Text('On Dashboard Write Mode'),
                   leading: Checkbox(
                       value: widget.entry.drawWr,
-                      onChanged: (bool value) {
+                      onChanged: (bool? value) {
                         setState(() {
-                          widget.entry.drawWr = value;
+                          widget.entry.drawWr = value!;
                         });
                       }),
                 ),
                 ListTile(
-                  title: Text('On Dashboard Read Mode'),
+                  title: const Text('On Dashboard Read Mode'),
                   leading: Checkbox(
                       value: widget.entry.drawRd,
-                      onChanged: (bool value) {
+                      onChanged: (bool? value) {
                         setState(() {
-                          widget.entry.drawRd = value;
+                          widget.entry.drawRd = value!;
                         });
                       }),
                 ),
                 ListTile(
-                  title: Text('Enable Logs'),
+                  title: const Text('Enable Logs'),
                   leading: Checkbox(
                       value: widget.entry.enLog,
-                      onChanged: (bool value) {
+                      onChanged: (bool? value) {
                         setState(() {
-                          widget.entry.enLog = value;
+                          widget.entry.enLog = value!;
                         });
                       }),
                 ),
@@ -345,26 +356,27 @@ class _DataEditScreenState extends State<DataEditScreen> {
 
   void _onValueExec(DatabaseEvent event) {
     // print('_onValueExec');
-    Map data = event.snapshot.value;
-    // print('node: $node');
-    if (data != null) {
+    dynamic data = event.snapshot.value;
+    // print('node: ${widget.node}');
+    if ((data != null) && (widget.entry.cb != null)) {
+      /* clear list menu */
+      _execStringList.clear();
+      /* take all routines */
       data.forEach((k, v) {
         // print('key: $k - value: ${v.toString()}');
         // filter only relative to the domain
         String owner = v["owner"];
         if (owner == widget.node) {
-          ExecEntry e = new ExecEntry.fromMap(_execRef, k, v);
+          ExecEntry e = ExecEntry.fromMap(_execRef, k, v);
           _execList.add(e);
-          _execStringList = _execList.map((e) => e.key).toList();
-          setState(() {
-            _execStringList.add('');
-            _selectedExec = _execStringList.firstWhere(
-              (el) => el == widget.entry.cb,
-              orElse: () => null,
-            );
-          });
+          _execStringList.add(e.key!);
         }
       });
+      if (_execStringList.contains(widget.entry.cb)) {
+        setState(() {});
+        _execStringList.add('');
+        _selectedExec = widget.entry.cb;
+      }
     }
   }
 }

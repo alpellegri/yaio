@@ -10,16 +10,21 @@ class ExecEdit extends StatefulWidget {
   final ExecEntry entry;
   final List<ExecEntry> execList;
 
-  ExecEdit({Key key, this.domain, this.node, this.entry, this.execList})
-      : super(key: key);
+  const ExecEdit({
+    super.key,
+    required this.domain,
+    required this.node,
+    required this.entry,
+    required this.execList,
+  });
 
   @override
-  _ExecEditState createState() => new _ExecEditState();
+  _ExecEditState createState() => _ExecEditState();
 }
 
 class _ExecEditState extends State<ExecEdit> {
-  final TextEditingController _controllerName = new TextEditingController();
-  String _selectedExec;
+  final TextEditingController _controllerName = TextEditingController();
+  String? _selectedExec;
   List<IoEntry> entryIoList = [];
   List<String> _execStringList = [];
 
@@ -27,14 +32,14 @@ class _ExecEditState extends State<ExecEdit> {
   void initState() {
     super.initState();
 
-    _execStringList = widget.execList.map((e) => e.key).toList();
+    _execStringList = widget.execList.map((e) => e.key!).toList();
     _execStringList.add('');
 
-    _controllerName.text = widget.entry?.key;
+    // _controllerName.text = widget.entry.key!;
     if (widget.entry.cb != null) {
       _selectedExec = _execStringList.firstWhere(
         (el) => el == widget.entry.cb,
-        orElse: () => null,
+        orElse: () => '',
       );
     }
   }
@@ -48,14 +53,14 @@ class _ExecEditState extends State<ExecEdit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit'),
+        title: const Text('Edit'),
       ),
       body: Column(
         children: <Widget>[
           ListTile(
             title: TextField(
               controller: _controllerName,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Name',
                 labelText: 'Routine Name',
               ),
@@ -63,41 +68,43 @@ class _ExecEditState extends State<ExecEdit> {
           ),
           (_execStringList.length > 1)
               ? ListTile(
-                  title: Text('Callback Routine'),
+                  title: const Text('Callback Routine'),
                   trailing: DropdownButton<String>(
-                    hint: Text('Select'),
+                    hint: const Text('Select'),
                     value: _selectedExec,
-                    onChanged: (String newValue) {
+                    onChanged: (String? newValue) {
                       setState(() {
-                        _selectedExec = newValue;
+                        _selectedExec = newValue!;
                       });
                     },
                     items: _execStringList.map((String e) {
                       return DropdownMenuItem<String>(
                         value: e,
-                        child: (e != '') ? (Text(e)) : (Text('-')),
+                        child: (e != '') ? (Text(e)) : (const Text('-')),
                       );
                     }).toList(),
                   ),
                 )
               : Container(),
-          SizedBox(height: 24.0),
+          const SizedBox(height: 24.0),
           Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 TextButton(
-                    child: Text('REMOVE'),
+                    child: const Text('REMOVE'),
                     onPressed: () {
                       print(widget.entry.reference);
                       if (widget.entry.exist == true) {
-                        widget.entry.reference.child(widget.entry.key).remove();
+                        widget.entry.reference
+                            .child(widget.entry.key!)
+                            .remove();
                       }
                       Navigator.pop(context, null);
                     }),
                 TextButton(
-                    child: Text('SAVE'),
+                    child: const Text('SAVE'),
                     onPressed: () {
                       setState(() {
                         widget.entry.key = _controllerName.text;
@@ -106,20 +113,21 @@ class _ExecEditState extends State<ExecEdit> {
                         } else {
                           widget.entry.cb = null;
                         }
-                        widget.entry.setOwner(widget.node);
+                        // print('ExecEntry.toJson owner ${widget.node}');
+                        widget.entry.owner = widget.node;
                         widget.entry.reference
-                            .child(widget.entry.key)
+                            .child(widget.entry.key!)
                             .set(widget.entry.toJson());
                       });
                       Navigator.pop(context, null);
                     }),
                 TextButton(
-                  child: Text('EDIT'),
+                  child: const Text('EDIT'),
                   onPressed: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (BuildContext context) => new ExecProg(
+                          builder: (BuildContext context) => ExecProg(
                               domain: widget.domain,
                               node: widget.node,
                               prog: widget.entry.p),
@@ -148,7 +156,7 @@ class ExecProgListItem extends StatelessWidget {
     value = entry.v;
 
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -157,7 +165,7 @@ class ExecProgListItem extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Container(
-                    padding: EdgeInsets.only(right: 8.0),
+                    padding: const EdgeInsets.only(right: 8.0),
                     child:
                         Text('$pc', style: TextStyle(color: Colors.grey[500]))),
                 Text('${kOpCode2Name[OpCode.values[entry.i]]}, $value'),
@@ -176,10 +184,15 @@ class ExecProg extends StatefulWidget {
   static const String routeName = '/exec_prog';
   final List<InstrEntry> prog;
 
-  ExecProg({Key key, this.domain, this.node, this.prog}) : super(key: key);
+  const ExecProg({
+    super.key,
+    required this.domain,
+    required this.node,
+    required this.prog,
+  });
 
   @override
-  _ExecProgState createState() => new _ExecProgState(domain, node, prog);
+  _ExecProgState createState() => _ExecProgState(domain, node, prog);
 }
 
 class _ExecProgState extends State<ExecProg> {
@@ -187,8 +200,8 @@ class _ExecProgState extends State<ExecProg> {
   final String node;
   final List<InstrEntry> prog;
   List<IoEntry> entryIoList = [];
-  DatabaseReference _dataRef;
-  StreamSubscription<DatabaseEvent> _onValueSubscription;
+  late DatabaseReference _dataRef;
+  late StreamSubscription<DatabaseEvent> _onValueSubscription;
 
   _ExecProgState(this.domain, this.node, this.prog);
 
@@ -197,8 +210,8 @@ class _ExecProgState extends State<ExecProg> {
     super.initState();
     print('_ExecProgState');
     _dataRef = FirebaseDatabase.instance
-        .reference()
-        .child(getUserRef())
+        .ref()
+        .child(getUserRef()!)
         .child('obj/data')
         .child(domain);
     _onValueSubscription = _dataRef.onValue.listen(_onValueIoEntry);
@@ -215,24 +228,22 @@ class _ExecProgState extends State<ExecProg> {
     print('_ExecProgState');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Program'),
+        title: const Text('Program'),
       ),
-      body: Container(
-        child: ListView.builder(
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-          itemCount: prog.length,
-          itemBuilder: (buildContext, index) {
-            return InkWell(
-                onTap: () => _openEntryDialog(index),
-                child: ExecProgListItem(index, prog[index], entryIoList));
-          },
-        ),
+      body: ListView.builder(
+        shrinkWrap: true,
+        physics: const BouncingScrollPhysics(),
+        itemCount: prog.length,
+        itemBuilder: (buildContext, index) {
+          return InkWell(
+              onTap: () => _openEntryDialog(index),
+              child: ExecProgListItem(index, prog[index], entryIoList));
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -245,14 +256,14 @@ class _ExecProgState extends State<ExecProg> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select line number'),
+          title: const Text('Select line number'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 TextField(
                   controller: ctrl,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'line',
                     labelText: 'Line',
                   ),
@@ -262,13 +273,13 @@ class _ExecProgState extends State<ExecProg> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(ctrl.text);
               },
             ),
             TextButton(
-              child: Text('DISCARD'),
+              child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
@@ -281,9 +292,9 @@ class _ExecProgState extends State<ExecProg> {
         int index = int.parse(e);
         setState(() {
           if (index < prog.length) {
-            prog.insert(index, new InstrEntry(0, '0'));
+            prog.insert(index, InstrEntry(0, '0'));
           } else {
-            prog.add(new InstrEntry(0, '0'));
+            prog.add(InstrEntry(0, '0'));
           }
         });
       } else {
@@ -300,7 +311,11 @@ class _ExecProgState extends State<ExecProg> {
     showDialog<Null>(
       context: context,
       builder: (BuildContext context) {
-        return new EntryDialog(index, prog, entryIoList, _didChanged);
+        return EntryDialog(
+            index: index,
+            prog: prog,
+            entryIoList: entryIoList,
+            onChanged: _didChanged);
       },
     );
   }
@@ -308,14 +323,14 @@ class _ExecProgState extends State<ExecProg> {
   // read all oneshot
   void _onValueIoEntry(DatabaseEvent event) {
     print('_onValueIoEntry');
-    Map data = event.snapshot.value;
+    Map data = event.snapshot.value as Map;
     if (data != null) {
       data.forEach((k, v) {
         // print('key: $k - value: ${v.toString()}');
-        String owner = v['owner'];
+        String? owner = v['owner'];
         if (owner == node) {
           setState(() {
-            IoEntry e = new IoEntry.fromMap(_dataRef, k, v);
+            IoEntry e = IoEntry.fromMap(_dataRef, k, v);
             entryIoList.add(e);
           });
         }
@@ -330,11 +345,17 @@ class EntryDialog extends StatefulWidget {
   final List<IoEntry> entryIoList;
   final ValueChanged<bool> onChanged;
 
-  EntryDialog(this.index, this.prog, this.entryIoList, this.onChanged);
+  const EntryDialog({
+    super.key,
+    required this.index,
+    required this.prog,
+    required this.entryIoList,
+    required this.onChanged,
+  });
 
   @override
   _EntryDialogState createState() =>
-      new _EntryDialogState(index, prog, entryIoList);
+      _EntryDialogState(index, prog, entryIoList);
 }
 
 class _EntryDialogState extends State<EntryDialog> {
@@ -342,11 +363,11 @@ class _EntryDialogState extends State<EntryDialog> {
   final List<InstrEntry> prog;
   final List<IoEntry> entryIoList;
 
-  final TextEditingController _controllerValue = new TextEditingController();
-  bool _isImmediate;
-  int _selectedOpCode;
+  final TextEditingController _controllerValue = TextEditingController();
+  bool? _isImmediate;
+  int? _selectedOpCode;
   List<int> _opCodeMenu = [];
-  IoEntry _selectedEntry;
+  IoEntry? _selectedEntry;
 
   _EntryDialogState(this.index, this.prog, this.entryIoList);
 
@@ -360,12 +381,12 @@ class _EntryDialogState extends State<EntryDialog> {
     print('isImmediate: $_isImmediate');
     if (_isImmediate == false) {
       // value = entryIoList.singleWhere((el) => el.key == entry.v).name;
-      entryIoList.forEach((el) {
+      for (var el in entryIoList) {
         // print('key: ${el.key}, name: ${el.name}');
         if (el.key == prog[index].v) {
           _selectedEntry = el;
         }
-      });
+      }
     } else {
       _controllerValue.text = prog[index].v.toString();
     }
@@ -382,7 +403,7 @@ class _EntryDialogState extends State<EntryDialog> {
       title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
+          children: const <Widget>[
             Text('Edit Code'),
             Icon(Icons.edit),
           ]),
@@ -391,35 +412,33 @@ class _EntryDialogState extends State<EntryDialog> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Opcode'),
-            SizedBox(height: 8.0),
+            const Text('Opcode'),
+            const SizedBox(height: 8.0),
             DropdownButton<int>(
               isDense: true,
-              hint: Text('action'),
+              hint: const Text('action'),
               value: _selectedOpCode,
-              onChanged: (int newValue) {
+              onChanged: (int? newValue) {
                 setState(() {
-                  _selectedOpCode = newValue;
+                  _selectedOpCode = newValue!;
                   _isImmediate =
-                      kOpCodeIsImmediate[OpCode.values[_selectedOpCode]];
+                      kOpCodeIsImmediate[OpCode.values[_selectedOpCode!]];
                 });
               },
               items: _opCodeMenu.map((int entry) {
                 return DropdownMenuItem<int>(
                   value: entry,
-                  child: Text(
-                    kOpCode2Name[OpCode.values[entry]],
-                  ),
+                  child: Text(kOpCode2Name[OpCode.values[entry]]!),
                 );
               }).toList(),
             ),
           ]),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           (_isImmediate == true)
               ? (TextField(
                   controller: _controllerValue,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'value',
                     labelText: 'Value',
                   ),
@@ -427,30 +446,30 @@ class _EntryDialogState extends State<EntryDialog> {
               : (Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                      Text('Operand'),
+                      const Text('Operand'),
                       DropdownButton<IoEntry>(
-                        hint: Text('data'),
+                        hint: const Text('data'),
                         value: _selectedEntry,
-                        onChanged: (IoEntry newValue) {
+                        onChanged: (IoEntry? newValue) {
                           setState(() {
-                            _selectedEntry = newValue;
+                            _selectedEntry = newValue!;
                           });
                         },
                         items: entryIoList.map((IoEntry entry) {
                           return DropdownMenuItem<IoEntry>(
                             value: entry,
-                            child: Text(entry.key),
+                            child: Text(entry.key!),
                           );
                         }).toList(),
                       ),
                     ])),
-          SizedBox(height: 24.0),
+          const SizedBox(height: 24.0),
           Row(
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 TextButton(
-                    child: Text('REMOVE'),
+                    child: const Text('REMOVE'),
                     onPressed: () {
                       setState(() {
                         _didChange();
@@ -459,14 +478,14 @@ class _EntryDialogState extends State<EntryDialog> {
                       Navigator.pop(context, null);
                     }),
                 TextButton(
-                    child: Text('SAVE'),
+                    child: const Text('SAVE'),
                     onPressed: () {
                       _didChange();
                       setState(() {
-                        prog[index].i = _selectedOpCode;
-                        prog[index].v = (_isImmediate == true)
+                        prog[index].i = _selectedOpCode!;
+                        prog[index].v = (_isImmediate! == true)
                             ? _controllerValue.text
-                            : _selectedEntry.key;
+                            : _selectedEntry!.key!;
                         Navigator.pop(context, null);
                       });
                     }),

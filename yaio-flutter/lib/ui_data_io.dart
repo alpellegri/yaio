@@ -5,7 +5,10 @@ import 'firebase_utils.dart';
 class DataItemWidget extends StatelessWidget {
   final IoEntry entry;
 
-  DataItemWidget(this.entry);
+  const DataItemWidget({
+    super.key,
+    required this.entry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +24,15 @@ class DataItemWidget extends StatelessWidget {
               // alignment: Alignment.centerLeft,
               width: 4,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8),
                     bottomLeft: Radius.circular(8)),
                 color: Theme.of(context).primaryColor,
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -44,13 +48,13 @@ class DataItemWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              entry.key,
+                              entry.key!,
                               textAlign: TextAlign.left,
                             ),
                             Text(
-                              '${kEntryId2Name[DataCode.values[entry.code]]}',
+                              '${kEntryId2Name[DataCode.values[entry.code!]]}',
                               textAlign: TextAlign.left,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.grey,
                               ),
                             ),
@@ -75,17 +79,21 @@ class DataConfigWidget extends StatefulWidget {
   final IoEntry data;
   final ValueChanged<IoEntry> onChangedValue;
 
-  DataConfigWidget({Key key, this.data, this.onChangedValue}) : super(key: key);
+  const DataConfigWidget({
+    super.key,
+    required this.data,
+    required this.onChangedValue,
+  });
 
   @override
-  _DataConfigWidget createState() => new _DataConfigWidget();
+  _DataConfigWidget createState() => _DataConfigWidget();
 }
 
 class _DataConfigWidget extends State<DataConfigWidget> {
-  IoEntry data;
-  TextEditingController ctrl_1 = new TextEditingController();
-  TextEditingController ctrl_2 = new TextEditingController();
-  TextEditingController ctrl_3 = new TextEditingController();
+  late IoEntry data;
+  TextEditingController ctrl_1 = TextEditingController();
+  TextEditingController ctrl_2 = TextEditingController();
+  TextEditingController ctrl_3 = TextEditingController();
 
   @override
   void initState() {
@@ -101,7 +109,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
 
   Widget build(BuildContext context) {
     Widget w;
-    switch (DataCode.values[data.code]) {
+    switch (DataCode.values[data.code!]) {
       case DataCode.RadioRx:
         w = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +124,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
@@ -139,7 +147,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
@@ -153,7 +161,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -177,7 +185,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'pin',
                   labelText: 'Pin',
                 ),
@@ -191,7 +199,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'period',
                   labelText: 'Period [min]',
                 ),
@@ -212,7 +220,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'identifier',
                   labelText: 'ID',
                 ),
@@ -234,7 +242,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -254,7 +262,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   });
                   widget.onChangedValue(data);
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'value',
                   labelText: 'Value',
                 ),
@@ -291,7 +299,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'hour',
                   labelText: 'Hour',
                 ),
@@ -305,7 +313,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'minutes',
                   labelText: 'Minutes',
                 ),
@@ -319,12 +327,15 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'seconds',
                   labelText: 'Seconds',
                 ),
               ),
-              TimerOptWidget(value: data.ioctl, onChanged: _handleTimerChanged),
+              TimerOptWidget(
+                value: data.ioctl!,
+                onChanged: _handleTimerChanged,
+              ),
             ]);
         break;
       case DataCode.Timeout:
@@ -341,7 +352,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'hour',
                   labelText: 'Hour',
                 ),
@@ -355,7 +366,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'minutes',
                   labelText: 'Minutes',
                 ),
@@ -369,7 +380,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
                   widget.onChangedValue(data);
                 },
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'seconds',
                   labelText: 'Seconds',
                 ),
@@ -401,7 +412,7 @@ class _DataConfigWidget extends State<DataConfigWidget> {
 class TimerOptWidget extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
-  static const List<String> dayOption = const [
+  static const List<String> dayOption = [
     'Sunday',
     'Monday',
     'Tuesday',
@@ -412,7 +423,11 @@ class TimerOptWidget extends StatelessWidget {
     'All',
   ];
 
-  TimerOptWidget({Key key, this.value, this.onChanged});
+  const TimerOptWidget({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   bool isChecked(int index, int value) => (value >> 16 & (1 << index)) != 0;
 
@@ -444,10 +459,10 @@ class TimerOptWidget extends StatelessWidget {
           Row(children: <Widget>[
             Expanded(
               child: Row(children: <Widget>[
-                Text('Polarity'),
+                const Text('Polarity'),
                 Checkbox(
                     value: ((value & (1 << 24)) != 0),
-                    onChanged: (bool v) {
+                    onChanged: (bool? v) {
                       int newValue = value;
                       newValue = (v == true)
                           ? (value | (1 << 24))
@@ -456,7 +471,7 @@ class TimerOptWidget extends StatelessWidget {
                     }),
               ]),
             ),
-            Text('Days of the week'),
+            const Text('Days of the week'),
             PopupMenuButton(
               padding: EdgeInsets.zero,
               onSelected: applyOnSelected,
@@ -486,11 +501,16 @@ class DataIoShortDialogWidget extends StatefulWidget {
   final String node;
   final IoEntry data;
 
-  DataIoShortDialogWidget({this.domain, this.node, this.data});
+  const DataIoShortDialogWidget({
+    super.key,
+    required this.domain,
+    required this.node,
+    required this.data,
+  });
 
   @override
   _DataIoShortDialogWidgetState createState() =>
-      new _DataIoShortDialogWidgetState(domain, node, data);
+      _DataIoShortDialogWidgetState(domain, node, data);
 }
 
 class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
@@ -526,14 +546,15 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
               DataConfigWidget(
                 data: data,
                 onChangedValue: _handleChangedValue,
+                key: null,
               ),
             ]),
         actions: <Widget>[
           TextButton(
-              child: Text('SAVE'),
+              child: const Text('SAVE'),
               onPressed: () {
                 try {
-                  data.reference.child(data.key).set(data.toJson());
+                  data.reference.child(data.key!).set(data.toJson());
                   nodeRefresh(domain, node);
                 } catch (exception) {
                   print('bug');
@@ -541,7 +562,7 @@ class _DataIoShortDialogWidgetState extends State<DataIoShortDialogWidget> {
                 Navigator.pop(context, null);
               }),
           TextButton(
-              child: Text('DISCARD'),
+              child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.pop(context, null);
               }),

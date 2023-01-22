@@ -6,51 +6,54 @@ import 'entries.dart';
 import 'firebase_utils.dart';
 
 class LogListItem extends StatelessWidget {
-  final MessageEntry messageEntry;
+  final MessageEntry message;
 
-  LogListItem(this.messageEntry);
+  const LogListItem({
+    super.key,
+    required this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-      child: new Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          new Row(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              new Container(
+              Container(
                 padding: const EdgeInsets.only(right: 6.0),
-                child: new Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    new Text(
-                      new DateFormat('dd/MM/yy').format(messageEntry.dateTime),
+                    Text(
+                      DateFormat('dd/MM/yy').format(message.dateTime),
                       // textScaleFactor: 1.0,
                     ),
-                    new Text(
-                      new DateFormat('Hm').format(messageEntry.dateTime),
+                    Text(
+                      DateFormat('Hm').format(message.dateTime),
                       // textScaleFactor: 1.0,
-                      style: new TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                       ),
                     ),
                   ],
                 ),
               ),
-              new Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  new Text(
-                    '${messageEntry.domain.toString()}/${messageEntry.node.toString()}',
+                  Text(
+                    '${message.domain.toString()}/${message.node.toString()}',
                     // textScaleFactor: 1.0,
                   ),
-                  new Text(
-                    messageEntry.message.toString(),
+                  Text(
+                    message.message.toString(),
                     // textScaleFactor: 0.8,
                   ),
                 ],
@@ -64,22 +67,25 @@ class LogListItem extends StatelessWidget {
 }
 
 class Messages extends StatefulWidget {
-  Messages({Key key, this.title}) : super(key: key);
+  const Messages({
+    super.key,
+    required this.title,
+  });
   static const String routeName = '/log_history';
   final String title;
 
   @override
-  _MessagesState createState() => new _MessagesState();
+  _MessagesState createState() => _MessagesState();
 }
 
 class _MessagesState extends State<Messages> {
   List<MessageEntry> entryList = [];
-  DatabaseReference _entryRef;
-  StreamSubscription<DatabaseEvent> _onAddSub;
-  StreamSubscription<DatabaseEvent> _onRemoveSub;
+  late DatabaseReference _entryRef;
+  late StreamSubscription<DatabaseEvent> _onAddSub;
+  late StreamSubscription<DatabaseEvent> _onRemoveSub;
 
   _MessagesState() {
-    _entryRef = FirebaseDatabase.instance.reference().child(getMessagesRef());
+    _entryRef = FirebaseDatabase.instance.ref().child(getMessagesRef()!);
     _onAddSub = _entryRef.onChildAdded.listen(_onEntryAdded);
     _onRemoveSub = _entryRef.onChildRemoved.listen(_onEntryRemoved);
   }
@@ -99,26 +105,26 @@ class _MessagesState extends State<Messages> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('${widget.title}'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.title}'),
       ),
-      body: new ListView.builder(
-        physics: BouncingScrollPhysics(),
+      body: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         shrinkWrap: true,
         reverse: true,
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           //calculating difference
-          return new InkWell(
+          return InkWell(
               // onTap: () => _openEditEntryDialog(logSaves[index]),
-              child: new LogListItem(entryList[index]));
+              child: LogListItem(message: entryList[index]));
         },
       ),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'remove all',
-        child: new Icon(Icons.delete),
+        child: const Icon(Icons.delete),
       ),
     );
   }
@@ -126,7 +132,7 @@ class _MessagesState extends State<Messages> {
   _onEntryAdded(DatabaseEvent event) {
     print('_onEntryAdded');
     setState(() {
-      entryList.add(new MessageEntry.fromSnapshot(event.snapshot));
+      entryList.add(MessageEntry.fromSnapshot(event.snapshot));
       entryList.sort((e1, e2) => e1.dateTime.compareTo(e2.dateTime));
     });
   }

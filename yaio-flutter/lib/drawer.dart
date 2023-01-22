@@ -8,15 +8,20 @@ import 'domain.dart';
 import 'firebase_utils.dart';
 
 final Map<String, WidgetBuilder> menuRoutes = <String, WidgetBuilder>{
-  Device.routeName: (BuildContext context) =>
-      new Device(title: 'Manage Domains and Nodes'),
-  Messages.routeName: (BuildContext context) =>
-      new Messages(title: 'Notifications'),
-  VersionInfo.routeName: (BuildContext context) =>
-      new VersionInfo(title: 'Version'),
+  Device.routeName: (BuildContext context) => const Device(
+        title: 'Manage Domains and Nodes',
+      ),
+  Messages.routeName: (BuildContext context) => const Messages(
+        title: 'Notifications',
+      ),
+  VersionInfo.routeName: (BuildContext context) => const VersionInfo(
+        title: 'Version',
+      ),
 };
 
 class NavDrawer extends StatefulWidget {
+  const NavDrawer({super.key});
+
   @override
   NavDrawerState createState() => NavDrawerState();
 }
@@ -29,9 +34,9 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     curve: Curves.fastOutSlowIn,
   ));
 
-  AnimationController _controller;
-  Animation<double> _drawerContentsOpacity;
-  Animation<Offset> _drawerDetailsPosition;
+  late AnimationController _controller;
+  late Animation<double> _drawerContentsOpacity;
+  late Animation<Offset> _drawerDetailsPosition;
   bool _showDrawerContents = true;
 
   @override
@@ -57,44 +62,45 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new UserAccountsDrawerHeader(
-            accountName: new Text(getFirebaseUser().user.displayName),
-            accountEmail: new Text(getFirebaseUser().user.email),
-            /*currentAccountPicture: new CircleAvatar(
-              backgroundImage: new NetworkImage(
-                getFirebaseUser().providerData[1].photoURL,
+          UserAccountsDrawerHeader(
+            accountName: Text(getFirebaseUser()!.user!.displayName!),
+            accountEmail: Text(getFirebaseUser()!.user!.email!),
+            currentAccountPicture: CircleAvatar(
+              backgroundImage: NetworkImage(
+                getFirebaseUser()!.user!.photoURL!,
               ),
-            ),*/
+            ),
             margin: EdgeInsets.zero,
             onDetailsPressed: () {
               _showDrawerContents = !_showDrawerContents;
-              if (_showDrawerContents)
+              if (_showDrawerContents) {
                 _controller.reverse();
-              else
+              } else {
                 _controller.forward();
+              }
             },
           ),
-          new MediaQuery.removePadding(
+          MediaQuery.removePadding(
             context: context,
             // DrawerHeader consumes top MediaQuery padding.
             removeTop: true,
-            child: new Expanded(
-              child: new ListView(
+            child: Expanded(
+              child: ListView(
                 dragStartBehavior: DragStartBehavior.down,
                 padding: const EdgeInsets.only(top: 8.0),
                 children: <Widget>[
-                  new Stack(
+                  Stack(
                     children: <Widget>[
                       // The initial contents of the drawer.
-                      new FadeTransition(
+                      FadeTransition(
                         opacity: _drawerContentsOpacity,
-                        child: new Column(
+                        child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
-                              new ListTile(
+                              ListTile(
                                   leading: const Icon(Icons.notifications),
                                   title: const Text('Notification'),
                                   onTap: () {
@@ -102,7 +108,7 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                     Navigator.of(context)
                                         .pushNamed(Messages.routeName);
                                   }),
-                              new ListTile(
+                              ListTile(
                                   leading: const Icon(Icons.receipt),
                                   title: const Text('Version Info'),
                                   onTap: () {
@@ -113,19 +119,19 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                             ]),
                       ),
                       // The drawer's "details" view.
-                      new SlideTransition(
+                      SlideTransition(
                         position: _drawerDetailsPosition,
-                        child: new FadeTransition(
-                          opacity: new ReverseAnimation(_drawerContentsOpacity),
-                          child: new Column(
+                        child: FadeTransition(
+                          opacity: ReverseAnimation(_drawerContentsOpacity),
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
-                              new ListTile(
-                                leading: new Icon(Icons.home),
+                              ListTile(
+                                leading: const Icon(Icons.home),
                                 title: ((getDomain() == null)
                                     ? (const Text(''))
-                                    : (new Text(getDomain()))),
+                                    : (Text(getDomain()!))),
                                 trailing: PopupMenuButton<String>(
                                     icon: const Icon(Icons.edit),
                                     onSelected: (value) {
@@ -134,9 +140,9 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                       Navigator.pop(context);
                                       Navigator.push(
                                         context,
-                                        new MaterialPageRoute(
+                                        MaterialPageRoute(
                                           builder: (BuildContext context) =>
-                                              new Domain(domain: value),
+                                              Domain(domain: value),
                                           fullscreenDialog: true,
                                         ),
                                       );
@@ -150,7 +156,7 @@ class NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                       }).toList();
                                     }),
                               ),
-                              new ListTile(
+                              ListTile(
                                 leading: const Icon(Icons.settings),
                                 title: const Text('Manage Domains and Nodes'),
                                 onTap: () {

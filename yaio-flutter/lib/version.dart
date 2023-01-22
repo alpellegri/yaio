@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class VersionInfo extends StatefulWidget {
-  VersionInfo({Key key, this.title}) : super(key: key);
+  const VersionInfo({
+    super.key,
+    required this.title,
+  });
   static const String routeName = '/package_info';
   final String title;
 
   @override
-  _VersionInfoState createState() => new _VersionInfoState();
+  _VersionInfoState createState() => _VersionInfoState();
 }
 
 class _VersionInfoState extends State<VersionInfo> {
@@ -19,7 +22,7 @@ class _VersionInfoState extends State<VersionInfo> {
     buildNumber: 'Unknown',
   );
 
-  _VersionInfoState() {}
+  _VersionInfoState();
 
   Future<void> _initPackageInfo() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
@@ -42,15 +45,15 @@ class _VersionInfoState extends State<VersionInfo> {
   Widget _infoTile(String title, String subtitle) {
     return ListTile(
       title: Text(title),
-      subtitle: Text(subtitle ?? 'Not set'),
+      subtitle: Text(subtitle.isEmpty ? 'Not set' : subtitle),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('${widget.title}'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.title}'),
       ),
       body: Column(
         children: <Widget>[

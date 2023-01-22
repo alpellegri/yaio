@@ -8,7 +8,7 @@ const String kMessagesRef = 'messages';
 const String kLogRef = 'logs';
 const String kTHRef = 'logs/TH';
 
-const String kWsUri = 'ws://192.168.2.1';
+const String kWsUri = 'ws://192.168.2.1:81';
 
 const int kNodeIdle = 0;
 const int kNodeReboot = 1;

@@ -12,31 +12,34 @@ import 'drawer.dart';
 
 class Domain extends StatefulWidget {
   final String domain;
-  Domain({Key key, this.domain}) : super(key: key);
+  const Domain({
+    super.key,
+    required this.domain,
+  });
 
   @override
-  _DomainState createState() => new _DomainState();
+  _DomainState createState() => _DomainState();
 }
 
 class _DomainState extends State<Domain> {
   List<IoEntry> entryList = [];
-  DatabaseReference _rootRef;
-  StreamSubscription<DatabaseEvent> _onRootAddSubscription;
-  StreamSubscription<DatabaseEvent> _onRootEditedSubscription;
-  StreamSubscription<DatabaseEvent> _onRootRemoveSubscription;
-  Map<String, dynamic> _map = new Map<String, dynamic>();
-  DatabaseReference _dataRef;
-  StreamSubscription<DatabaseEvent> _onDataAddSubscription;
-  StreamSubscription<DatabaseEvent> _onDataChangedSubscription;
-  StreamSubscription<DatabaseEvent> _onDataRemoveSubscription;
-  final NavDrawer drawer = new NavDrawer();
+  late DatabaseReference _rootRef;
+  late StreamSubscription<DatabaseEvent> _onRootAddSubscription;
+  late StreamSubscription<DatabaseEvent> _onRootEditedSubscription;
+  late StreamSubscription<DatabaseEvent> _onRootRemoveSubscription;
+  final Map<String, dynamic> _map = <String, dynamic>{};
+  late DatabaseReference _dataRef;
+  late StreamSubscription<DatabaseEvent> _onDataAddSubscription;
+  late StreamSubscription<DatabaseEvent> _onDataChangedSubscription;
+  late StreamSubscription<DatabaseEvent> _onDataRemoveSubscription;
+  final NavDrawer drawer = const NavDrawer();
 
   @override
   void initState() {
     super.initState();
     _rootRef = FirebaseDatabase.instance
-        .reference()
-        .child(getRootRef())
+        .ref()
+        .child(getRootRef()!)
         .child(widget.domain);
     _onRootAddSubscription = _rootRef.onChildAdded.listen(_onRootEntryAdded);
     _onRootEditedSubscription =
@@ -45,8 +48,8 @@ class _DomainState extends State<Domain> {
         _rootRef.onChildRemoved.listen(_onRootEntryRemoved);
 
     _dataRef = FirebaseDatabase.instance
-        .reference()
-        .child(getUserRef())
+        .ref()
+        .child(getUserRef()!)
         .child('obj/data')
         .child(widget.domain);
     _onDataAddSubscription = _dataRef.onChildAdded.listen(_onDataEntryAdded);
@@ -69,22 +72,23 @@ class _DomainState extends State<Domain> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.domain),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.domain),
       ),
       drawer: drawer,
-      body: new ListView.builder(
+      body: ListView.builder(
         shrinkWrap: true,
-        physics: new ClampingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         itemCount: _map.keys.length,
-        itemBuilder: (context, node) {
-          String _node = _map.keys.toList()[node];
-          return new DeviceCard(
-              domain: widget.domain,
-              node: _node,
-              value: _map[_node],
-              data: entryList);
+        itemBuilder: (context, item) {
+          String node = _map.keys.toList()[item];
+          return DeviceCard(
+            domain: widget.domain,
+            node: node,
+            value: _map[node],
+            data: entryList,
+          );
         },
       ),
     );
@@ -92,26 +96,26 @@ class _DomainState extends State<Domain> {
 
   void _onRootEntryAdded(DatabaseEvent event) {
     // print('_onRootEntryAdded ${event.snapshot.key} ${event.snapshot.value}');
-    String domain = event.snapshot.key;
+    String? domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
     setState(() {
-      _map.putIfAbsent(domain, () => value);
+      _map.putIfAbsent(domain!, () => value);
     });
   }
 
   void _onRootEntryChanged(DatabaseEvent event) {
     // print('_onRootEntryChanged ${event.snapshot.key} ${event.snapshot.value}');
-    String domain = event.snapshot.key;
+    String? domain = event.snapshot.key;
     dynamic value = event.snapshot.value;
     setState(() {
-      _map.update(domain, (dynamic v) => value);
+      _map.update(domain!, (dynamic v) => value);
     });
     // _updateAllNodes(domain, value);
   }
 
   void _onRootEntryRemoved(DatabaseEvent event) {
     // print('_onRootEntryRemoved ${event.snapshot.key} ${event.snapshot.value}');
-    String domain = event.snapshot.key;
+    String? domain = event.snapshot.key;
     setState(() {
       _map.removeWhere((key, value) => key == domain);
     });
@@ -119,12 +123,12 @@ class _DomainState extends State<Domain> {
 
   void _onDataEntryAdded(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    bool drawWr = v['drawWr'];
-    bool drawRd = v['drawRd'];
+    bool? drawWr = v['drawWr'];
+    bool? drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       setState(() {
-        IoEntry entry = new IoEntry.fromMap(
-            _dataRef, event.snapshot.key, event.snapshot.value);
+        IoEntry entry =
+            IoEntry.fromMap(_dataRef, event.snapshot.key, event.snapshot.value);
         entryList.add(entry);
       });
     }
@@ -132,22 +136,22 @@ class _DomainState extends State<Domain> {
 
   void _onDataEntryChanged(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    bool drawWr = v['drawWr'];
-    bool drawRd = v['drawRd'];
+    bool? drawWr = v['drawWr'];
+    bool? drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
-        entryList[entryList.indexOf(oldValue)] = new IoEntry.fromMap(
-            _dataRef, event.snapshot.key, event.snapshot.value);
+        entryList[entryList.indexOf(oldValue)] =
+            IoEntry.fromMap(_dataRef, event.snapshot.key, event.snapshot.value);
       });
     }
   }
 
   void _onDataEntryRemoved(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    bool drawWr = v['drawWr'];
-    bool drawRd = v['drawRd'];
+    bool? drawWr = v['drawWr'];
+    bool? drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
       IoEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -164,11 +168,16 @@ class DeviceCard extends StatefulWidget {
   final dynamic value;
   final List<IoEntry> data;
 
-  DeviceCard({Key key, this.domain, this.node, this.value, this.data})
-      : super(key: key);
+  const DeviceCard({
+    super.key,
+    required this.domain,
+    required this.node,
+    this.value,
+    required this.data,
+  });
 
   @override
-  _DeviceCardState createState() => new _DeviceCardState();
+  _DeviceCardState createState() => _DeviceCardState();
 }
 
 class _DeviceCardState extends State<DeviceCard> {
@@ -176,9 +185,9 @@ class _DeviceCardState extends State<DeviceCard> {
   Widget build(BuildContext context) {
     bool online = false;
     if ((widget.value['status'] != null) && (widget.value['control'] != null)) {
-      DateTime statusTime = new DateTime.fromMillisecondsSinceEpoch(
+      DateTime statusTime = DateTime.fromMillisecondsSinceEpoch(
           int.parse(widget.value['status']['time'].toString()) * 1000);
-      DateTime controlTime = new DateTime.fromMillisecondsSinceEpoch(
+      DateTime controlTime = DateTime.fromMillisecondsSinceEpoch(
           int.parse(widget.value['control']['time'].toString()) * 1000);
       Duration diff = statusTime.difference(controlTime);
       online = (diff.inSeconds >= -10);
@@ -196,23 +205,23 @@ class _DeviceCardState extends State<DeviceCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               // color: Colors.grey[100],
               ),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              SizedBox(width: 8.0),
+              const SizedBox(width: 8.0),
               online
                   ? Icon(Icons.link, color: Colors.green[400])
                   : Icon(Icons.link_off, color: Colors.grey[400]),
-              SizedBox(width: 8.0),
+              const SizedBox(width: 8.0),
               Text(widget.node,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
                   )),
-              SizedBox(width: 8.0),
+              const SizedBox(width: 8.0),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -223,11 +232,11 @@ class _DeviceCardState extends State<DeviceCard> {
                         onSelected: _routeSelection,
                         itemBuilder: (BuildContext context) =>
                             <PopupMenuItem<String>>[
-                              PopupMenuItem<String>(
+                              const PopupMenuItem<String>(
                                   value: 'Settings', child: Text('Settings')),
-                              PopupMenuItem<String>(
+                              const PopupMenuItem<String>(
                                   value: 'Data IO', child: Text('Data IO')),
-                              PopupMenuItem<String>(
+                              const PopupMenuItem<String>(
                                   value: 'Routine', child: Text('Routine')),
                             ]),
                   ],
@@ -236,7 +245,7 @@ class _DeviceCardState extends State<DeviceCard> {
             ],
           ),
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisSpacing: 4,
@@ -248,7 +257,7 @@ class _DeviceCardState extends State<DeviceCard> {
             childAspectRatio: 2,
           ),
           shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           itemCount: query.length,
           itemBuilder: (buildContext, index) {
             if (query[index].drawWr == true) {
@@ -256,7 +265,7 @@ class _DeviceCardState extends State<DeviceCard> {
                 onTap: () {
                   _openEntryDialog(widget.node, query[index]);
                 },
-                child: DataItemWidget(query[index]),
+                child: DataItemWidget(entry: query[index]),
               );
             } else if (query[index].enLog == true) {
               return InkWell(
@@ -264,21 +273,23 @@ class _DeviceCardState extends State<DeviceCard> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (BuildContext context) => new ChartHistory(
-                            domain: widget.domain,
-                            node: widget.node,
-                            name: query[index].key),
+                        builder: (BuildContext context) => ChartHistory(
+                          domain: widget.domain,
+                          node: widget.node,
+                          name: query[index].key!,
+                        ),
                         fullscreenDialog: true,
                       ));
                 },
-                child: DataItemWidget(query[index]),
+                child: DataItemWidget(entry: query[index]),
               );
             } else {
-              return DataItemWidget(query[index]);
+              return DataItemWidget(entry: query[index]);
             }
           },
         ),
-        Divider(color: Colors.black12, thickness: .6, indent: 8, endIndent: 8),
+        const Divider(
+            color: Colors.black12, thickness: .6, indent: 8, endIndent: 8),
       ],
     );
   }
@@ -287,27 +298,34 @@ class _DeviceCardState extends State<DeviceCard> {
     if (string == 'Settings') {
       Navigator.push(
         context,
-        new MaterialPageRoute(
-          builder: (BuildContext context) => new DeviceConfig(
-              domain: widget.domain, node: widget.node, value: widget.value),
+        MaterialPageRoute(
+          builder: (BuildContext context) => DeviceConfig(
+            domain: widget.domain,
+            node: widget.node,
+            value: widget.value,
+          ),
           fullscreenDialog: true,
         ),
       );
     } else if (string == 'Data IO') {
       Navigator.push(
         context,
-        new MaterialPageRoute(
-          builder: (BuildContext context) =>
-              new DataIO(domain: widget.domain, node: widget.node),
+        MaterialPageRoute(
+          builder: (BuildContext context) => DataIO(
+            domain: widget.domain,
+            node: widget.node,
+          ),
           fullscreenDialog: true,
         ),
       );
     } else if (string == 'Routine') {
       Navigator.push(
         context,
-        new MaterialPageRoute(
-          builder: (BuildContext context) =>
-              new Exec(domain: widget.domain, node: widget.node),
+        MaterialPageRoute(
+          builder: (BuildContext context) => Exec(
+            domain: widget.domain,
+            node: widget.node,
+          ),
           fullscreenDialog: true,
         ),
       );
@@ -315,10 +333,10 @@ class _DeviceCardState extends State<DeviceCard> {
   }
 
   void _openEntryDialog(String node, IoEntry entry) {
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return new DataIoShortDialogWidget(
+        return DataIoShortDialogWidget(
             domain: widget.domain, node: node, data: entry);
       },
     );

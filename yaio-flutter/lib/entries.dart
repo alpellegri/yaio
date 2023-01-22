@@ -35,7 +35,7 @@ enum DataCode {
   PhyAOut,
 }
 
-const Map<DataCode, String> kEntryId2Name = const {
+const Map<DataCode, String> kEntryId2Name = {
   DataCode.PhyDIn: kStringPhyDIn,
   DataCode.PhyDOut: kStringPhyDOut,
   DataCode.DhtTemperature: kDhtTemperature,
@@ -51,24 +51,6 @@ const Map<DataCode, String> kEntryId2Name = const {
   DataCode.Timeout: kStringTimeout,
   DataCode.PhyAIn: kStringPhyAIn,
   DataCode.PhyAOut: kStringPhyAOut,
-};
-
-const Map<String, DataCode> kEntryName2Id = const {
-  kStringPhyDIn: DataCode.PhyDIn,
-  kStringPhyDOut: DataCode.PhyDOut,
-  kDhtTemperature: DataCode.DhtTemperature,
-  kDhtHumidity: DataCode.DhtHumidity,
-  kStringRadioRx: DataCode.RadioRx,
-  kStringRadioMach: DataCode.RadioMach,
-  kStringRadioTx: DataCode.RadioTx,
-  kStringTimer: DataCode.Timer,
-  kStringBool: DataCode.Bool,
-  kStringInt: DataCode.Int,
-  kStringFloat: DataCode.Float,
-  kStringString: DataCode.String,
-  kStringTimeout: DataCode.Timeout,
-  kStringPhyAIn: DataCode.PhyAIn,
-  kStringPhyAOut: DataCode.PhyAOut,
 };
 
 // ......XXXXXX.........
@@ -104,15 +86,15 @@ int clearBits(int v, int pos, int len) {
 }
 
 String getValueCtrl1(IoEntry data) {
-  String v;
-  switch (DataCode.values[data.code]) {
+  String v = '';
+  switch (DataCode.values[data.code!]) {
     case DataCode.PhyDIn:
     case DataCode.PhyDOut:
     case DataCode.PhyAIn:
     case DataCode.PhyAOut:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(data.ioctl, 0, 8).toString();
+      v = getBits(data.ioctl!, 0, 8).toString();
       break;
     case DataCode.RadioRx:
     case DataCode.RadioTx:
@@ -120,7 +102,7 @@ String getValueCtrl1(IoEntry data) {
       v = (data.ioctl).toString();
       break;
     case DataCode.Timer:
-      DateTime now = new DateTime.now();
+      DateTime now = DateTime.now();
       // compensate timezone
       v = ((24 + (data.value ~/ 3600) + now.timeZoneOffset.inHours) % 24)
           .toString();
@@ -135,15 +117,15 @@ String getValueCtrl1(IoEntry data) {
 }
 
 String getValueCtrl2(IoEntry data) {
-  String v;
-  switch (DataCode.values[data.code]) {
+  String v = '';
+  switch (DataCode.values[data.code!]) {
     case DataCode.PhyDOut:
     case DataCode.PhyAOut:
     case DataCode.PhyDIn:
     case DataCode.PhyAIn:
     case DataCode.DhtTemperature:
     case DataCode.DhtHumidity:
-      v = getBits(data.ioctl, 8, 8).toString();
+      v = getBits(data.ioctl!, 8, 8).toString();
       break;
     case DataCode.RadioRx:
     case DataCode.RadioTx:
@@ -168,8 +150,8 @@ String getValueCtrl2(IoEntry data) {
 }
 
 String getValueCtrl3(IoEntry data) {
-  String v;
-  switch (DataCode.values[data.code]) {
+  String v = '';
+  switch (DataCode.values[data.code!]) {
     case DataCode.Timer:
     case DataCode.Timeout:
       v = (data.value % 60).toString();
@@ -182,7 +164,7 @@ String getValueCtrl3(IoEntry data) {
 IoEntry setValueCtrl1(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
-  switch (DataCode.values[data.code]) {
+  switch (DataCode.values[data.code!]) {
     case DataCode.PhyDOut:
     case DataCode.PhyAOut:
     case DataCode.RadioRx:
@@ -197,18 +179,18 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
     case DataCode.DhtHumidity:
       // pin
       local.value ??= 0;
-      local.ioctl = clearBits(local.ioctl, 0, 8);
-      local.ioctl |= setBits(0, 8, int.parse(v));
+      local.ioctl = clearBits(local.ioctl!, 0, 8);
+      local.ioctl = local.ioctl! | setBits(0, 8, int.parse(v));
       break;
     case DataCode.Bool:
       // binary values
-      print('${local.value}');
+      // print('${local.value}');
       local.value = (v == 'true');
       break;
     case DataCode.Timer:
       // binary values
       local.value ??= 0;
-      DateTime now = new DateTime.now();
+      DateTime now = DateTime.now();
       int h = (24 + int.parse(v) - now.timeZoneOffset.inHours) % 24;
       local.value = (3600 * h) + (local.value % 3600);
       break;
@@ -226,7 +208,7 @@ IoEntry setValueCtrl1(IoEntry data, String v) {
 IoEntry setValueCtrl2(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
-  switch (DataCode.values[data.code]) {
+  switch (DataCode.values[data.code!]) {
     case DataCode.PhyDOut:
     case DataCode.PhyAOut:
     case DataCode.RadioRx:
@@ -248,8 +230,8 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
       // binary values
       // period
       local.value ??= 0;
-      local.ioctl = clearBits(local.ioctl, 8, 8);
-      local.ioctl |= setBits(8, 8, int.parse(v));
+      local.ioctl = clearBits(local.ioctl!, 8, 8);
+      local.ioctl = local.ioctl! | setBits(8, 8, int.parse(v));
       break;
     case DataCode.String:
       // string values
@@ -270,7 +252,7 @@ IoEntry setValueCtrl2(IoEntry data, String v) {
 IoEntry setValueCtrl3(IoEntry data, String v) {
   IoEntry local = data;
   local.ioctl ??= 0;
-  switch (DataCode.values[data.code]) {
+  switch (DataCode.values[data.code!]) {
     case DataCode.Timer:
     case DataCode.Timeout:
       int value = local.value;
@@ -290,24 +272,24 @@ class IoEntryControl {
 }
 
 class IoEntry {
-  DatabaseReference reference;
+  late DatabaseReference reference;
   bool exist = false;
   bool aog = false;
   bool drawWr = false;
   bool drawRd = false;
   bool enLog = false;
-  String key;
-  String owner;
-  int code;
+  String? key;
+  String? owner;
+  int? code;
   dynamic value;
-  int ioctl;
-  String cb;
+  int? ioctl;
+  String? cb;
 
   IoEntry.setReference(DatabaseReference ref) : reference = ref;
 
   dynamic getValue() {
     dynamic v;
-    switch (DataCode.values[code]) {
+    switch (DataCode.values[code!]) {
       case DataCode.PhyDIn:
       case DataCode.PhyDOut:
       case DataCode.PhyAIn:
@@ -324,19 +306,20 @@ class IoEntry {
         v = value;
         break;
       case DataCode.Timer:
-        DateTime now = new DateTime.now();
-        int h = ((24 + (value ~/ 3600)) + now.timeZoneOffset.inHours) % 24;
-        int m = (value ~/ 60) % 60;
-        int s = value % 60;
-        DateTime dtset = new DateTime(0, 0, 0, h, m, s);
-        v = new DateFormat('Hms').format(dtset);
+        DateTime now = DateTime.now();
+        int h =
+            ((24 + ((value as int) ~/ 3600)) + now.timeZoneOffset.inHours) % 24;
+        int m = ((value as int) ~/ 60) % 60;
+        int s = (value as int) % 60;
+        DateTime dtset = DateTime(0, 0, 0, h.toInt(), m, s);
+        v = DateFormat('Hms').format(dtset);
         break;
       case DataCode.Timeout:
-        int h = (value ~/ 3600) % 24;
-        int m = (value ~/ 60) % 60;
-        int s = value % 60;
-        DateTime dtset = new DateTime(0, 0, 0, h, m, s);
-        v = new DateFormat('Hms').format(dtset);
+        int h = ((value as int) ~/ 3600) % 24;
+        int m = ((value as int) ~/ 60) % 60;
+        int s = (value as int) % 60;
+        DateTime dtset = DateTime(0, 0, 0, h, m, s);
+        v = DateFormat('Hms').format(dtset);
         break;
     }
     return v;
@@ -344,7 +327,7 @@ class IoEntry {
 
   String getStringValue() {
     String v;
-    switch (DataCode.values[code]) {
+    switch (DataCode.values[code!]) {
       case DataCode.PhyDIn:
       case DataCode.PhyDOut:
       case DataCode.PhyAIn:
@@ -368,14 +351,10 @@ class IoEntry {
     return v;
   }
 
-  setOwner(String _owner) {
-    owner = _owner;
-  }
-
-  IoEntry.fromMap(DatabaseReference ref, String k, dynamic v) {
+  IoEntry.fromMap(DatabaseReference ref, String? k, dynamic v) {
     reference = ref;
     exist = true;
-    key = k;
+    key = k!;
     owner = v['owner'];
     code = v['code'];
     value = v['value'];
@@ -392,8 +371,10 @@ class IoEntry {
   }
 
   Map toJson() {
+    // print('IoEntry.toJson');
     exist = true;
-    Map<String, dynamic> map = new Map<String, dynamic>();
+    Map<String, dynamic> map = <String, dynamic>{};
+    // print('IoEntry.toJson owner ${owner}');
     map['owner'] = owner;
     map['code'] = code;
     map['value'] = value;
@@ -459,7 +440,7 @@ enum OpCode {
   sub,
 }
 
-const Map<OpCode, bool> kOpCodeIsImmediate = const {
+const Map<OpCode, bool> kOpCodeIsImmediate = {
   OpCode.nop: true,
   OpCode.ldi: true,
   OpCode.res1: true,
@@ -484,7 +465,7 @@ const Map<OpCode, bool> kOpCodeIsImmediate = const {
   OpCode.sub: false,
 };
 
-const Map<OpCode, String> kOpCode2Name = const {
+const Map<OpCode, String> kOpCode2Name = {
   OpCode.nop: kOpCodeStringnop,
   OpCode.ldi: kOpCodeStringldi,
   OpCode.res1: kOpCodeStringres1,
@@ -509,31 +490,6 @@ const Map<OpCode, String> kOpCode2Name = const {
   OpCode.sub: kOpCodeStringsub,
 };
 
-const Map<String, OpCode> kName2Opcode = const {
-  kOpCodeStringnop: OpCode.nop,
-  kOpCodeStringldi: OpCode.ldi,
-  kOpCodeStringres1: OpCode.res1,
-  kOpCodeStringld: OpCode.ld,
-  kOpCodeStringres2: OpCode.res2,
-  kOpCodeStringst: OpCode.st,
-  kOpCodeStringlt: OpCode.lt,
-  kOpCodeStringgt: OpCode.gt,
-  kOpCodeStringeqi: OpCode.eqi,
-  kOpCodeStringeq: OpCode.eq,
-  kOpCodeStringbz: OpCode.bz,
-  kOpCodeStringbnz: OpCode.bnz,
-  kOpCodeStringdly: OpCode.dly,
-  kOpCodeStringres3: OpCode.res3,
-  kOpCodeStringlte: OpCode.lte,
-  kOpCodeStringgte: OpCode.gte,
-  kOpCodeStringhalt: OpCode.halt,
-  kOpCodeStringjmp: OpCode.jmp,
-  kOpCodeStringaddi: OpCode.addi,
-  kOpCodeStringadd: OpCode.add,
-  kOpCodeStringsubi: OpCode.subi,
-  kOpCodeStringsub: OpCode.sub,
-};
-
 class InstrEntry {
   int i;
   String v;
@@ -542,11 +498,11 @@ class InstrEntry {
 }
 
 class ExecEntry {
-  DatabaseReference reference;
+  late DatabaseReference reference;
   bool exist = false;
-  String key;
-  String owner;
-  String cb;
+  String? key;
+  String? owner;
+  String? cb;
   List<InstrEntry> p = [];
 
   ExecEntry(DatabaseReference ref) : reference = ref;
@@ -557,25 +513,22 @@ class ExecEntry {
     key = k;
     owner = v['owner'];
     if (v['p'] != null) {
-      v['p'].forEach((e) => p.add(new InstrEntry(e['i'], e['v'].toString())));
+      v['p'].forEach((e) => p.add(InstrEntry(e['i'], e['v'].toString())));
     }
     cb = v['cb'];
-  }
-
-  setOwner(String _owner) {
-    owner = _owner;
   }
 
   Map<String, dynamic> toJson() {
     // print('ExecEntry.toJson');
     exist = true;
-    Map<String, dynamic> map = new Map<String, dynamic>();
+    Map<String, dynamic> map = <String, dynamic>{};
     map['owner'] = owner;
+    // print('ExecEntry.toJson owner ${owner}');
     List list = [];
-    if (p.length > 0) {
-      p.forEach((e) {
+    if (p.isNotEmpty) {
+      for (var e in p) {
         list.add({'i': e.i, 'v': e.v});
-      });
+      }
       map['p'] = list;
     }
     map['cb'] = cb;
@@ -585,19 +538,19 @@ class ExecEntry {
 }
 
 class MessageEntry {
-  String key;
-  DateTime dateTime;
-  String domain;
-  String node;
-  String message;
+  String? key;
+  late DateTime dateTime;
+  String? domain;
+  String? node;
+  String? message;
 
   MessageEntry(this.dateTime, this.message);
 
   MessageEntry.fromSnapshot(DataSnapshot snapshot) {
     dynamic v = snapshot.value;
 
-    key = snapshot.key;
-    dateTime = new DateTime.fromMillisecondsSinceEpoch(v['time'] * 1000);
+    key = snapshot.key!;
+    dateTime = DateTime.fromMillisecondsSinceEpoch(v['time'] * 1000);
 
     domain = v['domain'];
     node = v['node'];

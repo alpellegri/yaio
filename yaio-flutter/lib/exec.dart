@@ -8,7 +8,10 @@ import 'exec_edit.dart';
 class ExecListItem extends StatelessWidget {
   final ExecEntry entry;
 
-  ExecListItem(this.entry);
+  const ExecListItem({
+    super.key,
+    required this.entry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +27,15 @@ class ExecListItem extends StatelessWidget {
               // alignment: Alignment.centerLeft,
               width: 4,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8),
                     bottomLeft: Radius.circular(8)),
                 color: Theme.of(context).primaryColor,
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
               child: Text('${entry.key}', textAlign: TextAlign.left),
             )
           ],
@@ -43,25 +47,29 @@ class Exec extends StatefulWidget {
   final String domain;
   final String node;
 
-  Exec({Key key, this.domain, this.node}) : super(key: key);
+  const Exec({
+    super.key,
+    required this.domain,
+    required this.node,
+  });
 
   @override
-  _ExecState createState() => new _ExecState();
+  _ExecState createState() => _ExecState();
 }
 
 class _ExecState extends State<Exec> {
   List<ExecEntry> entryList = [];
-  DatabaseReference _entryRef;
-  StreamSubscription<DatabaseEvent> _onAddSubscription;
-  StreamSubscription<DatabaseEvent> _onEditSubscription;
-  StreamSubscription<DatabaseEvent> _onRemoveSubscription;
+  late DatabaseReference _entryRef;
+  late StreamSubscription<DatabaseEvent> _onAddSubscription;
+  late StreamSubscription<DatabaseEvent> _onEditSubscription;
+  late StreamSubscription<DatabaseEvent> _onRemoveSubscription;
 
   @override
   void initState() {
     super.initState();
     _entryRef = FirebaseDatabase.instance
         .ref()
-        .child(getUserRef())
+        .child(getUserRef()!)
         .child('obj/exec')
         .child(widget.domain)
         .child(widget.node);
@@ -99,51 +107,51 @@ class _ExecState extends State<Exec> {
           childAspectRatio: 2,
         ),
         shrinkWrap: true,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         reverse: false,
         itemCount: entryList.length,
         itemBuilder: (buildContext, index) {
           return InkWell(
             onTap: () => _openEntryDialog(entryList[index]),
-            child: ExecListItem(entryList[index]),
+            child: ExecListItem(entry: entryList[index]),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onFloatingActionButtonPressed,
         tooltip: 'add',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   void _onEntryAdded(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    String owner = v['owner'];
+    String? owner = v['owner'];
     if (owner == widget.node) {
       setState(() {
-        entryList.add(new ExecEntry.fromMap(
-            _entryRef, event.snapshot.key, event.snapshot.value));
+        entryList.add(ExecEntry.fromMap(
+            _entryRef, event.snapshot.key!, event.snapshot.value));
       });
     }
   }
 
   void _onEntryEdited(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    String owner = v['owner'];
+    String? owner = v['owner'];
     if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
       setState(() {
-        entryList[entryList.indexOf(oldValue)] = new ExecEntry.fromMap(
-            _entryRef, event.snapshot.key, event.snapshot.value);
+        entryList[entryList.indexOf(oldValue)] = ExecEntry.fromMap(
+            _entryRef, event.snapshot.key!, event.snapshot.value);
       });
     }
   }
 
   void _onEntryRemoved(DatabaseEvent event) {
     dynamic v = event.snapshot.value;
-    String owner = v['owner'];
+    String? owner = v['owner'];
     if (owner == widget.node) {
       ExecEntry oldValue =
           entryList.singleWhere((el) => el.key == event.snapshot.key);
@@ -156,17 +164,18 @@ class _ExecState extends State<Exec> {
   void _openEntryDialog(ExecEntry entry) {
     Navigator.push(
         context,
-        new MaterialPageRoute(
-          builder: (BuildContext context) => new ExecEdit(
-              domain: widget.domain,
-              node: widget.node,
-              entry: entry,
-              execList: entryList),
+        MaterialPageRoute(
+          builder: (BuildContext context) => ExecEdit(
+            domain: widget.domain,
+            node: widget.node,
+            entry: entry,
+            execList: entryList,
+          ),
         ));
   }
 
   void _onFloatingActionButtonPressed() {
-    ExecEntry entry = new ExecEntry(_entryRef);
+    ExecEntry entry = ExecEntry(_entryRef);
     _openEntryDialog(entry);
   }
 }
