@@ -88,7 +88,7 @@ bool AP_Setup(void) {
     Serial.println(WiFi.softAPIP());
 
     DEBUG_PRINT("AP mode enabled\n");
-    webSocket = new WebSocketsServer(80);
+    webSocket = new WebSocketsServer(81);
     webSocket->begin();
     webSocket->onEvent(webSocketEvent);
   }
