@@ -147,7 +147,13 @@ class _ChartHistoryState extends State<ChartHistory> {
                       ),
                     ),
                   )),
-            (_toDisplayDays[0].isEmpty)
+            (_toDisplayDays[0].isEmpty &&
+                    _toDisplayDays[1].isEmpty &&
+                    _toDisplayDays[2].isEmpty &&
+                    _toDisplayDays[3].isEmpty &&
+                    _toDisplayDays[4].isEmpty &&
+                    _toDisplayDays[5].isEmpty &&
+                    _toDisplayDays[6].isEmpty)
                 ? (Container())
                 : (Padding(
                     padding: const EdgeInsets.all(8.0),
