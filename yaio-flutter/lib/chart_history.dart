@@ -62,7 +62,7 @@ class _ChartHistoryState extends State<ChartHistory> {
       var colorD = charts.MaterialPalette.gray.shade500;
       var color = (i == (_kdays - 1)) ? (colorP) : (colorD);
       serieDays.add(charts.Series<TimeSeries, DateTime>(
-        id: 'Data ${i}',
+        id: 'Data $i',
         colorFn: (_, __) => color,
         domainFn: (TimeSeries values, _) => values.time,
         measureFn: (TimeSeries values, _) => values.value,

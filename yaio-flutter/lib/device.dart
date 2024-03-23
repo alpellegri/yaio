@@ -237,7 +237,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             return Form(child: Builder(builder: (BuildContext context) {
               return CollapsibleBody(
                 onSelect: () {
-                  Form.of(context)?.save();
+                  Form.of(context).save();
                   _ctrlDomainName = item.value;
                   close();
                 },
@@ -310,7 +310,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             return Form(child: Builder(builder: (BuildContext context) {
               return CollapsibleBody(
                 onSelect: () {
-                  Form.of(context)?.save();
+                  Form.of(context).save();
                   _ctrlNodeName = item.value;
                   _changePreferences();
                   close();

@@ -324,7 +324,7 @@ class _ExecProgState extends State<ExecProg> {
   void _onValueIoEntry(DatabaseEvent event) {
     print('_onValueIoEntry');
     Map data = event.snapshot.value as Map;
-    if (data != null) {
+    if (data.length > 0) {
       data.forEach((k, v) {
         // print('key: $k - value: ${v.toString()}');
         String? owner = v['owner'];

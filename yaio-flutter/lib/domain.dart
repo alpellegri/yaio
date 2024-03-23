@@ -254,7 +254,7 @@ class _DeviceCardState extends State<DeviceCard> {
                 (MediaQuery.of(context).orientation == Orientation.portrait)
                     ? 3
                     : 5,
-            childAspectRatio: 2,
+            childAspectRatio: 1.5,
           ),
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
