@@ -13,6 +13,7 @@ class Login extends StatefulWidget {
     super.key,
     required this.title,
   });
+
   static const String routeName = '/yaio';
   final String title;
 
@@ -54,21 +55,26 @@ class _LoginState extends State<Login> {
           _fcmRef = FirebaseDatabase.instance.ref().child(getFcmTokenRef()!);
           _fcmRef.once().then((DatabaseEvent onValue) {
             print('once: ${onValue.snapshot.value}');
-            Map map = onValue.snapshot.value as Map;
+
             bool tokenFound = false;
-            map.forEach((key, value) {
-              if (value == token) {
-                print('key test: $key');
-                tokenFound = true;
-              }
-            });
+
+            if (onValue.snapshot.value != null) {
+              Map map = onValue.snapshot.value as Map;
+              map.forEach((key, value) {
+                if (value == token) {
+                  print('key test: $key');
+                  tokenFound = true;
+                }
+              });
+            }
             if (tokenFound == false) {
               _fcmRef.push().set(token);
               print('token saved: $token');
             }
+
             setState(() {
-              _connected = true;
-              _curr_domain = getDomain()!;
+            _connected = true;
+            _curr_domain = getDomain()!;
             });
             // at the end, not before
             // FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -124,7 +130,7 @@ class _LoginState extends State<Login> {
     value.forEach((node, v) {
       String dataSource = '$root/$domain/$node/control';
       DatabaseReference dataRef =
-          FirebaseDatabase.instance.ref().child('$dataSource/time');
+      FirebaseDatabase.instance.ref().child('$dataSource/time');
       dataRef.set(now.millisecondsSinceEpoch ~/ 1000);
     });
   }
@@ -141,7 +147,7 @@ class _LoginState extends State<Login> {
         ),
         body: ((_connected == false))
             ? (const SizedBox(
-                height: 3.0, child: LinearProgressIndicator(value: null)))
+            height: 3.0, child: LinearProgressIndicator(value: null)))
             : (const Text('Select a domain')),
       );
     } else {

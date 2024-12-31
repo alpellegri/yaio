@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'firebase_utils.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter/foundation.dart';
 
 class ComputeMessage {
@@ -47,10 +47,18 @@ class _ChartHistoryState extends State<ChartHistory> {
   final List<String> _toRemove = [];
   final _kdays = 7;
 
-  final List<List<TimeSeries>> _toDisplayDays = [];
-  List<charts.Series<TimeSeries, DateTime>> serieDays = [];
+  final List<List<TimeSeries>> _toDisplayDays = [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+  ];
+  List<LineSeries<TimeSeries, DateTime>> serieDays = [];
   final List<TimeSeries> _toDisplayLong = [];
-  List<charts.Series<TimeSeries, DateTime>> serieLong = [];
+  List<LineSeries<TimeSeries, DateTime>> serieLong = [];
 
   @override
   void initState() {
@@ -58,24 +66,22 @@ class _ChartHistoryState extends State<ChartHistory> {
 
     for (var i = 0; i < _kdays; i++) {
       _toDisplayDays.add([]);
-      var colorP = charts.MaterialPalette.indigo.shadeDefault;
-      var colorD = charts.MaterialPalette.gray.shade500;
+      var colorP = Colors.indigo;
+      var colorD = Colors.grey;
       var color = (i == (_kdays - 1)) ? (colorP) : (colorD);
-      serieDays.add(charts.Series<TimeSeries, DateTime>(
-        id: 'Data $i',
-        colorFn: (_, __) => color,
-        domainFn: (TimeSeries values, _) => values.time,
-        measureFn: (TimeSeries values, _) => values.value,
-        data: _toDisplayDays[i],
+      serieDays.add(LineSeries<TimeSeries, DateTime>(
+        pointColorMapper: (_, __) => color,
+        xValueMapper: (TimeSeries values, _) => values.time,
+        yValueMapper: (TimeSeries values, _) => values.value,
+        dataSource: _toDisplayDays[i],
       ));
     }
 
-    serieLong.add(charts.Series<TimeSeries, DateTime>(
-      id: 'Data',
-      colorFn: (_, __) => charts.MaterialPalette.indigo.shadeDefault,
-      domainFn: (TimeSeries values, _) => values.time,
-      measureFn: (TimeSeries values, _) => values.value,
-      data: _toDisplayLong,
+    serieLong.add(LineSeries<TimeSeries, DateTime>(
+      pointColorMapper: (_, __) => Colors.indigo,
+      xValueMapper: (TimeSeries values, _) => values.time,
+      yValueMapper: (TimeSeries values, _) => values.value,
+      dataSource: _toDisplayLong,
     ));
 
     print('_ChartHistoryState: ${getLogRef()}/${widget.domain}/${widget.name}');
@@ -133,17 +139,9 @@ class _ChartHistoryState extends State<ChartHistory> {
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
                       height: 300.0,
-                      child: charts.TimeSeriesChart(
-                        serieLong,
-                        animate: false,
-                        // Optionally pass in a [DateTimeFactory] used by the chart. The factory
-                        // should create the same type of [DateTime] as the data provided. If none
-                        // specified, the default creates local date time.
-                        // dateTimeFactory: const charts.LocalDateTimeFactory(),
-                        primaryMeasureAxis: const charts.NumericAxisSpec(
-                            tickProviderSpec:
-                                charts.BasicNumericTickProviderSpec(
-                                    zeroBound: false)),
+                      child: SfCartesianChart(
+                        primaryXAxis: DateTimeAxis(),
+                        series: serieLong,
                       ),
                     ),
                   )),
@@ -159,17 +157,9 @@ class _ChartHistoryState extends State<ChartHistory> {
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
                       height: 300.0,
-                      child: charts.TimeSeriesChart(
-                        serieDays,
-                        animate: false,
-                        // Optionally pass in a [DateTimeFactory] used by the chart. The factory
-                        // should create the same type of [DateTime] as the data provided. If none
-                        // specified, the default creates local date time.
-                        // dateTimeFactory: const charts.LocalDateTimeFactory(),
-                        primaryMeasureAxis: const charts.NumericAxisSpec(
-                            tickProviderSpec:
-                                charts.BasicNumericTickProviderSpec(
-                                    zeroBound: false)),
+                      child: SfCartesianChart(
+                        primaryXAxis: DateTimeAxis(),
+                        series: serieDays,
                       ),
                     ),
                   ))

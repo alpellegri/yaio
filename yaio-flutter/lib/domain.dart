@@ -72,6 +72,7 @@ class _DomainState extends State<Domain> {
 
   @override
   Widget build(BuildContext context) {
+    // print(jsonEncode(_map));
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.domain),
@@ -126,6 +127,7 @@ class _DomainState extends State<Domain> {
     bool? drawWr = v['drawWr'];
     bool? drawRd = v['drawRd'];
     if ((drawWr == true) || (drawRd == true)) {
+      // print('${event.snapshot.key}, ${event.snapshot.value}');
       setState(() {
         IoEntry entry =
             IoEntry.fromMap(_dataRef, event.snapshot.key, event.snapshot.value);
@@ -191,12 +193,11 @@ class _DeviceCardState extends State<DeviceCard> {
           int.parse(widget.value['control']['time'].toString()) * 1000);
       Duration diff = statusTime.difference(controlTime);
       online = (diff.inSeconds >= -10);
-      /*
-      print('${widget.node} $online ----------');
-      print(widget.value['status']['time']);
-      print(widget.value['control']['time']);
-      print(diff.inSeconds);
-      */
+
+      // print('${widget.node} $online ----------');
+      // print(widget.value['status']['time']);
+      // print(widget.value['control']['time']);
+      // print(diff.inSeconds);
     }
     // extract only data related to a node
     var query = widget.data.where((e) => (e.owner == widget.node)).toList();
